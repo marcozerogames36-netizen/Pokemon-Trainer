@@ -206,7 +206,9 @@
     .nav-item.active { background: rgba(124,58,237,0.15); color: var(--primary-hover); }
     .nav-item .icon { font-size: 1.2rem; width: 24px; text-align: center; }
     .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
-    .player-card { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 12px; background: var(--input-bg); }
+    .player-card { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 12px; background: var(--input-bg); cursor: pointer; width: 100%; border: 1px solid transparent; color: inherit; text-align: left; font: inherit; transition: border-color .18s, background .18s; }
+    .player-card:hover, .player-card.active { border-color: var(--primary); background: rgba(124,58,237,.12); }
+    .player-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
     .player-avatar {
       width: 42px; height: 42px; border-radius: 10px;
       background: linear-gradient(135deg, #7c3aed, #ec4899);
@@ -1010,6 +1012,38 @@
       image-rendering: crisp-edges;
       background: transparent !important;
     }
+    .item-icon-fallback { display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; }
+    .center-selection-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .center-selection-actions .btn { flex: 1 1 150px; min-height: 38px; padding: 8px 10px; font-size: 0.78rem; }
+    .center-party-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: 12px; max-height: 440px; overflow-y: auto; margin-bottom: 16px; padding: 2px; }
+    .center-pokemon-card { position: relative; display: block; min-width: 0; cursor: pointer; }
+    .center-pokemon-card:has(input:checked), .center-pokemon-card.selected { border-color: var(--primary); box-shadow: 0 0 0 1px rgba(124,58,237,.35); }
+    .center-pokemon-card:has(input:disabled) { cursor: default; opacity: .78; }
+    .center-pokemon-card .game-card-header { position: relative; height: 100px; background: linear-gradient(135deg,#1a1a2e,#0d0d18); }
+    .center-pokemon-sprite { width: 84px; height: 84px; object-fit: contain; image-rendering: pixelated; background: transparent; }
+    .center-pokemon-select { position: absolute; top: 9px; right: 9px; z-index: 2; width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer; }
+    .center-pokemon-card .game-card-body { padding: 12px 14px 14px; }
+    .center-pokemon-card .game-card-title { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .center-pokemon-meta { font-size: .76rem; color: var(--text-muted); margin: 3px 0 8px; }
+    .center-pokemon-hp { font-size: .75rem; margin: 9px 0 3px; }
+    .center-pokemon-moves { display: grid; gap: 4px; margin-top: 10px; }
+    .center-pokemon-move { display: flex; justify-content: space-between; gap: 8px; padding: 5px 7px; border: 1px solid var(--border); border-radius: 7px; background: var(--input-bg); font-size: .7rem; }
+    .center-pokemon-move span:last-child { color: var(--text-muted); white-space: nowrap; }
+    .center-pokemon-status { display: block; margin-top: 9px; font-size: .72rem; font-weight: 700; }
+    .tm-target-option.tm-compatible { border-color: rgba(34,197,94,.55); }
+    .tm-target-option .tm-compatibility-label { color: var(--text-muted); }
+    .tm-target-option.tm-compatible .tm-compatibility-label { color: #4ade80; font-weight: 700; }
+    .center-pokemon-row input { width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer; }
+    .center-pokemon-sprite { width: 46px; height: 46px; object-fit: contain; image-rendering: pixelated; }
+    .center-pokemon-details { min-width: 0; }
+    .center-pokemon-title { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-weight: 700; font-size: .84rem; }
+    .center-pokemon-stats { margin-top: 3px; color: var(--text-muted); font-size: .73rem; line-height: 1.4; }
+    .center-pokemon-needs { color: var(--warning); font-size: .68rem; font-weight: 700; }
+    @media (max-width: 480px) {
+      .center-party-list { max-height: 360px; }
+      .center-pokemon-card .game-card-header { height: 88px; }
+      .center-pokemon-sprite { width: 74px; height: 74px; }
+    }
     #shopQuantityDialog {
       width: min(420px, calc(100% - 32px)); margin: auto; padding: 0;
       color: var(--text); background: var(--card); border: 1px solid var(--border);
@@ -1037,6 +1071,18 @@
       border-radius: 18px; box-shadow: var(--shadow);
     }
     #nicknameDialog::backdrop { background: rgba(0,0,0,0.76); }
+    #moveLearnDialog {
+      width: min(460px, calc(100% - 32px)); max-height: min(85vh, 700px); margin: auto; padding: 0;
+      color: var(--text); background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; box-shadow: var(--shadow); overflow: auto;
+    }
+    #moveLearnDialog::backdrop { background: rgba(0,0,0,0.76); }
+    #moveLearnContent { padding: 22px; }
+    #moveLearnTitle { font-size: 1.15rem; margin-bottom: 8px; }
+    #moveLearnPrompt { color: var(--text-muted); font-size: .9rem; margin-bottom: 18px; }
+    #moveLearnChoices { display: grid; gap: 8px; max-height: 45vh; overflow-y: auto; }
+    #moveLearnActions { display: flex; gap: 10px; }
+    #moveLearnActions button { flex: 1; }
     .nickname-content { padding: 24px; }
     .nickname-content h3 { font-size: 1.2rem; margin-bottom: 8px; }
     .nickname-content p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 18px; }
@@ -1287,26 +1333,15 @@
       <div class="sidebar-header"><div class="sidebar-logo"><span><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pokébola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></span> Pokémon Trainer</div></div>
       <nav class="sidebar-nav">
         <button class="nav-item active" data-panel="home"><span class="icon">🏠</span> Início</button>
-        <button class="nav-item" data-panel="dungeons"><span class="icon">🗺️</span> Exploração</button>
-        <button class="nav-item" data-panel="missions"><span class="icon">📜</span> Missões</button>
-        <button class="nav-item" data-panel="gyms"><span class="icon">🏅</span> Ginásios</button>
-        <button class="nav-item" data-panel="center"><span class="icon">🏥</span> Centro Pokémon</button>
-        <button class="nav-item" data-panel="market"><span class="icon">🏪</span> Poké Market</button>
-        <button class="nav-item" data-panel="bag"><span class="icon">🎒</span> Mochila</button>
-        <button class="nav-item" data-panel="item-catalog"><span class="icon">🧰</span> Catálogo de Itens</button>
-        <button class="nav-item" data-panel="pokemon"><span class="icon">🔴</span> Meus Pokémon</button>
-        <button class="nav-item" data-panel="pc"><span class="icon">💻</span> PC do Bill</button>
-        <button class="nav-item" data-panel="pokedex"><span class="icon">📖</span> Pokédex</button>
-        <button class="nav-item" data-panel="profile"><span class="icon">👤</span> Perfil</button>
       </nav>
       <div class="sidebar-footer">
-        <div class="player-card">
+        <button type="button" class="player-card" id="playerProfileLink" onclick="switchPanel('profile')" aria-label="Abrir perfil do treinador">
           <div class="player-avatar" id="dashAvatar">♂️</div>
           <div class="player-info">
             <div class="player-name" id="dashName">Treinador</div>
             <div class="player-meta" id="dashMeta">Kanto</div>
           </div>
-        </div>
+        </button>
         <button type="button" class="btn btn-secondary" id="btnLogout" onclick="logoutTrainer()" style="width:100%;margin-top:10px;padding:10px;font-size:0.85rem;">🚪 Sair / Logout</button>
       </div>
     </aside>
@@ -1337,15 +1372,31 @@
             <div class="stat-card"><div class="value" id="statBadges">0 / 8</div><div class="label">Insígnias</div></div>
             <div class="stat-card"><div class="value" id="statMissions">0 / 12</div><div class="label">Missões</div></div>
           </div>
-          <h3 style="font-size:1.1rem;margin-bottom:14px;">Ações rápidas</h3>
+          <h3 style="font-size:1.1rem;margin-bottom:14px;">Acesso rápido</h3>
           <div class="cards-grid">
-            <div class="game-card" onclick="switchPanel('dungeons')">
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('dungeons')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('dungeons')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#1e3a2f,#0f1f18);">🌲</div>
-              <div class="game-card-body"><div class="game-card-title">Explorar regiões</div><div class="game-card-desc">Lute contra Pokémon selvagens!</div></div>
+              <div class="game-card-body"><div class="game-card-title">Exploração</div><div class="game-card-desc">Explore Kanto e encontre Pokémon selvagens.</div></div>
             </div>
-            <div class="game-card" onclick="switchPanel('missions')">
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('missions')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('missions')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#2a1f3d,#15101f);">📜</div>
-              <div class="game-card-body"><div class="game-card-title">Ver Missões</div><div class="game-card-desc">Missões disponíveis em Kanto</div></div>
+              <div class="game-card-body"><div class="game-card-title">Missões</div><div class="game-card-desc">Acompanhe objetivos e recompensas.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('gyms')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('gyms')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#42351d,#201a10);">🏅</div>
+              <div class="game-card-body"><div class="game-card-title">Ginásios</div><div class="game-card-desc">Desafie os líderes e conquiste insígnias.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('center')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('center')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#3b2533,#1d141b);">🏥</div>
+              <div class="game-card-body"><div class="game-card-title">Centro Pokémon</div><div class="game-card-desc">Cuide da equipe e restaure HP, PP e status.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('market')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('market')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#2b3c25,#141d11);">🏪</div>
+              <div class="game-card-body"><div class="game-card-title">Poké Market</div><div class="game-card-desc">Compre itens para sua jornada.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('item-catalog')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('item-catalog')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#293949,#141d26);">🧰</div>
+              <div class="game-card-body"><div class="game-card-title">Catálogo de Itens</div><div class="game-card-desc">Consulte itens, categorias e efeitos.</div></div>
             </div>
           </div>
         </div>
@@ -1382,13 +1433,17 @@
             <p style="text-align:center;color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">
               "Seus Pokémon parecem cansados. Quer que eu os cure?"
             </p>
-            <div id="centerPartyStatus" style="margin-bottom:16px;font-size:0.85rem;"></div>
+            <div class="center-selection-actions">
+              <button type="button" class="btn btn-secondary" onclick="setCenterSelection(true)">Selecionar os que precisam</button>
+              <button type="button" class="btn btn-secondary" onclick="setCenterSelection(false)">Limpar</button>
+            </div>
+            <div id="centerPartyStatus" class="center-party-list"></div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding:12px;background:var(--input-bg);border-radius:10px;">
               <span>Custo do tratamento</span>
               <strong id="centerCost" style="color:var(--warning);">₽ 200</strong>
             </div>
-            <button class="btn" id="btnHealTeam" onclick="healTeamAtCenter()">Curar equipe</button>
-            <p style="text-align:center;color:var(--text-muted);font-size:0.75rem;margin-top:10px;">Restaura HP, PP e cura status de todos os Pokémon da equipe</p>
+            <button class="btn" id="btnHealSelected" onclick="healSelectedAtCenter()">Curar selecionados</button>
+            <p style="text-align:center;color:var(--text-muted);font-size:0.75rem;margin-top:10px;">Selecione os Pokémon que deseja tratar. O custo é cobrado mesmo se toda a equipe estiver desmaiada.</p>
           </div>
         </div>
 
@@ -1445,9 +1500,28 @@
 
         <div class="panel" id="panel-profile">
           <h2 class="panel-title">👤 Perfil do Treinador</h2>
-          <p class="panel-desc">Informações do seu personagem.</p>
+          <p class="panel-desc">Informações do seu personagem e acesso à equipe, mochila e registros.</p>
           <button class="btn btn-secondary" onclick="if(confirm('Apagar todo o progresso salvo?'))clearSave()" style="max-width:280px;margin-bottom:16px;">🗑️ Apagar dados salvos</button>
           <div id="profileBox" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;"></div>
+          <h3 style="font-size:1.05rem;margin:24px 0 12px;">Acesso rápido</h3>
+          <div class="cards-grid profile-shortcuts">
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('bag')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('bag')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#3b2c1c,#1c1712);">🎒</div>
+              <div class="game-card-body"><div class="game-card-title">Mochila</div><div class="game-card-desc">Consulte e use seus itens.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pokemon')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pokemon')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#29354d,#151b2a);">🔴</div>
+              <div class="game-card-body"><div class="game-card-title">Meus Pokémon</div><div class="game-card-desc">Veja sua equipe e gerencie seus Pokémon.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pc')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pc')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#26394a,#111922);">💻</div>
+              <div class="game-card-body"><div class="game-card-title">PC do Bill</div><div class="game-card-desc">Acesse os Pokémon guardados nas boxes.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pokedex')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pokedex')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#38283e,#19121f);">📖</div>
+              <div class="game-card-body"><div class="game-card-title">Pokédex</div><div class="game-card-desc">Consulte os Pokémon vistos e capturados.</div></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1690,6 +1764,17 @@
         </div>
       </div>
     </form>
+  </dialog>
+  <dialog id="moveLearnDialog" aria-labelledby="moveLearnTitle">
+    <div id="moveLearnContent">
+      <h3 id="moveLearnTitle">Seu Pokémon quer aprender um golpe</h3>
+      <p id="moveLearnPrompt"></p>
+      <div class="nickname-actions" id="moveLearnActions">
+        <button type="button" class="btn btn-secondary" onclick="decideWhetherToLearnMove(false)">Não</button>
+        <button type="button" class="btn" onclick="decideWhetherToLearnMove(true)">Sim</button>
+      </div>
+      <div id="moveLearnChoices" style="display:none;"></div>
+    </div>
   </dialog>
   <div class="toast" id="toast"></div>
 
@@ -2353,6 +2438,122 @@
       return pool.slice(0,4).map(m=>({...m}));
     }
 
+    const fireRedLearnsetCache = new Map();
+    const moveDataCache = new Map();
+    const pendingLevelUpMoves = [];
+    let processingLevelUpMoves = false;
+    let pendingMoveLearnDecision = null;
+
+    async function getFireRedLearnset(speciesId) {
+      const id = Number(speciesId);
+      if (!id) return [];
+      if (fireRedLearnsetCache.has(id)) return fireRedLearnsetCache.get(id);
+      const request = (async () => {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`);
+        if (!response.ok) throw new Error('Não foi possível carregar o learnset FireRed.');
+        const pokemon = await response.json();
+        const learnset = [];
+        pokemon.moves.forEach(entry => {
+          const levelUpVersions = entry.version_group_details.filter(version => version.move_learn_method.name === 'level-up');
+          const detail = id <= 386
+            ? levelUpVersions.find(version => version.version_group.name === 'firered-leafgreen')
+            : levelUpVersions[levelUpVersions.length - 1];
+          if (detail) learnset.push({ slug: entry.move.name, level: detail.level_learned_at, order: detail.order || 0 });
+        });
+        return learnset.sort((a, b) => a.level - b.level || a.order - b.order || a.slug.localeCompare(b.slug));
+      })();
+      fireRedLearnsetCache.set(id, request);
+      try { return await request; } catch (error) { fireRedLearnsetCache.delete(id); throw error; }
+    }
+
+    async function getMoveDataForBattle(slug) {
+      if (moveDataCache.has(slug)) return moveDataCache.get(slug);
+      const request = (async () => {
+        const response = await fetch(`https://pokeapi.co/api/v2/move/${slug}/`);
+        if (!response.ok) throw new Error('Não foi possível carregar os dados do golpe.');
+        const data = await response.json();
+        const ailment = data.meta?.ailment?.name;
+        const statusNames = { paralysis: 'paralysis', sleep: 'sleep', poison: 'poison', burn: 'burn', freeze: 'freeze', confusion: 'confusion' };
+        const statusEffect = statusNames[ailment] ? { status: statusNames[ailment], chance: Math.max(0, Number(data.meta?.ailment_chance) || Number(data.effect_chance) || 0) / 100 } : undefined;
+        const statNames = { attack: 'attack', defense: 'defense', 'special-attack': 'specialAttack', 'special-defense': 'specialDefense', speed: 'speed', accuracy: 'accuracy', evasion: 'evasion' };
+        const changesTargetUser = ['user', 'users-field', 'user-and-allies'].includes(data.target?.name);
+        const statChanges = (data.stat_changes || []).map(change => ({
+          target: changesTargetUser ? 'self' : 'target',
+          stat: statNames[change.stat?.name],
+          stages: Number(change.change) || 0
+        })).filter(change => change.stat && change.stages);
+        const move = {
+          name: data.name.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' '),
+          type: normalizeBattleType(data.type?.name || 'normal'),
+          power: Number(data.power) || 0,
+          accuracy: data.accuracy,
+          pp: Number(data.pp) || 20,
+          basePp: Number(data.pp) || 20,
+          maxPp: Number(data.pp) || 20,
+          category: undefined,
+          statusEffect,
+          statChanges: statChanges.length ? statChanges : undefined,
+          ppUps: 0
+        };
+        return move;
+      })();
+      moveDataCache.set(slug, request);
+      try { return await request; } catch (error) { moveDataCache.delete(slug); throw error; }
+    }
+
+    async function getFireRedMovesForLevel(speciesId, level) {
+      const learnset = await getFireRedLearnset(speciesId);
+      const eligible = learnset.filter(entry => entry.level <= level).slice(-4);
+      if (!eligible.length) return getMovesForLevel(speciesId, level);
+      return Promise.all(eligible.map(async entry => ({ ...await getMoveDataForBattle(entry.slug), learnLevel: entry.level })));
+    }
+
+    async function getFireRedMovesLearnedAtLevel(speciesId, level) {
+      const learnset = await getFireRedLearnset(speciesId);
+      return Promise.all(learnset.filter(entry => entry.level === level).map(entry => getMoveDataForBattle(entry.slug)));
+    }
+
+    function finishMoveLearnDecision(slotIndex) {
+      const dialog = document.getElementById('moveLearnDialog');
+      const pending = pendingMoveLearnDecision;
+      if (!pending) return;
+      pendingMoveLearnDecision = null;
+      if (dialog?.open) dialog.close();
+      pending.resolve(slotIndex);
+    }
+
+    function decideWhetherToLearnMove(accept) {
+      const pending = pendingMoveLearnDecision;
+      if (!pending) return;
+      if (!accept) { finishMoveLearnDecision(null); return; }
+      document.getElementById('moveLearnActions').style.display = 'none';
+      const choices = document.getElementById('moveLearnChoices');
+      choices.style.display = 'grid';
+      choices.innerHTML = pending.pokemon.moves.map((move, index) => `
+        <button type="button" class="move-btn" onclick="finishMoveLearnDecision(${index})" style="text-align:left;">
+          Esquecer ${escapeHTML(move.name)} <span class="move-power">PP ${move.pp}/${move.maxPp}</span>
+        </button>
+      `).join('') + '<button type="button" class="btn btn-secondary" onclick="finishMoveLearnDecision(null)">Não aprender este golpe</button>';
+    }
+
+    function askMoveReplacement(pokemon, move) {
+      return new Promise(resolve => {
+        const dialog = document.getElementById('moveLearnDialog');
+        pendingMoveLearnDecision = { pokemon, move, resolve };
+        document.getElementById('moveLearnTitle').textContent = `${pokemon.name} quer aprender ${move.name}`;
+        document.getElementById('moveLearnPrompt').textContent = 'O Pokémon já conhece quatro golpes. Deseja esquecer um deles para aprender este?';
+        document.getElementById('moveLearnActions').style.display = 'flex';
+        document.getElementById('moveLearnChoices').style.display = 'none';
+        document.getElementById('moveLearnChoices').innerHTML = '';
+        dialog.showModal();
+      });
+    }
+
+    document.getElementById('moveLearnDialog').addEventListener('cancel', event => {
+      event.preventDefault();
+      finishMoveLearnDecision(null);
+    });
+
     const MOVE_BASE_PP = {
       'Investida': 35, 'Tackle': 35, 'Arranhão': 35, 'Scratch': 35, 'Pancada': 35,
       'Chicote de Vinha': 10, 'Vine Whip': 10, 'Pó Venenoso': 35, 'Poison Powder': 35,
@@ -2439,6 +2640,18 @@
     function normalizePokemonMoves(pokemon) {
       if (!pokemon || !Array.isArray(pokemon.moves)) return false;
       let changed = false;
+      const seenMoves = new Set();
+      pokemon.moves = pokemon.moves.filter(move => {
+        const name = String(getOriginalMoveName(move?.name || ''))
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!name || !seenMoves.has(name)) {
+          if (name) seenMoves.add(name);
+          return true;
+        }
+        changed = true;
+        return false;
+      });
       pokemon.moves.forEach(move => {
         const originalName = getOriginalMoveName(move.name);
         if (originalName !== move.name) { move.name = originalName; changed = true; }
@@ -2576,18 +2789,60 @@
       return poke.level - oldLevel;
     }
 
-    function learnMovesOnLevelUp(poke) {
+    function learnMovesOnLevelUp(poke, level = poke?.level) {
       if (!poke) return;
-      normalizePokemonMoves(poke);
-      const newMoves = getMovesForLevel(poke.id, poke.level);
-      const byName = {};
-      (poke.moves||[]).forEach(m => { byName[m.name]=m; });
-      newMoves.forEach(m => {
-        if (!byName[m.name]) byName[m.name] = { ...m, maxPp: getMoveMaxPp(m), pp: getMoveMaxPp(m) };
-      });
-      const merged = Object.values(byName).sort((a,b)=>(b.power||0)-(a.power||0));
-      poke.moves = merged.slice(0,4);
-      normalizePokemonMoves(poke);
+      pendingLevelUpMoves.push({ pokemon: poke, speciesId: poke.id, level });
+      processPendingLevelUpMoves();
+    }
+
+    async function processPendingLevelUpMoves() {
+      if (processingLevelUpMoves || document.getElementById('evoOverlay')?.classList.contains('active')) return;
+      processingLevelUpMoves = true;
+      try {
+        while (pendingLevelUpMoves.length) {
+          const task = pendingLevelUpMoves.shift();
+          const { pokemon } = task;
+          if (Object.prototype.hasOwnProperty.call(task, 'level')) {
+            let newMoves = [];
+            try { newMoves = await getFireRedMovesLearnedAtLevel(task.speciesId, task.level); }
+            catch (_) {
+              newMoves = (LEVEL_MOVES[task.speciesId] || []).filter(move => move.level === task.level).map(move => ({
+                ...move, basePp: getMoveMaxPp(move), maxPp: getMoveMaxPp(move), pp: getMoveMaxPp(move), ppUps: 0
+              }));
+            }
+            pendingLevelUpMoves.unshift(...newMoves.map(move => ({ pokemon, move })));
+            continue;
+          }
+          const { move } = task;
+          if (!pokemon || !move || !Array.isArray(pokemon.moves)) continue;
+          normalizePokemonMoves(pokemon);
+          if (pokemon.moves.some(known => known.name.toLowerCase() === move.name.toLowerCase())) continue;
+          move.pp = move.maxPp = move.basePp = Number(move.basePp || move.pp) || getMoveMaxPp(move);
+          move.ppUps = 0;
+          if (pokemon.moves.length < 4) {
+            pokemon.moves.push(move);
+            normalizePokemonMoves(pokemon);
+            saveGame();
+            refreshPartyUI();
+            showToast(`${pokemon.name} aprendeu ${move.name}!`);
+            continue;
+          }
+          const slotIndex = await askMoveReplacement(pokemon, move);
+          if (slotIndex === null) {
+            showToast(`${pokemon.name} não aprendeu ${move.name}.`);
+            continue;
+          }
+          const forgotten = pokemon.moves[slotIndex]?.name;
+          pokemon.moves[slotIndex] = move;
+          normalizePokemonMoves(pokemon);
+          saveGame();
+          refreshPartyUI();
+          showToast(`${pokemon.name} esqueceu ${forgotten} e aprendeu ${move.name}!`);
+        }
+      } finally {
+        processingLevelUpMoves = false;
+        if (pendingLevelUpMoves.length) processPendingLevelUpMoves();
+      }
     }
 
     function getLevelScaledHp(baseHp, level) {
@@ -2919,6 +3174,7 @@
           w.onerror = function(){ this.src = SPRITE_FB(player.party[0].id); };
         }
       }
+      processPendingLevelUpMoves();
     }
 
     function tryEvolveAfterLevelUp(poke) {
@@ -2966,8 +3222,9 @@
       ]
     };
 
-    function getMovesForStarter(starter) {
-      return getMovesForLevel(starter.id, 5);
+    async function getMovesForStarter(starter) {
+      try { return await getFireRedMovesForLevel(starter.id, 5); }
+      catch (_) { return getMovesForLevel(starter.id, 5); }
     }
 
     // Wild encounters per dungeon
@@ -3085,11 +3342,15 @@
         { name: 'Rhydon', id: 112, hp: 55, minLevel: 76, maxLevel: 88, moves: [{name:'Megachifre',power:75},{name:'Terremoto',power:70,type:'Terra'}] }
       ],
       'Cerulean Cave': [
-        { name: 'Kadabra', id: 64, hp: 40, rate: 45, minLevel: 78, maxLevel: 88, moves: [{name:'Psíquico',power:70,type:'Psiquico'},{name:'Confusão',power:50}] },
-        { name: 'Golbat', id: 42, hp: 45, rate: 40, minLevel: 78, maxLevel: 88, moves: [{name:'Voar',power:60},{name:'Mordida',power:50}] },
-        { name: 'Mewtwo', id: 150, hp: 80, rate: 10, minLevel: 100, maxLevel: 100, moves: [{name:'Psíquico',power:90,type:'Psiquico'},{name:'Raio',power:70},{name:'Sombra Noturna',power:60,type:'Fantasma'}] },
-
-        { name: 'Mr. Mime', id: 122, hp: 38, rate: 5, minLevel: 82, maxLevel: 92, rarity: 'Raro', notes: 'Aparicao rara na Caverna de Cerulean', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Pound',power:40,type:'Normal'}] },
+        { name: 'Kadabra', id: 64, hp: 40, rate: 35, minLevel: 78, maxLevel: 88, moves: [{name:'Psíquico',power:70,type:'Psiquico'},{name:'Confusão',power:50}] },
+        { name: 'Golbat', id: 42, hp: 45, rate: 35, minLevel: 78, maxLevel: 88, moves: [{name:'Voar',power:60},{name:'Mordida',power:50}] },
+        { name: 'Mewtwo', id: 150, hp: 80, rate: 5, minLevel: 100, maxLevel: 100, rarity: 'Lendário', notes: 'Encontro lendário extremamente raro.', moves: [{name:'Psíquico',power:90,type:'Psiquico'},{name:'Raio',power:70},{name:'Sombra Noturna',power:60,type:'Fantasma'}] },
+        { name: 'Mr. Mime', id: 122, hp: 38, rate: 5, minLevel: 82, maxLevel: 92, rarity: 'Raro', notes: 'Aparição rara na Caverna de Cerulean.', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Pound',power:40,type:'Normal'}] },
+        { name: 'Porygon', id: 137, hp: 65, rate: 6, minLevel: 84, maxLevel: 94, rarity: 'Raro', notes: 'Pokémon artificial raro encontrado nas profundezas.', moves: [{name:'Tri Attack',power:80,type:'Normal'},{name:'Psybeam',power:65,type:'Psiquico'}] },
+        { name: 'Omanyte', id: 138, hp: 35, rate: 3, minLevel: 82, maxLevel: 92, rarity: 'Muito raro', notes: 'Fóssil antigo encontrado nas áreas úmidas da caverna.', moves: [{name:'Surf',power:90,type:'Agua'},{name:'Ancient Power',power:60,type:'Pedra'}] },
+        { name: 'Kabuto', id: 140, hp: 30, rate: 3, minLevel: 82, maxLevel: 92, rarity: 'Muito raro', notes: 'Fóssil antigo que vive nas partes mais profundas.', moves: [{name:'Waterfall',power:80,type:'Agua'},{name:'Ancient Power',power:60,type:'Pedra'}] },
+        { name: 'Aerodactyl', id: 142, hp: 80, rate: 3, minLevel: 90, maxLevel: 98, rarity: 'Muito raro', notes: 'Pokémon fóssil voador que quase nunca aparece.', moves: [{name:'Wing Attack',power:60,type:'Voador'},{name:'Rock Slide',power:75,type:'Pedra'}] },
+        { name: 'Dragonite', id: 149, hp: 91, rate: 5, minLevel: 95, maxLevel: 100, rarity: 'Muito raro', notes: 'Dragão extremamente raro nas profundezas da caverna.', moves: [{name:'Dragon Claw',power:80,type:'Dragao'},{name:'Hurricane',power:80,type:'Voador'}] },
       ]
     };
 
@@ -3928,7 +4189,7 @@
         document.getElementById('starterError').classList.remove('show');
       }));
     });
-    document.getElementById('characterForm').addEventListener('submit', e => {
+    document.getElementById('characterForm').addEventListener('submit', async e => {
       e.preventDefault();
       let v = true;
       const name = document.getElementById('charName').value.trim(), region = document.getElementById('region').value;
@@ -3937,8 +4198,11 @@
       if (!region) { setError('region','regionError',true); v=false; } else setError('region','regionError',false);
       if (!selectedStarter) { document.getElementById('starterError').classList.add('show'); v=false; } else document.getElementById('starterError').classList.remove('show');
       if (!v) return;
+      const submitButton = e.submitter;
+      if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Preparando seu Pokémon…'; }
       const starter = STARTERS[region].find(s => s.name === selectedStarter);
-      const starterPokemon = { ...starter, maxHp: 30, hp: 30, level: 5, growthRate: 'mediumFast', exp: getExperienceForLevel(5), moves: getMovesForStarter(starter), type: typeLabel(getTypes(starter.id)), typeClass: typeClass(getTypes(starter.id)) };
+      const starterMoves = await getMovesForStarter(starter);
+      const starterPokemon = { ...starter, maxHp: 30, hp: 30, level: 5, growthRate: 'mediumFast', exp: getExperienceForLevel(5), moves: starterMoves, type: typeLabel(getTypes(starter.id)), typeClass: typeClass(getTypes(starter.id)) };
       ensurePokemonTraits(starterPokemon);
       player = {
         name, gender: selectedGender, originRegion: region, starter,
@@ -3985,6 +4249,14 @@
       greatball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/great.png',
       ultraball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/ultra.png',
       masterball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/master.png',
+      safari_ball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/safari.png',
+      premier_ball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/premier.png',
+      nest_ball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/nest.png',
+      net_ball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/net.png',
+      fast_ball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/fast.png',
+      dive_ball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/dive.png',
+      dusk_ball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/dusk.png',
+      moon_ball: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/ball/moon.png',
       potions: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/potion.png',
       superpotion: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/super-potion.png',
       hyperpotion: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/hyper-potion.png',
@@ -4035,15 +4307,21 @@
       chesto: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/chesto.png',
       rawst: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/rawst.png',
       cherri: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/cheri.png',
-      rarecandy: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/rare-candy.png',
-      escape: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/key-item/escape-rope.png',
-      repel: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/repel.png'
+      rarecandy: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/rare-candy.png'
     };
     const ITEM_SPRITE_FB = {
       balls: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png',
       greatball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png',
       ultraball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png',
       masterball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png',
+      safari_ball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/safari-ball.png',
+      premier_ball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/premier-ball.png',
+      nest_ball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/nest-ball.png',
+      net_ball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/net-ball.png',
+      fast_ball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/fast-ball.png',
+      dive_ball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/dive-ball.png',
+      dusk_ball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/dusk-ball.png',
+      moon_ball: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/moon-ball.png',
       potions: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/potion.png',
       superpotion: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-potion.png',
       hyperpotion: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/hyper-potion.png',
@@ -4094,14 +4372,26 @@
       chesto: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/chesto-berry.png',
       rawst: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rawst-berry.png',
       cherri: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/cheri-berry.png',
-      rarecandy: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png',
-      escape: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/escape-rope.png',
-      repel: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/repel.png'
+      rarecandy: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png'
     };
-    function itemIcon(key, cls) {
+    function itemIcon(key, cls, fallbackIcon = '🎒') {
       const src = ITEM_SPRITE[key] || ITEM_SPRITE.balls;
       const fb = ITEM_SPRITE_FB[key] || ITEM_SPRITE_FB.balls;
-      return `<img class="${cls || 'item-icon'}" src="${src}" alt="" onerror="this.onerror=null;this.src='${fb}'" />`;
+      const iconClass = cls || 'item-icon';
+      return `<img class="${iconClass}" src="${src}" alt="" data-fallback-src="${fb}" data-fallback-icon="${escapeHTML(fallbackIcon)}" onerror="handleItemIconError(this)" />`;
+    }
+    function handleItemIconError(image) {
+      if (!image.dataset.spriteFallback) {
+        image.dataset.spriteFallback = '1';
+        image.src = image.dataset.fallbackSrc || ITEM_SPRITE_FB.balls;
+        return;
+      }
+      const fallback = document.createElement('span');
+      fallback.className = `${image.className} item-icon-fallback`;
+      fallback.setAttribute('role', 'img');
+      fallback.setAttribute('aria-label', image.alt || 'Ícone do item');
+      fallback.textContent = image.dataset.fallbackIcon || '🎒';
+      image.replaceWith(fallback);
     }
 
     // Catálogo da mochila (key = propriedade em player.items ou player)
@@ -4112,6 +4402,14 @@
           { key: 'balls', name: 'Pokébola', sprite: 'balls', desc: 'Captura Pokémon selvagens' },
           { key: 'greatball', name: 'Great Ball', sprite: 'greatball', desc: 'Taxa de captura melhor' },
           { key: 'ultraball', name: 'Ultra Ball', sprite: 'ultraball', desc: 'Alta taxa de captura' },
+          { key: 'safari_ball', name: 'Safari Ball', sprite: 'safari_ball', desc: 'Multiplicador de captura 2×' },
+          { key: 'premier_ball', name: 'Premium Ball', sprite: 'premier_ball', desc: 'Multiplicador de captura 3×' },
+          { key: 'nest_ball', name: 'Nest Ball', sprite: 'nest_ball', desc: '2,5×; 3,5× contra Pokémon abaixo do nível 30' },
+          { key: 'net_ball', name: 'Net Ball', sprite: 'net_ball', desc: '2,5×; 3× contra Pokémon de Água ou Inseto' },
+          { key: 'fast_ball', name: 'Fast Ball', sprite: 'fast_ball', desc: '2,5×; 3× contra Pokémon com Velocidade base 100 ou maior' },
+          { key: 'dive_ball', name: 'Dive Ball', sprite: 'dive_ball', desc: '2,5×; 3,2× em encontros aquáticos' },
+          { key: 'dusk_ball', name: 'Dusk Ball', sprite: 'dusk_ball', desc: '2,5×; 3,5× em cavernas' },
+          { key: 'moon_ball', name: 'Moon Ball', sprite: 'moon_ball', desc: '2×; 4× em Pokémon que evoluem com Pedra da Lua' },
           { key: 'masterball', name: 'Master Ball', sprite: 'masterball', desc: 'Captura garantida' }
         ]
       },
@@ -4190,8 +4488,6 @@
         items: [
           { key: 'ss_ticket', name: 'S.S. TICKET', desc: 'Ingresso para embarcar no navio de luxo S.S. Anne, em Vermilion.' },
           { key: 'rarecandy', name: 'Doce Raro', sprite: 'rarecandy', desc: 'Sobe 1 nível' },
-          { key: 'repel', name: 'Repelente', sprite: 'repel', desc: 'Afasta Pokémon selvagens' },
-          { key: 'escape', name: 'Corda de Fuga', sprite: 'escape', desc: 'Escapa de cavernas' },
           { key: 'parcelbox', name: 'Caixa da Parcel', desc: 'Encomenda do Professor Carvalho' }
         ]
       }
@@ -4201,6 +4497,14 @@
       { key: 'balls', name: 'Pokébola', sprite: 'balls', kind: 'ball', multiplier: 1 },
       { key: 'greatball', name: 'Great Ball', sprite: 'greatball', kind: 'ball', multiplier: 1.5 },
       { key: 'ultraball', name: 'Ultra Ball', sprite: 'ultraball', kind: 'ball', multiplier: 2 },
+      { key: 'safari_ball', name: 'Safari Ball', sprite: 'safari_ball', kind: 'ball', multiplier: 2 },
+      { key: 'premier_ball', name: 'Premium Ball', sprite: 'premier_ball', kind: 'ball', multiplier: 3 },
+      { key: 'nest_ball', name: 'Nest Ball', sprite: 'nest_ball', kind: 'ball', multiplier: 2.5 },
+      { key: 'net_ball', name: 'Net Ball', sprite: 'net_ball', kind: 'ball', multiplier: 2.5 },
+      { key: 'fast_ball', name: 'Fast Ball', sprite: 'fast_ball', kind: 'ball', multiplier: 2.5 },
+      { key: 'dive_ball', name: 'Dive Ball', sprite: 'dive_ball', kind: 'ball', multiplier: 2.5 },
+      { key: 'dusk_ball', name: 'Dusk Ball', sprite: 'dusk_ball', kind: 'ball', multiplier: 2.5 },
+      { key: 'moon_ball', name: 'Moon Ball', sprite: 'moon_ball', kind: 'ball', multiplier: 2 },
       { key: 'masterball', name: 'Master Ball', sprite: 'masterball', kind: 'ball', multiplier: Infinity },
       { key: 'potions', name: 'Poção', sprite: 'potions', kind: 'heal', amount: 25 },
       { key: 'superpotion', name: 'Super Poção', sprite: 'superpotion', kind: 'heal', amount: 50 },
@@ -4234,10 +4538,15 @@
     function ensureBagItems() {
       if (!player) return;
       if (!player.items) player.items = {};
+      delete player.items.repel;
+      delete player.items.escape;
+      delete player.repel;
+      delete player.escape;
       const defaults = {
         balls: player.balls || 0, potions: player.potions || 0,
         antidote: player.antidote || 0, antiparalyze: player.antiparalyze || 0, antiburn: player.antiburn || 0,
-        greatball: 0, ultraball: 0, masterball: 0,
+        greatball: 0, ultraball: 0, safari_ball: 0, premier_ball: 0, nest_ball: 0,
+        net_ball: 0, fast_ball: 0, dive_ball: 0, dusk_ball: 0, moon_ball: 0, masterball: 0,
         superpotion: 0, hyperpotion: 0, fullrestore: 0, revive: 0, maxrevive: 0, ppup: 0, ppmax: 0,
         awakener: 0, iceheal: 0, fullheal: 0,
         firestone: 0, waterstone: 0, thunderstone: 0, leafstone: 0, moonstone: 0,
@@ -4247,7 +4556,7 @@
         silk_scarf: 0, silver_powder: 0, hard_stone: 0, sharp_beak: 0, poison_barb: 0,
         spell_tag: 0, dragon_fang: 0, never_melt_ice: 0, metal_coat: 0, black_glasses: 0,
         amulet_coin: 0, shell_bell: 0, macho_brace: 0,
-        rarecandy: 0, repel: 1, escape: 1, parcelbox: 0, ss_ticket: 0
+        rarecandy: 0, parcelbox: 0, ss_ticket: 0
       };
       [...EXTRA_MEDICINE_ITEMS, ...EXTRA_BATTLE_ITEMS, ...(EXTRA_TM_ITEMS || [])].forEach(item => { if (defaults[item.key] === undefined) defaults[item.key] = 0; });
       Object.keys(HELD_ITEM_INFO).forEach(key => { if (defaults[key] === undefined) defaults[key] = 0; });
@@ -4586,18 +4895,19 @@
       const root = document.getElementById('bagCategories');
       if (!root) return;
       root.innerHTML = BAG_CATEGORIES.map(cat => {
-        const cards = cat.items.map(it => {
+        const ownedItems = cat.items.filter(it => getItemQty(it.key) > 0);
+        if (!ownedItems.length) return '';
+        const cards = ownedItems.map(it => {
           const qty = getItemQty(it.key);
-          const empty = qty <= 0;
           const usable = BAG_FIELD_ITEMS.some(item => item.key === it.key);
-          return `<div class="bag-item item-tooltip-card${empty ? ' empty' : ''}"
+          return `<div class="bag-item item-tooltip-card"
             data-item-tooltip="${escapeHTML(it.desc)}" aria-label="${escapeHTML(`${it.name}: ${it.desc}`)}">
             ${it.key === 'parcelbox' || it.key === 'ss_ticket'
               ? `<span class="item-icon" role="img" aria-label="${it.key === 'ss_ticket' ? 'Ingresso' : 'Caixa'}">${it.key === 'ss_ticket' ? '🎫' : '📦'}</span>`
               : itemIcon(it.sprite, 'item-icon')}
             <div class="bag-item-name">${it.name}</div>
             <div class="bag-item-qty">x${qty}</div>
-            ${usable ? `<button type="button" class="btn btn-secondary" style="width:auto;padding:5px 9px;margin:6px auto 0;font-size:0.72rem;" onclick="event.stopPropagation();chooseBagItemTarget('${it.key}')" ${empty ? 'disabled' : ''}>Usar</button>` : ''}
+            ${usable ? `<button type="button" class="btn btn-secondary" style="width:auto;padding:5px 9px;margin:6px auto 0;font-size:0.72rem;" onclick="event.stopPropagation();chooseBagItemTarget('${it.key}')">Usar</button>` : ''}
           </div>`;
         }).join('');
         return `<div class="bag-category">
@@ -4667,7 +4977,7 @@
 
     function canUseItemOnPokemon(item, pokemon) {
       if (!item || !pokemon) return false;
-      if (item.kind === 'tm') return pokemon.hp > 0 && !pokemon.moves.some(move => move.name.toLowerCase() === item.move.name.toLowerCase());
+      if (item.kind === 'tm') return !pokemon.moves.some(move => move.name.toLowerCase() === item.move.name.toLowerCase());
       if (item.kind === 'revive' || item.kind === 'maxRevive') return pokemon.hp <= 0;
       if (item.kind === 'level') return pokemon.hp > 0 && pokemon.level < MAX_POKEMON_LEVEL;
       if (item.kind === 'ev') {
@@ -4686,16 +4996,77 @@
       return pokemon.hp > 0 && pokemon.hp < pokemon.maxHp;
     }
 
+    const technicalMachineCompatibilityCache = new Map();
+
+    async function isPokemonCompatibleWithTechnicalMachine(pokemon, item) {
+      if (!pokemon || !item?.move?.slug) return false;
+      const cacheKey = `${pokemon.id}:${item.move.slug}:${item.move.version || ''}`;
+      if (technicalMachineCompatibilityCache.has(cacheKey)) return technicalMachineCompatibilityCache.get(cacheKey);
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}/`);
+      if (!response.ok) throw new Error('Não foi possível consultar os golpes compatíveis.');
+      const species = await response.json();
+      const learned = species.moves.find(entry => entry.move.name === item.move.slug);
+      const compatible = Boolean(learned?.version_group_details?.some(detail =>
+        detail.move_learn_method.name === 'machine' && detail.version_group.name === item.move.version
+      ));
+      technicalMachineCompatibilityCache.set(cacheKey, compatible);
+      return compatible;
+    }
+
+    async function renderTechnicalMachineTargets(itemKey, inBattle = false) {
+      const item = (inBattle ? BATTLE_BAG_ITEMS : BAG_FIELD_ITEMS).find(entry => entry.key === itemKey);
+      const root = document.getElementById(inBattle ? 'bagMenu' : 'bagUseTarget');
+      if (!player || !item?.move || !root || getItemQty(itemKey) < 1) return;
+      const team = player.party.map((pokemon, index) => ({ pokemon, index }));
+      const shellStyle = inBattle ? 'grid-column:1/-1;' : 'padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;';
+      root.innerHTML = `<section style="${shellStyle}">
+        <div style="font-weight:700;margin-bottom:4px;">${item.name} · ${item.move.name}</div>
+        <div style="color:var(--text-muted);font-size:.82rem;margin-bottom:12px;">Confira sua equipe e escolha um Pokémon compatível para ensinar este golpe.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;" id="tmTargetOptions">
+          ${team.map(({ pokemon, index }) => `<button type="button" class="btn btn-secondary tm-target-option" data-party-index="${index}" disabled style="width:100%;margin:0;display:grid;grid-template-columns:44px 1fr;align-items:center;text-align:left;gap:8px;padding:8px;">
+            <img src="${SPRITE(pokemon.id)}" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" alt="" style="width:44px;height:44px;object-fit:contain;image-rendering:pixelated;">
+            <span><strong>${escapeHTML(pokemon.name)}</strong> · Nv. ${pokemon.level}<br><small class="tm-compatibility-label">Verificando compatibilidade…</small></span>
+          </button>`).join('')}
+        </div>
+        <button type="button" class="btn btn-secondary" style="margin-top:10px;${inBattle ? 'grid-column:1/-1;' : ''}" onclick="${inBattle ? 'renderBattleBagMenu()' : 'cancelBagItemUse()'}">Cancelar</button>
+      </section>`;
+      if (!inBattle) root.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      try {
+        const results = await Promise.all(team.map(async ({ pokemon, index }) => ({
+          index,
+          compatible: !pokemon.moves.some(move => move.name.toLowerCase() === item.move.name.toLowerCase())
+            && await isPokemonCompatibleWithTechnicalMachine(pokemon, item)
+        })));
+        results.forEach(({ index, compatible }) => {
+          const button = root.querySelector(`[data-party-index="${index}"]`);
+          if (!button) return;
+          button.disabled = !compatible;
+          button.classList.toggle('tm-compatible', compatible);
+          const label = button.querySelector('.tm-compatibility-label');
+          if (label) label.textContent = compatible ? '✓ Pode aprender' : '✕ Não pode aprender';
+          if (compatible) button.onclick = () => teachTechnicalMachine(itemKey, index, inBattle);
+        });
+        if (!results.some(result => result.compatible)) {
+          const note = document.createElement('div');
+          note.style.cssText = 'grid-column:1/-1;color:var(--text-muted);font-size:.82rem;';
+          note.textContent = 'Nenhum Pokémon da equipe pode aprender este TM agora.';
+          root.querySelector('#tmTargetOptions')?.append(note);
+        }
+      } catch (error) {
+        const note = document.createElement('div');
+        note.style.cssText = 'grid-column:1/-1;color:var(--danger,#ef4444);font-size:.82rem;';
+        note.textContent = error.message || 'Falha ao consultar a compatibilidade do TM.';
+        root.querySelector('#tmTargetOptions')?.append(note);
+      }
+    }
+
     async function teachTechnicalMachine(itemKey, partyIndex, inBattle = false, slotIndex = null) {
       const item = (inBattle ? BATTLE_BAG_ITEMS : BAG_FIELD_ITEMS).find(entry => entry.key === itemKey);
       const pokemon = player?.party?.[partyIndex];
       if (!item || !pokemon || !item.move || getItemQty(itemKey) < 1) return;
       try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}/`);
-        if (!response.ok) throw new Error('Nao foi possivel consultar os golpes compativeis.');
-        const species = await response.json();
-        const learned = species.moves.find(entry => entry.move.name === item.move.slug);
-        const compatible = learned?.version_group_details?.some(detail => detail.move_learn_method.name === 'machine' && detail.version_group.name === item.move.version);
+        const compatible = await isPokemonCompatibleWithTechnicalMachine(pokemon, item);
         if (!compatible) {
           showToast(`${pokemon.name} nao e compativel com ${item.name}.`, 'error');
           return;
@@ -4736,6 +5107,10 @@
       if (!player || battle) return;
       const item = BAG_FIELD_ITEMS.find(entry => entry.key === key);
       if (!item || getItemQty(key) <= 0) return;
+      if (item.kind === 'tm') {
+        renderTechnicalMachineTargets(key, false);
+        return;
+      }
       if (item.kind === 'evolution') {
         renderStoneEvolutionTargets(key);
         return;
@@ -4962,8 +5337,18 @@
     }
 
     const SHOP_ITEMS = [
-      { id: 'balls', name: 'Pokébola', icon: '🔴', sprite: 'balls', desc: 'Captura Pokémon selvagens', price: 200, key: 'balls' },
-      { id: 'greatball', name: 'Great Ball', icon: '🔵', sprite: 'greatball', desc: 'Taxa de captura melhor', price: 600, key: 'greatball' },
+      { id: 'balls', name: 'Pokébola', icon: '🔴', sprite: 'balls', desc: 'Modelo clássico com topo vermelho, base branca e botão central.', price: 200, key: 'balls' },
+      { id: 'greatball', name: 'Great Ball', icon: '🔵', sprite: 'greatball', desc: 'Pokébola azul com detalhes vermelhos e acabamento reforçado.', price: 600, key: 'greatball' },
+      { id: 'ultraball', name: 'Ultra Ball', icon: '⚫', sprite: 'ultraball', desc: 'Modelo avançado reconhecido pelo padrão preto e amarelo.', price: 1200, key: 'ultraball' },
+      { id: 'safari_ball', name: 'Safari Ball', icon: '🟢', sprite: 'safari_ball', desc: 'Bola especial usada nas expedições da Zona do Safari.', price: 1000, key: 'safari_ball' },
+      { id: 'premier_ball', name: 'Premium Ball', icon: '⚪', sprite: 'premier_ball', desc: 'Edição branca de aparência elegante e acabamento especial.', price: 1500, key: 'premier_ball' },
+      { id: 'nest_ball', name: 'Nest Ball', icon: '🟢', sprite: 'nest_ball', desc: 'Design verde com detalhes inspirados em ninhos.', price: 900, key: 'nest_ball' },
+      { id: 'net_ball', name: 'Net Ball', icon: '🔵', sprite: 'net_ball', desc: 'Visual azul com padrão de rede, associado a Água e Inseto.', price: 1000, key: 'net_ball' },
+      { id: 'fast_ball', name: 'Fast Ball', icon: '🟡', sprite: 'fast_ball', desc: 'Modelo amarelo com faixas marcantes e visual aerodinâmico.', price: 1000, key: 'fast_ball' },
+      { id: 'dive_ball', name: 'Dive Ball', icon: '🔵', sprite: 'dive_ball', desc: 'Acabamento azul inspirado no mergulho e na exploração marinha.', price: 1000, key: 'dive_ball' },
+      { id: 'dusk_ball', name: 'Dusk Ball', icon: '🟣', sprite: 'dusk_ball', desc: 'Tons escuros e roxos que lembram o céu ao anoitecer.', price: 1000, key: 'dusk_ball' },
+      { id: 'moon_ball', name: 'Moon Ball', icon: '🌙', sprite: 'moon_ball', desc: 'Design noturno com detalhes inspirados na lua.', price: 1000, key: 'moon_ball' },
+      { id: 'masterball', name: 'Master Ball', icon: '🟣', sprite: 'masterball', desc: 'Modelo raro e icônico com o grande símbolo “M”.', price: 50000, key: 'masterball' },
       { id: 'potions', name: 'Poção', icon: '🧪', sprite: 'potions', desc: 'Recupera 25 HP em batalha', price: 150, key: 'potions' },
       { id: 'superpotion', name: 'Super Poção', icon: '🧴', sprite: 'superpotion', desc: 'Recupera 50 HP', price: 350, key: 'superpotion' },
       { id: 'hyperpotion', name: 'Hiper Poção', icon: '🧪', sprite: 'hyperpotion', desc: 'Recupera 200 HP', price: 1200, key: 'hyperpotion' },
@@ -5003,7 +5388,6 @@
       { id: 'amulet_coin', name: 'Amulet Coin', icon: '🪙', sprite: 'amulet_coin', desc: 'Dobra o dinheiro recebido em batalhas', price: 6000, key: 'amulet_coin' },
       { id: 'shell_bell', name: 'Shell Bell', icon: '🐚', sprite: 'shell_bell', desc: 'Recupera 1/8 do dano causado', price: 5000, key: 'shell_bell' },
       { id: 'macho_brace', name: 'Macho Brace', icon: '🏋️', sprite: 'macho_brace', desc: 'Dobra os EVs recebidos e reduz a Velocidade pela metade', price: 6000, key: 'macho_brace' },
-      { id: 'repel', name: 'Repelente', icon: '🧴', sprite: 'repel', desc: 'Afasta selvagens', price: 350, key: 'repel' },
       { id: 'moonstone', name: 'Pedra da Lua', icon: '🌙', sprite: 'moonstone', desc: 'Pedra de evolução', price: 2100, key: 'moonstone' },
       { id: 'firestone', name: 'Pedra do Fogo', icon: '🔥', sprite: 'firestone', desc: 'Pedra de evolução', price: 2100, key: 'firestone' },
       { id: 'waterstone', name: 'Pedra da Água', icon: '💧', sprite: 'waterstone', desc: 'Pedra de evolução', price: 2100, key: 'waterstone' },
@@ -5080,6 +5464,9 @@
       if (!SHOP_ITEMS.some(entry => entry.key === item.key)) SHOP_ITEMS.push({ id: item.key, name: item.name, icon: '📀', sprite: item.key, desc: item.desc, price: item.price, key: item.key });
     });
 
+    ITEM_SPRITE.tm40 = ITEM_SPRITE.tm43 || ITEM_SPRITE.tm40;
+    ITEM_SPRITE_FB.tm40 = ITEM_SPRITE_FB.tm43 || ITEM_SPRITE_FB.tm40;
+
     const EXTRA_BATTLE_ITEMS = [
       { id: 'guard-spec', key: 'guard_spec', name: 'Guard Spec.', desc: 'Impede reduções de atributos da equipe por 5 turnos.', kind: 'guardSpec', price: 700 },
       { id: 'dire-hit', key: 'dire_hit', name: 'Dire Hit', desc: 'Aumenta bastante a chance de acerto crítico do Pokémon ativo.', kind: 'direHit', price: 650 },
@@ -5103,7 +5490,9 @@
     let itemCatalogPage = 0;
     const CATALOG_ITEM_KEY_ALIASES = {
       'poke-ball': 'balls', 'pokeball': 'balls', 'great-ball': 'greatball', 'ultra-ball': 'ultraball',
-      'master-ball': 'masterball', 'rare-candy': 'rarecandy', 'paralyze-heal': 'antiparalyze',
+      'master-ball': 'masterball', 'safari-ball': 'safari_ball', 'premier-ball': 'premier_ball',
+      'nest-ball': 'nest_ball', 'net-ball': 'net_ball', 'fast-ball': 'fast_ball',
+      'dive-ball': 'dive_ball', 'dusk-ball': 'dusk_ball', 'moon-ball': 'moon_ball', 'rare-candy': 'rarecandy', 'paralyze-heal': 'antiparalyze',
       'burn-heal': 'antiburn', 'ice-heal': 'iceheal', 'full-heal': 'fullheal', 'max-revive': 'maxrevive',
       'pp-up': 'ppup', 'pp-max': 'ppmax', 'exp-share': 'exp_share', 'focus-sash': 'focus_sash',
       'x-sp-atk': 'x_special_attack', 'x-sp-def': 'x_special_defense',
@@ -5136,7 +5525,8 @@
     }
 
     function renderItemCatalog() {
-      const catalog = Array.isArray(window.POKEMON_ITEM_CATALOG) ? window.POKEMON_ITEM_CATALOG : [];
+      const catalog = (Array.isArray(window.POKEMON_ITEM_CATALOG) ? window.POKEMON_ITEM_CATALOG : [])
+        .filter(item => !['repel', 'escape-rope', 'escape_rope'].includes(String(item.id || '').toLowerCase()));
       const grid = document.getElementById('itemCatalogGrid');
       const count = document.getElementById('itemCatalogCount');
       const pages = document.getElementById('itemCatalogPages');
@@ -5192,64 +5582,105 @@
     document.getElementById('itemCatalogSearch').addEventListener('input', () => { itemCatalogPage = 0; renderItemCatalog(); });
     document.getElementById('itemCatalogCategory').addEventListener('change', () => { itemCatalogPage = 0; renderItemCatalog(); });
 
-    function getHealCost() {
-      if (!player || !player.party) return 200;
-      const missing = player.party.reduce((s, p) => s + Math.max(0, p.maxHp - p.hp), 0);
+    let centerSelectionOwner = null;
+    let centerSelectedPokemon = new Set();
+    function pokemonNeedsCenterTreatment(pokemon) {
+      return Boolean(pokemon && (pokemon.hp < pokemon.maxHp || pokemon.status || (pokemon.moves || []).some(move => move.pp < move.maxPp)));
+    }
+    function getHealCost(pokemonList = player?.party || []) {
+      const missing = pokemonList.reduce((sum, pokemon) => sum + Math.max(0, pokemon.maxHp - pokemon.hp), 0);
       return Math.max(100, Math.min(800, 100 + missing * 4));
     }
-
-    function refreshCenterUI() {
+    function setCenterSelection(selectNeedy) {
       if (!player) return;
+      centerSelectedPokemon = new Set(selectNeedy ? player.party.filter(pokemonNeedsCenterTreatment) : []);
+      refreshCenterUI();
+    }
+    function toggleCenterPokemonSelection(index, checked) {
+      const pokemon = player?.party?.[index];
+      if (!pokemon) return;
+      if (checked) centerSelectedPokemon.add(pokemon);
+      else centerSelectedPokemon.delete(pokemon);
+      refreshCenterUI();
+    }
+    function refreshCenterUI() {
+      if (!player || !Array.isArray(player.party)) return;
+      if (centerSelectionOwner !== player) {
+        centerSelectionOwner = player;
+        centerSelectedPokemon = new Set(player.party.filter(pokemonNeedsCenterTreatment));
+      }
       const el = document.getElementById('centerPartyStatus');
       const costEl = document.getElementById('centerCost');
-      const allFainted = player.party.length > 0 && player.party.every(p => Number(p.hp) <= 0);
-      if (costEl) costEl.textContent = allFainted ? 'Gratuito' : '₽ ' + getHealCost().toLocaleString('pt-BR');
-      const healButton = document.getElementById('btnHealTeam');
-      if (healButton) healButton.textContent = allFainted ? 'Reanimar e curar equipe' : 'Curar equipe';
+      const selected = player.party.filter(pokemon => centerSelectedPokemon.has(pokemon));
+      const selectedNeedingCare = selected.filter(pokemonNeedsCenterTreatment);
+      const cost = selectedNeedingCare.length ? getHealCost(selectedNeedingCare) : 0;
+      if (costEl) costEl.textContent = !selectedNeedingCare.length ? 'Selecione Pokémon' : '₽ ' + cost.toLocaleString('pt-BR');
+      const selectedButton = document.getElementById('btnHealSelected');
+      if (selectedButton) {
+        selectedButton.textContent = `Curar selecionados (${selectedNeedingCare.length})`;
+        selectedButton.disabled = !selectedNeedingCare.length || player.money < cost;
+      }
       if (el) {
-        el.innerHTML = player.party.map(p => {
-          const pct = Math.round((p.hp / p.maxHp) * 100);
+        el.innerHTML = player.party.map((pokemon, index) => {
+          const hp = Math.max(0, Math.round(Number(pokemon.hp) || 0));
+          const maxHp = Math.max(1, Math.round(Number(pokemon.maxHp) || 1));
+          const pct = Math.max(0, Math.min(100, Math.round(hp / maxHp * 100)));
           const color = pct > 50 ? '#4ade80' : pct > 25 ? '#fbbf24' : '#f87171';
-          return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);">
-            <span>${p.name} Nv.${p.level}</span>
-            <span style="color:${color}">HP ${Math.round(p.hp)}/${p.maxHp} · PP ${(p.moves || []).reduce((sum, move) => sum + move.pp, 0)}/${(p.moves || []).reduce((sum, move) => sum + move.maxPp, 0)}${p.status ? ` · ${getPokemonStatusLabel(p)}` : ''}</span>
-          </div>`;
+          const moves = pokemon.moves || [];
+          const statusLabel = hp <= 0 ? 'Desmaiado' : pokemon.status ? getPokemonStatusLabel(pokemon) : 'Saudável';
+          const checked = centerSelectedPokemon.has(pokemon) ? 'checked' : '';
+          const disabled = pokemonNeedsCenterTreatment(pokemon) ? '' : 'disabled';
+          const types = getTypes(pokemon.id);
+          return `<label class="game-card center-pokemon-card ${checked ? 'selected' : ''}">
+            <div class="game-card-header">
+              <img class="center-pokemon-sprite" src="${SPRITE(pokemon.id)}" alt="${escapeHTML(pokemon.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" />
+              <input class="center-pokemon-select" type="checkbox" ${checked} ${disabled} aria-label="Selecionar ${escapeHTML(pokemon.name)} para curar" onchange="toggleCenterPokemonSelection(${index}, this.checked)" />
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-title" title="${getPokemonGenderLabel(pokemon)}">${getPokemonDisplayNameHTML(pokemon)}${pokemon === player.poke ? ' ★' : ''}</div>
+              <div class="center-pokemon-meta">Nv. ${pokemon.level}</div>
+              <div>${types.map(type => `<span class="type-badge ${typeClass([type])}">${type}</span>`).join(' ')}</div>
+              <div class="center-pokemon-hp" style="color:${color}">HP ${hp}/${maxHp}</div>
+              <div class="center-pokemon-moves">${moves.map(move => `<div class="center-pokemon-move"><span>${escapeHTML(move.name)}</span><span>PP ${Number(move.pp) || 0}/${Number(move.maxPp) || 0}</span></div>`).join('') || '<span class="center-pokemon-meta">Sem golpes</span>'}</div>
+              <span class="center-pokemon-status" style="color:${hp <= 0 || pokemon.status ? 'var(--warning)' : 'var(--success)'}">Status: ${escapeHTML(statusLabel)}</span>
+            </div>
+          </label>`;
         }).join('');
       }
     }
-
-    function healTeamAtCenter() {
+    function treatPokemonAtCenter(pokemonList) {
       if (!player || !Array.isArray(player.party) || !player.party.length) return;
-      const allFainted = player.party.every(p => Number(p.hp) <= 0);
-      const cost = allFainted ? 0 : getHealCost();
-      const needsHeal = player.party.some(p =>
-        p.hp < p.maxHp || p.status || (p.moves || []).some(move => move.pp < move.maxPp)
-      );
-      if (!needsHeal) {
-        showToast('Sua equipe já está totalmente curada!', 'error');
+      const needingCare = pokemonList.filter(pokemonNeedsCenterTreatment);
+      if (!needingCare.length) {
+        showToast('Os Pokémon selecionados já estão totalmente curados!', 'error');
         return;
       }
+      const cost = getHealCost(needingCare);
       if (player.money < cost) {
         showToast('Dinheiro insuficiente! Precisa de ₽ ' + cost, 'error');
         return;
       }
       player.money -= cost;
-      player.party.forEach(p => {
-        p.hp = p.maxHp;
-        p.status = '';
-        delete p.sleepTurns;
-        normalizePokemonMoves(p);
-        p.moves.forEach(move => { move.pp = move.maxPp; });
+      needingCare.forEach(pokemon => {
+        pokemon.hp = pokemon.maxHp;
+        pokemon.status = '';
+        delete pokemon.sleepTurns;
+        delete pokemon.confusionTurns;
+        delete pokemon.toxicCounter;
+        normalizePokemonMoves(pokemon);
+        pokemon.moves.forEach(move => { move.pp = move.maxPp; });
       });
       if (!player.party.includes(player.poke)) player.poke = player.party[0] || null;
-      if (player.poke) player.poke.hp = player.poke.maxHp;
       updateStatsUI();
       refreshCenterUI();
       refreshPartyUI();
       saveGame();
-      showToast(allFainted ? 'Equipe reanimada e curada gratuitamente!' : 'Equipe totalmente curada! - ₽ ' + cost);
+      showToast(`${needingCare.length} Pokémon curado(s)! - ₽ ${cost.toLocaleString('pt-BR')}`);
     }
-
+    function healSelectedAtCenter() {
+      if (!player) return;
+      treatPokemonAtCenter(player.party.filter(pokemon => centerSelectedPokemon.has(pokemon)));
+    }
     function refreshMarketUI() {
       if (!player) return;
       const moneyEl = document.getElementById('marketMoney');
@@ -5274,7 +5705,7 @@
           <div class="game-card item-tooltip-card" onclick="buyItem('${item.id}')"
             data-item-tooltip="${escapeHTML(item.desc)}" aria-label="${escapeHTML(`${item.name}: ${item.desc}`)}">
             <div class="game-card-header" style="background:linear-gradient(135deg,#1a2a1a,#0d150d);">
-              ${itemIcon(item.sprite || item.key, 'shop-item-icon')}
+              ${itemIcon(item.sprite || item.key, 'shop-item-icon', item.icon || '🎒')}
             </div>
             <div class="game-card-body">
               <div class="game-card-title">${item.name}</div>
@@ -5742,6 +6173,12 @@
       const panel = document.getElementById('panel-'+id);
       if (panel) panel.classList.add('active');
       document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.panel === id));
+      const profileLink = document.getElementById('playerProfileLink');
+      if (profileLink) {
+        profileLink.classList.toggle('active', id === 'profile');
+        if (id === 'profile') profileLink.setAttribute('aria-current', 'page');
+        else profileLink.removeAttribute('aria-current');
+      }
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('sidebarOverlay').classList.remove('open');
       if (id === 'center') refreshCenterUI();
@@ -6069,7 +6506,9 @@
       return wild;
     }
 
-    function startDungeonBattle(dungeonName) {
+    let dungeonBattleStarting = false;
+    async function startDungeonBattle(dungeonName) {
+      if (dungeonBattleStarting || battle) return;
       if (player.poke.hp <= 0) {
         const healthy = player.party.find(p => p.hp > 0);
         if (healthy) {
@@ -6083,6 +6522,14 @@
       if (!encounters) { showToast('Região sem encontros ainda.', 'error'); return; }
       const wild = getWildEncounter(encounters);
       if (!wild) return;
+      dungeonBattleStarting = true;
+      try {
+        wild.moves = await getFireRedMovesForLevel(wild.id, wild.level);
+      } catch (_) {
+        wild.moves = wild.moves?.length ? wild.moves : getMovesForLevel(wild.id, wild.level);
+      } finally {
+        dungeonBattleStarting = false;
+      }
       wild.hp = getLevelScaledHp(wild.hp, wild.level);
       wild.maxHp = wild.hp;
       wild.currentHp = wild.maxHp;
@@ -6724,6 +7171,10 @@
 
     function renderBattleItemTargets(item) {
       const bag = document.getElementById('bagMenu');
+      if (item?.kind === 'tm') {
+        renderTechnicalMachineTargets(item.key, true);
+        return;
+      }
       const targets = player.party
         .map((pokemon, index) => ({ pokemon, index }))
         .filter(({ pokemon }) => canUseItemOnPokemon(item, pokemon));
@@ -6999,6 +7450,81 @@
     }
 
 
+    const captureSpeciesDataCache = new Map();
+
+    async function getCaptureSpeciesData(pokemon) {
+      const id = Number(pokemon?.id);
+      if (!id) return { catchRate: 45, speed: 0 };
+      if (captureSpeciesDataCache.has(id)) return captureSpeciesDataCache.get(id);
+      const result = (async () => {
+        try {
+          const [speciesResponse, pokemonResponse] = await Promise.all([
+            fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}/`),
+            fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`)
+          ]);
+          if (!speciesResponse.ok) throw new Error('Pokémon species unavailable');
+          const species = await speciesResponse.json();
+          const creature = pokemonResponse.ok ? await pokemonResponse.json() : null;
+          return {
+            catchRate: Math.max(1, Math.min(255, Number(species.capture_rate) || 45)),
+            speed: Number(creature?.stats?.find(stat => stat.stat.name === 'speed')?.base_stat) || 0
+          };
+        } catch (_) {
+          return { catchRate: Math.max(1, Math.min(255, Number(pokemon.catchRate) || 45)), speed: Number(pokemon.speed) || 0 };
+        }
+      })();
+      captureSpeciesDataCache.set(id, result);
+      return result;
+    }
+
+    function normalizedCaptureText(value) {
+      return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    async function getCaptureBallMultiplier(ball, enemy) {
+      if (ball.key === 'masterball') return Infinity;
+      let multiplier = ball.multiplier || 1;
+      const details = await getCaptureSpeciesData(enemy);
+      const types = getTypes(enemy.id).map(normalizedCaptureText);
+      const place = normalizedCaptureText(battle?.dungeon || '');
+      if (ball.key === 'nest_ball' && enemy.level < 30) multiplier = 3.5;
+      if (ball.key === 'net_ball' && types.some(type => ['agua', 'inseto'].includes(type))) multiplier = 3;
+      if (ball.key === 'fast_ball' && details.speed >= 100) multiplier = 3;
+      if (ball.key === 'dive_ball' && /agua|water|mar|sea|oceano|ocean|ilha|island|espuma|rota 19|rota 20|rota 21|rota 24/.test(place)) multiplier = 3.2;
+      if (ball.key === 'dusk_ball' && /cave|caverna|tunel|tunnel|moon|lua|victory road|rocky|rochoso/.test(place)) multiplier = 3.5;
+      if (ball.key === 'moon_ball' && Object.prototype.hasOwnProperty.call(STONE_EVOLUTIONS.moonstone, enemy.id)) multiplier = 4;
+      return multiplier;
+    }
+
+    async function calculateCaptureChance(enemy, ball) {
+      if (ball.key === 'masterball') return 1;
+      const details = await getCaptureSpeciesData(enemy);
+      const maxHp = Math.max(1, Number(enemy.maxHp) || 1);
+      const currentHp = Math.max(1, Math.min(maxHp, Number(enemy.currentHp) || maxHp));
+      const multiplier = await getCaptureBallMultiplier(ball, enemy);
+      let statusMultiplier = 1;
+      const status = normalizedCaptureText(enemy.status);
+      if (['sleep', 'slp', 'sono', 'freeze', 'frz', 'congelado'].some(value => status.includes(value))) statusMultiplier = 2;
+      else if (['par', 'paral', 'poison', 'psn', 'veneno', 'burn', 'brn', 'queim'].some(value => status.includes(value))) statusMultiplier = 1.5;
+      const catchValue = ((3 * maxHp - 2 * currentHp) * details.catchRate * multiplier * statusMultiplier) / (3 * maxHp);
+      if (catchValue >= 255) return 1;
+      if (catchValue <= 0) return 0;
+      const shakeThreshold = 65536 / Math.pow(255 / catchValue, 3 / 16);
+      return Math.max(0, Math.min(1, Math.pow(shakeThreshold / 65536, 4)));
+    }
+
+    async function updateBattleCatchOdds() {
+      if (!battle?.enemy) return;
+      const enemy = battle.enemy;
+      const oddsNodes = [...document.querySelectorAll('#bagMenu [data-capture-ball]')];
+      await Promise.all(oddsNodes.map(async node => {
+        const ball = BATTLE_BAG_ITEMS.find(item => item.key === node.dataset.captureBall);
+        if (!ball || !battle || battle.enemy !== enemy) return;
+        const chance = await calculateCaptureChance(enemy, ball);
+        if (node.isConnected && battle?.enemy === enemy) node.textContent = `${(chance * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
+      }));
+    }
+
     function renderBattleBagMenu() {
       ensureBagItems();
       const bag = document.getElementById('bagMenu');
@@ -7019,6 +7545,7 @@
             <button class="move-btn" onclick="useBattleBagItem('${item.key}')" style="display:flex;align-items:center;gap:8px;">
               ${itemIcon(item.sprite, 'item-icon-sm')}
               ${item.name}
+              ${item.kind === 'ball' ? `<span class="move-power" data-capture-ball="${item.key}">Calculando…</span>` : ''}
               <span class="move-power">x${qty}</span>
             </button>
           `;
@@ -7030,6 +7557,7 @@
         ${entries || '<div style="padding:10px 0;color:var(--text-muted);">Nenhum item disponível na mochila.</div>'}
         <button class="move-btn" onclick="backToMenu()" style="grid-column:1/-1;text-align:center;justify-content:center;">← Voltar</button>
       `;
+      updateBattleCatchOdds();
     }
 
     function showBag() {
@@ -7086,7 +7614,7 @@
       finishNicknameChoice(false);
     });
 
-    function tryCapture(ballKey) {
+    async function tryCapture(ballKey) {
       if (!battle || battle.busy) return;
       if (battle.isGym) {
         setLog('Não dá para capturar o Pokémon de um Líder de Ginásio!');
@@ -7102,25 +7630,24 @@
       }
       battle.busy = true;
       backToMenu();
+      const enemy = battle.enemy;
+      const catchRate = await calculateCaptureChance(enemy, selectedBall);
+      if (!battle || battle.enemy !== enemy) return;
       decItemQty(selectedBall.key, 1);
-      const hpRatio = battle.enemy.currentHp / battle.enemy.maxHp;
-      // Higher chance when HP is low
-      let catchRate = 0.35 + (1 - hpRatio) * 0.50; // 35% full HP -> 85% near 0
-      catchRate *= selectedBall.multiplier;
-      if (battle.enemy.level > player.poke.level + 5) catchRate *= 0.85;
-      if (battle.enemy.name === 'Mewtwo') catchRate = Math.min(catchRate, 0.12);
-      catchRate = selectedBall.key === 'masterball' ? 1 : Math.min(0.92, catchRate);
       SFX.captureThrow();
-      setLog(`Você jogou ${selectedBall.name}! (Restam ${getItemQty(selectedBall.key)})`);
+      setLog(`Você jogou ${selectedBall.name}! Chance estimada: ${(catchRate * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%. (Restam ${getItemQty(selectedBall.key)})`);
       const eSpr = document.getElementById('enemySprite');
       eSpr.classList.add('capturing');
       const didCapture = Math.random() < catchRate;
 
-      showCaptureBall(didCapture ? 3 : 2, (ball) => {
+      showCaptureBall(didCapture ? 3 : 2, async (ball) => {
         if (didCapture) {
           if (ball) ball.classList.add('caught');
           SFX.captureSuccess();
           setLog(`Gotcha! ${getPokemonDisplayName(battle.enemy)} foi capturado!`);
+          let caughtMoves;
+          try { caughtMoves = await getFireRedMovesForLevel(battle.enemy.id, battle.enemy.level); }
+          catch (_) { caughtMoves = getMovesForLevel(battle.enemy.id, battle.enemy.level); }
           const types = getTypes(battle.enemy.id);
           const caught = {
             name: battle.enemy.name,
@@ -7137,7 +7664,7 @@
             evs: {...battle.enemy.evs},
             growthRate: 'mediumFast',
             exp: getExperienceForLevel(battle.enemy.level),
-            moves: getMovesForLevel(battle.enemy.id, battle.enemy.level),
+            moves: caughtMoves,
             status: battle.enemy.status || '',
             sleepTurns: battle.enemy.sleepTurns
           };
@@ -7232,6 +7759,8 @@
     function setupBattleUI(logMsg) {
       const e = battle.enemy;
       renderPartyBalls();
+      if (normalizePokemonMoves(player.poke)) saveGame();
+      normalizePokemonMoves(e);
       ensurePokemonGender(e);
       ensurePokemonGender(player.poke);
       ensurePokemonTraits(e);
