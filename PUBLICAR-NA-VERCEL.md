@@ -26,4 +26,5 @@ O jogo já passa a URL atual como destino dos fluxos de cadastro, login social e
 
 - A chave `sb_publishable_...` no HTML é uma chave pública de cliente; não coloque uma chave `sb_secret_...` ou `service_role` no navegador.
 - O arquivo `supabase-schema.sql` documenta a tabela e as políticas RLS. Ele não configura o banco automaticamente; aplique-o no SQL Editor do Supabase se ainda não tiver sido aplicado.
+- O PvP amistoso usa a tabela `pvp_rooms`, as funções RPC e o Realtime definidos em `supabase-schema.sql`. Para ativá-lo, aplique novamente o arquivo completo no SQL Editor do Supabase após publicar a versão com PvP.
 - Após publicar, faça um save, atualize a página e confirme que o progresso voltou.

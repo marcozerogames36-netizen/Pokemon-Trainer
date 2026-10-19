@@ -239,6 +239,27 @@
     .panel-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
     .panel-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
     .panel-back-button { width: auto !important; margin: 0 0 14px !important; padding: 7px 11px !important; font-size: .8rem !important; }
+    .pvp-team-select { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin:14px 0; }
+    .pvp-select-card { display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--border); border-radius:12px; background:var(--card); cursor:pointer; }
+    .pvp-select-card:has(input:checked) { border-color:var(--primary); background:rgba(124,58,237,.1); }
+    .pvp-select-card input { accent-color:var(--primary); }
+    .pvp-select-card img { width:48px; height:48px; object-fit:contain; }
+    .pvp-lobby-box, .pvp-room-box { max-width:900px; padding:18px; border:1px solid var(--border); border-radius:16px; background:var(--card); }
+    .pvp-room-controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:16px; }
+    .pvp-room-controls input { flex:1 1 180px; min-width:0; }
+    .pvp-code { font-size:1.6rem; font-weight:800; letter-spacing:.18em; color:#c4b5fd; }
+    .pvp-sides { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:16px 0; }
+    .pvp-side-card { padding:14px; border:1px solid var(--border); border-radius:14px; background:var(--input-bg); min-width:0; }
+    .pvp-side-card.active { border-color:var(--primary); }
+    .pvp-pokemon-line { display:flex; align-items:center; gap:10px; margin-top:8px; }
+    .pvp-pokemon-line img { width:64px; height:64px; object-fit:contain; }
+    .pvp-hp-track { height:8px; border-radius:10px; overflow:hidden; background:#27272a; margin-top:5px; }
+    .pvp-hp-track span { display:block; height:100%; background:#22c55e; }
+    .pvp-battle-actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:8px; margin-top:14px; }
+    .pvp-battle-actions .btn { margin:0; }
+    .pvp-action-disabled { opacity:.45; cursor:not-allowed; }
+    .pvp-log { display:grid; gap:5px; margin:14px 0; padding:12px; max-height:170px; overflow:auto; border-radius:10px; background:#0d0d12; color:var(--text-muted); font-size:.85rem; }
+    @media (max-width:560px) { .pvp-sides { grid-template-columns:1fr; } .pvp-lobby-box,.pvp-room-box { padding:13px; } }
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
     .game-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 16px;
@@ -1399,6 +1420,10 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#293949,#141d26);">🧰</div>
               <div class="game-card-body"><div class="game-card-title">Catálogo de Itens</div><div class="game-card-desc">Consulte itens, categorias e efeitos.</div></div>
             </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pvp')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pvp')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#41234d,#1d1225);">⚔️</div>
+              <div class="game-card-body"><div class="game-card-title">PvP Online</div><div class="game-card-desc">Desafie outro treinador por código de sala.</div></div>
+            </div>
           </div>
         </div>
         <div class="panel" id="panel-dungeons">
@@ -1412,6 +1437,13 @@
           <h2 class="panel-title">📜 Missões de Kanto</h2>
           <p class="panel-desc">Complete missões para ganhar experiência, dinheiro e itens.</p>
           <div class="mission-list" id="missionsList"></div>
+        </div>
+
+        <div class="panel" id="panel-pvp">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
+          <h2 class="panel-title">⚔️ PvP Online</h2>
+          <p class="panel-desc">Crie uma sala e compartilhe o código com outro treinador. Batalhas amistosas não alteram seu progresso, HP, PP ou itens.</p>
+          <div id="pvpContent"></div>
         </div>
 
         <div class="panel" id="panel-gyms">
@@ -6203,10 +6235,313 @@
       if (id === 'gyms') renderGyms();
       if (id === 'missions') renderMissions();
       if (id === 'pc') renderPC();
+      if (id === 'pvp') renderPvpPanel();
       if (id === 'dungeons') {
         const dg = document.getElementById('dungeonsGrid');
         if (dg) dg.innerHTML = DUNGEONS.map(dungeonCardHTML).join('');
       }
+    }
+
+    // PvP amistoso online: salas privadas, turnos sincronizados e progresso isolado.
+    let pvpRoom = null;
+    let pvpChannel = null;
+    let pvpSelectedIndices = new Set();
+    let pvpResolving = false;
+    let pvpStarting = false;
+    let pvpSubmitting = false;
+
+    function pvpGetSelectedTeam() {
+      if (!player || !(pvpSelectedIndices instanceof Set)) return [];
+      return [...pvpSelectedIndices].sort((a,b)=>a-b).map(index=>player.party[index]).filter(Boolean);
+    }
+
+    function pvpBuildTeamSnapshot() {
+      return pvpGetSelectedTeam().map(pokemon => {
+        const maxHp = Math.max(1, Math.round(Number(pokemon.maxHp) || 1));
+        const stats = ['hp','attack','defense','specialAttack','specialDefense','speed'];
+        const ivs = Object.fromEntries(stats.map(stat=>{
+          const value = Number(pokemon.ivs?.[stat]);
+          return [stat,Number.isInteger(value)&&value>=0&&value<=31?value:15];
+        }));
+        const evs = Object.fromEntries(stats.map(stat=>{
+          const value = Number(pokemon.evs?.[stat]);
+          return [stat,Number.isInteger(value)&&value>=0&&value<=252?value:0];
+        }));
+        const moves = (pokemon.moves || []).filter(move => Number(move.power) > 0).slice(0,4).map(move => ({
+          name: String(move.name || 'Golpe'), type: normalizeBattleType(move.type || 'Normal'),
+          power: Math.max(1, Math.min(250, Math.floor(Number(move.power) || 1))),
+          accuracy: move.accuracy !== null && move.accuracy !== undefined && Number.isFinite(Number(move.accuracy)) ? Math.max(1, Math.min(100, Number(move.accuracy))) : 100,
+          pp: Math.max(1, Math.floor(Number(move.maxPp) || Number(move.pp) || 10)),
+          maxPp: Math.max(1, Math.floor(Number(move.maxPp) || Number(move.pp) || 10))
+        }));
+        return {
+          id: Number(pokemon.id) || 1, name: String(pokemon.name || 'Pokémon').slice(0,32),
+          level: Math.max(1, Math.min(100, Math.floor(Number(pokemon.level) || 1))), maxHp,
+          types: getTypes(pokemon.id),
+          hp: maxHp, ability: ABILITY_INFO[pokemon.ability] ? pokemon.ability : '',
+          nature: String(pokemon.nature || ''), ivs, evs, moves
+        };
+      });
+    }
+
+    function pvpRenderTeamSelection() {
+      if (!player || !Array.isArray(player.party)) return '';
+      if (!pvpSelectedIndices.size) {
+        player.party.slice(0,6).forEach((pokemon,index)=>{ if (pokemon) pvpSelectedIndices.add(index); });
+      }
+      return `<div class="pvp-team-select">${player.party.map((pokemon,index)=>{
+        const selected = pvpSelectedIndices.has(index);
+        const moves = (pokemon.moves || []).filter(move=>Number(move.power)>0).length;
+        return `<label class="pvp-select-card"><input type="checkbox" ${selected?'checked':''} onchange="togglePvpPokemon(${index},this.checked)" />
+          <img src="${SPRITE(pokemon.id)}" alt="" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" />
+          <span><strong>${escapeHTML(pokemon.name)}</strong><br><small>Nv. ${pokemon.level} · ${moves} golpes</small></span></label>`;
+      }).join('')}</div>`;
+    }
+
+    function togglePvpPokemon(index, checked) {
+      if (checked) {
+        if (pvpSelectedIndices.size >= 6) { showToast('Escolha no máximo 6 Pokémon.', 'error'); renderPvpPanel(); return; }
+        pvpSelectedIndices.add(index);
+      } else {
+        if (pvpSelectedIndices.size <= 1) { showToast('Selecione pelo menos um Pokémon.', 'error'); renderPvpPanel(); return; }
+        pvpSelectedIndices.delete(index);
+      }
+      renderPvpPanel();
+    }
+
+    function renderPvpPanel() {
+      const root = document.getElementById('pvpContent');
+      if (!root) return;
+      if (!player || !onlineUser || !supabaseClient) {
+        root.innerHTML = '<div class="pvp-lobby-box">Entre em uma conta para criar ou acessar uma sala PvP.</div>';
+        return;
+      }
+      if (pvpRoom) { renderPvpRoom(); return; }
+      root.innerHTML = `<div class="pvp-lobby-box">
+        <strong>Escolha sua equipe</strong><div class="panel-desc" style="margin:4px 0 0;">Selecione de 1 a 6 Pokémon. Eles entram com HP e PP completos apenas nesta batalha amistosa.</div>
+        ${pvpRenderTeamSelection()}
+        <div class="pvp-room-controls">
+          <button type="button" class="btn" style="width:auto;margin:0;" onclick="pvpCreateRoom()">Criar sala</button>
+          <input id="pvpRoomCodeInput" type="text" maxlength="6" placeholder="Código da sala" aria-label="Código da sala" autocomplete="off" />
+          <button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="pvpJoinRoom()">Entrar / retomar</button>
+        </div>
+        <p style="color:var(--text-muted);font-size:.78rem;margin:12px 0 0;">Somente golpes de dano direto são habilitados. Não há itens, recompensas ou mudanças no seu save.</p>
+      </div>`;
+    }
+
+    function pvpMakeCode() {
+      const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const bytes = new Uint8Array(6);
+      if (window.crypto?.getRandomValues) window.crypto.getRandomValues(bytes);
+      else bytes.forEach((_,index)=>{ bytes[index]=Math.floor(Math.random()*256); });
+      return [...bytes].map(value=>alphabet[value % alphabet.length]).join('');
+    }
+
+    async function pvpCreateRoom() {
+      if (pvpSubmitting || !onlineUser || !supabaseClient) return;
+      const team = pvpBuildTeamSnapshot();
+      if (!team.length) { showToast('Selecione ao menos um Pokémon.', 'error'); return; }
+      pvpSubmitting = true;
+      try {
+        let room, error;
+        for (let attempt=0; attempt<4; attempt++) {
+          const result = await supabaseClient.rpc('pvp_create_room', {
+            p_code: pvpMakeCode(), p_trainer: player.name, p_team: team
+          });
+          room = result.data; error = result.error;
+          if (!error) break;
+          if (!/duplicate|unique/i.test(error.message || '') || attempt === 3) throw error;
+        }
+        await pvpAttachRoom(room);
+        showToast('Sala criada. Compartilhe o código com seu adversário.');
+      } catch (error) {
+        showToast('Não foi possível criar a sala: ' + error.message, 'error');
+      } finally { pvpSubmitting = false; }
+    }
+
+    async function pvpJoinRoom() {
+      if (pvpSubmitting || !onlineUser || !supabaseClient) return;
+      const input = document.getElementById('pvpRoomCodeInput');
+      const code = String(input?.value || '').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+      if (code.length !== 6) { showToast('Digite o código de 6 caracteres.', 'error'); return; }
+      const team = pvpBuildTeamSnapshot();
+      if (!team.length) { showToast('Selecione ao menos um Pokémon.', 'error'); return; }
+      pvpSubmitting = true;
+      try {
+        const existing = await supabaseClient.from('pvp_rooms').select('*').eq('room_code',code).maybeSingle();
+        if (existing.error) throw existing.error;
+        if (existing.data && [existing.data.host_id,existing.data.guest_id].includes(onlineUser.id)) {
+          await pvpAttachRoom(existing.data);
+        } else {
+          const { data, error } = await supabaseClient.rpc('pvp_join_room', {
+            p_code: code, p_trainer: player.name, p_team: team
+          });
+          if (error) throw error;
+          await pvpAttachRoom(data);
+        }
+      } catch (error) {
+        showToast('Não foi possível entrar na sala: ' + error.message, 'error');
+      } finally { pvpSubmitting = false; }
+    }
+
+    async function pvpAttachRoom(room) {
+      if (!room || !room.id) throw new Error('A sala retornou dados inválidos.');
+      if (pvpChannel) { await supabaseClient.removeChannel(pvpChannel); pvpChannel = null; }
+      pvpRoom = room;
+      pvpChannel = supabaseClient.channel('pvp-room-' + room.id)
+        .on('postgres_changes', { event:'UPDATE', schema:'public', table:'pvp_rooms', filter:'id=eq.' + room.id }, payload => {
+          pvpRoom = payload.new;
+          renderPvpPanel();
+          pvpMaybeStartRoom();
+          pvpMaybeResolveTurn();
+        })
+        .subscribe(status => {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') showToast('A conexão da sala foi interrompida. Confira sua internet.', 'error');
+        });
+      renderPvpPanel();
+      pvpMaybeStartRoom();
+      pvpMaybeResolveTurn();
+    }
+
+    async function pvpMaybeStartRoom() {
+      if (!pvpRoom || pvpRoom.status !== 'ready' || ![pvpRoom.host_id,pvpRoom.guest_id].includes(onlineUser?.id) || pvpStarting) return;
+      pvpStarting = true;
+      try {
+        const { data, error } = await supabaseClient.rpc('pvp_start_room', { p_code: pvpRoom.room_code });
+        if (error) throw error;
+        pvpRoom = data;
+        renderPvpPanel();
+      } catch (error) { showToast('Não foi possível iniciar a batalha: ' + error.message, 'error'); }
+      finally { pvpStarting = false; }
+    }
+
+    function pvpIsHost() { return pvpRoom?.host_id === onlineUser?.id; }
+    function pvpMyTeam() { return pvpIsHost() ? (pvpRoom?.host_team || []) : (pvpRoom?.guest_team || []); }
+    function pvpTheirTeam() { return pvpIsHost() ? (pvpRoom?.guest_team || []) : (pvpRoom?.host_team || []); }
+    function pvpMySideKey(suffix) { return (pvpIsHost() ? 'host' : 'guest') + suffix; }
+
+    function pvpPokemonCard(pokemon, hp, active) {
+      const maxHp = Math.max(1, Number(pokemon.maxHp) || 1);
+      const current = Math.max(0, Math.min(maxHp, Number(hp) || 0));
+      const pct = Math.round(current / maxHp * 100);
+      const types = getTypes(pokemon.id);
+      return `<div class="pvp-side-card ${active?'active':''}">
+        <div style="font-weight:700;">${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</div>
+        <div class="pvp-pokemon-line"><img src="${SPRITE(pokemon.id)}" alt="" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" />
+          <div style="flex:1;min-width:0"><div>HP ${current}/${maxHp}</div><div class="pvp-hp-track"><span style="width:${pct}%;background:${pct<=25?'#ef4444':pct<=50?'#facc15':'#22c55e'}"></span></div>
+          <div style="margin-top:7px;">${types.map(type=>`<span class="type-badge ${typeClass([type])}">${type}</span>`).join(' ')}</div></div>
+        </div></div>`;
+    }
+
+    function pvpRenderRoomStatus() {
+      const room = pvpRoom;
+      if (room.status === 'waiting') return `<div class="pvp-room-box"><div>Compartilhe este código com seu adversário:</div><div class="pvp-code">${escapeHTML(room.room_code)}</div><p style="color:var(--text-muted)">Aguardando outro treinador…</p><button class="btn btn-secondary" style="width:auto" onclick="pvpLeaveRoom()">Cancelar sala</button></div>`;
+      if (room.status === 'ready') {
+        const opponentName = pvpIsHost() ? room.guest_name : room.host_name;
+        return `<div class="pvp-room-box">${escapeHTML(opponentName || 'O adversário')} conectou. Preparando a batalha…</div>`;
+      }
+      if (room.status === 'finished' || room.status === 'cancelled') {
+        const won = room.battle?.winner_user_id === onlineUser?.id;
+        const text = room.battle?.result === 'abandoned'
+          ? room.battle?.winner_user_id === onlineUser?.id ? 'O adversário saiu. Você venceu a batalha!' : room.battle?.winner_user_id ? 'Você saiu da batalha. O adversário venceu.' : 'Sala cancelada.'
+          : won ? 'Você venceu a batalha!' : room.battle?.winner_user_id ? 'Você perdeu a batalha.' : 'A batalha terminou.';
+        return `<div class="pvp-room-box"><strong>${text}</strong><button class="btn btn-secondary" style="width:auto;margin-top:14px" onclick="pvpCloseRoom()">Voltar à seleção de equipe</button></div>`;
+      }
+      return '';
+    }
+
+    function renderPvpRoom() {
+      const root = document.getElementById('pvpContent');
+      const room = pvpRoom;
+      if (!room || !root) return;
+      if (room.status !== 'battle') {
+        root.innerHTML = `<div style="margin-bottom:12px;color:var(--text-muted)">Sala <strong class="pvp-code" style="font-size:1rem">${escapeHTML(room.room_code)}</strong></div>${pvpRenderRoomStatus()}`;
+        return;
+      }
+      const state = room.battle || {};
+      const myHost = pvpIsHost();
+      const localTeam = pvpMyTeam(), foeTeam = pvpTheirTeam();
+      const localActive = Number(state[myHost?'hostActive':'guestActive']) || 0;
+      const foeActive = Number(state[myHost?'guestActive':'hostActive']) || 0;
+      const localHp = state[myHost?'hostHp':'guestHp'] || [];
+      const foeHp = state[myHost?'guestHp':'hostHp'] || [];
+      const localPp = state[myHost?'hostPp':'guestPp'] || [];
+      const foeActionPending = Boolean(myHost ? room.guest_action : room.host_action);
+      const myActionPending = Boolean(myHost ? room.host_action : room.guest_action);
+      const active = localTeam[localActive];
+      const activeHp = Number(localHp[localActive]) || 0;
+      const hasPpMove = Boolean(active?.moves?.some((move,index)=>(Number(localPp[localActive]?.[index])||0)>0));
+      const moveButtons = (active?.moves || []).map((move,index)=>{
+        const pp = Number(localPp[localActive]?.[index]) || 0;
+        const disabled = pp<=0 || myActionPending || activeHp<=0;
+        return `<button class="btn btn-secondary ${disabled?'pvp-action-disabled':''}" style="margin:0;text-align:left" ${disabled?'disabled':''} onclick="pvpSubmitAction({type:'move',index:${index}})">
+          ${escapeHTML(move.name)} <small>${escapeHTML(move.type)} · PWR ${move.power} · PP ${pp}/${move.maxPp}</small></button>`;
+      }).join('');
+      const struggleButton = !hasPpMove ? `<button class="btn btn-secondary" ${myActionPending||activeHp<=0?'disabled':''} onclick="pvpSubmitAction({type:'struggle',index:-1})">Luta desesperada (Struggle)</button>` : '';
+      const switchButtons = localTeam.map((pokemon,index)=>{
+        if (index===localActive || Number(localHp[index])<=0) return '';
+        return `<button class="btn btn-secondary" style="margin:0;text-align:left" ${myActionPending?'disabled':''} onclick="pvpSubmitAction({type:'switch',index:${index}})">Trocar para ${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</button>`;
+      }).join('');
+      const prompt = room.status === 'battle'
+        ? myActionPending ? (foeActionPending ? 'Resolvendo turno…' : 'Ação enviada. Aguardando o adversário…') : 'Sua vez: escolha um golpe ou troque de Pokémon.'
+        : '';
+      root.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span>Sala <strong class="pvp-code" style="font-size:1rem">${escapeHTML(room.room_code)}</strong> · Turno ${Number(room.turn)||1}</span><button class="btn btn-secondary" style="width:auto;margin:0" onclick="pvpLeaveRoom()">Sair da batalha</button></div>
+        <div class="pvp-sides">
+          <div><strong>${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</strong>${pvpPokemonCard(localTeam[localActive],localHp[localActive],true)}<div style="display:grid;gap:5px;margin-top:8px">${localTeam.map((p,index)=>`<small style="color:${Number(localHp[index])>0?'var(--text-muted)':'#f87171'}">${escapeHTML(p.name)}: ${Math.max(0,Number(localHp[index])||0)}/${p.maxHp} HP</small>`).join('')}</div></div>
+          <div><strong>${escapeHTML(myHost?room.guest_name:room.host_name)}</strong>${pvpPokemonCard(foeTeam[foeActive],foeHp[foeActive],true)}<div style="display:grid;gap:5px;margin-top:8px">${foeTeam.map((p,index)=>`<small style="color:${Number(foeHp[index])>0?'var(--text-muted)':'#f87171'}">${escapeHTML(p.name)}: ${Math.max(0,Number(foeHp[index])||0)}/${p.maxHp} HP</small>`).join('')}</div></div>
+        </div>
+        <div class="pvp-log" aria-live="polite">${(state.log||[]).slice(-5).map(line=>`<div>${escapeHTML(line)}</div>`).join('')}</div>
+        <strong>${escapeHTML(prompt)}</strong>
+        <div class="pvp-battle-actions">${moveButtons}${struggleButton}${switchButtons}</div>`;
+    }
+
+    async function pvpSubmitAction(action) {
+      if (!pvpRoom || pvpRoom.status !== 'battle' || pvpSubmitting) return;
+      const field = pvpIsHost() ? 'host_action' : 'guest_action';
+      if (pvpRoom[field]) return;
+      pvpSubmitting = true;
+      try {
+        const { data, error } = await supabaseClient.rpc('pvp_submit_action', { p_code:pvpRoom.room_code, p_action:action });
+        if (error) throw error;
+        pvpRoom = data;
+        renderPvpPanel();
+        pvpMaybeResolveTurn();
+      } catch (error) { showToast('Não foi possível enviar sua ação: ' + error.message, 'error'); }
+      finally { pvpSubmitting = false; }
+    }
+
+    function pvpMaybeResolveTurn() {
+      if (!pvpRoom || pvpRoom.status !== 'battle' || !pvpRoom.host_action || !pvpRoom.guest_action || pvpResolving) return;
+      pvpResolveTurn();
+    }
+
+    async function pvpResolveTurn() {
+      if (pvpResolving || !pvpRoom) return;
+      pvpResolving = true;
+      try {
+        const { data, error } = await supabaseClient.rpc('pvp_resolve_turn', { p_code:pvpRoom.room_code });
+        if (error) throw error;
+        pvpRoom = data;
+        renderPvpPanel();
+      } catch (error) { showToast('Falha ao resolver o turno PvP: ' + error.message, 'error'); }
+      finally { pvpResolving = false; }
+    }
+
+    async function pvpLeaveRoom() {
+      if (!pvpRoom || !supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient.rpc('pvp_leave_room',{p_code:pvpRoom.room_code});
+        if (error) throw error;
+        pvpRoom = data;
+        renderPvpPanel();
+      } catch (error) { showToast('Não foi possível sair da sala: ' + error.message, 'error'); }
+    }
+
+    async function pvpCloseRoom() {
+      if (pvpRoom && ['waiting','ready','battle'].includes(pvpRoom.status)) { await pvpLeaveRoom(); return; }
+      if (pvpChannel) { await supabaseClient.removeChannel(pvpChannel); pvpChannel = null; }
+      pvpRoom = null;
+      renderPvpPanel();
     }
     document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => switchPanel(i.dataset.panel)));
     document.getElementById('menuToggle').addEventListener('click', () => {
@@ -6464,6 +6799,10 @@
       if (!confirm('Sair da sessão? Seu progresso continua salvo na nuvem.')) return;
       try {
         await flushGameSave();
+        if (pvpRoom && ['waiting','ready','battle'].includes(pvpRoom.status)) await pvpLeaveRoom();
+        if (pvpChannel) { await supabaseClient.removeChannel(pvpChannel); pvpChannel = null; }
+        pvpRoom = null;
+        pvpSelectedIndices.clear();
         const { error } = await supabaseClient.auth.signOut();
         if (error) throw error;
         stopBattleBgm();
