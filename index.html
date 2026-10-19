@@ -345,6 +345,23 @@
       box-shadow: 0 8px 28px rgba(0,0,0,0.45);
       backdrop-filter: blur(8px);
     }
+    .battle-player .player-info { position: relative; }
+    .party-ball-row {
+      position: absolute; top: -31px; left: 0;
+      display: flex; align-items: center; justify-content: center; gap: 3px;
+      width: max-content; max-width: calc(100vw - 28px); z-index: 3;
+    }
+    .party-ball {
+      position: relative; display: block; flex: 0 0 auto; width: 30px; height: 30px;
+      border: 2px solid #101116; border-radius: 50%;
+      background: linear-gradient(to bottom, #ff2635 0 44%, #101116 44% 55%, #f8fafc 55% 100%);
+      box-shadow: 0 2px 5px #0008, inset -3px -2px 0 #0002;
+    }
+    .party-ball::after {
+      content: ''; position: absolute; width: 9px; height: 9px; left: 50%; top: 50%;
+      transform: translate(-50%,-50%); border: 2px solid #101116; border-radius: 50%;
+      background: #f8fafc; box-shadow: inset 0 0 0 2px #fff;
+    }
     .enemy-name-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 2px; }
     .enemy-info .poke-name { font-weight: 700; font-size: 0.95rem; }
     .enemy-info .poke-level { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
@@ -502,6 +519,9 @@
       .battle-enemy { padding: 0 4% 0 2%; }
       .battle-player { padding-left: 4%; }
       .battle-enemy .enemy-info, .battle-player .player-info { min-width: 140px; padding: 8px 10px; }
+      .party-ball-row { gap: 2px; top: -24px; }
+      .party-ball { width: 22px; height: 22px; border-width: 1.5px; }
+      .party-ball::after { width: 7px; height: 7px; border-width: 1.5px; }
     }
     @media (max-width: 480px) {
       .card { padding: 32px 20px 26px; }
@@ -706,6 +726,23 @@
       padding: 20px;
     }
     #summaryOverlay.active { display: flex; }
+    #heldItemPickerOverlay {
+      display: none; position: fixed; inset: 0; z-index: 140; padding: 20px;
+      background: rgba(0,0,0,0.82); align-items: center; justify-content: center;
+    }
+    #heldItemPickerOverlay.active { display: flex; }
+    .held-item-picker-card {
+      width: min(420px, 100%); max-height: 85vh; overflow-y: auto; padding: 22px;
+      color: var(--text); background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; box-shadow: var(--shadow);
+    }
+    .held-item-choice {
+      width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+      color: var(--text); background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 10px; text-align: left; cursor: pointer;
+    }
+    .held-item-choice:hover { border-color: var(--primary); }
+    .held-item-choice img { width: 38px; height: 38px; object-fit: contain; }
     .summary-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 20px;
       padding: 28px; max-width: 420px; width: 100%; box-shadow: var(--shadow);
@@ -723,6 +760,10 @@
       background: transparent;
     }
     .summary-name { font-size: 1.35rem; font-weight: 700; }
+    .gender-symbol { display: inline-block; margin-left: 2px; font-weight: 800; line-height: 1; }
+    .gender-symbol-male { color: #60a5fa; }
+    .gender-symbol-female { color: #f472b6; }
+    .gender-symbol-neutral { color: #a1a1aa; }
     .summary-meta { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
     .summary-section { margin-top: 16px; }
     .summary-section h4 {
@@ -730,13 +771,17 @@
       color: var(--text-muted); margin-bottom: 10px;
     }
     .summary-moves { display: flex; flex-direction: column; gap: 8px; }
+    .summary-training-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; }
+    .summary-training-stat { min-width: 0; padding: 8px; border-radius: 8px; background: var(--input-bg); text-align: center; }
+    .summary-training-stat strong { display: block; font-size: 0.76rem; }
+    .summary-training-stat span { display: block; margin-top: 3px; color: var(--text-muted); font-size: 0.68rem; line-height: 1.35; }
     .summary-move {
       display: flex; justify-content: space-between; align-items: center;
       padding: 10px 12px; background: var(--input-bg); border-radius: 10px;
       border: 1px solid var(--border); font-size: 0.875rem;
     }
     .summary-stats-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.875rem;
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; font-size: 0.875rem;
     }
 
     #oakIntroOverlay {
@@ -834,7 +879,20 @@
     }
     .summary-stat {
       background: var(--input-bg); border-radius: 8px; padding: 10px 12px;
-      display: flex; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0;
+    }
+    .summary-stat > span { flex: 0 0 auto; color: var(--text-muted); }
+    .summary-stat > strong { min-width: 0; text-align: right; overflow-wrap: anywhere; }
+    .summary-stat--wide { grid-column: 1 / -1; }
+    #summaryStats > .summary-stat:last-child { grid-column: 1 / -1; }
+    .summary-stat--wide > strong { flex: 1; }
+    .summary-trait { cursor: help; text-decoration: underline dotted var(--text-muted); text-underline-offset: 3px; }
+    .summary-trait:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 3px; }
+    @media (max-width: 420px) {
+      .summary-card { padding: 20px; }
+      .summary-stats-grid { gap: 7px; font-size: 0.82rem; }
+      .summary-stat { padding: 10px; gap: 7px; }
+      .summary-stat--wide { align-items: flex-start; }
     }
     .pokedex-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;
@@ -906,6 +964,24 @@
       border: 1px solid var(--border); border-radius: 10px; padding: 12px;
       color: var(--text); background: var(--input-bg); font: inherit; cursor: pointer;
     }
+    #nicknameDialog {
+      width: min(440px, calc(100% - 32px)); margin: auto; padding: 0;
+      color: var(--text); background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; box-shadow: var(--shadow);
+    }
+    #nicknameDialog::backdrop { background: rgba(0,0,0,0.76); }
+    .nickname-content { padding: 24px; }
+    .nickname-content h3 { font-size: 1.2rem; margin-bottom: 8px; }
+    .nickname-content p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 18px; }
+    .nickname-content label { display: block; font-size: 0.85rem; margin-bottom: 7px; }
+    .nickname-content input {
+      width: 100%; padding: 12px; color: var(--text); background: var(--input-bg);
+      border: 1px solid var(--border); border-radius: 10px; font: inherit;
+    }
+    .nickname-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .nickname-actions button { flex: 1; }
+    .nickname-entry { display: none; }
+    .nickname-entry.active { display: block; }
     .pc-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
@@ -1356,10 +1432,26 @@
         <div class="summary-stats-grid" id="summaryStats"></div>
       </div>
       <div class="summary-section">
+        <h4>IVs &amp; EVs</h4>
+        <div class="summary-training-grid" id="summaryTraining"></div>
+      </div>
+      <div class="summary-section">
+        <h4>Item segurado</h4>
+        <div id="summaryHeldItem"></div>
+      </div>
+      <div class="summary-section">
         <h4>Golpes conhecidos</h4>
         <div class="summary-moves" id="summaryMoves"></div>
       </div>
       <button class="btn btn-secondary" style="margin-top:18px;" onclick="closeSummary()">Fechar</button>
+    </div>
+  </div>
+  <div id="heldItemPickerOverlay" onclick="if(event.target===this)closeHeldItemPicker()">
+    <div class="held-item-picker-card" role="dialog" aria-modal="true" aria-labelledby="heldItemPickerTitle">
+      <h3 id="heldItemPickerTitle" style="margin:0 0 6px;">Escolha um item</h3>
+      <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px;">Itens disponíveis na sua mochila</p>
+      <div id="heldItemPickerList" style="display:grid;gap:8px;"></div>
+      <button type="button" class="btn btn-secondary" style="width:100%;margin-top:14px;" onclick="closeHeldItemPicker()">Voltar</button>
     </div>
   </div>
 
@@ -1409,6 +1501,7 @@
           <img class="player-sprite" id="playerSprite" src="" alt="Player" />
         </div>
         <div class="player-info" id="playerInfoBox">
+          <div class="party-ball-row" id="partyBallRow" role="img" aria-label="Pokémon da equipe"></div>
           <div class="poke-name" id="playerPokeName">Bulbasaur</div>
           <div class="poke-level" id="playerPokeLevel">Nv. 5</div>
           <div id="playerTypeBadge" style="margin-bottom:6px;"></div>
@@ -1478,6 +1571,24 @@
       </div>
     </form>
   </dialog>
+  <dialog id="nicknameDialog" aria-labelledby="nicknameTitle">
+    <form class="nickname-content" id="nicknameForm">
+      <h3 id="nicknameTitle">Dar um apelido?</h3>
+      <p id="nicknameQuestion">Deseja dar um apelido para este Pokémon?</p>
+      <div class="nickname-actions" id="nicknameChoiceActions">
+        <button type="button" class="btn btn-secondary" onclick="finishNicknameChoice(false)">Não</button>
+        <button type="button" class="btn" onclick="showNicknameInput()">Sim</button>
+      </div>
+      <div class="nickname-entry" id="nicknameEntry">
+        <label for="nicknameInput">Apelido (máximo de 10 caracteres)</label>
+        <input id="nicknameInput" type="text" maxlength="10" autocomplete="off" required />
+        <div class="nickname-actions">
+          <button type="button" class="btn btn-secondary" onclick="finishNicknameChoice(false)">Manter nome</button>
+          <button type="submit" class="btn">Confirmar</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
   <div class="toast" id="toast"></div>
 
   <script>
@@ -1531,6 +1642,141 @@
       return POKE_TYPES[id] || ['Normal'];
     }
 
+    const NATURES = [
+      ['Hardy','',''],['Lonely','Ataque','Defesa'],['Brave','Ataque','Velocidade'],['Adamant','Ataque','Ataque Especial'],['Naughty','Ataque','Defesa Especial'],
+      ['Bold','Defesa','Ataque'],['Docile','',''],['Relaxed','Defesa','Velocidade'],['Impish','Defesa','Ataque Especial'],['Lax','Defesa','Defesa Especial'],
+      ['Timid','Velocidade','Ataque'],['Hasty','Velocidade','Defesa'],['Serious','',''],['Jolly','Velocidade','Ataque Especial'],['Naive','Velocidade','Defesa Especial'],
+      ['Modest','Ataque Especial','Ataque'],['Mild','Ataque Especial','Defesa'],['Quiet','Ataque Especial','Velocidade'],['Bashful','',''],['Rash','Ataque Especial','Defesa Especial'],
+      ['Calm','Defesa Especial','Ataque'],['Gentle','Defesa Especial','Defesa'],['Sassy','Defesa Especial','Velocidade'],['Careful','Defesa Especial','Ataque Especial'],['Quirky','','']
+    ].map(([name,up,down])=>({name,up,down}));
+    const ABILITY_INFO = {
+      Adaptabilidade:'Golpes do mesmo tipo recebem STAB aumentado (1,5x).',
+      Overgrow:'Golpes Planta ficam 50% mais fortes com HP abaixo de 1/3.',
+      Blaze:'Golpes Fogo ficam 50% mais fortes com HP abaixo de 1/3.',
+      Torrent:'Golpes Água ficam 50% mais fortes com HP abaixo de 1/3.',
+      Swarm:'Golpes Inseto ficam 50% mais fortes com HP abaixo de 1/3.',
+      Static:'Golpes recebidos podem paralisar o atacante (30%).',
+      'Poison Point':'Golpes recebidos podem envenenar o atacante (30%).',
+      'Water Absorb':'É imune a Água e recupera 1/4 do HP máximo.',
+      'Volt Absorb':'É imune a Elétrico e recupera 1/4 do HP máximo.',
+      Levitate:'É imune a golpes Terra.',
+      Intimidate:'Reduz em 25% o dano de golpes físicos recebido.',
+      'Thick Fat':'Reduz em 50% o dano de golpes Fogo e Gelo.',
+      Guts:'Com status, causa 50% mais dano físico e ignora a penalidade de queimadura.',
+      'Flash Fire':'É imune a Fogo; após isso, golpes Fogo ficam 50% mais fortes.'
+    };
+    const ABILITY_BY_ID = {
+      1:'Overgrow',2:'Overgrow',3:'Overgrow',4:'Blaze',5:'Blaze',6:'Blaze',7:'Torrent',8:'Torrent',9:'Torrent',10:'Swarm',11:'Swarm',12:'Swarm',
+      25:'Static',26:'Static',29:'Poison Point',30:'Poison Point',31:'Poison Point',32:'Poison Point',33:'Poison Point',34:'Poison Point',
+      24:'Intimidate',58:'Intimidate',59:'Intimidate',130:'Intimidate',66:'Guts',67:'Guts',68:'Guts',
+      92:'Levitate',93:'Levitate',94:'Levitate',133:'Adaptabilidade',134:'Water Absorb',135:'Volt Absorb',136:'Flash Fire',143:'Thick Fat',150:'Adaptabilidade'
+    };
+    const ABILITY_BY_TYPE = {Planta:'Overgrow',Fogo:'Blaze',Agua:'Torrent',Eletrico:'Static',Inseto:'Swarm',Veneno:'Poison Point',Fantasma:'Levitate',Lutador:'Guts'};
+    function ensurePokemonTraits(pokemon) {
+      if (!pokemon) return false;
+      let changed = false;
+      if (!NATURES.some(n=>n.name===pokemon.nature)) {
+        pokemon.nature = NATURES[Math.floor(Math.random()*NATURES.length)].name;
+        changed = true;
+      }
+      if (!ABILITY_INFO[pokemon.ability]) {
+        pokemon.ability = ABILITY_BY_ID[pokemon.id] || ABILITY_BY_TYPE[getTypes(pokemon.id)[0]] || 'Adaptabilidade';
+        changed = true;
+      }
+      if (!pokemon.ivs || typeof pokemon.ivs !== 'object') {
+        pokemon.ivs = Object.fromEntries(['hp','attack','defense','specialAttack','specialDefense','speed'].map(stat=>[stat,Math.floor(Math.random()*32)]));
+        changed = true;
+      } else {
+        for (const stat of ['hp','attack','defense','specialAttack','specialDefense','speed']) {
+          if (!Number.isInteger(pokemon.ivs[stat]) || pokemon.ivs[stat]<0 || pokemon.ivs[stat]>31) {
+            pokemon.ivs[stat] = Math.floor(Math.random()*32);
+            changed = true;
+          }
+        }
+      }
+      if (!pokemon.evs || typeof pokemon.evs !== 'object') {
+        pokemon.evs = {hp:0,attack:0,defense:0,specialAttack:0,specialDefense:0,speed:0};
+        changed = true;
+      } else {
+        for (const stat of ['hp','attack','defense','specialAttack','specialDefense','speed']) {
+          if (!Number.isInteger(pokemon.evs[stat]) || pokemon.evs[stat]<0) { pokemon.evs[stat]=0; changed=true; }
+          pokemon.evs[stat]=Math.min(252,pokemon.evs[stat]);
+        }
+      }
+      return changed;
+    }
+    const EV_LIMIT_TOTAL = 510;
+    const EV_LIMIT_STAT = 252;
+    const EV_YIELD_BY_ID = {
+      1:{specialAttack:1},2:{specialAttack:1},3:{specialAttack:2},4:{speed:1},5:{specialAttack:1},6:{specialAttack:3},
+      7:{defense:1},8:{defense:1},9:{specialDefense:3},10:{hp:1},11:{defense:1},12:{specialAttack:2},13:{speed:1},14:{defense:1},15:{attack:2},
+      16:{speed:1},17:{speed:2},18:{speed:3},19:{speed:1},20:{speed:2},25:{speed:2},26:{speed:3},43:{specialAttack:1},44:{specialAttack:2},45:{specialAttack:3},
+      66:{attack:1},67:{attack:2},68:{attack:3},74:{defense:1},75:{defense:2},76:{defense:3},92:{specialAttack:1},93:{specialAttack:2},94:{specialAttack:3},
+      95:{defense:1},113:{hp:2},130:{attack:2},143:{hp:2},150:{specialAttack:3}
+    };
+    const EV_YIELD_BY_TYPE = {Normal:'hp',Fogo:'speed',Agua:'hp',Planta:'specialAttack',Eletrico:'speed',Gelo:'specialDefense',Lutador:'attack',Veneno:'specialDefense',Terra:'attack',Voador:'speed',Psiquico:'specialAttack',Inseto:'speed',Pedra:'defense',Fantasma:'specialDefense',Dragao:'attack',Aço:'defense'};
+    function getPokemonStatMultiplier(pokemon, stat) {
+      ensurePokemonTraits(pokemon);
+      const level = Math.max(1, pokemon.level || 1);
+      const iv = pokemon.ivs[stat] || 0;
+      const ev = Math.floor((pokemon.evs[stat] || 0) / 4);
+      const natureStat = {attack:'Ataque',defense:'Defesa',specialAttack:'Ataque Especial',specialDefense:'Defesa Especial',speed:'Velocidade'}[stat];
+      const training = 1 + ((iv - 15.5 + ev) * level / 10000);
+      return training * (natureStat ? natureMultiplier(pokemon,natureStat) : 1);
+    }
+    function getStatEvasionChance(defender, attacker) {
+      const difference = getPokemonStatMultiplier(defender,'speed') - getPokemonStatMultiplier(attacker,'speed');
+      return Math.max(0,Math.min(0.15,difference*0.15));
+    }
+    function awardPokemonEffort(pokemon, defeated) {
+      if (!pokemon || !defeated) return {};
+      ensurePokemonTraits(pokemon);
+      const total = Object.values(pokemon.evs).reduce((sum,value)=>sum+value,0);
+      if (total >= EV_LIMIT_TOTAL) return {};
+      const yieldByStat = EV_YIELD_BY_ID[defeated.id] || {[EV_YIELD_BY_TYPE[getTypes(defeated.id)[0]] || 'hp']:1};
+      const gained = {};
+      for (const [stat,amount] of Object.entries(yieldByStat)) {
+        let remaining = Math.min(amount, EV_LIMIT_TOTAL - Object.values(pokemon.evs).reduce((sum,value)=>sum+value,0), EV_LIMIT_STAT - pokemon.evs[stat]);
+        if (remaining<=0) continue;
+        pokemon.evs[stat]+=remaining;
+        gained[stat]=remaining;
+      }
+      return gained;
+    }
+    const STAT_LABELS = {hp:'HP',attack:'Ataque',defense:'Defesa',specialAttack:'Atq. Especial',specialDefense:'Def. Especial',speed:'Velocidade'};
+    function formatEffortGain(gained) {
+      return Object.entries(gained || {}).map(([stat,value])=>`+${value} EV ${STAT_LABELS[stat]}`).join(', ');
+    }
+    function natureMultiplier(pokemon, stat) {
+      const nature = NATURES.find(n=>n.name===pokemon?.nature);
+      return nature?.up===stat ? 1.1 : nature?.down===stat ? 0.9 : 1;
+    }
+    function abilityDamageMultiplier(attacker, defender, moveType, physical, hasStab) {
+      let multiplier = hasStab && attacker.ability==='Adaptabilidade' ? 1.25 : 1;
+      const hp = Number.isFinite(attacker.currentHp) ? attacker.currentHp : attacker.hp;
+      const maxHp = attacker.maxHp || 1;
+      const abilityType = {Overgrow:'Planta',Blaze:'Fogo',Torrent:'Agua',Swarm:'Inseto'}[attacker.ability];
+      if (abilityType===moveType && hp<=maxHp/3) multiplier*=1.5;
+      if (attacker.ability==='Guts' && attacker.status && physical) multiplier*=1.5;
+      if (attacker.ability==='Flash Fire' && attacker.flashFireActive && moveType==='Fogo') multiplier*=1.5;
+      if (defender.ability==='Intimidate' && physical) multiplier*=0.75;
+      if (defender.ability==='Thick Fat' && ['Fogo','Gelo'].includes(moveType)) multiplier*=0.5;
+      return multiplier;
+    }
+    function abilityTypeImmunity(defender, moveType) {
+      if (defender.ability==='Levitate' && moveType==='Terra') return 'Levitate';
+      if (defender.ability==='Water Absorb' && moveType==='Agua') return 'Water Absorb';
+      if (defender.ability==='Volt Absorb' && moveType==='Eletrico') return 'Volt Absorb';
+      if (defender.ability==='Flash Fire' && moveType==='Fogo') return 'Flash Fire';
+      return '';
+    }
+    function applyAbilityOnHit(attacker, defender, damaging) {
+      if (!damaging || !attacker || !defender) return '';
+      if (defender.ability==='Static' && Math.random()<0.3 && canReceiveStatus(attacker,'paralysis')) { attacker.status='paralysis'; return `${attacker.name} ficou paralisado por Static!`; }
+      if (defender.ability==='Poison Point' && Math.random()<0.3 && canReceiveStatus(attacker,'poison')) { attacker.status='poison'; return `${attacker.name} foi envenenado por Poison Point!`; }
+      return '';
+    }
+
     const GENDERLESS_POKEMON_IDS = new Set([
       81, 82, 100, 101, 120, 121, 132, 137, 144, 145, 146, 150, 151,
       201, 233, 292, 337, 338, 343, 344, 374, 375, 376, 377, 378, 379,
@@ -1573,6 +1819,13 @@
         : pokemon.gender === 'female' ? '♀'
           : '⚪';
       return `${pokemon.name} ${symbol}`;
+    }
+    function getPokemonDisplayNameHTML(pokemon) {
+      ensurePokemonGender(pokemon);
+      const gender = pokemon.gender === 'male' ? ['male','♂']
+        : pokemon.gender === 'female' ? ['female','♀']
+          : ['neutral','⚪'];
+      return `${escapeHTML(pokemon.name)} <span class="gender-symbol gender-symbol-${gender[0]}" aria-label="${getPokemonGenderLabel(pokemon)}">${gender[1]}</span>`;
     }
 
     const STATUS_LABELS = {
@@ -2061,11 +2314,13 @@
 
     // Animated battle sprites (Black/White GIFs — pokemondb)
     const SPRITE_BACK = id => {
+      if (id === 810) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/810.gif';
       const slug = pokeSlug(id);
       if (slug) return `https://img.pokemondb.net/sprites/black-white/anim/back-normal/${slug}.gif`;
       return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`;
     };
     const SPRITE_ANIM = id => {
+      if (id === 810) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/810.gif';
       const slug = pokeSlug(id);
       if (slug) return `https://img.pokemondb.net/sprites/black-white/anim/normal/${slug}.gif`;
       return SPRITE_FRONT(id);
@@ -3297,6 +3552,8 @@
       if (!selectedStarter) { document.getElementById('starterError').classList.add('show'); v=false; } else document.getElementById('starterError').classList.remove('show');
       if (!v) return;
       const starter = STARTERS[region].find(s => s.name === selectedStarter);
+      const starterPokemon = { ...starter, maxHp: 30, hp: 30, level: 5, growthRate: 'mediumFast', exp: getExperienceForLevel(5), moves: getMovesForStarter(starter), type: typeLabel(getTypes(starter.id)), typeClass: typeClass(getTypes(starter.id)) };
+      ensurePokemonTraits(starterPokemon);
       player = {
         name, gender: selectedGender, originRegion: region, starter,
         rivalName: '', oakIntroStep: 0, oakIntroFinished: false, oakIntroRewardClaimed: false,
@@ -3304,7 +3561,7 @@
         money: 3000, level: 1, badges: 0, missionsDone: 0, potions: 5, balls: 8,
         antidote: 2, antiparalyze: 2, antiburn: 2,
         badgesList: [],
-        party: [{ ...starter, maxHp: 30, hp: 30, level: 5, growthRate: 'mediumFast', exp: getExperienceForLevel(5), moves: getMovesForStarter(starter), type: typeLabel(getTypes(starter.id)), typeClass: typeClass(getTypes(starter.id)) }],
+        party: [starterPokemon],
         poke: null,
         pokedex: { seen: {}, caught: {} },
         missions: { completed: [], progress: {}, active: [] },
@@ -3314,6 +3571,7 @@
       ensureBagItems();
       player.poke = player.party[0];
       player.party.forEach(ensurePokemonGender);
+      player.party.forEach(ensurePokemonTraits);
       player.party.forEach(normalizePokemonMoves);
       markPokedex(starter.id, true);
       showToast('Personagem criado! Bem-vindo a Kanto! 🎉');
@@ -3359,6 +3617,13 @@
       moonstone: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/evo/moon-stone.png',
       oran: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/oran.png',
       sitrus: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/sitrus.png',
+      leftovers: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/leftovers.png',
+      charcoal: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/charcoal.png',
+      miracle_seed: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/miracle-seed.png',
+      mystic_water: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/mystic-water.png',
+      magnet: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/magnet.png',
+      twisted_spoon: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/twisted-spoon.png',
+      black_belt: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/black-belt.png',
       leppa: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/leppa.png',
       lum: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/lum.png',
       pecha: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/pecha.png',
@@ -3392,6 +3657,13 @@
       moonstone: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/moon-stone.png',
       oran: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/oran-berry.png',
       sitrus: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/sitrus-berry.png',
+      leftovers: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/leftovers.png',
+      charcoal: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/charcoal.png',
+      miracle_seed: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/miracle-seed.png',
+      mystic_water: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/mystic-water.png',
+      magnet: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/magnet.png',
+      twisted_spoon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/twisted-spoon.png',
+      black_belt: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/black-belt.png',
       leppa: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/leppa-berry.png',
       lum: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/lum-berry.png',
       pecha: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pecha-berry.png',
@@ -3459,6 +3731,18 @@
         ]
       },
       {
+        id: 'held', title: 'Itens segurados',
+        items: [
+          { key: 'leftovers', name: 'Leftovers', sprite: 'leftovers', desc: 'Recupera 1/16 do HP ao fim de cada turno.' },
+          { key: 'charcoal', name: 'Carvao', sprite: 'charcoal', desc: 'Aumenta em 10% o poder de golpes de Fogo.' },
+          { key: 'miracle_seed', name: 'Miracle Seed', sprite: 'miracle_seed', desc: 'Aumenta em 10% o poder de golpes de Planta.' },
+          { key: 'mystic_water', name: 'Mystic Water', sprite: 'mystic_water', desc: 'Aumenta em 10% o poder de golpes de Agua.' },
+          { key: 'magnet', name: 'Magnet', sprite: 'magnet', desc: 'Aumenta em 10% o poder de golpes Eletricos.' },
+          { key: 'twisted_spoon', name: 'Twisted Spoon', sprite: 'twisted_spoon', desc: 'Aumenta em 10% o poder de golpes Psiquicos.' },
+          { key: 'black_belt', name: 'Black Belt', sprite: 'black_belt', desc: 'Aumenta em 10% o poder de golpes Lutadores.' }
+        ]
+      },
+      {
         id: 'other', title: 'Outros',
         items: [
           { key: 'ss_ticket', name: 'S.S. TICKET', desc: 'Ingresso para embarcar no navio de luxo S.S. Anne, em Vermilion.' },
@@ -3512,6 +3796,7 @@
         awakener: 0, iceheal: 0, fullheal: 0,
         firestone: 0, waterstone: 0, thunderstone: 0, leafstone: 0, moonstone: 0,
         oran: 2, sitrus: 0, leppa: 0, lum: 0, pecha: 1, chesto: 0, rawst: 0, cherri: 0,
+        leftovers: 0, charcoal: 0, miracle_seed: 0, mystic_water: 0, magnet: 0, twisted_spoon: 0, black_belt: 0,
         rarecandy: 0, repel: 1, escape: 1, parcelbox: 0, ss_ticket: 0
       };
       // Sync legacy fields
@@ -3539,6 +3824,120 @@
       const next = Math.max(0, current - (amount || 1));
       setItemQty(key, next);
       return next;
+    }
+
+    const HELD_ITEM_INFO = {
+      oran: { name: 'Oran Berry', desc: 'Consome ao chegar a metade do HP e recupera 10 HP.', berry: 'heal', amount: 10 },
+      sitrus: { name: 'Sitrus Berry', desc: 'Consome ao chegar a metade do HP e recupera 25% do HP maximo.', berry: 'heal', amount: 0.25 },
+      lum: { name: 'Lum Berry', desc: 'Consome para curar qualquer alteracao de status.', berry: 'status', cures: ['all'] },
+      pecha: { name: 'Pecha Berry', desc: 'Consome para curar envenenamento.', berry: 'status', cures: ['poison'] },
+      chesto: { name: 'Chesto Berry', desc: 'Consome para acordar do sono.', berry: 'status', cures: ['sleep'] },
+      rawst: { name: 'Rawst Berry', desc: 'Consome para curar queimadura.', berry: 'status', cures: ['burn'] },
+      cherri: { name: 'Cheri Berry', desc: 'Consome para curar paralisia.', berry: 'status', cures: ['paralysis'] },
+      leftovers: { name: 'Leftovers', desc: 'Recupera 1/16 do HP maximo ao fim de cada turno.', type: '' },
+      charcoal: { name: 'Carvao', desc: 'Aumenta em 10% o poder de golpes de Fogo.', type: 'Fogo' },
+      miracle_seed: { name: 'Miracle Seed', desc: 'Aumenta em 10% o poder de golpes de Planta.', type: 'Planta' },
+      mystic_water: { name: 'Mystic Water', desc: 'Aumenta em 10% o poder de golpes de Agua.', type: 'Agua' },
+      magnet: { name: 'Magnet', desc: 'Aumenta em 10% o poder de golpes Eletricos.', type: 'Eletrico' },
+      twisted_spoon: { name: 'Twisted Spoon', desc: 'Aumenta em 10% o poder de golpes Psiquicos.', type: 'Psiquico' },
+      black_belt: { name: 'Black Belt', desc: 'Aumenta em 10% o poder de golpes Lutadores.', type: 'Lutador' }
+    };
+
+    function renderSummaryHeldItem(idx) {
+      const root = document.getElementById('summaryHeldItem');
+      const pokemon = player && player.party[idx];
+      if (!root || !pokemon) return;
+      ensureBagItems();
+      const held = HELD_ITEM_INFO[pokemon.heldItem];
+      const choices = Object.entries(HELD_ITEM_INFO).filter(([key]) => getItemQty(key) > 0 && key !== pokemon.heldItem);
+      root.innerHTML = `<div class="summary-move"><span>${held ? escapeHTML(held.name) : 'Nenhum item'}</span><span style="color:var(--text-muted);font-size:.78rem;">${held ? escapeHTML(held.desc) : 'Escolha um item da mochila para equipar.'}</span></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button type="button" class="btn btn-secondary" onclick="openHeldItemPicker(${idx})">${held ? 'Trocar item' : 'Segurar item'}</button>
+          ${held ? `<button type="button" class="btn btn-secondary" onclick="removeHeldItem(${idx})">Remover</button>` : ''}
+        </div>`;
+    }
+
+    function openHeldItemPicker(idx) {
+      const pokemon = player && player.party[idx];
+      const overlay = document.getElementById('heldItemPickerOverlay');
+      const list = document.getElementById('heldItemPickerList');
+      if (!pokemon || !overlay || !list) return;
+      ensureBagItems();
+      const choices = Object.entries(HELD_ITEM_INFO).filter(([key]) => getItemQty(key) > 0 && key !== pokemon.heldItem);
+      list.innerHTML = choices.length ? choices.map(([key, info]) => `
+        <button type="button" class="held-item-choice" onclick="equipHeldItem(${idx},'${key}')">
+          ${itemIcon(key)}
+          <span style="flex:1;min-width:0;"><strong>${escapeHTML(info.name)}</strong><br><small style="color:var(--text-muted);">${escapeHTML(info.desc)}</small></span>
+          <span style="color:var(--primary);font-weight:700;">x${getItemQty(key)}</span>
+        </button>`).join('') : '<div style="padding:18px;text-align:center;color:var(--text-muted);">Voce nao tem itens seguraveis na mochila.</div>';
+      overlay.classList.add('active');
+    }
+
+    function closeHeldItemPicker() {
+      const overlay = document.getElementById('heldItemPickerOverlay');
+      if (overlay) overlay.classList.remove('active');
+    }
+
+    function equipHeldItem(idx, key) {
+      const pokemon = player && player.party[idx];
+      if (!pokemon || !HELD_ITEM_INFO[key] || getItemQty(key) < 1) return;
+      if (pokemon.heldItem) setItemQty(pokemon.heldItem, getItemQty(pokemon.heldItem) + 1);
+      decItemQty(key, 1);
+      pokemon.heldItem = key;
+      closeHeldItemPicker();
+      saveGame();
+      renderBag();
+      renderSummaryHeldItem(idx);
+      refreshPartyUI();
+      showToast(`${pokemon.name} esta segurando ${HELD_ITEM_INFO[key].name}.`);
+    }
+
+    function removeHeldItem(idx) {
+      const pokemon = player && player.party[idx];
+      if (!pokemon || !HELD_ITEM_INFO[pokemon.heldItem]) return;
+      const key = pokemon.heldItem;
+      pokemon.heldItem = '';
+      setItemQty(key, getItemQty(key) + 1);
+      saveGame();
+      renderBag();
+      renderSummaryHeldItem(idx);
+      refreshPartyUI();
+    }
+
+    function heldItemDamageMultiplier(pokemon, moveType) {
+      const info = pokemon && HELD_ITEM_INFO[pokemon.heldItem];
+      return info && info.type === moveType ? 1.1 : 1;
+    }
+
+    function applyHeldItemTrigger(pokemon) {
+      const key = pokemon && pokemon.heldItem;
+      const info = HELD_ITEM_INFO[key];
+      if (!info || !info.berry) return '';
+      const hpKey = Number.isFinite(pokemon.currentHp) ? 'currentHp' : 'hp';
+      if (pokemon[hpKey] <= 0) return '';
+      let message = '';
+      if (info.berry === 'heal' && pokemon[hpKey] <= Math.ceil(pokemon.maxHp / 2)) {
+        const amount = info.amount <= 1 ? Math.max(1, Math.floor(pokemon.maxHp * info.amount)) : info.amount;
+        const restored = Math.min(pokemon.maxHp - pokemon[hpKey], amount);
+        if (restored > 0) {
+          pokemon[hpKey] += restored;
+          message = `${pokemon.name} consumiu ${info.name} e recuperou ${restored} HP!`;
+        }
+      } else if (info.berry === 'status' && pokemon.status && (info.cures.includes('all') || info.cures.includes(pokemon.status))) {
+        const cured = curePokemonStatus(pokemon);
+        message = `${pokemon.name} consumiu ${info.name} e curou ${cured}!`;
+      }
+      if (message) pokemon.heldItem = '';
+      return message;
+    }
+
+    function applyHeldItemEndTurn(pokemon) {
+      if (!pokemon || pokemon.heldItem !== 'leftovers') return '';
+      const hpKey = Number.isFinite(pokemon.currentHp) ? 'currentHp' : 'hp';
+      if (pokemon[hpKey] <= 0 || pokemon[hpKey] >= pokemon.maxHp) return '';
+      const restored = Math.min(pokemon.maxHp - pokemon[hpKey], Math.max(1, Math.floor(pokemon.maxHp / 16)));
+      pokemon[hpKey] += restored;
+      return `${pokemon.name} recuperou ${restored} HP com Leftovers.`;
     }
 
     function renderBag() {
@@ -3816,6 +4215,13 @@
       { id: 'revive', name: 'Revive', icon: '💜', sprite: 'revive', desc: 'Revive um Pokémon', price: 1500, key: 'revive' },
       { id: 'oran', name: 'Oran Berry', icon: '🫐', sprite: 'oran', desc: 'Recupera 10 HP', price: 80, key: 'oran' },
       { id: 'leppa', name: 'Leppa Berry', icon: '🍒', sprite: 'leppa', desc: 'Recupera 10 PP de um golpe', price: 300, key: 'leppa' },
+      { id: 'leftovers', name: 'Leftovers', icon: '🍇', sprite: 'leftovers', desc: 'Recupera 1/16 do HP ao fim do turno', price: 4000, key: 'leftovers' },
+      { id: 'charcoal', name: 'Carvao', icon: '🔥', sprite: 'charcoal', desc: 'Fortalece golpes de Fogo em 10%', price: 980, key: 'charcoal' },
+      { id: 'miracle_seed', name: 'Miracle Seed', icon: '🌱', sprite: 'miracle_seed', desc: 'Fortalece golpes de Planta em 10%', price: 980, key: 'miracle_seed' },
+      { id: 'mystic_water', name: 'Mystic Water', icon: '💧', sprite: 'mystic_water', desc: 'Fortalece golpes de Agua em 10%', price: 980, key: 'mystic_water' },
+      { id: 'magnet', name: 'Magnet', icon: '🧲', sprite: 'magnet', desc: 'Fortalece golpes Eletricos em 10%', price: 980, key: 'magnet' },
+      { id: 'twisted_spoon', name: 'Twisted Spoon', icon: '🥄', sprite: 'twisted_spoon', desc: 'Fortalece golpes Psiquicos em 10%', price: 980, key: 'twisted_spoon' },
+      { id: 'black_belt', name: 'Black Belt', icon: '🥋', sprite: 'black_belt', desc: 'Fortalece golpes Lutadores em 10%', price: 980, key: 'black_belt' },
       { id: 'repel', name: 'Repelente', icon: '🧴', sprite: 'repel', desc: 'Afasta selvagens', price: 350, key: 'repel' },
       { id: 'moonstone', name: 'Pedra da Lua', icon: '🌙', sprite: 'moonstone', desc: 'Pedra de evolução', price: 2100, key: 'moonstone' },
       { id: 'firestone', name: 'Pedra do Fogo', icon: '🔥', sprite: 'firestone', desc: 'Pedra de evolução', price: 2100, key: 'firestone' },
@@ -4158,13 +4564,15 @@
         player.starter = { name: player.party[0].name, id: player.party[0].id };
       }
       let genderMigrated = player.party.map(ensurePokemonGender).some(Boolean);
+      let traitsMigrated = player.party.map(ensurePokemonTraits).some(Boolean);
       player.pc.boxes.forEach(box => {
         box.forEach(pokemon => {
           if (pokemon && ensurePokemonGender(pokemon)) genderMigrated = true;
+          if (pokemon && ensurePokemonTraits(pokemon)) traitsMigrated = true;
         });
       });
       enterDashboard();
-      if (experienceMigrated || migratedMoves || genderMigrated || reopenLegacyOakIntro || reopenLegacyParcelMission || migrateBillDialogue) saveGame();
+      if (experienceMigrated || migratedMoves || genderMigrated || traitsMigrated || reopenLegacyOakIntro || reopenLegacyParcelMission || migrateBillDialogue) saveGame();
     }
 
     async function tryAutoLoad() {
@@ -4704,6 +5112,8 @@
       if (!wild) return;
       wild.maxHp = wild.hp;
       wild.currentHp = wild.hp;
+      ensurePokemonTraits(wild);
+      ensurePokemonTraits(player.poke);
 
       battle = {
         dungeon: dungeonName,
@@ -4717,7 +5127,8 @@
       };
 
       // Setup UI
-      document.getElementById('enemyName').textContent = getPokemonDisplayName(wild);
+      renderPartyBalls();
+      document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(wild);
       updateEnemyCaughtBadge(wild.id, true);
       document.getElementById('enemyLevel').textContent = `Nv. ${wild.level}`;
       {
@@ -4735,7 +5146,7 @@
       eSprite.className = 'enemy-sprite';
       eSprite.style.removeProperty('opacity');
 
-      document.getElementById('playerPokeName').textContent = getPokemonDisplayName(player.poke);
+      document.getElementById('playerPokeName').innerHTML = getPokemonDisplayNameHTML(player.poke);
       document.getElementById('playerPokeLevel').textContent = `Nv. ${player.poke.level}`;
       {
         const types = getTypes(player.poke.id);
@@ -4778,6 +5189,15 @@
       bar.style.width = pct + '%';
       bar.className = 'hp-fill' + (pct <= 25 ? ' red' : pct <= 50 ? ' yellow' : '');
       updatePlayerExperienceBar();
+    }
+    function renderPartyBalls() {
+      const row = document.getElementById('partyBallRow');
+      if (!row) return;
+      const party = Array.isArray(player?.party) ? player.party.slice(0,6) : [];
+      row.innerHTML = party.map((pokemon,index)=>
+        `<span class="party-ball" aria-hidden="true" title="Pokemon ${index+1}: ${escapeHTML(pokemon.name || 'Pokemon')}"></span>`
+      ).join('');
+      row.setAttribute('aria-label', `${party.length} Pokemon na equipe`);
     }
     function updatePlayerExperienceBar() {
       const progress = getPokemonExperienceProgress(player.poke);
@@ -4859,7 +5279,7 @@
       battle.playerHp = p.hp;
       battle.playerMaxHp = p.maxHp;
       updatePlayerHpBar();
-      document.getElementById('playerPokeName').textContent = getPokemonDisplayName(p);
+      document.getElementById('playerPokeName').innerHTML = getPokemonDisplayNameHTML(p);
       document.getElementById('playerPokeLevel').textContent = `Nv. ${p.level}`;
       const types = getTypes(p.id);
       const el = document.getElementById('playerTypeBadge');
@@ -4883,9 +5303,10 @@
         battle.busy = true;
         backToMenu();
         const residual = applyResidualStatus(player.poke);
+        const leftovers = applyHeldItemEndTurn(player.poke);
         battle.playerHp = player.poke.hp;
         updatePlayerHpBar();
-        setLog(residual ? `${statusBlock} ${residual}` : statusBlock);
+        setLog([statusBlock, residual, leftovers].filter(Boolean).join(' '));
         saveGame();
         if (player.poke.hp <= 0) {
           const hasBackup = player.party.some(pokemon => pokemon !== player.poke && pokemon.hp > 0);
@@ -4926,9 +5347,16 @@
       const atkTypes = getTypes(player.poke.id);
       const hasStab = atkTypes.some(t => t === moveType);
       const physicalTypes = ['Normal', 'Lutador', 'Voador', 'Veneno', 'Terra', 'Pedra', 'Inseto', 'Fantasma', 'Sombrio', 'Dragao', 'Aço'];
-      const burnMultiplier = player.poke.status === 'burn' && physicalTypes.includes(moveType) ? 0.5 : 1;
-      const rawDamage = calcDamage(player.poke.level, battle.enemy.level || 5, move.power, mult, hasStab);
-      const dmg = rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier)) : 0;
+      const physical = physicalTypes.includes(moveType);
+      const burnMultiplier = player.poke.status === 'burn' && physical && player.poke.ability !== 'Guts' ? 0.5 : 1;
+      const immunity = abilityTypeImmunity(battle.enemy, moveType);
+      const evaded = move.power>0 && Math.random()<getStatEvasionChance(battle.enemy,player.poke);
+      const effectiveMult = immunity || evaded ? 0 : mult;
+      const rawDamage = calcDamage(player.poke.level, battle.enemy.level || 5, move.power, effectiveMult, hasStab);
+      const attackStat = physical ? 'attack' : 'specialAttack';
+      const defenseStat = physical ? 'defense' : 'specialDefense';
+      const traitMultiplier = getPokemonStatMultiplier(player.poke,attackStat) / (getPokemonStatMultiplier(battle.enemy,defenseStat)*getPokemonStatMultiplier(battle.enemy,'hp')) * abilityDamageMultiplier(player.poke, battle.enemy, moveType, physical, hasStab);
+      const dmg = rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(player.poke, moveType))) : 0;
 
       const pSprite = document.getElementById('playerSprite');
       pSprite.classList.add('attack-anim');
@@ -4955,11 +5383,31 @@
           : `Causou ${dmg} de dano!`;
         if (mult >= 2) msg += ' É super efetivo!';
         else if (mult > 0 && mult < 1) msg += ' Não é muito efetivo...';
-        const statusMessage = applyMoveStatus(player.poke, battle.enemy, move);
+        let abilityMessage = evaded ? `${battle.enemy.name} desviou do golpe!` : '';
+        if (immunity === 'Water Absorb' || immunity === 'Volt Absorb') {
+          const healed = Math.min(battle.enemy.maxHp - battle.enemy.currentHp, Math.max(1, Math.floor(battle.enemy.maxHp / 4)));
+          battle.enemy.currentHp += healed;
+          abilityMessage = `${battle.enemy.name} recuperou ${healed} HP com ${immunity}!`;
+        } else if (immunity === 'Flash Fire') {
+          battle.enemy.flashFireActive = true;
+          abilityMessage = `${battle.enemy.name} absorveu o fogo com Flash Fire!`;
+        } else if (immunity) abilityMessage = `${battle.enemy.name} evitou o golpe com ${immunity}!`;
+        const abilityStatus = applyAbilityOnHit(player.poke, battle.enemy, dmg > 0);
+        if (abilityStatus) abilityMessage = `${abilityMessage} ${abilityStatus}`.trim();
+        const statusMessage = evaded ? '' : applyMoveStatus(player.poke, battle.enemy, move);
+        const heldMessage = applyHeldItemTrigger(battle.enemy);
+        const playerHeldMessage = applyHeldItemTrigger(player.poke);
+        const leftoversMessage = applyHeldItemEndTurn(player.poke);
+        battle.playerHp = player.poke.hp;
+        if (abilityMessage) msg += ` ${abilityMessage}`;
         if (statusMessage) msg += ` ${statusMessage}`;
+        if (heldMessage) msg += ` ${heldMessage}`;
+        if (playerHeldMessage) msg += ` ${playerHeldMessage}`;
+        if (leftoversMessage) msg += ` ${leftoversMessage}`;
         const residualMessage = applyResidualStatus(player.poke);
         if (residualMessage) msg += ` ${residualMessage}`;
         battle.playerHp = player.poke.hp;
+        updateEnemyHpBar();
         updatePlayerHpBar();
         saveGame();
         setLog(msg);
@@ -4996,8 +5444,9 @@
       const statusBlock = tryActDespiteStatus(battle.enemy);
       if (statusBlock) {
         const residual = applyResidualStatus(battle.enemy);
-        if (residual) updateEnemyHpBar();
-        setLog(residual ? `${statusBlock} ${residual}` : statusBlock);
+        const leftovers = applyHeldItemEndTurn(battle.enemy);
+        if (residual || leftovers) updateEnemyHpBar();
+        setLog([statusBlock, residual, leftovers].filter(Boolean).join(' '));
         if (battle.enemy.currentHp <= 0) {
           setTimeout(() => endBattle(true), 600);
         } else {
@@ -5014,9 +5463,16 @@
       const atkTypes = getTypes(battle.enemy.id);
       const hasStab = atkTypes.some(t => t === moveType);
       const physicalTypes = ['Normal', 'Lutador', 'Voador', 'Veneno', 'Terra', 'Pedra', 'Inseto', 'Fantasma', 'Sombrio', 'Dragao', 'Aço'];
-      const burnMultiplier = battle.enemy.status === 'burn' && physicalTypes.includes(moveType) ? 0.5 : 1;
-      const rawDamage = calcDamage(battle.enemy.level || 5, player.poke.level, move.power, mult, hasStab);
-      const dmg = rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier)) : 0;
+      const physical = physicalTypes.includes(moveType);
+      const burnMultiplier = battle.enemy.status === 'burn' && physical && battle.enemy.ability !== 'Guts' ? 0.5 : 1;
+      const immunity = abilityTypeImmunity(player.poke, moveType);
+      const evaded = move.power>0 && Math.random()<getStatEvasionChance(player.poke,battle.enemy);
+      const effectiveMult = immunity || evaded ? 0 : mult;
+      const rawDamage = calcDamage(battle.enemy.level || 5, player.poke.level, move.power, effectiveMult, hasStab);
+      const attackStat = physical ? 'attack' : 'specialAttack';
+      const defenseStat = physical ? 'defense' : 'specialDefense';
+      const traitMultiplier = getPokemonStatMultiplier(battle.enemy,attackStat) / (getPokemonStatMultiplier(player.poke,defenseStat)*getPokemonStatMultiplier(player.poke,'hp')) * abilityDamageMultiplier(battle.enemy, player.poke, moveType, physical, hasStab);
+      const dmg = rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(battle.enemy, moveType))) : 0;
 
       const eSprite = document.getElementById('enemySprite');
       eSprite.classList.add('attack-anim');
@@ -5044,14 +5500,36 @@
           : `Causou ${dmg} de dano em ${player.poke.name}!`;
         if (mult >= 2) msg += ' É super efetivo!';
         else if (mult > 0 && mult < 1) msg += ' Não é muito efetivo...';
-        const statusMessage = applyMoveStatus(battle.enemy, player.poke, move);
+        let abilityMessage = evaded ? `${player.poke.name} desviou do golpe!` : '';
+        if (immunity === 'Water Absorb' || immunity === 'Volt Absorb') {
+          const healed = Math.min(player.poke.maxHp - battle.playerHp, Math.max(1, Math.floor(player.poke.maxHp / 4)));
+          battle.playerHp += healed;
+          player.poke.hp = battle.playerHp;
+          abilityMessage = `${player.poke.name} recuperou ${healed} HP com ${immunity}!`;
+        } else if (immunity === 'Flash Fire') {
+          player.poke.flashFireActive = true;
+          abilityMessage = `${player.poke.name} absorveu o fogo com Flash Fire!`;
+        } else if (immunity) abilityMessage = `${player.poke.name} evitou o golpe com ${immunity}!`;
+        const abilityStatus = applyAbilityOnHit(battle.enemy, player.poke, dmg > 0);
+        if (abilityStatus) abilityMessage = `${abilityMessage} ${abilityStatus}`.trim();
+        const statusMessage = evaded ? '' : applyMoveStatus(battle.enemy, player.poke, move);
+        const heldMessage = applyHeldItemTrigger(player.poke);
+        const enemyHeldMessage = applyHeldItemTrigger(battle.enemy);
+        const leftoversMessage = applyHeldItemEndTurn(battle.enemy);
+        battle.playerHp = player.poke.hp;
+        if (abilityMessage) msg += ` ${abilityMessage}`;
         if (statusMessage) msg += ` ${statusMessage}`;
+        if (heldMessage) msg += ` ${heldMessage}`;
+        if (enemyHeldMessage) msg += ` ${enemyHeldMessage}`;
+        if (leftoversMessage) msg += ` ${leftoversMessage}`;
         const residualMessage = applyResidualStatus(battle.enemy);
         if (residualMessage) {
           updateEnemyHpBar();
           msg += ` ${residualMessage}`;
         }
+        updatePlayerHpBar();
         setLog(msg);
+        saveGame();
 
         if (battle.enemy.currentHp <= 0) {
           setTimeout(() => endBattle(true), 600);
@@ -5112,7 +5590,7 @@
       battle.playerHp = p.hp;
       battle.playerMaxHp = p.maxHp;
       updatePlayerHpBar();
-      document.getElementById('playerPokeName').textContent = getPokemonDisplayName(p);
+      document.getElementById('playerPokeName').innerHTML = getPokemonDisplayNameHTML(p);
       document.getElementById('playerPokeLevel').textContent = `Nv. ${p.level}`;
       const types = getTypes(p.id);
       const el = document.getElementById('playerTypeBadge');
@@ -5285,6 +5763,9 @@
       battle.busy = true;
       if (won && battle.isGym && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
         battle.totalExperience = (battle.totalExperience || 0) + getBattleExperience(battle.enemy, true);
+        const effort = awardPokemonEffort(player.poke, battle.enemy);
+        battle.totalEffort = battle.totalEffort || {};
+        for (const [stat,value] of Object.entries(effort)) battle.totalEffort[stat] = (battle.totalEffort[stat] || 0) + value;
         battle.experienceAwarded = true;
       }
       document.getElementById('battleMenu').style.display = 'none';
@@ -5309,6 +5790,7 @@
       if (won) {
         const money = Math.floor(50 + battle.enemy.level * 30 + Math.random() * 100);
         const xp = captured ? 0 : getBattleExperience(battle.enemy);
+        const effort = captured ? {} : awardPokemonEffort(player.poke, battle.enemy);
         player.money += money;
         player.poke.hp = Math.max(0, battle.playerHp);
         const levelsGained = awardPokemonExperience(player.poke, xp);
@@ -5331,6 +5813,7 @@
         document.getElementById('resultRewards').innerHTML = `
           + ₽ ${money}<br>
           ${xp ? `+ ${xp} XP` : ''}${leveled ? `<br><strong style="color:var(--success)">⬆️ ${player.poke.name} ${levelsGained === 1 ? `subiu para o Nv. ${player.poke.level}` : `subiu ${levelsGained} níveis e chegou ao Nv. ${player.poke.level}`}!</strong>` : ''}
+          ${formatEffortGain(effort) ? `<br>${formatEffortGain(effort)}` : ''}
           ${evoNote}
           ${captured ? `<br><strong style="color:var(--success)">✓ ${capturedName} adicionado!</strong>` : ''}`;
         updateStatsUI();
@@ -5399,6 +5882,52 @@
       document.getElementById('bagMenu').style.display = 'grid';
     }
 
+    let pendingNicknameCapture = null;
+
+    function askCaughtPokemonNickname(pokemon, onComplete) {
+      pendingNicknameCapture = { pokemon, onComplete };
+      document.getElementById('nicknameQuestion').textContent = `Deseja dar um apelido para ${pokemon.name}?`;
+      document.getElementById('nicknameChoiceActions').style.display = 'flex';
+      document.getElementById('nicknameEntry').classList.remove('active');
+      document.getElementById('nicknameInput').value = pokemon.name;
+      document.getElementById('nicknameDialog').showModal();
+    }
+
+    function showNicknameInput() {
+      if (!pendingNicknameCapture) return;
+      document.getElementById('nicknameChoiceActions').style.display = 'none';
+      document.getElementById('nicknameEntry').classList.add('active');
+      const input = document.getElementById('nicknameInput');
+      input.focus();
+      input.select();
+    }
+
+    function finishNicknameChoice(useNickname) {
+      if (!pendingNicknameCapture) return;
+      const pending = pendingNicknameCapture;
+      if (useNickname) {
+        const nickname = document.getElementById('nicknameInput').value.trim();
+        if (!nickname || Array.from(nickname).length > 10 || !/^[\p{L}\p{N} .,'!?-]+$/u.test(nickname)) {
+          showToast('Use de 1 a 10 letras, números ou espaços para o apelido.', 'error');
+          document.getElementById('nicknameInput').focus();
+          return;
+        }
+        pending.pokemon.name = nickname;
+      }
+      pendingNicknameCapture = null;
+      document.getElementById('nicknameDialog').close();
+      pending.onComplete(pending.pokemon);
+    }
+
+    document.getElementById('nicknameForm').addEventListener('submit', event => {
+      event.preventDefault();
+      finishNicknameChoice(true);
+    });
+    document.getElementById('nicknameDialog').addEventListener('cancel', event => {
+      event.preventDefault();
+      finishNicknameChoice(false);
+    });
+
     function tryCapture(ballKey) {
       if (!battle || battle.busy) return;
       if (battle.isGym) {
@@ -5444,6 +5973,10 @@
             maxHp: battle.enemy.maxHp + 5,
             hp: battle.enemy.maxHp + 5,
             level: battle.enemy.level,
+            nature: battle.enemy.nature,
+            ability: battle.enemy.ability,
+            ivs: {...battle.enemy.ivs},
+            evs: {...battle.enemy.evs},
             growthRate: 'mediumFast',
             exp: getExperienceForLevel(battle.enemy.level),
             moves: getMovesForLevel(battle.enemy.id, battle.enemy.level),
@@ -5454,21 +5987,25 @@
           normalizePokemonMoves(caught);
           markPokedex(caught.id, true);
           onMissionEvent('capture', caught.id);
-          if (player.party.length < 6) {
-            player.party.push(caught);
-          } else {
-            const boxNum = depositToPC(caught);
-            if (boxNum >= 0) {
-              setLog(`Equipe cheia! ${battle.enemy.name} foi enviado para a Box ${boxNum + 1} do PC.`);
-            } else {
-              setLog(`PC lotado! ${battle.enemy.name} não pôde ser guardado.`);
-            }
-          }
           setTimeout(() => {
             eSpr.classList.remove('capturing');
             eSpr.classList.add('faint');
             if (ball) ball.remove();
-            endBattle(true, true, caught.name);
+            askCaughtPokemonNickname(caught, namedPokemon => {
+              if (player.party.length < 6) {
+                player.party.push(namedPokemon);
+              } else {
+                const boxNum = depositToPC(namedPokemon);
+                if (boxNum >= 0) {
+                  setLog(`Equipe cheia! ${namedPokemon.name} foi enviado para a Box ${boxNum + 1} do PC.`);
+                } else {
+                  setLog(`PC lotado! ${namedPokemon.name} não pôde ser guardado.`);
+                }
+              }
+              renderPartyBalls();
+              saveGame();
+              endBattle(true, true, namedPokemon.name);
+            });
           }, 600);
         } else {
           if (ball) ball.remove();
@@ -5530,9 +6067,12 @@
 
     function setupBattleUI(logMsg) {
       const e = battle.enemy;
+      renderPartyBalls();
       ensurePokemonGender(e);
       ensurePokemonGender(player.poke);
-      document.getElementById('enemyName').textContent = getPokemonDisplayName(e) + (battle.isGym ? ` (${battle.gym.leader})` : '');
+      ensurePokemonTraits(e);
+      ensurePokemonTraits(player.poke);
+      document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : '');
       updateEnemyCaughtBadge(e.id, !battle.isGym);
       document.getElementById('enemyLevel').textContent = `Nv. ${e.level}`;
       {
@@ -5551,7 +6091,7 @@
       eSprite.className = 'enemy-sprite';
       eSprite.style.removeProperty('opacity');
 
-      document.getElementById('playerPokeName').textContent = getPokemonDisplayName(player.poke);
+      document.getElementById('playerPokeName').innerHTML = getPokemonDisplayNameHTML(player.poke);
       document.getElementById('playerPokeLevel').textContent = `Nv. ${player.poke.level}`;
       {
         const types = getTypes(player.poke.id);
@@ -5597,6 +6137,7 @@
     function endGymVictory() {
       const gym = battle.gym;
       const xp = battle.totalExperience || 0;
+      const effortMessage = formatEffortGain(battle.totalEffort);
       player.poke.hp = Math.max(0, battle.playerHp);
       const levelsGained = awardPokemonExperience(player.poke, xp);
       const evolvedReady = levelsGained > 0 && canEvolve(player.poke);
@@ -5623,6 +6164,7 @@
         + Insígnia ${gym.badge}<br>
         + ₽ ${gym.reward.toLocaleString('pt-BR')}<br>
         + ${xp} XP${levelsGained ? `<br><strong style="color:var(--success)">⬆️ ${player.poke.name} ${levelsGained === 1 ? `subiu para o Nv. ${player.poke.level}` : `subiu ${levelsGained} níveis e chegou ao Nv. ${player.poke.level}`}!</strong>` : ''}<br>
+        ${effortMessage ? `${effortMessage}<br>` : ''}
         Insígnias: ${player.badges}/8`;
       if (evolvedReady) battle._pendingEvo = player.poke;
       updateStatsUI();
@@ -5631,7 +6173,6 @@
       renderGyms();
       onMissionEvent('gym_win', gym.badge);
     }
-
 
     function closeBattle() {
       stopBattleBgm();
@@ -5659,7 +6200,7 @@
             <img src="${SPRITE(p.id)}" style="width:80px;height:80px;object-fit:contain;background:transparent;" onerror="this.src='${SPRITE_FB(p.id)}'" />
           </div>
           <div class="game-card-body">
-            <div class="game-card-title" title="${getPokemonGenderLabel(p)}">${getPokemonDisplayName(p)}${p === player.poke ? ' ★' : ''}${canEvolve(p) ? ' ✨' : ''}</div>
+            <div class="game-card-title" title="${getPokemonGenderLabel(p)}">${getPokemonDisplayNameHTML(p)}${p === player.poke ? ' ★' : ''}${canEvolve(p) ? ' ✨' : ''}</div>
             <div class="game-card-desc">Nv. ${p.level} · HP ${Math.round(p.hp)}/${p.maxHp}${p.status ? ` · ${getPokemonStatusLabel(p)}` : ''}${canEvolve(p) ? ' · Pode evoluir!' : ''}</div>
             <div style="font-size:0.72rem;color:var(--text-muted);margin:4px 0 8px;">${p.level >= MAX_POKEMON_LEVEL ? 'EXP Máxima' : `EXP ${getPokemonExperienceProgress(p).current.toLocaleString('pt-BR')} / ${getPokemonExperienceProgress(p).required.toLocaleString('pt-BR')}`}</div>
             <span class="type-badge ${p.typeClass || 'type-planta'}">${p.type || '—'}</span>
@@ -5687,21 +6228,31 @@
     function openSummary(idx) {
       const p = player.party[idx];
       if (!p) return;
+      ensurePokemonTraits(p);
       document.getElementById('summarySprite').src = SPRITE(p.id);
       document.getElementById('summarySprite').onerror = function(){ this.src = SPRITE_FB(p.id); };
-      document.getElementById('summaryName').textContent = getPokemonDisplayName(p);
+      document.getElementById('summaryName').innerHTML = getPokemonDisplayNameHTML(p);
       document.getElementById('summaryMeta').textContent = `Nv. ${p.level} · ${getPokemonGenderLabel(p)} · HP ${Math.round(p.hp)}/${p.maxHp}`;
       const types = getTypes(p.id);
       document.getElementById('summaryTypes').innerHTML = types.map(t =>
         `<span class="type-badge ${typeClass([t])}">${t}</span>`
       ).join(' ');
+      const nature = NATURES.find(x=>x.name===p.nature);
+      const natureDescription = nature?.up ? `Aumenta ${nature.up} e reduz ${nature.down}.` : 'Esta natureza não altera atributos.';
+      const abilityDescription = ABILITY_INFO[p.ability];
       document.getElementById('summaryStats').innerHTML = `
         <div class="summary-stat"><span>HP</span><strong>${Math.round(p.hp)} / ${p.maxHp}</strong></div>
         <div class="summary-stat"><span>Nível</span><strong>${p.level}</strong></div>
         <div class="summary-stat"><span>Sexo</span><strong>${getPokemonGenderLabel(p)}</strong></div>
         <div class="summary-stat"><span>Tipo</span><strong>${p.type || typeLabel(types)}</strong></div>
+        <div class="summary-stat summary-stat--wide"><span>Natureza</span><strong><span class="summary-trait" tabindex="0" title="${natureDescription}" aria-label="Natureza ${p.nature}: ${natureDescription}">${p.nature}</span></strong></div>
+        <div class="summary-stat summary-stat--wide"><span>Habilidade</span><strong><span class="summary-trait" tabindex="0" title="${abilityDescription}" aria-label="Habilidade ${p.ability}: ${abilityDescription}">${p.ability}</span></strong></div>
         <div class="summary-stat"><span>Status</span><strong>${p.hp <= 0 ? 'Desmaiado' : getPokemonStatusLabel(p) || (p === player.poke ? 'Ativo ★' : 'Reserva')}</strong></div>
       `;
+      document.getElementById('summaryTraining').innerHTML = Object.entries(STAT_LABELS).map(([stat,label])=>
+        `<div class="summary-training-stat"><strong>${label}</strong><span>IV ${p.ivs[stat]}/31<br>EV ${p.evs[stat]}</span></div>`
+      ).join('');
+      renderSummaryHeldItem(idx);
       const moves = p.moves || [];
       document.getElementById('summaryMoves').innerHTML = moves.length
         ? moves.map(m => `
@@ -5875,7 +6426,7 @@
           }
           return `<div class="pc-slot" onclick="withdrawFromPC(${bi},${slot})" title="Retirar para o time">
             <img src="${SPRITE(p.id)}" alt="${p.name}" onerror="this.src='${SPRITE_FB(p.id)}'" />
-            <div class="pc-name" title="${getPokemonGenderLabel(p)}">${getPokemonDisplayName(p)}</div>
+            <div class="pc-name" title="${getPokemonGenderLabel(p)}">${getPokemonDisplayNameHTML(p)}</div>
             <div class="pc-lv">Nv. ${p.level}</div>
           </div>`;
         }).join('');
@@ -5885,7 +6436,7 @@
         row.innerHTML = player.party.map((p, idx) => `
           <div class="pc-party-card" onclick="depositFromParty(${idx})" title="Depositar no PC">
             <img src="${SPRITE(p.id)}" alt="${p.name}" onerror="this.src='${SPRITE_FB(p.id)}'" />
-            <div class="pc-name" title="${getPokemonGenderLabel(p)}">${getPokemonDisplayName(p)}</div>
+            <div class="pc-name" title="${getPokemonGenderLabel(p)}">${getPokemonDisplayNameHTML(p)}</div>
             <div class="pc-lv" style="font-size:0.65rem;color:var(--text-muted);">Nv.${p.level}${p === player.poke ? ' ★' : ''}</div>
           </div>`).join('');
       }
