@@ -238,6 +238,7 @@
     .panel.active { display: block; }
     .panel-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
     .panel-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+    .panel-back-button { width: auto !important; margin: 0 0 14px !important; padding: 7px 11px !important; font-size: .8rem !important; }
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
     .game-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 16px;
@@ -1401,28 +1402,33 @@
           </div>
         </div>
         <div class="panel" id="panel-dungeons">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">Explora&ccedil;&atilde;o de Kanto</h2>
           <p class="panel-desc">Clique em uma regi&atilde;o para enfrentar Pok&eacute;mon selvagens em batalha!</p>
           <div class="cards-grid" id="dungeonsGrid"></div>
         </div>
         <div class="panel" id="panel-missions">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">📜 Missões de Kanto</h2>
           <p class="panel-desc">Complete missões para ganhar experiência, dinheiro e itens.</p>
           <div class="mission-list" id="missionsList"></div>
         </div>
 
         <div class="panel" id="panel-gyms">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">🏅 Ginásios de Kanto</h2>
           <p class="panel-desc">Desafie os Líderes de Ginásio e conquiste as 8 Insígnias!</p>
           <div class="cards-grid" id="gymsGrid"></div>
         </div>
         <div class="panel" id="panel-pokemon">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
           <h2 class="panel-title">🎒 Meus Pokémon</h2>
           <p class="panel-desc">Seu time atual.</p>
           <div class="cards-grid" id="pokemonTeam"></div>
         </div>
         
         <div class="panel" id="panel-center">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">🏥 Centro Pokémon</h2>
           <p class="panel-desc">Cure toda a sua equipe por uma taxa. Enfermeira Joy cuida dos seus Pokémon.</p>
           <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;">
@@ -1448,6 +1454,7 @@
         </div>
 
         <div class="panel" id="panel-market">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">🏪 Poké Market</h2>
           <p class="panel-desc">Compre itens para a sua aventura. Seu saldo: <strong id="marketMoney">₽ 0</strong></p>
           <div class="cards-grid" id="marketGrid"></div>
@@ -1458,6 +1465,7 @@
         </div>
 
         <div class="panel" id="panel-bag">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
           <h2 class="panel-title">🎒 Mochila</h2>
           <p class="panel-desc">Todos os seus itens: Pokébolas, medicinas, pedras de evolução, berries e mais.</p>
           <div id="bagCategories"></div>
@@ -1465,6 +1473,7 @@
         </div>
 
         <div class="panel" id="panel-item-catalog">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">🧰 Catálogo de Itens</h2>
           <p class="panel-desc">Consulte os itens Pokémon, suas categorias, efeitos e ícones.</p>
           <div class="item-catalog-controls">
@@ -1477,6 +1486,7 @@
         </div>
 
         <div class="panel" id="panel-pc">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
           <h2 class="panel-title">💻 PC do Bill</h2>
           <p class="panel-desc">Armazene e retire Pokémon das boxes. Quando o time está cheio, capturas vão para cá automaticamente.</p>
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center;">
@@ -1493,12 +1503,14 @@
         </div>
 
         <div class="panel" id="panel-pokedex">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
           <h2 class="panel-title">📖 Pokédex de Kanto</h2>
           <p class="panel-desc">Registro de Pokémon vistos e capturados. <span id="pokedexProgress">0 / 151</span></p>
           <div class="pokedex-grid" id="pokedexGrid"></div>
         </div>
 
         <div class="panel" id="panel-profile">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">👤 Perfil do Treinador</h2>
           <p class="panel-desc">Informações do seu personagem e acesso à equipe, mochila e registros.</p>
           <button class="btn btn-secondary" onclick="if(confirm('Apagar todo o progresso salvo?'))clearSave()" style="max-width:280px;margin-bottom:16px;">🗑️ Apagar dados salvos</button>
