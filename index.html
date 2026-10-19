@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/pokemon-types.js"></script>
+  <script src="assets/item-catalog.js"></script>
   <style>
     :root {
       --bg: #0b0b0f; --card: #14141c; --border: #252532;
@@ -20,6 +22,18 @@
       --sidebar-w: 240px; --hp-green: #22c55e; --hp-yellow: #eab308; --hp-red: #ef4444;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html {
+      scroll-behavior: smooth;
+      scrollbar-color: var(--border) var(--card);
+      scrollbar-width: thin;
+    }
+    *::-webkit-scrollbar { width: 10px; height: 10px; }
+    *::-webkit-scrollbar-track { background: var(--card); border-radius: 10px; }
+    *::-webkit-scrollbar-thumb {
+      background: var(--border); border: 2px solid var(--card); border-radius: 10px;
+      transition: background-color 0.2s ease;
+    }
+    *::-webkit-scrollbar-thumb:hover { background: #3b3b4b; }
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg); color: var(--text); min-height: 100vh;
@@ -45,6 +59,7 @@
       border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;
       font-size: 26px; margin-bottom: 14px; box-shadow: 0 10px 28px var(--primary-glow);
     }
+    .pokeball-mark { display: block; width: 44px; height: 44px; flex: 0 0 auto; }
     .logo h1 { font-size: 1.55rem; font-weight: 700; }
     .logo p { color: var(--text-muted); font-size: 0.875rem; margin-top: 6px; }
     .screen { display: none; animation: fadeUp 0.3s ease; }
@@ -179,6 +194,7 @@
       width: 36px; height: 36px; background: linear-gradient(135deg, #7c3aed, #a78bfa);
       border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
     }
+    .sidebar-logo .pokeball-mark { width: 29px; height: 29px; }
     .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
     .nav-item {
       display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px;
@@ -428,6 +444,15 @@
 
     .player-info .poke-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
     .player-info .poke-level { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
+    .battle-level-type-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: 6px; width: 100%; margin-bottom: 6px; white-space: nowrap; }
+    .battle-level-type-row .poke-level { margin: 0; flex-shrink: 0; }
+    .battle-level-type-row .type-badge { margin: 0; }
+    .battle-level-type-badges { display: flex; align-items: center; flex-wrap: nowrap; justify-content: flex-end; gap: 4px; min-width: 0; margin-left: auto; }
+    .battle-stat-stages { display: none; flex-wrap: wrap; gap: 4px; margin: -2px 0 7px; }
+    .battle-stat-stage { display: inline-flex; align-items: center; border-radius: 5px; padding: 2px 5px; font-size: 0.58rem; font-weight: 800; letter-spacing: .01em; line-height: 1.2; }
+    .battle-stat-stage.positive { background: #16a34a33; color: #4ade80; }
+    .battle-stat-stage.negative { background: #dc262633; color: #f87171; }
+    .battle-stat-stage.utility { background: #7c3aed33; color: #c4b5fd; }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
@@ -499,9 +524,26 @@
     .battle-result.show { display: block; }
     .battle-result h3 { font-size: 1.4rem; margin-bottom: 8px; }
     .battle-result p { color: var(--text-muted); margin-bottom: 16px; font-size: 0.9rem; }
-    .battle-result .rewards { 
-      background: var(--input-bg); border-radius: 10px; padding: 12px;
-      margin-bottom: 16px; font-size: 0.9rem;
+    .battle-result .rewards {
+      display: grid; gap: 8px; text-align: left;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 0.9rem;
+    }
+    .reward-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      min-height: 28px; padding: 5px 7px; border-bottom: 1px solid var(--border);
+    }
+    .reward-row:last-child { border-bottom: 0; }
+    .reward-label { color: var(--text-muted); }
+    .reward-value { color: var(--text); text-align: right; font-weight: 700; }
+    .reward-money .reward-value { color: #fbbf24; }
+    .reward-xp .reward-value { color: #60a5fa; }
+    .reward-ev .reward-value { color: #4ade80; }
+    .reward-highlight { color: var(--success); font-weight: 700; padding: 3px 7px; }
+    @media (max-width: 480px) {
+      .battle-result .rewards { padding: 9px; }
+      .reward-row { align-items: flex-start; flex-wrap: wrap; }
+      .reward-value { overflow-wrap: anywhere; }
     }
 
     @media (max-width: 768px) {
@@ -549,6 +591,9 @@
     .type-pedra { background: #b8a03833; color: #d1c17d; }
     .type-fantasma { background: #70589833; color: #a292bc; }
     .type-dragao { background: #7038f833; color: #a27dfa; }
+    .type-sombrio { background: #70584833; color: #b6a090; }
+    .type-aco { background: #b8b8d033; color: #d1d1e0; }
+    .type-fada { background: #ee99ac33; color: #f4b6c2; }
     .type-planta-veneno { background: #a855f733; color: #c084fc; }
     .type-planta-voador { background: #84cc1633; color: #a3e635; }
 
@@ -780,6 +825,11 @@
       padding: 10px 12px; background: var(--input-bg); border-radius: 10px;
       border: 1px solid var(--border); font-size: 0.875rem;
     }
+    .held-item-summary { display: flex; align-items: center; justify-content: flex-start; gap: 10px; min-width: 0; }
+    .held-item-summary-icon { width: 32px; height: 32px; flex: 0 0 32px; object-fit: contain; }
+    .held-item-summary-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .held-item-summary-copy strong { line-height: 1.2; }
+    .held-item-summary-copy span { color: var(--text-muted); font-size: 0.78rem; line-height: 1.35; }
     .summary-stats-grid {
       display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; font-size: 0.875rem;
     }
@@ -1041,6 +1091,22 @@
     .bag-item .item-icon { width: 40px; height: 40px; }
     .bag-item-name { font-size: 0.72rem; font-weight: 600; margin-top: 6px; line-height: 1.2; }
     .bag-item-qty { font-size: 0.75rem; color: var(--primary); font-weight: 700; margin-top: 4px; }
+    .item-catalog-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+    .item-catalog-controls input, .item-catalog-controls select {
+      flex: 1 1 220px; min-width: 0; padding: 11px 12px; color: var(--text);
+      background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; font: inherit;
+    }
+    .item-catalog-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 10px; }
+    .item-catalog-card { display: flex; gap: 12px; align-items: flex-start; min-width: 0; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+    .item-catalog-icon { width: 42px; height: 42px; flex: 0 0 42px; object-fit: contain; image-rendering: pixelated; }
+    .item-catalog-copy { min-width: 0; }
+    .item-catalog-copy strong { display: block; font-size: .88rem; }
+    .item-catalog-copy small { display: block; margin-top: 3px; color: var(--primary-hover); font-size: .7rem; }
+    .item-catalog-copy p { margin-top: 6px; color: var(--text-muted); font-size: .76rem; line-height: 1.4; }
+    .item-catalog-availability { display: inline-block; margin-top: 7px; padding: 3px 6px; border-radius: 6px; color: #a1a1aa; background: var(--input-bg); font-size: .66rem; }
+    .item-catalog-availability.active { color: var(--success); }
+    .item-catalog-action { width: auto; margin: 8px 0 0; padding: 6px 9px; font-size: .72rem; }
+    .item-catalog-pages { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 16px 0; }
 
 
     /* Battle intro transition */
@@ -1088,7 +1154,7 @@
     <div class="container">
       <div class="card">
         <div id="authScreen" class="screen active">
-          <div class="logo"><div class="logo-icon">🔴</div><h1>Pokémon Trainer</h1><p>Entre ou crie sua conta de treinador</p><p id="authStatus" role="status" style="margin-top:10px;">Conectando ao serviço online...</p></div>
+          <div class="logo"><div class="logo-icon"><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pokébola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></div><h1>Pokémon Trainer</h1><p>Entre ou crie sua conta de treinador</p><p id="authStatus" role="status" style="margin-top:10px;">Conectando ao serviço online...</p></div>
           <div class="tabs">
             <button type="button" class="tab active" data-tab="login">Entrar</button>
             <button type="button" class="tab" data-tab="register">Registrar</button>
@@ -1201,7 +1267,7 @@
   <div id="dashboard">
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header"><div class="sidebar-logo"><span>⚡</span> Pokémon Trainer</div></div>
+      <div class="sidebar-header"><div class="sidebar-logo"><span><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pokébola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></span> Pokémon Trainer</div></div>
       <nav class="sidebar-nav">
         <button class="nav-item active" data-panel="home"><span class="icon">🏠</span> Início</button>
         <button class="nav-item" data-panel="dungeons"><span class="icon">🗺️</span> Exploração</button>
@@ -1210,6 +1276,7 @@
         <button class="nav-item" data-panel="center"><span class="icon">🏥</span> Centro Pokémon</button>
         <button class="nav-item" data-panel="market"><span class="icon">🏪</span> Poké Market</button>
         <button class="nav-item" data-panel="bag"><span class="icon">🎒</span> Mochila</button>
+        <button class="nav-item" data-panel="item-catalog"><span class="icon">🧰</span> Catálogo de Itens</button>
         <button class="nav-item" data-panel="pokemon"><span class="icon">🔴</span> Meus Pokémon</button>
         <button class="nav-item" data-panel="pc"><span class="icon">💻</span> PC do Bill</button>
         <button class="nav-item" data-panel="pokedex"><span class="icon">📖</span> Pokédex</button>
@@ -1266,8 +1333,8 @@
           </div>
         </div>
         <div class="panel" id="panel-dungeons">
-          <h2 class="panel-title">🗺️ Exploração de Kanto</h2>
-          <p class="panel-desc">Clique em uma região para enfrentar Pokémon selvagens em batalha!</p>
+          <h2 class="panel-title">Explora&ccedil;&atilde;o de Kanto</h2>
+          <p class="panel-desc">Clique em uma regi&atilde;o para enfrentar Pok&eacute;mon selvagens em batalha!</p>
           <div class="cards-grid" id="dungeonsGrid"></div>
         </div>
         <div class="panel" id="panel-missions">
@@ -1323,6 +1390,18 @@
           <p class="panel-desc">Todos os seus itens: Pokébolas, medicinas, pedras de evolução, berries e mais.</p>
           <div id="bagCategories"></div>
           <div id="bagUseTarget" style="margin-top:16px;"></div>
+        </div>
+
+        <div class="panel" id="panel-item-catalog">
+          <h2 class="panel-title">🧰 Catálogo de Itens</h2>
+          <p class="panel-desc">Consulte os itens Pokémon, suas categorias, efeitos e ícones.</p>
+          <div class="item-catalog-controls">
+            <input id="itemCatalogSearch" type="search" placeholder="Buscar item ou efeito..." aria-label="Buscar itens" />
+            <select id="itemCatalogCategory" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option></select>
+          </div>
+          <div id="itemCatalogCount" class="panel-desc" aria-live="polite"></div>
+          <div id="itemCatalogGrid" class="item-catalog-grid"></div>
+          <div id="itemCatalogPages" class="item-catalog-pages"></div>
         </div>
 
         <div class="panel" id="panel-pc">
@@ -1482,9 +1561,12 @@
             <div class="poke-name" id="enemyName">Wild Pokémon</div>
             <div class="enemy-caught-badge" id="enemyCaughtBadge">✓ Já capturado</div>
           </div>
-          <div class="poke-level" id="enemyLevel">Nv. 5</div>
-          <div id="enemyTypeBadge" style="margin-bottom:6px;"></div>
+          <div class="battle-level-type-row">
+            <div class="poke-level" id="enemyLevel">Nv. 5</div>
+            <div id="enemyTypeBadge" class="battle-level-type-badges"></div>
+          </div>
           <div id="enemyMajorStatus" class="type-badge" style="display:none;margin-bottom:6px;"></div>
+          <div id="enemyStatStages" class="battle-stat-stages" aria-live="polite"></div>
           <div class="hp-bar-wrap">
             <div class="hp-label"><span>HP</span><span id="enemyHpText">20/20</span></div>
             <div class="hp-bar"><div class="hp-fill" id="enemyHpBar" style="width:100%"></div></div>
@@ -1503,9 +1585,12 @@
         <div class="player-info" id="playerInfoBox">
           <div class="party-ball-row" id="partyBallRow" role="img" aria-label="Pokémon da equipe"></div>
           <div class="poke-name" id="playerPokeName">Bulbasaur</div>
-          <div class="poke-level" id="playerPokeLevel">Nv. 5</div>
-          <div id="playerTypeBadge" style="margin-bottom:6px;"></div>
+          <div class="battle-level-type-row">
+            <div class="poke-level" id="playerPokeLevel">Nv. 5</div>
+            <div id="playerTypeBadge" class="battle-level-type-badges"></div>
+          </div>
           <div id="playerMajorStatus" class="type-badge" style="display:none;margin-bottom:6px;"></div>
+          <div id="playerStatStages" class="battle-stat-stages" aria-live="polite"></div>
           <div class="hp-bar-wrap">
             <div class="hp-label"><span>HP</span><span id="playerHpText">25/25</span></div>
             <div class="hp-bar"><div class="hp-fill" id="playerHpBar" style="width:100%"></div></div>
@@ -1595,24 +1680,27 @@
 
     // ===== TIPOS E EFETIVIDADE =====
     const TYPE_CHART = {
-      Normal: { Pedra: 0.5, Fantasma: 0 },
-      Fogo: { Fogo: 0.5, Agua: 0.5, Planta: 2, Gelo: 2, Inseto: 2, Pedra: 0.5, Dragao: 0.5 },
+      Normal: { Pedra: 0.5, Aço: 0.5, Fantasma: 0 },
+      Fogo: { Fogo: 0.5, Agua: 0.5, Planta: 2, Gelo: 2, Inseto: 2, Pedra: 0.5, Dragao: 0.5, Aço: 2 },
       Agua: { Fogo: 2, Agua: 0.5, Planta: 0.5, Terra: 2, Pedra: 2, Dragao: 0.5 },
-      Planta: { Fogo: 0.5, Agua: 2, Planta: 0.5, Veneno: 0.5, Terra: 2, Voador: 0.5, Inseto: 0.5, Pedra: 2, Dragao: 0.5 },
+      Planta: { Fogo: 0.5, Agua: 2, Planta: 0.5, Veneno: 0.5, Terra: 2, Voador: 0.5, Inseto: 0.5, Pedra: 2, Dragao: 0.5, Aço: 0.5 },
       Eletrico: { Agua: 2, Eletrico: 0.5, Planta: 0.5, Terra: 0, Voador: 2, Dragao: 0.5 },
-      Gelo: { Fogo: 0.5, Agua: 0.5, Planta: 2, Gelo: 0.5, Terra: 2, Voador: 2, Dragao: 2 },
-      Lutador: { Normal: 2, Gelo: 2, Veneno: 0.5, Voador: 0.5, Psiquico: 0.5, Inseto: 0.5, Pedra: 2, Fantasma: 0 },
-      Veneno: { Planta: 2, Veneno: 0.5, Terra: 0.5, Pedra: 0.5, Fantasma: 0.5 },
-      Terra: { Fogo: 2, Eletrico: 2, Planta: 0.5, Veneno: 2, Voador: 0, Inseto: 0.5, Pedra: 2 },
-      Voador: { Eletrico: 0.5, Planta: 2, Lutador: 2, Inseto: 2, Pedra: 0.5 },
-      Psiquico: { Lutador: 2, Veneno: 2, Psiquico: 0.5 },
-      Inseto: { Fogo: 0.5, Planta: 2, Lutador: 0.5, Veneno: 0.5, Voador: 0.5, Psiquico: 2, Fantasma: 0.5 },
-      Pedra: { Fogo: 2, Gelo: 2, Lutador: 0.5, Terra: 0.5, Voador: 2, Inseto: 2 },
-      Fantasma: { Normal: 0, Psiquico: 2, Fantasma: 2 },
-      Dragao: { Dragao: 2 }
+      Gelo: { Fogo: 0.5, Agua: 0.5, Planta: 2, Gelo: 0.5, Terra: 2, Voador: 2, Dragao: 2, Aço: 0.5 },
+      Lutador: { Normal: 2, Gelo: 2, Veneno: 0.5, Voador: 0.5, Psiquico: 0.5, Inseto: 0.5, Pedra: 2, Fantasma: 0, Sombrio: 2, Aço: 2, Fada: 0.5 },
+      Veneno: { Planta: 2, Veneno: 0.5, Terra: 0.5, Pedra: 0.5, Fantasma: 0.5, Aço: 0, Fada: 2 },
+      Terra: { Fogo: 2, Eletrico: 2, Planta: 0.5, Veneno: 2, Voador: 0, Inseto: 0.5, Pedra: 2, Aço: 2 },
+      Voador: { Eletrico: 0.5, Planta: 2, Lutador: 2, Inseto: 2, Pedra: 0.5, Aço: 0.5 },
+      Psiquico: { Lutador: 2, Veneno: 2, Psiquico: 0.5, Sombrio: 0, Aço: 0.5 },
+      Inseto: { Fogo: 0.5, Planta: 2, Lutador: 0.5, Veneno: 0.5, Voador: 0.5, Psiquico: 2, Fantasma: 0.5, Sombrio: 2, Aço: 0.5, Fada: 0.5 },
+      Pedra: { Fogo: 2, Gelo: 2, Lutador: 0.5, Terra: 0.5, Voador: 2, Inseto: 2, Aço: 0.5 },
+      Fantasma: { Normal: 0, Psiquico: 2, Fantasma: 2, Sombrio: 0.5 },
+      Dragao: { Aço: 0.5, Dragao: 2, Fada: 0 },
+      Sombrio: { Lutador: 0.5, Psiquico: 2, Fantasma: 2, Sombrio: 0.5, Fada: 0.5 },
+      Aço: { Fogo: 0.5, Agua: 0.5, Eletrico: 0.5, Gelo: 2, Pedra: 2, Aço: 0.5, Fada: 2 },
+      Fada: { Fogo: 0.5, Lutador: 2, Veneno: 0.5, Dragao: 2, Sombrio: 2, Aço: 0.5 }
     };
 
-    const POKE_TYPES = {
+    const POKE_TYPES = window.POKE_TYPES_DATA || {
       1: ['Planta','Veneno'], 4: ['Fogo'], 7: ['Agua'],
       10: ['Inseto'], 13: ['Inseto','Veneno'], 25: ['Eletrico'], 26: ['Eletrico'],
       35: ['Normal'], 41: ['Veneno','Voador'], 42: ['Veneno','Voador'],
@@ -1715,6 +1803,18 @@
       95:{defense:1},113:{hp:2},130:{attack:2},143:{hp:2},150:{specialAttack:3}
     };
     const EV_YIELD_BY_TYPE = {Normal:'hp',Fogo:'speed',Agua:'hp',Planta:'specialAttack',Eletrico:'speed',Gelo:'specialDefense',Lutador:'attack',Veneno:'specialDefense',Terra:'attack',Voador:'speed',Psiquico:'specialAttack',Inseto:'speed',Pedra:'defense',Fantasma:'specialDefense',Dragao:'attack',Aço:'defense'};
+    function getBattleStatStage(pokemon, stat) {
+      if (!battle || !pokemon) return 0;
+      const stages = pokemon === player?.poke ? battle.playerStatStages : pokemon === battle.enemy ? battle.enemyStatStages : null;
+      return Math.max(-6, Math.min(6, Number(stages?.[stat]) || 0));
+    }
+    function getBattleStageMultiplier(pokemon, stat) {
+      const stage = getBattleStatStage(pokemon, stat);
+      return stage >= 0 ? (2 + stage) / 2 : 2 / (2 - stage);
+    }
+    function getCriticalHitChance(stage) {
+      return [1 / 16, 1 / 8, 1 / 4, 1 / 3, 1 / 2][Math.max(0, Math.min(4, Math.floor(stage || 0)))];
+    }
     function getPokemonStatMultiplier(pokemon, stat) {
       ensurePokemonTraits(pokemon);
       const level = Math.max(1, pokemon.level || 1);
@@ -1722,11 +1822,15 @@
       const ev = Math.floor((pokemon.evs[stat] || 0) / 4);
       const natureStat = {attack:'Ataque',defense:'Defesa',specialAttack:'Ataque Especial',specialDefense:'Defesa Especial',speed:'Velocidade'}[stat];
       const training = 1 + ((iv - 15.5 + ev) * level / 10000);
-      return training * (natureStat ? natureMultiplier(pokemon,natureStat) : 1);
+      const heldSpeedMultiplier = stat === 'speed' && pokemon.heldItem === 'macho_brace' ? 0.5 : 1;
+      return training * (natureStat ? natureMultiplier(pokemon,natureStat) : 1) * heldSpeedMultiplier * getBattleStageMultiplier(pokemon, stat);
     }
     function getStatEvasionChance(defender, attacker) {
       const difference = getPokemonStatMultiplier(defender,'speed') - getPokemonStatMultiplier(attacker,'speed');
-      return Math.max(0,Math.min(0.15,difference*0.15));
+      const accuracyStage = !battle ? 0
+        : attacker === player?.poke ? (battle.playerAccuracyStage || 0)
+          : attacker === battle.enemy ? (battle.enemyAccuracyStage || 0) : 0;
+      return Math.max(0,Math.min(0.15,difference*0.15 - accuracyStage*0.04));
     }
     function awardPokemonEffort(pokemon, defeated) {
       if (!pokemon || !defeated) return {};
@@ -1736,7 +1840,8 @@
       const yieldByStat = EV_YIELD_BY_ID[defeated.id] || {[EV_YIELD_BY_TYPE[getTypes(defeated.id)[0]] || 'hp']:1};
       const gained = {};
       for (const [stat,amount] of Object.entries(yieldByStat)) {
-        let remaining = Math.min(amount, EV_LIMIT_TOTAL - Object.values(pokemon.evs).reduce((sum,value)=>sum+value,0), EV_LIMIT_STAT - pokemon.evs[stat]);
+        const trainingMultiplier = pokemon.heldItem === 'macho_brace' ? 2 : 1;
+        let remaining = Math.min(amount * trainingMultiplier, EV_LIMIT_TOTAL - Object.values(pokemon.evs).reduce((sum,value)=>sum+value,0), EV_LIMIT_STAT - pokemon.evs[stat]);
         if (remaining<=0) continue;
         pokemon.evs[stat]+=remaining;
         gained[stat]=remaining;
@@ -1868,6 +1973,78 @@
         element.style.color = status ? STATUS_COLORS[status] : '';
         element.style.display = status ? 'inline-flex' : 'none';
       });
+      const statNames = { attack: 'ATQ', defense: 'DEF', specialAttack: 'ATQ ESP', specialDefense: 'DEF ESP', speed: 'VEL' };
+      const renderStages = (elementId, stages, accuracy, critical, showGuard) => {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        const indicators = Object.entries(statNames)
+          .map(([stat, label]) => ({ label, value: Number(stages?.[stat]), kind: 'stage' }))
+          .filter(({ value }) => Number.isFinite(value) && value !== 0);
+        if (accuracy) indicators.push({ label: 'PREC', value: accuracy, kind: 'stage' });
+        if (critical) indicators.push({ label: 'CRIT', value: critical, kind: 'utility' });
+        if (showGuard && battle.guardSpecTurns > 0) indicators.push({ label: `PROTEGIDO ${battle.guardSpecTurns}T`, value: 1, kind: 'utility' });
+        element.innerHTML = indicators.map(({ label, value, kind }) => {
+          const sign = value > 0 ? '+' : '';
+          const tone = kind === 'utility' ? 'utility' : value > 0 ? 'positive' : 'negative';
+          return `<span class="battle-stat-stage ${tone}" title="${label}: ${sign}${value} estágio(s)">${label} ${sign}${value}</span>`;
+        }).join('');
+        element.style.display = indicators.length ? 'flex' : 'none';
+      };
+      renderStages('playerStatStages', battle.playerStatStages, battle.playerAccuracyStage, battle.playerCritStage, true);
+      renderStages('enemyStatStages', battle.enemyStatStages, battle.enemyAccuracyStage, battle.enemyCritStage, false);
+    }
+
+    function applyMoveStatChanges(attacker, defender, move, damage = 0) {
+      const rawChanges = move && move.statChanges;
+      if (!battle || !rawChanges) return '';
+      const changes = Array.isArray(rawChanges)
+        ? rawChanges
+        : Object.entries(rawChanges).map(([stat, stages]) => ({ target: Number(stages) < 0 ? 'target' : 'self', stat, stages }));
+      const messages = [];
+      changes.forEach(change => {
+        if (!change || !change.stat) return;
+        const target = ['self', 'attacker'].includes(change.target) ? attacker : defender;
+        if (!target || (target === defender && move.power > 0 && damage <= 0)) return;
+        const amount = Number(change.stages ?? change.amount ?? change.change) || 0;
+        if (!amount) return;
+        const isPlayer = target === player?.poke;
+        if (amount < 0 && isPlayer && battle.guardSpecTurns > 0) {
+          messages.push(`Guard Spec. impediu a redução de atributo de ${target.name}.`);
+          return;
+        }
+        if (change.stat === 'accuracy' || change.stat === 'critical') {
+          const stageKey = change.stat === 'accuracy'
+            ? (isPlayer ? 'playerAccuracyStage' : 'enemyAccuracyStage')
+            : (isPlayer ? 'playerCritStage' : 'enemyCritStage');
+          const max = change.stat === 'critical' ? 4 : 6;
+          const previous = battle[stageKey] || 0;
+          battle[stageKey] = change.stat === 'critical'
+            ? Math.max(0, Math.min(max, previous + amount))
+            : Math.max(-6, Math.min(max, previous + amount));
+          const delta = battle[stageKey] - previous;
+          if (delta) messages.push(`${change.stat === 'accuracy' ? 'Precisão' : 'chance de crítico'} de ${target.name} ${delta > 0 ? 'aumentou' : 'diminuiu'} ${Math.abs(delta)} estágio(s).`);
+          return;
+        }
+        const validStats = ['attack', 'defense', 'specialAttack', 'specialDefense', 'speed'];
+        if (!validStats.includes(change.stat)) return;
+        const stageKey = isPlayer ? 'playerStatStages' : 'enemyStatStages';
+        const stages = battle[stageKey] || (battle[stageKey] = {});
+        const previous = Number(stages[change.stat]) || 0;
+        stages[change.stat] = Math.max(-6, Math.min(6, previous + amount));
+        const delta = stages[change.stat] - previous;
+        if (delta) {
+          const labels = { attack: 'Ataque', defense: 'Defesa', specialAttack: 'Ataque Especial', specialDefense: 'Defesa Especial', speed: 'Velocidade' };
+          messages.push(`${labels[change.stat]} de ${target.name} ${delta > 0 ? 'aumentou' : 'diminuiu'} ${Math.abs(delta)} estágio(s).`);
+        }
+      });
+      if (messages.length) renderBattleStatusIndicators();
+      return messages.join(' ');
+    }
+
+    function tickGuardSpecTurn() {
+      if (!battle || battle.guardSpecTurns <= 0) return;
+      battle.guardSpecTurns = Math.max(0, battle.guardSpecTurns - 1);
+      renderBattleStatusIndicators();
     }
 
     function getStatusMoveEffect(move) {
@@ -2023,13 +2200,14 @@
         normal:'type-normal', fogo:'type-fogo', agua:'type-agua', planta:'type-planta',
         eletrico:'type-eletrico', gelo:'type-gelo', lutador:'type-lutador', veneno:'type-veneno',
         terra:'type-terra', voador:'type-voador', psiquico:'type-psiquico', inseto:'type-inseto',
-        pedra:'type-pedra', fantasma:'type-fantasma', dragao:'type-dragao'
+        pedra:'type-pedra', fantasma:'type-fantasma', dragao:'type-dragao', sombrio:'type-sombrio',
+        aco:'type-aco', fada:'type-fada'
       };
       return map[t] || 'type-normal';
     }
 
     function typeLabel(types) {
-      return (types || ['Normal']).join(' / ');
+      return (types || ['Normal']).map(type => type === 'Aço' ? 'A\u00e7o' : type).join(' / ');
     }
 
     // ===== LEVEL-UP MOVESETS =====
@@ -2069,7 +2247,7 @@
     function getMovesForLevel(speciesId, level) {
       const table = LEVEL_MOVES[speciesId];
       if (table) {
-        const learned = table.filter(m => m.level <= level && (m.power > 0 || m.statusEffect));
+        const learned = table.filter(m => m.level <= level && (m.power > 0 || m.statusEffect || m.statChanges));
         const sorted = learned.sort((a,b) => b.level - a.level);
         const unique = []; const seen = new Set();
         for (const m of sorted) {
@@ -2119,15 +2297,16 @@
       if (!pokemon || !Array.isArray(pokemon.moves)) return false;
       let changed = false;
       pokemon.moves.forEach(move => {
-        const maxPp = Number.isInteger(move.maxPp) && move.maxPp > 0
-          ? move.maxPp
-          : getMoveMaxPp(move);
+        const basePp = getMoveMaxPp(move);
+        const ppUps = Math.max(0, Math.min(3, Number.isInteger(move.ppUps) ? move.ppUps : 0));
+        const maxPp = Math.min(Math.floor(basePp * 1.6), basePp + Math.ceil(basePp * 0.2) * ppUps);
         const pp = Number.isInteger(move.pp)
           ? Math.max(0, Math.min(maxPp, move.pp))
           : maxPp;
-        if (move.maxPp !== maxPp || move.pp !== pp) changed = true;
+        if (move.maxPp !== maxPp || move.pp !== pp || move.ppUps !== ppUps) changed = true;
         move.maxPp = maxPp;
         move.pp = pp;
+        move.ppUps = ppUps;
       });
       return changed;
     }
@@ -2211,6 +2390,27 @@
         ? enemy.expYield
         : BASE_EXP_YIELD[enemy.id] || DEFAULT_EXP_YIELD;
       return Math.max(1, Math.floor(baseYield * enemy.level / 7 * (isTrainer ? 1.5 : 1)));
+    }
+
+    function getBattleExperienceShares(totalExperience, activePokemon) {
+      const shares = new Map();
+      if (!player || !activePokemon || totalExperience <= 0) return shares;
+      const active = player.party.includes(activePokemon) && activePokemon.hp > 0 ? [activePokemon] : [];
+      // O Pokémon ativo recebe sua EXP normal. Só os demais que seguram Exp. Share
+      // entram na divisão da metade compartilhada.
+      const holders = player.party.filter(p => p !== activePokemon && p.hp > 0 && p.heldItem === 'exp_share');
+      const addShare = (pokemon, amount) => {
+        if (amount <= 0) return;
+        const multiplier = pokemon.heldItem === 'lucky_egg' ? 1.5 : 1;
+        shares.set(pokemon, (shares.get(pokemon) || 0) + Math.floor(amount * multiplier));
+      };
+      active.forEach(p => addShare(p, totalExperience));
+      if (holders.length) {
+        const sharePool = Math.floor(totalExperience / 2);
+        const perHolder = Math.floor(sharePool / holders.length);
+        holders.forEach(p => addShare(p, perHolder));
+      }
+      return shares;
     }
 
     function awardPokemonExperience(poke, amount) {
@@ -2475,35 +2675,6 @@
       912:{ to: 913, name: 'Quaxwell',   level: 16 },
       913:{ to: 914, name: 'Quaquaval',  level: 36 }
     };
-
-    // Add evolved forms to POKE_TYPES where missing
-    const EXTRA_TYPES = {
-      2:['Planta','Veneno'],3:['Planta','Veneno'],5:['Fogo'],6:['Fogo','Voador'],
-      8:['Agua'],9:['Agua'],11:['Inseto'],12:['Inseto','Voador'],
-      14:['Inseto','Veneno'],15:['Inseto','Veneno'],
-      26:['Eletrico'],42:['Veneno','Voador'],45:['Planta','Veneno'],
-      51:['Terra'],59:['Fogo'],62:['Agua','Lutador'],65:['Psiquico'],
-      68:['Lutador'],71:['Planta','Veneno'],75:['Pedra','Terra'],76:['Pedra','Terra'],
-      78:['Fogo'],80:['Agua','Psiquico'],82:['Eletrico'],87:['Agua','Gelo'],
-      89:['Veneno'],93:['Fantasma','Veneno'],94:['Fantasma','Veneno'],
-      101:['Eletrico'],105:['Terra'],110:['Veneno'],112:['Terra','Pedra'],
-      121:['Agua','Psiquico'],130:['Agua','Voador'],148:['Dragao'],149:['Dragao','Voador'],
-      153:['Planta'],154:['Planta'],156:['Fogo'],157:['Fogo'],159:['Agua'],160:['Agua'],
-      253:['Planta'],254:['Planta'],256:['Fogo','Lutador'],257:['Fogo','Lutador'],
-      259:['Agua','Terra'],260:['Agua','Terra'],
-      388:['Planta'],389:['Planta','Terra'],391:['Fogo','Lutador'],392:['Fogo','Lutador'],
-      394:['Agua'],395:['Agua','Aco'],
-      496:['Planta'],497:['Planta'],499:['Fogo','Lutador'],500:['Fogo','Lutador'],
-      502:['Agua'],503:['Agua'],
-      651:['Planta'],652:['Planta','Lutador'],654:['Fogo'],655:['Fogo','Psiquico'],
-      657:['Agua'],658:['Agua','Sombrio'],
-      723:['Planta','Voador'],724:['Planta','Fantasma'],726:['Fogo'],727:['Fogo','Sombrio'],
-      729:['Agua'],730:['Agua','Fada'],
-      811:['Planta'],812:['Planta'],814:['Fogo'],815:['Fogo'],817:['Agua'],818:['Agua'],
-      907:['Planta'],908:['Planta','Sombrio'],910:['Fogo'],911:['Fogo','Fantasma'],
-      913:['Agua'],914:['Agua','Lutador']
-    };
-    Object.keys(EXTRA_TYPES).forEach(k => { POKE_TYPES[k] = EXTRA_TYPES[k]; });
 
     let pendingEvolution = null;
 
@@ -3602,6 +3773,9 @@
       potions: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/potion.png',
       superpotion: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/super-potion.png',
       hyperpotion: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/hyper-potion.png',
+      maxrevive: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/max-revive.png',
+      ppup: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/pp-up.png',
+      ppmax: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/pp-max.png',
       fullrestore: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/full-restore.png',
       antidote: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/antidote.png',
       antiparalyze: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/paralyze-heal.png',
@@ -3624,6 +3798,22 @@
       magnet: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/magnet.png',
       twisted_spoon: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/twisted-spoon.png',
       black_belt: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/black-belt.png',
+      exp_share: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/exp-share.png',
+      lucky_egg: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/lucky-egg.png',
+      focus_sash: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/held-item/focus-sash.png',
+      silk_scarf: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/silk-scarf.png',
+      silver_powder: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/silver-powder.png',
+      hard_stone: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/hard-stone.png',
+      sharp_beak: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/sharp-beak.png',
+      poison_barb: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poison-barb.png',
+      spell_tag: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/spell-tag.png',
+      dragon_fang: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/dragon-fang.png',
+      never_melt_ice: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/never-melt-ice.png',
+      metal_coat: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/metal-coat.png',
+      black_glasses: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/black-glasses.png',
+      amulet_coin: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/amulet-coin.png',
+      shell_bell: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/shell-bell.png',
+      macho_brace: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/macho-brace.png',
       leppa: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/leppa.png',
       lum: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/lum.png',
       pecha: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/pecha.png',
@@ -3642,6 +3832,9 @@
       potions: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/potion.png',
       superpotion: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-potion.png',
       hyperpotion: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/hyper-potion.png',
+      maxrevive: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/max-revive.png',
+      ppup: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pp-up.png',
+      ppmax: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pp-max.png',
       fullrestore: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/full-restore.png',
       antidote: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/antidote.png',
       antiparalyze: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/paralyze-heal.png',
@@ -3664,6 +3857,22 @@
       magnet: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/magnet.png',
       twisted_spoon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/twisted-spoon.png',
       black_belt: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/black-belt.png',
+      exp_share: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/exp-share.png',
+      lucky_egg: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/lucky-egg.png',
+      focus_sash: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/focus-sash.png',
+      silk_scarf: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/silk-scarf.png',
+      silver_powder: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/silver-powder.png',
+      hard_stone: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/hard-stone.png',
+      sharp_beak: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/sharp-beak.png',
+      poison_barb: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poison-barb.png',
+      spell_tag: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/spell-tag.png',
+      dragon_fang: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/dragon-fang.png',
+      never_melt_ice: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/never-melt-ice.png',
+      metal_coat: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/metal-coat.png',
+      black_glasses: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/black-glasses.png',
+      amulet_coin: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/amulet-coin.png',
+      shell_bell: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/shell-bell.png',
+      macho_brace: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/macho-brace.png',
       leppa: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/leppa-berry.png',
       lum: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/lum-berry.png',
       pecha: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pecha-berry.png',
@@ -3697,6 +3906,9 @@
           { key: 'potions', name: 'Poção', sprite: 'potions', desc: 'Recupera 25 HP' },
           { key: 'superpotion', name: 'Super Poção', sprite: 'superpotion', desc: 'Recupera 50 HP' },
           { key: 'hyperpotion', name: 'Hiper Poção', sprite: 'hyperpotion', desc: 'Recupera 200 HP' },
+          { key: 'maxrevive', name: 'Max Revive', sprite: 'maxrevive', desc: 'Revive um Pokémon desmaiado com HP total.' },
+          { key: 'ppup', name: 'PP Up', sprite: 'ppup', desc: 'Aumenta em 20% o PP máximo de um golpe (até 3 vezes).' },
+          { key: 'ppmax', name: 'PP Max', sprite: 'ppmax', desc: 'Aumenta ao máximo o PP de um golpe.' },
           { key: 'fullrestore', name: 'Restaurar Tudo', sprite: 'fullrestore', desc: 'Recupera HP e cura qualquer status' },
           { key: 'revive', name: 'Revive', sprite: 'revive', desc: 'Revive um Pokémon desmaiado' },
           { key: 'antidote', name: 'Antídoto', sprite: 'antidote', desc: 'Cura envenenamento' },
@@ -3739,7 +3951,23 @@
           { key: 'mystic_water', name: 'Mystic Water', sprite: 'mystic_water', desc: 'Aumenta em 10% o poder de golpes de Agua.' },
           { key: 'magnet', name: 'Magnet', sprite: 'magnet', desc: 'Aumenta em 10% o poder de golpes Eletricos.' },
           { key: 'twisted_spoon', name: 'Twisted Spoon', sprite: 'twisted_spoon', desc: 'Aumenta em 10% o poder de golpes Psiquicos.' },
-          { key: 'black_belt', name: 'Black Belt', sprite: 'black_belt', desc: 'Aumenta em 10% o poder de golpes Lutadores.' }
+          { key: 'black_belt', name: 'Black Belt', sprite: 'black_belt', desc: 'Aumenta em 10% o poder de golpes Lutadores.' },
+          { key: 'exp_share', name: 'Exp. Share', sprite: 'exp_share', desc: 'Compartilha metade da EXP de batalha com quem o segura.' },
+          { key: 'lucky_egg', name: 'Lucky Egg', sprite: 'lucky_egg', desc: 'Aumenta em 50% a experiência recebida pelo Pokémon que o segura.' },
+          { key: 'focus_sash', name: 'Focus Sash', sprite: 'focus_sash', desc: 'Com HP cheio, sobrevive a um golpe que o derrotaria com 1 HP. Consome-se ao ativar.' },
+          { key: 'silk_scarf', name: 'Silk Scarf', sprite: 'silk_scarf', desc: 'Aumenta em 10% o poder de golpes Normais.' },
+          { key: 'silver_powder', name: 'Silver Powder', sprite: 'silver_powder', desc: 'Aumenta em 10% o poder de golpes Inseto.' },
+          { key: 'hard_stone', name: 'Hard Stone', sprite: 'hard_stone', desc: 'Aumenta em 10% o poder de golpes Pedra.' },
+          { key: 'sharp_beak', name: 'Sharp Beak', sprite: 'sharp_beak', desc: 'Aumenta em 10% o poder de golpes Voador.' },
+          { key: 'poison_barb', name: 'Poison Barb', sprite: 'poison_barb', desc: 'Aumenta em 10% o poder de golpes Veneno.' },
+          { key: 'spell_tag', name: 'Spell Tag', sprite: 'spell_tag', desc: 'Aumenta em 10% o poder de golpes Fantasma.' },
+          { key: 'dragon_fang', name: 'Dragon Fang', sprite: 'dragon_fang', desc: 'Aumenta em 10% o poder de golpes Dragão.' },
+          { key: 'never_melt_ice', name: 'Never-Melt Ice', sprite: 'never_melt_ice', desc: 'Aumenta em 10% o poder de golpes Gelo.' },
+          { key: 'metal_coat', name: 'Metal Coat', sprite: 'metal_coat', desc: 'Aumenta em 10% o poder de golpes Aço.' },
+          { key: 'black_glasses', name: 'Black Glasses', sprite: 'black_glasses', desc: 'Aumenta em 10% o poder de golpes Sombrio.' },
+          { key: 'amulet_coin', name: 'Amulet Coin', sprite: 'amulet_coin', desc: 'Dobra o dinheiro recebido em batalhas quando o portador participa.' },
+          { key: 'shell_bell', name: 'Shell Bell', sprite: 'shell_bell', desc: 'Recupera 1/8 do dano causado ao fim do turno.' },
+          { key: 'macho_brace', name: 'Macho Brace', sprite: 'macho_brace', desc: 'Dobra os EVs recebidos, mas reduz a Velocidade do portador pela metade.' }
         ]
       },
       {
@@ -3762,6 +3990,9 @@
       { key: 'potions', name: 'Poção', sprite: 'potions', kind: 'heal', amount: 25 },
       { key: 'superpotion', name: 'Super Poção', sprite: 'superpotion', kind: 'heal', amount: 50 },
       { key: 'hyperpotion', name: 'Hiper Poção', sprite: 'hyperpotion', kind: 'heal', amount: 200 },
+      { key: 'maxrevive', name: 'Max Revive', sprite: 'maxrevive', kind: 'maxRevive' },
+      { key: 'ppup', name: 'PP Up', sprite: 'ppup', kind: 'ppUp' },
+      { key: 'ppmax', name: 'PP Max', sprite: 'ppmax', kind: 'ppMax' },
       { key: 'fullrestore', name: 'Restaurar Tudo', sprite: 'fullrestore', kind: 'fullHeal' },
       { key: 'antidote', name: 'Antídoto', sprite: 'antidote', kind: 'statusCure' },
       { key: 'antiparalyze', name: 'Antiparalisia', sprite: 'antiparalyze', kind: 'statusCure' },
@@ -3792,13 +4023,18 @@
         balls: player.balls || 0, potions: player.potions || 0,
         antidote: player.antidote || 0, antiparalyze: player.antiparalyze || 0, antiburn: player.antiburn || 0,
         greatball: 0, ultraball: 0, masterball: 0,
-        superpotion: 0, hyperpotion: 0, fullrestore: 0, revive: 0,
+        superpotion: 0, hyperpotion: 0, fullrestore: 0, revive: 0, maxrevive: 0, ppup: 0, ppmax: 0,
         awakener: 0, iceheal: 0, fullheal: 0,
         firestone: 0, waterstone: 0, thunderstone: 0, leafstone: 0, moonstone: 0,
         oran: 2, sitrus: 0, leppa: 0, lum: 0, pecha: 1, chesto: 0, rawst: 0, cherri: 0,
         leftovers: 0, charcoal: 0, miracle_seed: 0, mystic_water: 0, magnet: 0, twisted_spoon: 0, black_belt: 0,
+        exp_share: 0, lucky_egg: 0, focus_sash: 0,
+        silk_scarf: 0, silver_powder: 0, hard_stone: 0, sharp_beak: 0, poison_barb: 0,
+        spell_tag: 0, dragon_fang: 0, never_melt_ice: 0, metal_coat: 0, black_glasses: 0,
+        amulet_coin: 0, shell_bell: 0, macho_brace: 0,
         rarecandy: 0, repel: 1, escape: 1, parcelbox: 0, ss_ticket: 0
       };
+      [...EXTRA_MEDICINE_ITEMS, ...EXTRA_BATTLE_ITEMS].forEach(item => { if (defaults[item.key] === undefined) defaults[item.key] = 0; });
       // Sync legacy fields
       if (typeof player.balls === 'number') defaults.balls = player.balls;
       if (typeof player.potions === 'number') defaults.potions = player.potions;
@@ -3840,7 +4076,23 @@
       mystic_water: { name: 'Mystic Water', desc: 'Aumenta em 10% o poder de golpes de Agua.', type: 'Agua' },
       magnet: { name: 'Magnet', desc: 'Aumenta em 10% o poder de golpes Eletricos.', type: 'Eletrico' },
       twisted_spoon: { name: 'Twisted Spoon', desc: 'Aumenta em 10% o poder de golpes Psiquicos.', type: 'Psiquico' },
-      black_belt: { name: 'Black Belt', desc: 'Aumenta em 10% o poder de golpes Lutadores.', type: 'Lutador' }
+      black_belt: { name: 'Black Belt', desc: 'Aumenta em 10% o poder de golpes Lutadores.', type: 'Lutador' },
+      exp_share: { name: 'Exp. Share', desc: 'Compartilha metade da experiência de batalha com quem o segura.', type: '' },
+      lucky_egg: { name: 'Lucky Egg', desc: 'Aumenta em 50% a experiência recebida em batalha.', type: '' },
+      focus_sash: { name: 'Focus Sash', desc: 'Com HP cheio, sobrevive a um golpe fatal com 1 HP. Consome-se ao ativar.', type: '' },
+      silk_scarf: { name: 'Silk Scarf', desc: 'Aumenta em 10% o poder de golpes Normais.', type: 'Normal' },
+      silver_powder: { name: 'Silver Powder', desc: 'Aumenta em 10% o poder de golpes Inseto.', type: 'Inseto' },
+      hard_stone: { name: 'Hard Stone', desc: 'Aumenta em 10% o poder de golpes Pedra.', type: 'Pedra' },
+      sharp_beak: { name: 'Sharp Beak', desc: 'Aumenta em 10% o poder de golpes Voadores.', type: 'Voador' },
+      poison_barb: { name: 'Poison Barb', desc: 'Aumenta em 10% o poder de golpes Veneno.', type: 'Veneno' },
+      spell_tag: { name: 'Spell Tag', desc: 'Aumenta em 10% o poder de golpes Fantasma.', type: 'Fantasma' },
+      dragon_fang: { name: 'Dragon Fang', desc: 'Aumenta em 10% o poder de golpes Dragão.', type: 'Dragao' },
+      never_melt_ice: { name: 'Never-Melt Ice', desc: 'Aumenta em 10% o poder de golpes Gelo.', type: 'Gelo' },
+      metal_coat: { name: 'Metal Coat', desc: 'Aumenta em 10% o poder de golpes Aço.', type: 'Aço' },
+      black_glasses: { name: 'Black Glasses', desc: 'Aumenta em 10% o poder de golpes Sombrios.', type: 'Sombrio' },
+      amulet_coin: { name: 'Amulet Coin', desc: 'Dobra o dinheiro recebido em batalhas.', type: '' },
+      shell_bell: { name: 'Shell Bell', desc: 'Recupera 1/8 do dano causado.', type: '' },
+      macho_brace: { name: 'Macho Brace', desc: 'Dobra os EVs recebidos e reduz a Velocidade do portador pela metade.', type: '' }
     };
 
     function renderSummaryHeldItem(idx) {
@@ -3850,7 +4102,7 @@
       ensureBagItems();
       const held = HELD_ITEM_INFO[pokemon.heldItem];
       const choices = Object.entries(HELD_ITEM_INFO).filter(([key]) => getItemQty(key) > 0 && key !== pokemon.heldItem);
-      root.innerHTML = `<div class="summary-move"><span>${held ? escapeHTML(held.name) : 'Nenhum item'}</span><span style="color:var(--text-muted);font-size:.78rem;">${held ? escapeHTML(held.desc) : 'Escolha um item da mochila para equipar.'}</span></div>
+      root.innerHTML = `<div class="summary-move">${held ? `<div class="held-item-summary">${itemIcon(pokemon.heldItem, 'held-item-summary-icon')}<div class="held-item-summary-copy"><strong>${escapeHTML(held.name)}</strong><span>${escapeHTML(held.desc)}</span></div></div>` : `<span>Nenhum item</span><span style="color:var(--text-muted);font-size:.78rem;">Escolha um item da mochila para equipar.</span>`}</div>
         <div style="display:flex;gap:8px;margin-top:8px;">
           <button type="button" class="btn btn-secondary" onclick="openHeldItemPicker(${idx})">${held ? 'Trocar item' : 'Segurar item'}</button>
           ${held ? `<button type="button" class="btn btn-secondary" onclick="removeHeldItem(${idx})">Remover</button>` : ''}
@@ -3909,6 +4161,14 @@
       return info && info.type === moveType ? 1.1 : 1;
     }
 
+    function applyFocusSash(pokemon, currentHp, damage) {
+      if (!pokemon || pokemon.heldItem !== 'focus_sash' || currentHp !== pokemon.maxHp || damage < currentHp || currentHp <= 1) {
+        return { damage, message: '' };
+      }
+      pokemon.heldItem = '';
+      return { damage: currentHp - 1, message: `${pokemon.name} resistiu ao golpe com Focus Sash!` };
+    }
+
     function applyHeldItemTrigger(pokemon) {
       const key = pokemon && pokemon.heldItem;
       const info = HELD_ITEM_INFO[key];
@@ -3938,6 +4198,15 @@
       const restored = Math.min(pokemon.maxHp - pokemon[hpKey], Math.max(1, Math.floor(pokemon.maxHp / 16)));
       pokemon[hpKey] += restored;
       return `${pokemon.name} recuperou ${restored} HP com Leftovers.`;
+    }
+
+    function applyShellBell(pokemon, damage) {
+      if (!pokemon || pokemon.heldItem !== 'shell_bell' || damage <= 0) return '';
+      const hpKey = Number.isFinite(pokemon.currentHp) ? 'currentHp' : 'hp';
+      if (pokemon[hpKey] <= 0 || pokemon[hpKey] >= pokemon.maxHp) return '';
+      const restored = Math.min(pokemon.maxHp - pokemon[hpKey], Math.max(1, Math.floor(damage / 8)));
+      pokemon[hpKey] += restored;
+      return `${pokemon.name} recuperou ${restored} HP com Shell Bell.`;
     }
 
     function renderBag() {
@@ -3971,6 +4240,9 @@
       { key: 'potions', name: 'Poção', kind: 'heal', amount: 25 },
       { key: 'superpotion', name: 'Super Poção', kind: 'heal', amount: 50 },
       { key: 'hyperpotion', name: 'Hiper Poção', kind: 'heal', amount: 200 },
+      { key: 'maxrevive', name: 'Max Revive', sprite: 'maxrevive', kind: 'maxRevive' },
+      { key: 'ppup', name: 'PP Up', sprite: 'ppup', kind: 'ppUp' },
+      { key: 'ppmax', name: 'PP Max', sprite: 'ppmax', kind: 'ppMax' },
       { key: 'fullrestore', name: 'Restaurar Tudo', kind: 'heal' },
       { key: 'revive', name: 'Revive', kind: 'revive' },
       { key: 'antidote', name: 'Antídoto', sprite: 'antidote', kind: 'statusCure' },
@@ -4024,8 +4296,16 @@
 
     function canUseItemOnPokemon(item, pokemon) {
       if (!item || !pokemon) return false;
-      if (item.kind === 'revive') return pokemon.hp <= 0;
-      if (item.kind === 'pp') return pokemon.hp > 0 && pokemon.moves.some(move => move.pp < move.maxPp);
+      if (item.kind === 'revive' || item.kind === 'maxRevive') return pokemon.hp <= 0;
+      if (item.kind === 'level') return pokemon.hp > 0 && pokemon.level < MAX_POKEMON_LEVEL;
+      if (item.kind === 'ev') {
+        ensurePokemonTraits(pokemon);
+        const total = Object.values(pokemon.evs).reduce((sum, value) => sum + value, 0);
+        return pokemon.hp > 0 && total < EV_LIMIT_TOTAL && pokemon.evs[item.stat] < Math.min(EV_LIMIT_STAT, 100);
+      }
+      if (['pp', 'maxPp', 'allPp', 'allMaxPp'].includes(item.kind)) return pokemon.hp > 0 && pokemon.moves.some(move => move.pp < move.maxPp);
+      if (item.kind === 'ppUp') return pokemon.hp > 0 && pokemon.moves.some(move => (move.ppUps || 0) < 3);
+      if (item.kind === 'ppMax') return pokemon.hp > 0 && pokemon.moves.some(move => (move.ppUps || 0) < 3);
       if (item.kind === 'statusCure') return pokemon.hp > 0 && itemCuresStatus(item.key, pokemon);
       if (item.key === 'fullrestore' || item.kind === 'fullHeal') {
         return pokemon.hp > 0 && (pokemon.hp < pokemon.maxHp || Boolean(pokemon.status));
@@ -4047,9 +4327,9 @@
         .filter(({ pokemon }) => canUseItemOnPokemon(item, pokemon));
 
       if (!targets.length) {
-        showToast(item.kind === 'revive'
+        showToast(item.kind === 'revive' || item.kind === 'maxRevive'
           ? 'Nenhum Pokémon desmaiado pode receber Revive.'
-          : item.kind === 'pp'
+          : ['pp', 'maxPp', 'allPp', 'allMaxPp', 'ppUp', 'ppMax'].includes(item.kind)
             ? 'Nenhum Pokémon tem golpes que precisem recuperar PP.'
             : item.kind === 'statusCure'
               ? 'Nenhum Pokémon tem o status que esse item cura.'
@@ -4063,7 +4343,7 @@
           <div style="display:flex;flex-wrap:wrap;gap:8px;">
             ${targets.map(({ pokemon, index }) => `
               <button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="useBagItemOnPokemon('${key}',${index})">
-                ${pokemon.name} · Nv. ${pokemon.level} · ${item.kind === 'pp'
+                ${pokemon.name} · Nv. ${pokemon.level} · ${['pp', 'maxPp', 'allPp', 'allMaxPp', 'ppUp', 'ppMax'].includes(item.kind)
                   ? `Golpes com PP baixo: ${pokemon.moves.filter(move => move.pp < move.maxPp).length}`
                   : item.kind === 'statusCure'
                     ? getPokemonStatusLabel(pokemon)
@@ -4138,8 +4418,36 @@
         cancelBagItemUse();
         return;
       }
-      if (item.kind === 'pp') {
-        const moves = pokemon.moves.filter(move => move.pp < move.maxPp);
+      if (item.kind === 'ev') {
+        ensurePokemonTraits(pokemon);
+        const total = Object.values(pokemon.evs).reduce((sum, value) => sum + value, 0);
+        const gained = Math.max(0, Math.min(item.amount || 10, EV_LIMIT_TOTAL - total, Math.min(EV_LIMIT_STAT, 100) - pokemon.evs[item.stat]));
+        if (!gained) return;
+        pokemon.evs[item.stat] += gained;
+        decItemQty(key, 1); cancelBagItemUse(); renderBag(); refreshPartyUI(); saveGame();
+        showToast(`${item.name} aumentou ${STAT_LABELS[item.stat]} em ${gained} EV!`);
+        return;
+      }
+      if (item.kind === 'level') {
+        const expNeeded = Math.max(0, getExperienceForLevel(pokemon.level + 1, pokemon.growthRate) - pokemon.exp);
+        const gainedLevels = awardPokemonExperience(pokemon, expNeeded);
+        decItemQty(key, 1); cancelBagItemUse(); renderBag(); refreshPartyUI(); saveGame();
+        showToast(`${pokemon.name} subiu para o nível ${pokemon.level}!${gainedLevels > 1 ? ` (+${gainedLevels} níveis)` : ''}`);
+        return;
+      }
+      if (item.kind === 'allPp' || item.kind === 'allMaxPp') {
+        let restored = 0;
+        pokemon.moves.forEach(move => {
+          const amount = item.kind === 'allMaxPp' ? move.maxPp : item.amount;
+          const gained = Math.min(amount, move.maxPp - move.pp);
+          move.pp += gained; restored += gained;
+        });
+        decItemQty(key, 1); cancelBagItemUse(); renderBag(); refreshPartyUI(); saveGame();
+        showToast(`${item.name} restaurou ${restored} PP em ${pokemon.name}.`);
+        return;
+      }
+      if (['pp', 'maxPp', 'ppUp', 'ppMax'].includes(item.kind)) {
+        const moves = pokemon.moves.filter(move => ['pp', 'maxPp'].includes(item.kind) ? move.pp < move.maxPp : (move.ppUps || 0) < 3);
         if (!moves.length) {
           showToast(`${pokemon.name} não tem golpes que precisem recuperar PP.`, 'error');
           cancelBagItemUse();
@@ -4148,10 +4456,10 @@
         const targetRoot = document.getElementById('bagUseTarget');
         targetRoot.innerHTML = `
           <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;">
-            <div style="font-weight:600;margin-bottom:10px;">Escolha um golpe para recuperar 10 PP:</div>
+            <div style="font-weight:600;margin-bottom:10px;">Escolha um golpe ${item.kind === 'pp' ? `para recuperar ${item.amount || 10} PP` : item.kind === 'maxPp' ? 'para restaurar todo o PP' : 'para aumentar o PP máximo'}:</div>
             <div style="display:flex;flex-wrap:wrap;gap:8px;">
               ${moves.map(move => `
-                <button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="useBagLeppaOnMove(${partyIndex},'${move.name.replace(/'/g, "\\'")}')">
+                <button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="useBagPpItem('${key}',${partyIndex},'${move.name.replace(/'/g, "\\'")}')">
                   ${move.name} · PP ${move.pp}/${move.maxPp}
                 </button>
               `).join('')}
@@ -4162,8 +4470,10 @@
         return;
       }
 
-      if (item.kind === 'revive') {
-        pokemon.hp = Math.max(1, Math.ceil(pokemon.maxHp / 2));
+      if (item.kind === 'revive' || item.kind === 'maxRevive') {
+        pokemon.status = '';
+        delete pokemon.sleepTurns;
+        pokemon.hp = item.kind === 'maxRevive' ? pokemon.maxHp : Math.max(1, Math.ceil(pokemon.maxHp / 2));
       } else if (item.kind !== 'statusCure') {
         const amount = item.key === 'fullrestore'
           ? pokemon.maxHp
@@ -4184,20 +4494,40 @@
       saveGame();
       showToast(curedStatus
         ? `${item.name} curou ${curedStatus} de ${pokemon.name}!`
-        : `${item.name} usado em ${pokemon.name}!`);
+        : item.kind === 'maxRevive'
+          ? `${pokemon.name} voltou com o HP total!`
+          : item.kind === 'revive'
+            ? `${pokemon.name} voltou com ${pokemon.hp} HP!`
+            : `${item.name} usado em ${pokemon.name}!`);
     }
 
     function useBagLeppaOnMove(partyIndex, moveName) {
+      useBagPpItem('leppa', partyIndex, moveName);
+    }
+
+    function useBagPpItem(itemKey, partyIndex, moveName) {
       const pokemon = player && player.party[partyIndex];
       const move = pokemon && pokemon.moves.find(entry => entry.name === moveName);
-      if (!pokemon || !move || move.pp >= move.maxPp || getItemQty('leppa') <= 0) return;
-      const restored = Math.min(10, move.maxPp - move.pp);
-      move.pp += restored;
-      decItemQty('leppa', 1);
+      const item = BAG_FIELD_ITEMS.find(entry => entry.key === itemKey);
+      if (!pokemon || !move || !item || getItemQty(itemKey) <= 0) return;
+      if (item.kind === 'pp' || item.kind === 'maxPp') {
+        if (move.pp >= move.maxPp) return;
+        const restored = Math.min(item.kind === 'maxPp' ? move.maxPp : (item.amount || 10), move.maxPp - move.pp);
+        move.pp += restored;
+        showToast(`${item.name} restaurou ${restored} PP de ${move.name}!`);
+      } else {
+        const oldMax = move.maxPp;
+        move.ppUps = item.kind === 'ppMax' ? 3 : Math.min(3, (move.ppUps || 0) + 1);
+        normalizePokemonMoves(pokemon);
+        const added = move.maxPp - oldMax;
+        move.pp = Math.min(move.maxPp, move.pp + added);
+        showToast(`${item.name} aumentou o PP máximo de ${move.name} para ${move.maxPp}!`);
+      }
+      decItemQty(itemKey, 1);
       cancelBagItemUse();
       renderBag();
+      refreshPartyUI();
       saveGame();
-      showToast(`Leppa Berry restaurou ${restored} PP de ${move.name}!`);
     }
 
     const SHOP_ITEMS = [
@@ -4205,6 +4535,7 @@
       { id: 'greatball', name: 'Great Ball', icon: '🔵', sprite: 'greatball', desc: 'Taxa de captura melhor', price: 600, key: 'greatball' },
       { id: 'potions', name: 'Poção', icon: '🧪', sprite: 'potions', desc: 'Recupera 25 HP em batalha', price: 150, key: 'potions' },
       { id: 'superpotion', name: 'Super Poção', icon: '🧴', sprite: 'superpotion', desc: 'Recupera 50 HP', price: 350, key: 'superpotion' },
+      { id: 'hyperpotion', name: 'Hiper Poção', icon: '🧪', sprite: 'hyperpotion', desc: 'Recupera 200 HP', price: 1200, key: 'hyperpotion' },
       { id: 'antidote', name: 'Antídoto', icon: '💚', sprite: 'antidote', desc: 'Cura envenenamento', price: 100, key: 'antidote' },
       { id: 'antiparalyze', name: 'Antiparalisia', icon: '💛', sprite: 'antiparalyze', desc: 'Cura paralisia', price: 100, key: 'antiparalyze' },
       { id: 'antiburn', name: 'Antiqueimadura', icon: '🧡', sprite: 'antiburn', desc: 'Cura queimadura', price: 100, key: 'antiburn' },
@@ -4213,6 +4544,9 @@
       { id: 'fullheal', name: 'Cura Total', icon: '✨', sprite: 'fullheal', desc: 'Cura qualquer status', price: 400, key: 'fullheal' },
       { id: 'fullrestore', name: 'Restaurar Tudo', icon: '🧪', sprite: 'fullrestore', desc: 'Recupera todo o HP e cura status', price: 1500, key: 'fullrestore' },
       { id: 'revive', name: 'Revive', icon: '💜', sprite: 'revive', desc: 'Revive um Pokémon', price: 1500, key: 'revive' },
+      { id: 'maxrevive', name: 'Max Revive', icon: '💎', sprite: 'maxrevive', desc: 'Revive um Pokémon com HP total', price: 4000, key: 'maxrevive' },
+      { id: 'ppup', name: 'PP Up', icon: '⬆️', sprite: 'ppup', desc: 'Aumenta em 20% o PP máximo de um golpe', price: 3000, key: 'ppup' },
+      { id: 'ppmax', name: 'PP Max', icon: '🔝', sprite: 'ppmax', desc: 'Maximiza o PP de um golpe', price: 6000, key: 'ppmax' },
       { id: 'oran', name: 'Oran Berry', icon: '🫐', sprite: 'oran', desc: 'Recupera 10 HP', price: 80, key: 'oran' },
       { id: 'leppa', name: 'Leppa Berry', icon: '🍒', sprite: 'leppa', desc: 'Recupera 10 PP de um golpe', price: 300, key: 'leppa' },
       { id: 'leftovers', name: 'Leftovers', icon: '🍇', sprite: 'leftovers', desc: 'Recupera 1/16 do HP ao fim do turno', price: 4000, key: 'leftovers' },
@@ -4222,6 +4556,22 @@
       { id: 'magnet', name: 'Magnet', icon: '🧲', sprite: 'magnet', desc: 'Fortalece golpes Eletricos em 10%', price: 980, key: 'magnet' },
       { id: 'twisted_spoon', name: 'Twisted Spoon', icon: '🥄', sprite: 'twisted_spoon', desc: 'Fortalece golpes Psiquicos em 10%', price: 980, key: 'twisted_spoon' },
       { id: 'black_belt', name: 'Black Belt', icon: '🥋', sprite: 'black_belt', desc: 'Fortalece golpes Lutadores em 10%', price: 980, key: 'black_belt' },
+      { id: 'exp_share', name: 'Exp. Share', icon: '\u{1F4D8}', sprite: 'exp_share', desc: 'Compartilha metade da experiencia com quem o segura', price: 5000, key: 'exp_share' },
+      { id: 'lucky_egg', name: 'Lucky Egg', icon: '\u{1F95A}', sprite: 'lucky_egg', desc: 'Aumenta em 50% a experiencia recebida pelo Pokemon que o segura', price: 10000, key: 'lucky_egg' },
+      { id: 'focus_sash', name: 'Focus Sash', icon: '🛡️', sprite: 'focus_sash', desc: 'Com HP cheio, sobrevive a um golpe fatal com 1 HP. Consome-se ao ativar.', price: 5000, key: 'focus_sash' },
+      { id: 'silk_scarf', name: 'Silk Scarf', icon: '🧣', sprite: 'silk_scarf', desc: 'Fortalece golpes Normais em 10%', price: 980, key: 'silk_scarf' },
+      { id: 'silver_powder', name: 'Silver Powder', icon: '✨', sprite: 'silver_powder', desc: 'Fortalece golpes Inseto em 10%', price: 980, key: 'silver_powder' },
+      { id: 'hard_stone', name: 'Hard Stone', icon: '🪨', sprite: 'hard_stone', desc: 'Fortalece golpes Pedra em 10%', price: 980, key: 'hard_stone' },
+      { id: 'sharp_beak', name: 'Sharp Beak', icon: '🪶', sprite: 'sharp_beak', desc: 'Fortalece golpes Voadores em 10%', price: 980, key: 'sharp_beak' },
+      { id: 'poison_barb', name: 'Poison Barb', icon: '☠️', sprite: 'poison_barb', desc: 'Fortalece golpes Veneno em 10%', price: 980, key: 'poison_barb' },
+      { id: 'spell_tag', name: 'Spell Tag', icon: '👻', sprite: 'spell_tag', desc: 'Fortalece golpes Fantasma em 10%', price: 980, key: 'spell_tag' },
+      { id: 'dragon_fang', name: 'Dragon Fang', icon: '🐉', sprite: 'dragon_fang', desc: 'Fortalece golpes Dragão em 10%', price: 980, key: 'dragon_fang' },
+      { id: 'never_melt_ice', name: 'Never-Melt Ice', icon: '🧊', sprite: 'never_melt_ice', desc: 'Fortalece golpes Gelo em 10%', price: 980, key: 'never_melt_ice' },
+      { id: 'metal_coat', name: 'Metal Coat', icon: '⚙️', sprite: 'metal_coat', desc: 'Fortalece golpes Aço em 10%', price: 980, key: 'metal_coat' },
+      { id: 'black_glasses', name: 'Black Glasses', icon: '🕶️', sprite: 'black_glasses', desc: 'Fortalece golpes Sombrios em 10%', price: 980, key: 'black_glasses' },
+      { id: 'amulet_coin', name: 'Amulet Coin', icon: '🪙', sprite: 'amulet_coin', desc: 'Dobra o dinheiro recebido em batalhas', price: 6000, key: 'amulet_coin' },
+      { id: 'shell_bell', name: 'Shell Bell', icon: '🐚', sprite: 'shell_bell', desc: 'Recupera 1/8 do dano causado', price: 5000, key: 'shell_bell' },
+      { id: 'macho_brace', name: 'Macho Brace', icon: '🏋️', sprite: 'macho_brace', desc: 'Dobra os EVs recebidos e reduz a Velocidade pela metade', price: 6000, key: 'macho_brace' },
       { id: 'repel', name: 'Repelente', icon: '🧴', sprite: 'repel', desc: 'Afasta selvagens', price: 350, key: 'repel' },
       { id: 'moonstone', name: 'Pedra da Lua', icon: '🌙', sprite: 'moonstone', desc: 'Pedra de evolução', price: 2100, key: 'moonstone' },
       { id: 'firestone', name: 'Pedra do Fogo', icon: '🔥', sprite: 'firestone', desc: 'Pedra de evolução', price: 2100, key: 'firestone' },
@@ -4229,6 +4579,147 @@
       { id: 'thunderstone', name: 'Pedra do Trovão', icon: '⚡', sprite: 'thunderstone', desc: 'Pedra de evolução', price: 2100, key: 'thunderstone' },
       { id: 'leafstone', name: 'Pedra da Folha', icon: '🍃', sprite: 'leafstone', desc: 'Pedra de evolução', price: 2100, key: 'leafstone' }
     ];
+
+    const EXTRA_MEDICINE_ITEMS = [
+      { id: 'max-potion', key: 'max_potion', name: 'Max Potion', desc: 'Restaura todo o HP.', category: 'medicine', kind: 'heal', amount: 99999, price: 2500 },
+      { id: 'fresh-water', key: 'fresh_water', name: 'Fresh Water', desc: 'Recupera 50 HP.', category: 'medicine', kind: 'heal', amount: 50, price: 200 },
+      { id: 'soda-pop', key: 'soda_pop', name: 'Soda Pop', desc: 'Recupera 60 HP.', category: 'medicine', kind: 'heal', amount: 60, price: 300 },
+      { id: 'lemonade', key: 'lemonade', name: 'Lemonade', desc: 'Recupera 80 HP.', category: 'medicine', kind: 'heal', amount: 80, price: 350 },
+      { id: 'moomoo-milk', key: 'moomoo_milk', name: 'Moomoo Milk', desc: 'Recupera 100 HP.', category: 'medicine', kind: 'heal', amount: 100, price: 500 },
+      { id: 'energy-powder', key: 'energy_powder', name: 'Energy Powder', desc: 'Recupera 50 HP.', category: 'medicine', kind: 'heal', amount: 50, price: 500 },
+      { id: 'energy-root', key: 'energy_root', name: 'Energy Root', desc: 'Recupera 200 HP.', category: 'medicine', kind: 'heal', amount: 200, price: 1000 },
+      { id: 'berry-juice', key: 'berry_juice', name: 'Berry Juice', desc: 'Recupera 20 HP.', category: 'medicine', kind: 'heal', amount: 20, price: 100 },
+      { id: 'sweet-heart', key: 'sweet_heart', name: 'Sweet Heart', desc: 'Recupera 20 HP.', category: 'medicine', kind: 'heal', amount: 20, price: 150 },
+      { id: 'ether', key: 'ether', name: 'Ether', desc: 'Recupera 10 PP de um golpe.', category: 'pp', kind: 'pp', amount: 10, price: 1200 },
+      { id: 'max-ether', key: 'max_ether', name: 'Max Ether', desc: 'Recupera todo o PP de um golpe.', category: 'pp', kind: 'maxPp', price: 2000 },
+      { id: 'elixir', key: 'elixir', name: 'Elixir', desc: 'Recupera 10 PP de todos os golpes.', category: 'pp', kind: 'allPp', amount: 10, price: 3000 },
+      { id: 'max-elixir', key: 'max_elixir', name: 'Max Elixir', desc: 'Recupera todo o PP de todos os golpes.', category: 'pp', kind: 'allMaxPp', price: 5000 },
+      { id: 'hp-up', key: 'hp_up', name: 'HP Up', desc: 'Aumenta 10 EVs de HP.', category: 'medicine', kind: 'ev', stat: 'hp', amount: 10, price: 9800 },
+      { id: 'protein', key: 'protein', name: 'Protein', desc: 'Aumenta 10 EVs de Ataque.', category: 'medicine', kind: 'ev', stat: 'attack', amount: 10, price: 9800 },
+      { id: 'iron', key: 'iron', name: 'Iron', desc: 'Aumenta 10 EVs de Defesa.', category: 'medicine', kind: 'ev', stat: 'defense', amount: 10, price: 9800 },
+      { id: 'carbos', key: 'carbos', name: 'Carbos', desc: 'Aumenta 10 EVs de Velocidade.', category: 'medicine', kind: 'ev', stat: 'speed', amount: 10, price: 9800 },
+      { id: 'calcium', key: 'calcium', name: 'Calcium', desc: 'Aumenta 10 EVs de Ataque Especial.', category: 'medicine', kind: 'ev', stat: 'specialAttack', amount: 10, price: 9800 },
+      { id: 'zinc', key: 'zinc', name: 'Zinc', desc: 'Aumenta 10 EVs de Defesa Especial.', category: 'medicine', kind: 'ev', stat: 'specialDefense', amount: 10, price: 9800 },
+      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy', desc: 'Sobe um nível.', category: 'medicine', kind: 'level', price: 4800 }
+    ];
+    EXTRA_MEDICINE_ITEMS.forEach(item => {
+      const iconUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.id}.png`;
+      ITEM_SPRITE[item.key] = iconUrl;
+      ITEM_SPRITE_FB[item.key] = `https://img.pokemondb.net/sprites/items/${item.id}.png`;
+      const catalogCategory = BAG_CATEGORIES.find(category => category.id === (item.category === 'pp' ? 'medicine' : item.category));
+      if (catalogCategory && !BAG_CATEGORIES.some(category => category.items.some(entry => entry.key === item.key))) {
+        catalogCategory.items.push({ key: item.key, name: item.name, sprite: item.key, desc: item.desc });
+      }
+      BAG_FIELD_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount, stat: item.stat });
+      if (!['ev', 'level'].includes(item.kind)) BATTLE_BAG_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount });
+      if (!SHOP_ITEMS.some(entry => entry.key === item.key)) {
+        SHOP_ITEMS.push({ id: item.key, name: item.name, icon: item.kind === 'ev' ? '💊' : item.kind === 'level' ? '🍬' : '🧪', sprite: item.key, desc: item.desc, price: item.price, key: item.key });
+      }
+    });
+
+    const EXTRA_BATTLE_ITEMS = [
+      { id: 'guard-spec', key: 'guard_spec', name: 'Guard Spec.', desc: 'Impede reduções de atributos da equipe por 5 turnos.', kind: 'guardSpec', price: 700 },
+      { id: 'dire-hit', key: 'dire_hit', name: 'Dire Hit', desc: 'Aumenta bastante a chance de acerto crítico do Pokémon ativo.', kind: 'direHit', price: 650 },
+      { id: 'x-attack', key: 'x_attack', name: 'X Attack', desc: 'Aumenta o Ataque do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'attack', price: 500 },
+      { id: 'x-defense', key: 'x_defense', name: 'X Defense', desc: 'Aumenta a Defesa do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'defense', price: 550 },
+      { id: 'x-speed', key: 'x_speed', name: 'X Speed', desc: 'Aumenta a Velocidade do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'speed', price: 350 },
+      { id: 'x-accuracy', key: 'x_accuracy', name: 'X Accuracy', desc: 'Aumenta a precisão do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'accuracy', price: 950 },
+      { id: 'x-sp-atk', key: 'x_special_attack', name: 'X Sp. Atk', desc: 'Aumenta o Ataque Especial do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'specialAttack', price: 350 },
+      { id: 'x-sp-def', key: 'x_special_defense', name: 'X Sp. Def', desc: 'Aumenta a Defesa Especial do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'specialDefense', price: 350 }
+    ];
+    BAG_CATEGORIES.push({ id: 'battle-items', title: 'Itens de batalha', items: [] });
+    EXTRA_BATTLE_ITEMS.forEach(item => {
+      ITEM_SPRITE[item.key] = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.id}.png`;
+      ITEM_SPRITE_FB[item.key] = `https://img.pokemondb.net/sprites/items/${item.id}.png`;
+      BAG_CATEGORIES.find(category => category.id === 'battle-items').items.push({ key: item.key, name: item.name, sprite: item.key, desc: item.desc });
+      BATTLE_BAG_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, stat: item.stat });
+      if (!SHOP_ITEMS.some(entry => entry.key === item.key)) SHOP_ITEMS.push({ id: item.key, name: item.name, icon: '⚔️', sprite: item.key, desc: item.desc, price: item.price, key: item.key });
+    });
+
+    const ITEM_CATALOG_PAGE_SIZE = 60;
+    let itemCatalogPage = 0;
+    const CATALOG_ITEM_KEY_ALIASES = {
+      'poke-ball': 'balls', 'pokeball': 'balls', 'great-ball': 'greatball', 'ultra-ball': 'ultraball',
+      'master-ball': 'masterball', 'rare-candy': 'rarecandy', 'paralyze-heal': 'antiparalyze',
+      'burn-heal': 'antiburn', 'ice-heal': 'iceheal', 'full-heal': 'fullheal', 'max-revive': 'maxrevive',
+      'pp-up': 'ppup', 'pp-max': 'ppmax', 'exp-share': 'exp_share', 'focus-sash': 'focus_sash',
+      'mystic-water': 'mystic_water', 'miracle-seed': 'miracle_seed', 'twisted-spoon': 'twisted_spoon',
+      'black-belt': 'black_belt', 'black-glasses': 'black_glasses', 'silk-scarf': 'silk_scarf',
+      'silver-powder': 'silver_powder', 'hard-stone': 'hard_stone', 'sharp-beak': 'sharp_beak',
+      'poison-barb': 'poison_barb', 'spell-tag': 'spell_tag', 'dragon-fang': 'dragon_fang',
+      'never-melt-ice': 'never_melt_ice', 'metal-coat': 'metal_coat'
+    };
+
+    function getCatalogGameItem(item) {
+      if (!item) return null;
+      const key = CATALOG_ITEM_KEY_ALIASES[item.id] || item.id.replace(/-/g, '_');
+      const normalized = value => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const sources = [
+        ...SHOP_ITEMS.map(entry => ({ ...entry, source: 'shop' })),
+        ...BAG_FIELD_ITEMS.map(entry => ({ ...entry, source: 'bag' })),
+        ...BATTLE_BAG_ITEMS.map(entry => ({ ...entry, source: 'battle' })),
+        ...Object.entries(HELD_ITEM_INFO).map(([entryKey, entry]) => ({ ...entry, key: entryKey, source: 'held' }))
+      ];
+      const match = sources.find(entry => normalized(entry.key) === normalized(key) || normalized(entry.id) === normalized(item.id));
+      return match ? { ...match, key: match.key || key } : null;
+    }
+
+    function renderItemCatalog() {
+      const catalog = Array.isArray(window.POKEMON_ITEM_CATALOG) ? window.POKEMON_ITEM_CATALOG : [];
+      const grid = document.getElementById('itemCatalogGrid');
+      const count = document.getElementById('itemCatalogCount');
+      const pages = document.getElementById('itemCatalogPages');
+      const search = (document.getElementById('itemCatalogSearch')?.value || '').trim().toLocaleLowerCase('pt-BR');
+      const category = document.getElementById('itemCatalogCategory')?.value || '';
+      const categorySelect = document.getElementById('itemCatalogCategory');
+      if (!grid || !count || !pages) return;
+      if (categorySelect && categorySelect.options.length === 1 && catalog.length) {
+        [...new Set(catalog.map(item => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(name => {
+          const option = document.createElement('option'); option.value = name; option.textContent = name; categorySelect.append(option);
+        });
+      }
+      const filtered = catalog.filter(item => {
+        if (category && item.category !== category) return false;
+        return !search || `${item.name} ${item.category} ${item.effect}`.toLocaleLowerCase('pt-BR').includes(search);
+      });
+      const pageCount = Math.max(1, Math.ceil(filtered.length / ITEM_CATALOG_PAGE_SIZE));
+      itemCatalogPage = Math.min(itemCatalogPage, pageCount - 1);
+      const start = itemCatalogPage * ITEM_CATALOG_PAGE_SIZE;
+      count.textContent = `${filtered.length.toLocaleString('pt-BR')} itens encontrados · exibindo ${filtered.length ? start + 1 : 0}–${Math.min(start + ITEM_CATALOG_PAGE_SIZE, filtered.length)} de ${filtered.length.toLocaleString('pt-BR')}`;
+      grid.innerHTML = filtered.slice(start, start + ITEM_CATALOG_PAGE_SIZE).map(item => {
+        const gameItem = getCatalogGameItem(item);
+        const gameKey = gameItem && gameItem.key;
+        const qty = gameKey ? getItemQty(gameKey) : 0;
+        const integrated = Boolean(gameItem && (BAG_FIELD_ITEMS.some(entry => entry.key === gameKey) || HELD_ITEM_INFO[gameKey] || BATTLE_BAG_ITEMS.some(entry => entry.key === gameKey)));
+        const icon = String(item.icon || item.id || '').replace(/[^a-z0-9-]/gi, '');
+        const primaryIcon = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${icon}.png`;
+        const backupIcon = `https://img.pokemondb.net/sprites/items/${icon}.png`;
+        const action = gameItem && HELD_ITEM_INFO[gameKey] && qty > 0
+            ? `<button class="btn btn-secondary item-catalog-action" onclick="switchPanel('pokemon')">Equipar em um Pokémon</button>`
+            : gameItem && BAG_FIELD_ITEMS.some(entry => entry.key === gameKey) && qty > 0
+              ? `<button class="btn btn-secondary item-catalog-action" onclick="openCatalogItem('${gameKey}')">Usar</button>`
+            : gameItem && gameItem.source === 'shop'
+              ? `<button class="btn btn-secondary item-catalog-action" onclick="switchPanel('market');buyItem('${gameItem.id}')">Comprar</button>`
+            : gameItem && BATTLE_BAG_ITEMS.some(entry => entry.key === gameKey) && qty > 0
+              ? `<span class="item-catalog-availability">Disponível durante batalhas</span>`
+              : '';
+        return `<article class="item-catalog-card"><img class="item-catalog-icon" src="${primaryIcon}" alt="${escapeHTML(item.name)}" loading="lazy" onerror="this.onerror=null;this.src='${backupIcon}';this.onerror=function(){this.replaceWith(document.createTextNode('🎒'))}" />
+          <div class="item-catalog-copy"><strong>${escapeHTML(item.name)}</strong><small>${escapeHTML(item.category || 'Outros')}</small>
+            <p>${escapeHTML(item.effect || 'Este item não possui um efeito descrito no catálogo.')}</p>
+            <span class="item-catalog-availability${integrated ? ' active' : ''}">${integrated ? `Mecânica no jogo${qty ? ` · Mochila: ${qty}` : ''}` : 'Informativo · mecânica ainda não integrada'}</span>
+            ${action}
+          </div></article>`;
+      }).join('') || '<p style="grid-column:1/-1;color:var(--text-muted);">Nenhum item corresponde à busca.</p>';
+      pages.innerHTML = pageCount > 1 ? `<button class="btn btn-secondary" style="width:auto;margin:0;" ${itemCatalogPage <= 0 ? 'disabled' : ''} onclick="itemCatalogPage--;renderItemCatalog()">Anterior</button><span style="color:var(--text-muted);font-size:.85rem;">Página ${itemCatalogPage + 1} de ${pageCount}</span><button class="btn btn-secondary" style="width:auto;margin:0;" ${itemCatalogPage >= pageCount - 1 ? 'disabled' : ''} onclick="itemCatalogPage++;renderItemCatalog()">Próxima</button>` : '';
+    }
+
+    function openCatalogItem(key) {
+      switchPanel('bag');
+      setTimeout(() => chooseBagItemTarget(key), 0);
+    }
+
+    document.getElementById('itemCatalogSearch').addEventListener('input', () => { itemCatalogPage = 0; renderItemCatalog(); });
+    document.getElementById('itemCatalogCategory').addEventListener('change', () => { itemCatalogPage = 0; renderItemCatalog(); });
 
     function getHealCost() {
       if (!player || !player.party) return 200;
@@ -4780,6 +5271,7 @@
       if (id === 'center') refreshCenterUI();
       if (id === 'market') refreshMarketUI();
       if (id === 'bag') renderBag();
+      if (id === 'item-catalog') renderItemCatalog();
       if (id === 'pokemon') refreshPartyUI();
       if (id === 'pokedex') renderPokedex();
       if (id === 'profile') refreshProfileUI();
@@ -5123,7 +5615,9 @@
         playerMaxHp: player.poke.maxHp,
         turn: 'player',
         busy: false,
-        potionsUsed: 0
+        potionsUsed: 0,
+        playerStatStages: {}, enemyStatStages: {}, playerCritStage: 0,
+        playerAccuracyStage: 0, guardSpecTurns: 0
       };
 
       // Setup UI
@@ -5276,6 +5770,9 @@
       backToMenu();
       player.poke.hp = battle.playerHp;
       player.poke = p;
+      battle.playerStatStages = {};
+      battle.playerAccuracyStage = 0;
+      battle.playerCritStage = 0;
       battle.playerHp = p.hp;
       battle.playerMaxHp = p.maxHp;
       updatePlayerHpBar();
@@ -5352,11 +5849,12 @@
       const immunity = abilityTypeImmunity(battle.enemy, moveType);
       const evaded = move.power>0 && Math.random()<getStatEvasionChance(battle.enemy,player.poke);
       const effectiveMult = immunity || evaded ? 0 : mult;
+      const critical = Math.random() < getCriticalHitChance(battle.playerCritStage);
       const rawDamage = calcDamage(player.poke.level, battle.enemy.level || 5, move.power, effectiveMult, hasStab);
       const attackStat = physical ? 'attack' : 'specialAttack';
       const defenseStat = physical ? 'defense' : 'specialDefense';
       const traitMultiplier = getPokemonStatMultiplier(player.poke,attackStat) / (getPokemonStatMultiplier(battle.enemy,defenseStat)*getPokemonStatMultiplier(battle.enemy,'hp')) * abilityDamageMultiplier(player.poke, battle.enemy, moveType, physical, hasStab);
-      const dmg = rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(player.poke, moveType))) : 0;
+      let dmg = rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(player.poke, moveType) * (critical ? 1.5 : 1))) : 0;
 
       const pSprite = document.getElementById('playerSprite');
       pSprite.classList.add('attack-anim');
@@ -5365,6 +5863,8 @@
 
       setLog(`${player.poke.name} usou ${move.name}!`);
       setTimeout(() => {
+        const sash = applyFocusSash(battle.enemy, battle.enemy.currentHp, dmg);
+        dmg = sash.damage;
         battle.enemy.currentHp = Math.max(0, battle.enemy.currentHp - dmg);
         updateEnemyHpBar();
         const eSprite = document.getElementById('enemySprite');
@@ -5381,9 +5881,11 @@
         let msg = dmg === 0
           ? (move.power <= 0 ? `${player.poke.name} não causou dano.` : 'Não teve efeito...')
           : `Causou ${dmg} de dano!`;
+        if (critical && dmg > 0) msg += ' Acerto crítico!';
         if (mult >= 2) msg += ' É super efetivo!';
         else if (mult > 0 && mult < 1) msg += ' Não é muito efetivo...';
         let abilityMessage = evaded ? `${battle.enemy.name} desviou do golpe!` : '';
+        if (sash.message) abilityMessage = `${abilityMessage} ${sash.message}`.trim();
         if (immunity === 'Water Absorb' || immunity === 'Volt Absorb') {
           const healed = Math.min(battle.enemy.maxHp - battle.enemy.currentHp, Math.max(1, Math.floor(battle.enemy.maxHp / 4)));
           battle.enemy.currentHp += healed;
@@ -5395,14 +5897,18 @@
         const abilityStatus = applyAbilityOnHit(player.poke, battle.enemy, dmg > 0);
         if (abilityStatus) abilityMessage = `${abilityMessage} ${abilityStatus}`.trim();
         const statusMessage = evaded ? '' : applyMoveStatus(player.poke, battle.enemy, move);
+        const statChangeMessage = evaded ? '' : applyMoveStatChanges(player.poke, battle.enemy, move, dmg);
         const heldMessage = applyHeldItemTrigger(battle.enemy);
         const playerHeldMessage = applyHeldItemTrigger(player.poke);
+        const shellBellMessage = applyShellBell(player.poke, dmg);
         const leftoversMessage = applyHeldItemEndTurn(player.poke);
         battle.playerHp = player.poke.hp;
         if (abilityMessage) msg += ` ${abilityMessage}`;
         if (statusMessage) msg += ` ${statusMessage}`;
+        if (statChangeMessage) msg += ` ${statChangeMessage}`;
         if (heldMessage) msg += ` ${heldMessage}`;
         if (playerHeldMessage) msg += ` ${playerHeldMessage}`;
+        if (shellBellMessage) msg += ` ${shellBellMessage}`;
         if (leftoversMessage) msg += ` ${leftoversMessage}`;
         const residualMessage = applyResidualStatus(player.poke);
         if (residualMessage) msg += ` ${residualMessage}`;
@@ -5445,6 +5951,7 @@
       if (statusBlock) {
         const residual = applyResidualStatus(battle.enemy);
         const leftovers = applyHeldItemEndTurn(battle.enemy);
+        tickGuardSpecTurn();
         if (residual || leftovers) updateEnemyHpBar();
         setLog([statusBlock, residual, leftovers].filter(Boolean).join(' '));
         if (battle.enemy.currentHp <= 0) {
@@ -5455,7 +5962,7 @@
         }
         return;
       }
-      const moves = (battle.enemy.moves || []).filter(move => move.power > 0 || move.statusEffect || getStatusMoveEffect(move));
+      const moves = (battle.enemy.moves || []).filter(move => move.power > 0 || move.statusEffect || move.statChanges || getStatusMoveEffect(move));
       const move = moves[Math.floor(Math.random() * moves.length)] || { name: 'Investida', power: 30, type: 'Normal' };
       const moveType = move.type || 'Normal';
       const defTypes = getTypes(player.poke.id);
@@ -5468,11 +5975,12 @@
       const immunity = abilityTypeImmunity(player.poke, moveType);
       const evaded = move.power>0 && Math.random()<getStatEvasionChance(player.poke,battle.enemy);
       const effectiveMult = immunity || evaded ? 0 : mult;
+      const critical = Math.random() < getCriticalHitChance(battle.enemyCritStage);
       const rawDamage = calcDamage(battle.enemy.level || 5, player.poke.level, move.power, effectiveMult, hasStab);
       const attackStat = physical ? 'attack' : 'specialAttack';
       const defenseStat = physical ? 'defense' : 'specialDefense';
       const traitMultiplier = getPokemonStatMultiplier(battle.enemy,attackStat) / (getPokemonStatMultiplier(player.poke,defenseStat)*getPokemonStatMultiplier(player.poke,'hp')) * abilityDamageMultiplier(battle.enemy, player.poke, moveType, physical, hasStab);
-      const dmg = rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(battle.enemy, moveType))) : 0;
+      let dmg = rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(battle.enemy, moveType) * (critical ? 1.5 : 1))) : 0;
 
       const eSprite = document.getElementById('enemySprite');
       eSprite.classList.add('attack-anim');
@@ -5481,6 +5989,8 @@
 
       setLog(`${battle.enemy.name} usou ${move.name}!`);
       setTimeout(() => {
+        const sash = applyFocusSash(player.poke, battle.playerHp, dmg);
+        dmg = sash.damage;
         battle.playerHp = Math.max(0, battle.playerHp - dmg);
         player.poke.hp = battle.playerHp;
         updatePlayerHpBar();
@@ -5498,9 +6008,11 @@
         let msg = dmg === 0
           ? (move.power <= 0 ? `${battle.enemy.name} não causou dano.` : 'Não teve efeito...')
           : `Causou ${dmg} de dano em ${player.poke.name}!`;
+        if (critical && dmg > 0) msg += ' Acerto crítico!';
         if (mult >= 2) msg += ' É super efetivo!';
         else if (mult > 0 && mult < 1) msg += ' Não é muito efetivo...';
         let abilityMessage = evaded ? `${player.poke.name} desviou do golpe!` : '';
+        if (sash.message) abilityMessage = `${abilityMessage} ${sash.message}`.trim();
         if (immunity === 'Water Absorb' || immunity === 'Volt Absorb') {
           const healed = Math.min(player.poke.maxHp - battle.playerHp, Math.max(1, Math.floor(player.poke.maxHp / 4)));
           battle.playerHp += healed;
@@ -5513,14 +6025,19 @@
         const abilityStatus = applyAbilityOnHit(battle.enemy, player.poke, dmg > 0);
         if (abilityStatus) abilityMessage = `${abilityMessage} ${abilityStatus}`.trim();
         const statusMessage = evaded ? '' : applyMoveStatus(battle.enemy, player.poke, move);
+        const statChangeMessage = evaded ? '' : applyMoveStatChanges(battle.enemy, player.poke, move, dmg);
+        tickGuardSpecTurn();
         const heldMessage = applyHeldItemTrigger(player.poke);
         const enemyHeldMessage = applyHeldItemTrigger(battle.enemy);
+        const shellBellMessage = applyShellBell(battle.enemy, dmg);
         const leftoversMessage = applyHeldItemEndTurn(battle.enemy);
         battle.playerHp = player.poke.hp;
         if (abilityMessage) msg += ` ${abilityMessage}`;
         if (statusMessage) msg += ` ${statusMessage}`;
+        if (statChangeMessage) msg += ` ${statChangeMessage}`;
         if (heldMessage) msg += ` ${heldMessage}`;
         if (enemyHeldMessage) msg += ` ${enemyHeldMessage}`;
+        if (shellBellMessage) msg += ` ${shellBellMessage}`;
         if (leftoversMessage) msg += ` ${leftoversMessage}`;
         const residualMessage = applyResidualStatus(battle.enemy);
         if (residualMessage) {
@@ -5587,6 +6104,9 @@
       battle.forceSwitch = false;
       backToMenu();
       player.poke = p;
+      battle.playerStatStages = {};
+      battle.playerAccuracyStage = 0;
+      battle.playerCritStage = 0;
       battle.playerHp = p.hp;
       battle.playerMaxHp = p.maxHp;
       updatePlayerHpBar();
@@ -5624,6 +6144,41 @@
         return;
       }
 
+      if (['battleBoost', 'direHit', 'guardSpec'].includes(item.kind)) {
+        const active = player.poke;
+        if (!active || active.hp <= 0) return;
+        let message;
+        if (item.kind === 'battleBoost') {
+          if (item.stat === 'accuracy') {
+            const before = battle.playerAccuracyStage || 0;
+            battle.playerAccuracyStage = Math.min(6, before + 2);
+            message = battle.playerAccuracyStage === before ? 'A precisão já está no máximo!' : `${item.name} aumentou a precisão de ${active.name}!`;
+          } else {
+            const stages = battle.playerStatStages || (battle.playerStatStages = {});
+            const before = stages[item.stat] || 0;
+            stages[item.stat] = Math.min(6, before + 2);
+            const statName = { attack: 'Ataque', defense: 'Defesa', speed: 'Velocidade', specialAttack: 'Ataque Especial', specialDefense: 'Defesa Especial' }[item.stat];
+            message = stages[item.stat] === before ? `${statName} já está no máximo!` : `${item.name} aumentou ${statName} de ${active.name} em ${stages[item.stat] - before} estágio(s)!`;
+          }
+        } else if (item.kind === 'direHit') {
+          const before = battle.playerCritStage || 0;
+          battle.playerCritStage = Math.min(4, before + 1);
+          message = battle.playerCritStage === before ? 'A chance de acerto crítico já está no máximo!' : `Usou ${item.name}! A chance de acerto crítico de ${active.name} aumentou.`;
+        } else {
+          battle.guardSpecTurns = 5;
+          message = 'Guard Spec. protege a equipe contra reduções de atributos por 5 turnos!';
+        }
+        renderBattleStatusIndicators();
+        decItemQty(key, 1);
+        battle.busy = true;
+        backToMenu();
+        saveGame();
+        setLog(message);
+        battle.turn = 'enemy';
+        setTimeout(enemyAttack, 1000);
+        return;
+      }
+
       renderBattleItemTargets(item);
     }
 
@@ -5637,9 +6192,9 @@
         .map((pokemon, index) => ({ pokemon, index }))
         .filter(({ pokemon }) => canUseItemOnPokemon(item, pokemon));
       if (!targets.length) {
-        setLog(item.kind === 'revive'
+        setLog(item.kind === 'revive' || item.kind === 'maxRevive'
           ? 'Nenhum Pokémon desmaiado pode receber Revive.'
-          : item.kind === 'pp'
+          : ['pp', 'maxPp', 'allPp', 'allMaxPp', 'ppUp', 'ppMax'].includes(item.kind)
             ? 'Nenhum Pokémon tem golpes que precisem recuperar PP.'
             : item.kind === 'statusCure'
               ? 'Nenhum Pokémon tem o status que esse item cura.'
@@ -5652,7 +6207,7 @@
         ${targets.map(({ pokemon, index }) => `
           <button class="move-btn" onclick="useBattleItemOnPokemon('${item.key}',${index})">
             <span>${pokemon.name}${pokemon === player.poke ? ' ★' : ''}</span>
-            <span class="switch-hp">Nv.${pokemon.level} · ${item.kind === 'pp'
+            <span class="switch-hp">Nv.${pokemon.level} · ${['pp', 'maxPp', 'allPp', 'allMaxPp', 'ppUp', 'ppMax'].includes(item.kind)
               ? `PP baixo: ${pokemon.moves.filter(move => move.pp < move.maxPp).length} golpe(s)`
               : item.kind === 'statusCure'
                 ? getPokemonStatusLabel(pokemon)
@@ -5668,8 +6223,20 @@
       const item = BATTLE_BAG_ITEMS.find(entry => entry.key === key);
       const pokemon = player.party[index];
       if (!item || !pokemon || getItemQty(key) <= 0) return;
-      if (item.kind === 'pp') {
-        const moves = pokemon.moves.filter(move => move.pp < move.maxPp);
+      if (item.kind === 'allPp' || item.kind === 'allMaxPp') {
+        let restored = 0;
+        pokemon.moves.forEach(move => {
+          const amount = item.kind === 'allMaxPp' ? move.maxPp : item.amount;
+          const gained = Math.min(amount, move.maxPp - move.pp);
+          move.pp += gained; restored += gained;
+        });
+        decItemQty(key, 1); battle.busy = true; backToMenu(); saveGame(); SFX.heal();
+        setLog(`${item.name} restaurou ${restored} PP em ${pokemon.name}.`);
+        battle.turn = 'enemy'; setTimeout(enemyAttack, 1000);
+        return;
+      }
+      if (['pp', 'maxPp', 'ppUp', 'ppMax'].includes(item.kind)) {
+        const moves = pokemon.moves.filter(move => ['pp', 'maxPp'].includes(item.kind) ? move.pp < move.maxPp : (move.ppUps || 0) < 3);
         if (!moves.length) {
           setLog(`${pokemon.name} não tem golpes que precisem recuperar PP.`);
           renderBattleItemTargets(item);
@@ -5677,13 +6244,13 @@
         }
         const bag = document.getElementById('bagMenu');
         bag.innerHTML = `
-          <div style="grid-column:1/-1;color:var(--text-muted);">Escolha um golpe de ${pokemon.name} para recuperar 10 PP:</div>
+          <div style="grid-column:1/-1;color:var(--text-muted);">Escolha um golpe de ${pokemon.name} ${item.kind === 'pp' ? 'para recuperar 10 PP' : 'para aumentar o PP máximo'}:</div>
           ${moves.map(move => `
-            <button class="move-btn" onclick="useBattleLeppaOnMove(${index},'${move.name.replace(/'/g, "\\'")}')">
+            <button class="move-btn" onclick="useBattlePpItem('${key}',${index},'${move.name.replace(/'/g, "\\'")}')">
               <span>${move.name}</span><span class="move-power">PP ${move.pp}/${move.maxPp}</span>
             </button>
           `).join('')}
-          <button class="move-btn" onclick="renderBattleItemTargets(BATTLE_BAG_ITEMS.find(item => item.key === 'leppa'))" style="grid-column:1/-1;text-align:center;justify-content:center;">← Voltar</button>
+          <button class="move-btn" onclick="renderBattleItemTargets(BATTLE_BAG_ITEMS.find(item => item.key === '${key}'))" style="grid-column:1/-1;text-align:center;justify-content:center;">← Voltar</button>
         `;
         return;
       }
@@ -5692,8 +6259,10 @@
       battle.busy = true;
       backToMenu();
 
-      if (item.kind === 'revive') {
-        pokemon.hp = Math.max(1, Math.ceil(pokemon.maxHp / 2));
+      if (item.kind === 'revive' || item.kind === 'maxRevive') {
+        pokemon.status = '';
+        delete pokemon.sleepTurns;
+        pokemon.hp = item.kind === 'maxRevive' ? pokemon.maxHp : Math.max(1, Math.ceil(pokemon.maxHp / 2));
       } else if (item.kind !== 'statusCure') {
         const healAmount = item.kind === 'fullHeal'
           ? pokemon.maxHp
@@ -5715,26 +6284,46 @@
       SFX.heal();
       setLog(curedStatus
         ? `${item.name} curou ${curedStatus} de ${pokemon.name}!`
-        : item.kind === 'revive'
-        ? `Usou Revive! ${pokemon.name} voltou com ${pokemon.hp} HP.`
-        : `Usou ${item.name} em ${pokemon.name}! Recuperou HP.`);
+        : item.kind === 'maxRevive'
+          ? `Usou Max Revive! ${pokemon.name} voltou com o HP total.`
+          : item.kind === 'revive'
+            ? `Usou Revive! ${pokemon.name} voltou com ${pokemon.hp} HP.`
+            : `Usou ${item.name} em ${pokemon.name}! Recuperou HP.`);
       battle.turn = 'enemy';
       setTimeout(enemyAttack, 1000);
     }
 
     function useBattleLeppaOnMove(partyIndex, moveName) {
+      useBattlePpItem('leppa', partyIndex, moveName);
+    }
+
+    function useBattlePpItem(itemKey, partyIndex, moveName) {
       if (!battle || battle.busy) return;
+      const item = BATTLE_BAG_ITEMS.find(entry => entry.key === itemKey);
       const pokemon = player.party[partyIndex];
       const move = pokemon && pokemon.moves.find(entry => entry.name === moveName);
-      if (!pokemon || !move || move.pp >= move.maxPp || getItemQty('leppa') <= 0) return;
-      const restored = Math.min(10, move.maxPp - move.pp);
-      move.pp += restored;
-      decItemQty('leppa', 1);
+      if (!item || !pokemon || !move || getItemQty(itemKey) <= 0) return;
+      let message;
+      if (item.kind === 'pp' || item.kind === 'maxPp') {
+        if (move.pp >= move.maxPp) return;
+        const restored = Math.min(item.kind === 'maxPp' ? move.maxPp : (item.amount || 10), move.maxPp - move.pp);
+        move.pp += restored;
+        message = `${item.name} restaurou ${restored} PP de ${pokemon.name}: ${move.name}.`;
+      } else {
+        if ((move.ppUps || 0) >= 3) return;
+        const oldMax = move.maxPp;
+        move.ppUps = item.kind === 'ppMax' ? 3 : Math.min(3, (move.ppUps || 0) + 1);
+        normalizePokemonMoves(pokemon);
+        const added = move.maxPp - oldMax;
+        move.pp = Math.min(move.maxPp, move.pp + added);
+        message = `${item.name} aumentou o PP máximo de ${move.name} para ${move.maxPp}!`;
+      }
+      decItemQty(itemKey, 1);
       battle.busy = true;
       backToMenu();
       saveGame();
       SFX.heal();
-      setLog(`Leppa Berry restaurou ${restored} PP de ${pokemon.name}: ${move.name}.`);
+      setLog(message);
       battle.turn = 'enemy';
       setTimeout(enemyAttack, 1000);
     }
@@ -5762,10 +6351,17 @@
     function endBattle(won, captured, capturedName) {
       battle.busy = true;
       if (won && battle.isGym && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
-        battle.totalExperience = (battle.totalExperience || 0) + getBattleExperience(battle.enemy, true);
-        const effort = awardPokemonEffort(player.poke, battle.enemy);
-        battle.totalEffort = battle.totalEffort || {};
-        for (const [stat,value] of Object.entries(effort)) battle.totalEffort[stat] = (battle.totalEffort[stat] || 0) + value;
+        const shares = getBattleExperienceShares(getBattleExperience(battle.enemy, true), player.poke);
+        battle.experienceShares = battle.experienceShares || new Map();
+        for (const [pokemon, amount] of shares) {
+          battle.experienceShares.set(pokemon, (battle.experienceShares.get(pokemon) || 0) + amount);
+          const effort = awardPokemonEffort(pokemon, battle.enemy);
+          if (pokemon === player.poke) {
+            battle.totalEffort = battle.totalEffort || {};
+            for (const [stat, value] of Object.entries(effort)) battle.totalEffort[stat] = (battle.totalEffort[stat] || 0) + value;
+          }
+        }
+        battle.totalExperience = [...battle.experienceShares.values()].reduce((sum, amount) => sum + amount, 0);
         battle.experienceAwarded = true;
       }
       document.getElementById('battleMenu').style.display = 'none';
@@ -5788,9 +6384,24 @@
       }
 
       if (won) {
-        const money = Math.floor(50 + battle.enemy.level * 30 + Math.random() * 100);
-        const xp = captured ? 0 : getBattleExperience(battle.enemy);
-        const effort = captured ? {} : awardPokemonEffort(player.poke, battle.enemy);
+        // Batalhas selvagens devem complementar a renda, sem substituir recompensas de progressão.
+        const baseMoney = Math.min(100, Math.max(10, Math.floor(8 + battle.enemy.level * 2)));
+        const rewardMultiplier = player.poke?.heldItem === 'amulet_coin' ? 2 : 1;
+        const money = Math.floor((captured ? baseMoney * 0.5 : baseMoney) * rewardMultiplier);
+        const experienceShares = captured ? new Map() : getBattleExperienceShares(getBattleExperience(battle.enemy), player.poke);
+        const xp = experienceShares.get(player.poke) || 0;
+        const effort = {};
+        const sharedExperienceText = [];
+        for (const [pokemon, amount] of experienceShares) {
+          if (pokemon === player.poke || amount <= 0) continue;
+          awardPokemonExperience(pokemon, amount);
+          sharedExperienceText.push(`${pokemon.name}: +${amount} XP`);
+        }
+        for (const [pokemon, amount] of experienceShares) {
+          if (amount <= 0) continue;
+          const gained = awardPokemonEffort(pokemon, battle.enemy);
+          if (pokemon === player.poke) Object.assign(effort, gained);
+        }
         player.money += money;
         player.poke.hp = Math.max(0, battle.playerHp);
         const levelsGained = awardPokemonExperience(player.poke, xp);
@@ -5806,16 +6417,15 @@
         document.getElementById('resultDesc').textContent = captured
           ? `${capturedName} agora faz parte da sua equipe!`
           : `Você derrotou ${battle.enemy.name}!`;
-        let evoNote = '';
-        if (leveled && evolvedReady) {
-          evoNote = `<br><strong style="color:#c4b5fd">✨ ${player.poke.name} pode evoluir!</strong>`;
-        }
-        document.getElementById('resultRewards').innerHTML = `
-          + ₽ ${money}<br>
-          ${xp ? `+ ${xp} XP` : ''}${leveled ? `<br><strong style="color:var(--success)">⬆️ ${player.poke.name} ${levelsGained === 1 ? `subiu para o Nv. ${player.poke.level}` : `subiu ${levelsGained} níveis e chegou ao Nv. ${player.poke.level}`}!</strong>` : ''}
-          ${formatEffortGain(effort) ? `<br>${formatEffortGain(effort)}` : ''}
-          ${evoNote}
-          ${captured ? `<br><strong style="color:var(--success)">✓ ${capturedName} adicionado!</strong>` : ''}`;
+        const rewardRows = [`<div class="reward-row reward-money"><span class="reward-label">Dinheiro</span><strong class="reward-value">+ ₽ ${money.toLocaleString('pt-BR')}</strong></div>`];
+        if (xp) rewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`);
+        if (leveled) rewardRows.push(`<div class="reward-highlight">⬆️ ${player.poke.name} ${levelsGained === 1 ? `subiu para o Nv. ${player.poke.level}` : `subiu ${levelsGained} níveis e chegou ao Nv. ${player.poke.level}`}!</div>`);
+        const effortText = formatEffortGain(effort);
+        if (effortText) rewardRows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortText}</strong></div>`);
+        if (sharedExperienceText.length) rewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${sharedExperienceText.join(' / ')}</strong></div>`);
+        if (leveled && evolvedReady) rewardRows.push('<div class="reward-highlight">✨ Pokémon pronto para evoluir!</div>');
+        if (captured) rewardRows.push(`<div class="reward-highlight">✓ ${capturedName} adicionado à equipe!</div>`);
+        document.getElementById('resultRewards').innerHTML = rewardRows.join('');
         updateStatsUI();
         // Missões: vitória em exploração
         if (!battle.isGym) {
@@ -5832,7 +6442,7 @@
         player.poke.hp = 0;
         document.getElementById('resultTitle').textContent = '💀 Derrota...';
         document.getElementById('resultDesc').textContent = `${player.poke.name} desmaiou! Você foi levado ao Centro Pokémon.`;
-        document.getElementById('resultRewards').innerHTML = `Perdeu ₽ ${lost}<br>Equipe curada no Centro Pokémon.`;
+        document.getElementById('resultRewards').innerHTML = `<div class="reward-row reward-money"><span class="reward-label">Dinheiro perdido</span><strong class="reward-value">− ₽ ${lost.toLocaleString('pt-BR')}</strong></div><div class="reward-highlight">Equipe curada no Centro Pokémon.</div>`;
         // Heal the whole party as at a Pokémon Center.
         player.party.forEach(p => {
           p.hp = p.maxHp;
@@ -5856,7 +6466,13 @@
           const qty = getItemQty(item.key);
           if (qty <= 0) return '';
           if (item.kind === 'ball' && battle.isGym) return '';
-          if (item.kind !== 'ball' && !player.party.some(pokemon => canUseItemOnPokemon(item, pokemon))) return '';
+          if (['battleBoost', 'direHit', 'guardSpec'].includes(item.kind)) {
+            if (!player.poke || player.poke.hp <= 0) return '';
+            if (item.kind === 'battleBoost' && item.stat === 'accuracy' && (battle.playerAccuracyStage || 0) >= 6) return '';
+            if (item.kind === 'battleBoost' && item.stat !== 'accuracy' && (battle.playerStatStages?.[item.stat] || 0) >= 6) return '';
+            if (item.kind === 'direHit' && (battle.playerCritStage || 0) >= 4) return '';
+            if (item.kind === 'guardSpec' && (battle.guardSpecTurns || 0) > 0) return '';
+          } else if (item.kind !== 'ball' && !player.party.some(pokemon => canUseItemOnPokemon(item, pokemon))) return '';
           return `
             <button class="move-btn" onclick="useBattleBagItem('${item.key}')" style="display:flex;align-items:center;gap:8px;">
               ${itemIcon(item.sprite, 'item-icon-sm')}
@@ -6051,7 +6667,9 @@
         playerHp: player.poke.hp,
         playerMaxHp: player.poke.maxHp,
         turn: 'player',
-        busy: false
+        busy: false,
+        playerStatStages: {}, enemyStatStages: {}, playerCritStage: 0,
+        playerAccuracyStage: 0, guardSpecTurns: 0
       };
       battle.enemy = battle.gymTeam[0];
 
@@ -6138,14 +6756,23 @@
       const gym = battle.gym;
       const xp = battle.totalExperience || 0;
       const effortMessage = formatEffortGain(battle.totalEffort);
+      const experienceShares = battle.experienceShares || new Map([[player.poke, xp]]);
       player.poke.hp = Math.max(0, battle.playerHp);
-      const levelsGained = awardPokemonExperience(player.poke, xp);
+      const levelsGained = awardPokemonExperience(player.poke, experienceShares.get(player.poke) || 0);
+      let sharedLevelsGained = 0;
+      const sharedExperienceText = [];
+      for (const [pokemon, amount] of experienceShares) {
+        if (pokemon === player.poke || amount <= 0) continue;
+        sharedLevelsGained += awardPokemonExperience(pokemon, amount);
+        sharedExperienceText.push(`${pokemon.name}: +${amount} XP`);
+      }
       const evolvedReady = levelsGained > 0 && canEvolve(player.poke);
       updatePlayerExperienceBar();
-      if (levelsGained > 0) SFX.levelUp();
+      if (levelsGained > 0 || sharedLevelsGained > 0) SFX.levelUp();
       player.badges++;
       player.badgesList.push(gym.badge);
-      player.money += gym.reward;
+      const gymMoneyReward = gym.reward * (player.poke?.heldItem === 'amulet_coin' ? 2 : 1);
+      player.money += gymMoneyReward;
       // Heal party a bit
       player.party.forEach(p => { p.hp = Math.min(p.maxHp, p.hp + 10); });
       player.poke.hp = Math.min(player.poke.maxHp, player.poke.hp);
@@ -6160,12 +6787,16 @@
       result.classList.add('show');
       document.getElementById('resultTitle').textContent = '🏅 Insígnia conquistada!';
       document.getElementById('resultDesc').textContent = `Você derrotou ${gym.leader} e ganhou a Insígnia ${gym.badge}!`;
-      document.getElementById('resultRewards').innerHTML = `
-        + Insígnia ${gym.badge}<br>
-        + ₽ ${gym.reward.toLocaleString('pt-BR')}<br>
-        + ${xp} XP${levelsGained ? `<br><strong style="color:var(--success)">⬆️ ${player.poke.name} ${levelsGained === 1 ? `subiu para o Nv. ${player.poke.level}` : `subiu ${levelsGained} níveis e chegou ao Nv. ${player.poke.level}`}!</strong>` : ''}<br>
-        ${effortMessage ? `${effortMessage}<br>` : ''}
-        Insígnias: ${player.badges}/8`;
+      const gymRewardRows = [
+        `<div class="reward-row"><span class="reward-label">Insígnia</span><strong class="reward-value">${gym.badge}</strong></div>`,
+        `<div class="reward-row reward-money"><span class="reward-label">Dinheiro</span><strong class="reward-value">+ ₽ ${gymMoneyReward.toLocaleString('pt-BR')}</strong></div>`,
+        `<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`
+      ];
+      if (levelsGained) gymRewardRows.push(`<div class="reward-highlight">⬆️ ${player.poke.name} ${levelsGained === 1 ? `subiu para o Nv. ${player.poke.level}` : `subiu ${levelsGained} níveis e chegou ao Nv. ${player.poke.level}`}!</div>`);
+      if (effortMessage) gymRewardRows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
+      if (sharedExperienceText.length) gymRewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${sharedExperienceText.join(' / ')}</strong></div>`);
+      gymRewardRows.push(`<div class="reward-row"><span class="reward-label">Insígnias conquistadas</span><strong class="reward-value">${player.badges}/8</strong></div>`);
+      document.getElementById('resultRewards').innerHTML = gymRewardRows.join('');
       if (evolvedReady) battle._pendingEvo = player.poke;
       updateStatsUI();
       SFX.gymFanfare();
