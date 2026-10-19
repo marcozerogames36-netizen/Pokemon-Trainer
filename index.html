@@ -246,7 +246,7 @@
     .pvp-select-card img { width:48px; height:48px; object-fit:contain; }
     .pvp-lobby-box, .pvp-room-box { max-width:900px; padding:18px; border:1px solid var(--border); border-radius:16px; background:var(--card); }
     .pvp-room-controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:16px; }
-    .pvp-room-controls input { flex:1 1 180px; min-width:0; }
+    .pvp-room-controls input { flex:1 1 320px; width:min(100%,380px); min-width:240px; height:42px; padding:8px 14px; text-align:center; letter-spacing:.14em; text-transform:uppercase; }
     .pvp-code { font-size:1.6rem; font-weight:800; letter-spacing:.18em; color:#c4b5fd; }
     .pvp-sides { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:16px 0; }
     .pvp-side-card { padding:14px; border:1px solid var(--border); border-radius:14px; background:var(--input-bg); min-width:0; }
@@ -259,7 +259,28 @@
     .pvp-battle-actions .btn { margin:0; }
     .pvp-action-disabled { opacity:.45; cursor:not-allowed; }
     .pvp-log { display:grid; gap:5px; margin:14px 0; padding:12px; max-height:170px; overflow:auto; border-radius:10px; background:#0d0d12; color:var(--text-muted); font-size:.85rem; }
+    .pvp-arena { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; min-height:min(76vh,720px); overflow:hidden; border:1px solid var(--border); border-radius:18px; background:#0a1628; }
+    .pvp-arena .battle-bg { background:linear-gradient(180deg,#1a2744 0%,#2a4a3a 45%,#1a3a2a 100%); }
+    .pvp-arena .battle-field { min-height:360px; }
+    .pvp-arena .battle-ui { width:min(100%,700px); }
+    .pvp-room-toolbar { position:absolute; z-index:3; top:12px; left:14px; right:14px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .pvp-room-toolbar .btn { width:auto; margin:0; padding:7px 11px; }
+    .pvp-turn-prompt { margin:12px 0 0; color:var(--text-muted); font-size:.82rem; }
+    .pvp-waiting-action { padding:14px; border:1px solid var(--border); border-radius:12px; text-align:center; color:var(--text-muted); background:var(--input-bg); }
+    .pvp-trainer-name { margin-bottom:4px; color:var(--text-muted); font-size:.68rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
     @media (max-width:560px) { .pvp-sides { grid-template-columns:1fr; } .pvp-lobby-box,.pvp-room-box { padding:13px; } }
+    @media (max-width:700px) {
+      .pvp-arena { min-height:calc(100vh - 180px); min-height:calc(100dvh - 180px); }
+      .pvp-arena .battle-field { min-height:300px; padding:56px 12px 8px; }
+      .pvp-arena .battle-enemy, .pvp-arena .battle-player { gap:6px; }
+      .pvp-arena .enemy-info, .pvp-arena .player-info { min-width:0; width:min(58%,240px); padding:8px 10px; }
+      .pvp-arena .enemy-sprite, .pvp-arena .player-sprite { width:clamp(86px,24vw,140px); height:clamp(86px,24vw,140px); }
+      .pvp-arena .battle-ui { padding:12px 12px 14px; }
+    }
+    @media (max-width:560px) {
+      .pvp-room-controls input { flex:1 1 100%; width:100%; max-width:none; min-width:0; }
+      .pvp-room-controls .btn { flex:1 1 auto; }
+    }
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
     .game-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 16px;
@@ -403,6 +424,7 @@
       transform: translate(-50%,-50%); border: 2px solid #101116; border-radius: 50%;
       background: #f8fafc; box-shadow: inset 0 0 0 2px #fff;
     }
+    .party-ball.fainted { filter: grayscale(1); opacity: .42; }
     .enemy-name-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 2px; }
     .enemy-info .poke-name { font-weight: 700; font-size: 0.95rem; }
     .enemy-info .poke-level { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
@@ -6249,6 +6271,8 @@
     let pvpResolving = false;
     let pvpStarting = false;
     let pvpSubmitting = false;
+    let pvpBattleMenu = 'main';
+    let pvpBattleMenuTurn = 0;
 
     function pvpGetSelectedTeam() {
       if (!player || !(pvpSelectedIndices instanceof Set)) return [];
@@ -6276,7 +6300,7 @@
         }));
         return {
           id: Number(pokemon.id) || 1, name: String(pokemon.name || 'Pokémon').slice(0,32),
-          level: Math.max(1, Math.min(100, Math.floor(Number(pokemon.level) || 1))), maxHp,
+          gender: pokemon.gender || '', level: Math.max(1, Math.min(100, Math.floor(Number(pokemon.level) || 1))), maxHp,
           types: getTypes(pokemon.id),
           hp: maxHp, ability: ABILITY_INFO[pokemon.ability] ? pokemon.ability : '',
           nature: String(pokemon.nature || ''), ivs, evs, moves
@@ -6420,17 +6444,27 @@
     function pvpTheirTeam() { return pvpIsHost() ? (pvpRoom?.guest_team || []) : (pvpRoom?.host_team || []); }
     function pvpMySideKey(suffix) { return (pvpIsHost() ? 'host' : 'guest') + suffix; }
 
-    function pvpPokemonCard(pokemon, hp, active) {
+    function pvpTypeColor(type) {
+      return ({Normal:'#a8a878',Fogo:'#f08030',Agua:'#6890f0',Planta:'#78c850',Eletrico:'#f8d030',Gelo:'#98d8d8',Lutador:'#c03028',Veneno:'#a040a0',Terra:'#e0c068',Voador:'#a890f0',Psiquico:'#f85888',Inseto:'#a8b820',Pedra:'#b8a038',Fantasma:'#705898',Dragao:'#7038f8',Sombrio:'#705848','Aço':'#b8b8d0',Fada:'#ee99ac'})[normalizeBattleType(type)] || '#a8a878';
+    }
+
+    function pvpBattleInfo(pokemon, hp, className, party = null, partyHp = null) {
       const maxHp = Math.max(1, Number(pokemon.maxHp) || 1);
-      const current = Math.max(0, Math.min(maxHp, Number(hp) || 0));
-      const pct = Math.round(current / maxHp * 100);
+      const currentHp = Math.max(0, Math.min(maxHp, Number(hp) || 0));
+      const percent = Math.round(currentHp / maxHp * 100);
+      const healthTone = percent <= 20 ? 'red' : percent <= 50 ? 'yellow' : '';
       const types = getTypes(pokemon.id);
-      return `<div class="pvp-side-card ${active?'active':''}">
-        <div style="font-weight:700;">${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</div>
-        <div class="pvp-pokemon-line"><img src="${SPRITE(pokemon.id)}" alt="" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" />
-          <div style="flex:1;min-width:0"><div>HP ${current}/${maxHp}</div><div class="pvp-hp-track"><span style="width:${pct}%;background:${pct<=25?'#ef4444':pct<=50?'#facc15':'#22c55e'}"></span></div>
-          <div style="margin-top:7px;">${types.map(type=>`<span class="type-badge ${typeClass([type])}">${type}</span>`).join(' ')}</div></div>
-        </div></div>`;
+      const teamBalls = party ? `<div class="party-ball-row" role="img" aria-label="${party.length} Pokémon na equipe">${party.map((member,index)=>`<span class="party-ball ${(Number(partyHp?.[index])||0)<=0?'fainted':''}" aria-hidden="true" title="${escapeHTML(member.name)}"></span>`).join('')}</div>` : '';
+      return `<div>${teamBalls}
+        <div${className === 'enemy-info' ? ' class="enemy-name-row"' : ''}><div class="poke-name">${getPokemonDisplayNameHTML(pokemon)}</div></div>
+        <div class="battle-level-type-row"><div class="poke-level">Nv. ${pokemon.level}</div><div class="battle-level-type-badges">${types.map(type=>`<span class="type-badge ${typeClass([type])}">${type}</span>`).join('')}</div></div>
+        <div class="hp-bar-wrap"><div class="hp-label"><span>HP</span><span>${currentHp}/${maxHp}</span></div><div class="hp-bar"><div class="hp-fill ${healthTone}" style="width:${percent}%"></div></div></div>
+      </div>`;
+    }
+
+    function pvpSetBattleMenu(menu) {
+      pvpBattleMenu = menu;
+      renderPvpPanel();
     }
 
     function pvpRenderRoomStatus() {
@@ -6470,29 +6504,41 @@
       const myActionPending = Boolean(myHost ? room.host_action : room.guest_action);
       const active = localTeam[localActive];
       const activeHp = Number(localHp[localActive]) || 0;
+      const turn = Number(room.turn) || 1;
+      if (pvpBattleMenuTurn !== turn) { pvpBattleMenuTurn = turn; pvpBattleMenu = 'main'; }
+      if (activeHp <= 0 && !myActionPending) pvpBattleMenu = 'switch';
       const hasPpMove = Boolean(active?.moves?.some((move,index)=>(Number(localPp[localActive]?.[index])||0)>0));
       const moveButtons = (active?.moves || []).map((move,index)=>{
         const pp = Number(localPp[localActive]?.[index]) || 0;
         const disabled = pp<=0 || myActionPending || activeHp<=0;
-        return `<button class="btn btn-secondary ${disabled?'pvp-action-disabled':''}" style="margin:0;text-align:left" ${disabled?'disabled':''} onclick="pvpSubmitAction({type:'move',index:${index}})">
-          ${escapeHTML(move.name)} <small>${escapeHTML(move.type)} · PWR ${move.power} · PP ${pp}/${move.maxPp}</small></button>`;
+        return `<button class="move-btn" data-move-type="${escapeHTML(normalizeBattleType(move.type))}" style="--move-color:${pvpTypeColor(move.type)}" ${disabled?'disabled':''} onclick="pvpSubmitAction({type:'move',index:${index}})">
+          <span>${escapeHTML(move.name)}${pp<=0?' (sem PP)':''}</span><span><span class="move-category ${getMoveCategoryClass(move)}">${escapeHTML(getMoveCategory(move))}</span><span class="move-power"> PWR ${move.power} · PP ${pp}/${move.maxPp}</span></span></button>`;
       }).join('');
-      const struggleButton = !hasPpMove ? `<button class="btn btn-secondary" ${myActionPending||activeHp<=0?'disabled':''} onclick="pvpSubmitAction({type:'struggle',index:-1})">Luta desesperada (Struggle)</button>` : '';
+      const struggleButton = !hasPpMove ? `<button class="move-btn" ${myActionPending||activeHp<=0?'disabled':''} onclick="pvpSubmitAction({type:'struggle',index:-1})"><span>Struggle</span><span class="move-power">PWR 50 · PP —</span></button>` : '';
       const switchButtons = localTeam.map((pokemon,index)=>{
-        if (index===localActive || Number(localHp[index])<=0) return '';
-        return `<button class="btn btn-secondary" style="margin:0;text-align:left" ${myActionPending?'disabled':''} onclick="pvpSubmitAction({type:'switch',index:${index}})">Trocar para ${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</button>`;
-      }).join('');
-      const prompt = room.status === 'battle'
-        ? myActionPending ? (foeActionPending ? 'Resolvendo turno…' : 'Ação enviada. Aguardando o adversário…') : 'Sua vez: escolha um golpe ou troque de Pokémon.'
-        : '';
-      root.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span>Sala <strong class="pvp-code" style="font-size:1rem">${escapeHTML(room.room_code)}</strong> · Turno ${Number(room.turn)||1}</span><button class="btn btn-secondary" style="width:auto;margin:0" onclick="pvpLeaveRoom()">Sair da batalha</button></div>
-        <div class="pvp-sides">
-          <div><strong>${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</strong>${pvpPokemonCard(localTeam[localActive],localHp[localActive],true)}<div style="display:grid;gap:5px;margin-top:8px">${localTeam.map((p,index)=>`<small style="color:${Number(localHp[index])>0?'var(--text-muted)':'#f87171'}">${escapeHTML(p.name)}: ${Math.max(0,Number(localHp[index])||0)}/${p.maxHp} HP</small>`).join('')}</div></div>
-          <div><strong>${escapeHTML(myHost?room.guest_name:room.host_name)}</strong>${pvpPokemonCard(foeTeam[foeActive],foeHp[foeActive],true)}<div style="display:grid;gap:5px;margin-top:8px">${foeTeam.map((p,index)=>`<small style="color:${Number(foeHp[index])>0?'var(--text-muted)':'#f87171'}">${escapeHTML(p.name)}: ${Math.max(0,Number(foeHp[index])||0)}/${p.maxHp} HP</small>`).join('')}</div></div>
+        const isActive = index === localActive;
+        const fainted = Number(localHp[index]) <= 0;
+        return `<button class="move-btn" ${fainted||isActive||myActionPending?'disabled':''} onclick="pvpSubmitAction({type:'switch',index:${index}})" ${isActive?'style="border-color:var(--primary)"':''}>
+          <span>${escapeHTML(pokemon.name)}${isActive?' ★':''}${fainted?' (desmaiado)':''}</span><span class="switch-hp">Nv. ${pokemon.level} · HP ${Math.max(0,Number(localHp[index])||0)}/${pokemon.maxHp}</span></button>`;
+      }).join('') + `<button class="move-btn" onclick="pvpSetBattleMenu('main')" style="grid-column:1/-1;text-align:center;justify-content:center">← Voltar</button>`;
+      const actionMenu = myActionPending
+        ? `<div class="pvp-waiting-action">${foeActionPending?'Aguarde, os turnos estão sendo resolvidos…':'Ação enviada. Aguardando o adversário…'}</div>`
+        : pvpBattleMenu === 'moves'
+          ? `<div class="battle-actions moves-view">${moveButtons}${struggleButton}<button class="move-btn" onclick="pvpSetBattleMenu('main')" style="grid-column:1/-1;text-align:center;justify-content:center">← Voltar</button></div>`
+          : pvpBattleMenu === 'switch'
+            ? `<div class="battle-actions moves-view">${switchButtons}</div>`
+            : `<div class="battle-actions"><button class="battle-btn fight" ${activeHp<=0?'disabled':''} onclick="pvpSetBattleMenu('moves')">⚔️ Lutar</button><button class="battle-btn pokemon" onclick="pvpSetBattleMenu('switch')">🔄 Trocar Pokémon</button></div>`;
+      const latestLog = (state.log || []).slice(-1)[0] || 'A batalha começou!';
+      const local = localTeam[localActive], opponent = foeTeam[foeActive];
+      root.innerHTML = `<div class="pvp-arena">
+        <div class="battle-bg"></div><div class="battle-sky"></div><div class="battle-ground"></div>
+        <div class="pvp-room-toolbar"><span>Sala <strong class="pvp-code" style="font-size:1rem">${escapeHTML(room.room_code)}</strong> · Turno ${turn}</span><button class="btn btn-secondary" onclick="pvpLeaveRoom()">Sair da batalha</button></div>
+        <div class="battle-field">
+          <div class="battle-enemy"><div class="enemy-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.guest_name:room.host_name)}</div>${pvpBattleInfo(opponent,foeHp[foeActive],'enemy-info')}</div><div class="sprite-stage enemy-stage"><div class="sprite-shadow"></div><img class="enemy-sprite" src="${SPRITE_ANIM(opponent.id)}" alt="${escapeHTML(opponent.name)}" onerror="this.onerror=null;this.src='${SPRITE_FRONT(opponent.id)}'" /></div></div>
+          <div class="battle-player"><div class="sprite-stage player-stage"><div class="sprite-shadow"></div><img class="player-sprite" src="${SPRITE_BACK(local.id)}" alt="${escapeHTML(local.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(local.id)}'" /></div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</div>${pvpBattleInfo(local,localHp[localActive],'player-info',localTeam,localHp)}</div></div>
         </div>
-        <div class="pvp-log" aria-live="polite">${(state.log||[]).slice(-5).map(line=>`<div>${escapeHTML(line)}</div>`).join('')}</div>
-        <strong>${escapeHTML(prompt)}</strong>
-        <div class="pvp-battle-actions">${moveButtons}${struggleButton}${switchButtons}</div>`;
+        <div class="battle-ui"><div class="battle-log" aria-live="polite" style="margin:0">${escapeHTML(latestLog)}</div><div class="pvp-turn-prompt">${myActionPending?'':activeHp<=0?'Seu Pokémon desmaiou. Escolha quem entrará na batalha.':pvpBattleMenu==='moves'?'Escolha um golpe.':pvpBattleMenu==='switch'?'Escolha um Pokémon para trocar.':'Escolha sua ação.'}</div>${actionMenu}</div>
+      </div>`;
     }
 
     async function pvpSubmitAction(action) {
