@@ -1838,7 +1838,7 @@
       </div>
       <div class="shop-quantity-actions">
         <button class="shop-quantity-cancel" type="button" id="shopQuantityCancel">Cancelar</button>
-        <button class="btn" type="submit">Comprar</button>
+        <button class="btn" type="submit" id="shopQuantitySubmitButton">Comprar</button>
       </div>
     </form>
   </dialog>
@@ -2160,7 +2160,7 @@
       const gender = pokemon.gender === 'male' ? ['male','♂']
         : pokemon.gender === 'female' ? ['female','♀']
           : ['neutral','⚪'];
-      return `${escapeHTML(pokemon.name)} <span class="gender-symbol gender-symbol-${gender[0]}" aria-label="${getPokemonGenderLabel(pokemon)}">${gender[1]}</span>`;
+      return `${escapeHTML(pokemon.name)}${pokemon.shiny ? ' <span title="Pokémon Shiny" aria-label="Pokémon Shiny">✨</span>' : ''} <span class="gender-symbol gender-symbol-${gender[0]}" aria-label="${getPokemonGenderLabel(pokemon)}">${gender[1]}</span>`;
     }
 
     const STATUS_LABELS = {
@@ -2618,11 +2618,13 @@
         const statusEffect = statusNames[ailment] ? { status: statusNames[ailment], chance: Math.max(0, Number(data.meta?.ailment_chance) || Number(data.effect_chance) || 0) / 100 } : undefined;
         const statNames = { attack: 'attack', defense: 'defense', 'special-attack': 'specialAttack', 'special-defense': 'specialDefense', speed: 'speed', accuracy: 'accuracy', evasion: 'evasion' };
         const changesTargetUser = ['user', 'users-field', 'user-and-allies'].includes(data.target?.name);
-        const statChanges = (data.stat_changes || []).map(change => ({
-          target: changesTargetUser ? 'self' : 'target',
-          stat: statNames[change.stat?.name],
-          stages: Number(change.change) || 0
-        })).filter(change => change.stat && change.stages);
+        const statChanges = slug === 'swords-dance'
+          ? [{ target: 'self', stat: 'attack', stages: 2 }]
+          : (data.stat_changes || []).map(change => ({
+              target: changesTargetUser ? 'self' : 'target',
+              stat: statNames[change.stat?.name],
+              stages: Number(change.change) || 0
+            })).filter(change => change.stat && change.stages);
         const move = {
           name: data.name.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' '),
           type: getCurrentMoveType(data),
@@ -3103,6 +3105,19 @@
       if (slug) return `https://img.pokemondb.net/sprites/black-white/anim/normal/${slug}.gif`;
       return SPRITE_FRONT(id);
     };
+    const SPRITE_SHINY = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`;
+    const SPRITE_BACK_SHINY = id => {
+      const slug = pokeSlug(id);
+      return slug ? `https://img.pokemondb.net/sprites/black-white/anim/back-shiny/${slug}.gif`
+        : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/${id}.png`;
+    };
+    const SPRITE_ANIM_SHINY = id => {
+      const slug = pokeSlug(id);
+      return slug ? `https://img.pokemondb.net/sprites/black-white/anim/shiny/${slug}.gif` : SPRITE_SHINY(id);
+    };
+    const SPRITE_POKEMON = pokemon => pokemon?.shiny ? SPRITE_SHINY(pokemon.id) : SPRITE(pokemon.id);
+    const SPRITE_BACK_POKEMON = pokemon => pokemon?.shiny ? SPRITE_BACK_SHINY(pokemon.id) : SPRITE_BACK(pokemon.id);
+    const SPRITE_ANIM_POKEMON = pokemon => pokemon?.shiny ? SPRITE_ANIM_SHINY(pokemon.id) : SPRITE_ANIM(pokemon.id);
 
     function showDamageNumber(target, amount, kind) {
       // target: 'enemy' or 'player'
@@ -3278,7 +3293,7 @@
       btn.style.display = 'none';
       title.textContent = 'O quê?';
       sub.textContent = poke.name + ' está evoluindo!';
-      sprite.src = SPRITE(poke.id);
+      sprite.src = SPRITE_POKEMON(poke);
       sprite.onerror = function(){ this.src = SPRITE_FB(poke.id); };
       sprite.className = 'evo-sprite glow';
       overlay.classList.add('active');
@@ -4376,7 +4391,7 @@
       sec.classList.add('show');
       grid.innerHTML = STARTERS[region].map(p => `
         <div class="starter-card" data-name="${p.name}" data-id="${p.id}">
-          <div class="starter-img-wrap"><img class="starter-img" src="${SPRITE(p.id)}" alt="${p.name}" onerror="this.src='${SPRITE_FB(p.id)}'" /></div>
+          <div class="starter-img-wrap"><img class="starter-img" src="${SPRITE_POKEMON(p)}" alt="${p.name}" onerror="this.src='${SPRITE_FB(p.id)}'" /></div>
           <div class="starter-name">${p.name}</div>
           <span class="type-badge ${p.typeClass}">${p.type}</span>
         </div>`).join('');
@@ -5242,7 +5257,7 @@
         <div style="color:var(--text-muted);font-size:.82rem;margin-bottom:12px;">Confira sua equipe e escolha um Pokémon compatível para ensinar este golpe.</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;" id="tmTargetOptions">
           ${team.map(({ pokemon, index }) => `<button type="button" class="btn btn-secondary tm-target-option" data-party-index="${index}" disabled style="width:100%;margin:0;display:grid;grid-template-columns:44px 1fr;align-items:center;text-align:left;gap:8px;padding:8px;">
-            <img src="${SPRITE(pokemon.id)}" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" alt="" style="width:44px;height:44px;object-fit:contain;image-rendering:pixelated;">
+            <img src="${SPRITE_POKEMON(pokemon)}" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" alt="" style="width:44px;height:44px;object-fit:contain;image-rendering:pixelated;">
             <span><strong>${escapeHTML(pokemon.name)}</strong> · Nv. ${pokemon.level}<br><small class="tm-compatibility-label">Verificando compatibilidade…</small></span>
           </button>`).join('')}
         </div>
@@ -5856,7 +5871,7 @@
           const types = getTypes(pokemon.id);
           return `<label class="game-card center-pokemon-card ${checked ? 'selected' : ''}">
             <div class="game-card-header">
-              <img class="center-pokemon-sprite" src="${SPRITE(pokemon.id)}" alt="${escapeHTML(pokemon.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" />
+              <img class="center-pokemon-sprite" src="${SPRITE_POKEMON(pokemon)}" alt="${escapeHTML(pokemon.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" />
               <input class="center-pokemon-select" type="checkbox" ${checked} ${disabled} aria-label="Selecionar ${escapeHTML(pokemon.name)} para curar" onchange="toggleCenterPokemonSelection(${index}, this.checked)" />
             </div>
             <div class="game-card-body">
@@ -5965,7 +5980,7 @@
         sellList.innerHTML = ownedItems.length ? ownedItems.map(item => {
           const quantity = getItemQty(item.key);
           return `<article class="game-card"><div class="game-card-body">
-            <div class="game-card-title">${escapeHTML(item.name)}</div>
+            <div class="game-card-title" style="display:flex;align-items:center;gap:8px;">${itemIcon(item.key, 'item-icon-sm')}<span>${escapeHTML(item.name)}</span></div>
             <div class="game-card-desc">Na mochila: ${quantity} &middot; Venda por &#8381; ${item.salePrice.toLocaleString('pt-BR')} cada</div>
             <div class="game-card-meta"><button type="button" class="shop-buy-button" onclick="openSellQuantityDialog('${item.key}')">Vender</button></div>
           </div></article>`;
@@ -5998,6 +6013,7 @@
 
       pendingShopItemId = item.id;
       pendingShopAction = 'buy';
+      document.getElementById('shopQuantitySubmitButton').textContent = 'Comprar';
       const dialog = document.getElementById('shopQuantityDialog');
       const input = document.getElementById('shopQuantityInput');
       document.getElementById('shopQuantityTitle').textContent = `Comprar ${item.name}`;
@@ -6047,6 +6063,7 @@
       if (available < 1) return;
       pendingShopItemId = item.key;
       pendingShopAction = 'sell';
+      document.getElementById('shopQuantitySubmitButton').textContent = 'Vender';
       const salePrice = item.salePrice;
       const dialog = document.getElementById('shopQuantityDialog');
       const input = document.getElementById('shopQuantityInput');
@@ -6626,7 +6643,7 @@
         const selected = pvpSelectedIndices.has(index);
         const moves = (pokemon.moves || []).filter(move=>Number(move.power)>0 || move.healing>0 || move.drain>0 || move.statChanges?.length || ['burn','paralysis','poison','sleep','freeze'].includes(move.statusEffect?.status)).length;
         return `<label class="pvp-select-card"><input type="checkbox" ${selected?'checked':''} onchange="togglePvpPokemon(${index},this.checked)" />
-          <img src="${SPRITE(pokemon.id)}" alt="" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" />
+          <img src="${SPRITE_POKEMON(pokemon)}" alt="" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" />
           <span><strong>${escapeHTML(pokemon.name)}</strong><br><small>Nv. ${pokemon.level} · ${moves} golpes</small></span></label>`;
       }).join('')}</div>`;
     }
@@ -6906,8 +6923,8 @@
         <div class="battle-bg"></div><div class="battle-sky"></div><div class="battle-ground"></div>
         <div class="pvp-room-toolbar"><span>Sala <strong class="pvp-code" style="font-size:1rem">${escapeHTML(room.room_code)}</strong> · Turno ${turn}</span><span class="pvp-room-clock" id="pvpTurnClock">45s</span><button class="btn btn-secondary" onclick="pvpLeaveRoom()">Sair da batalha</button></div>
         <div class="battle-field">
-          <div class="battle-enemy"><div class="enemy-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.guest_name:room.host_name)}</div>${pvpBattleInfo(opponent,foeHp[foeActive],'enemy-info',null,null,foeStatus[foeActive])}</div><div class="sprite-stage enemy-stage ${foeFainted?'pvp-fainted-stage':''}" ${foeFainted?'aria-hidden="true"':''}>${foeFainted?'':'<div class="sprite-shadow"></div>'}${foeFainted?'':`<img class="enemy-sprite" src="${SPRITE_ANIM(opponent.id)}" alt="${escapeHTML(opponent.name)}" onerror="this.onerror=null;this.src='${SPRITE_FRONT(opponent.id)}'" />`}</div></div>
-          <div class="battle-player"><div class="sprite-stage player-stage ${localFainted?'pvp-fainted-stage':''}" ${localFainted?'aria-hidden="true"':''}>${localFainted?'':'<div class="sprite-shadow"></div>'}${localFainted?'':`<img class="player-sprite" src="${SPRITE_BACK(local.id)}" alt="${escapeHTML(local.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(local.id)}'" />`}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</div>${pvpBattleInfo(local,localHp[localActive],'player-info',localTeam,localHp,localStatus[localActive])}</div></div>
+          <div class="battle-enemy"><div class="enemy-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.guest_name:room.host_name)}</div>${pvpBattleInfo(opponent,foeHp[foeActive],'enemy-info',null,null,foeStatus[foeActive])}</div><div class="sprite-stage enemy-stage ${foeFainted?'pvp-fainted-stage':''}" ${foeFainted?'aria-hidden="true"':''}>${foeFainted?'':'<div class="sprite-shadow"></div>'}${foeFainted?'':`<img class="enemy-sprite" src="${SPRITE_ANIM_POKEMON(opponent)}" alt="${escapeHTML(opponent.name)}" onerror="this.onerror=null;this.src='${SPRITE_FRONT(opponent.id)}'" />`}</div></div>
+          <div class="battle-player"><div class="sprite-stage player-stage ${localFainted?'pvp-fainted-stage':''}" ${localFainted?'aria-hidden="true"':''}>${localFainted?'':'<div class="sprite-shadow"></div>'}${localFainted?'':`<img class="player-sprite" src="${SPRITE_BACK_POKEMON(local)}" alt="${escapeHTML(local.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(local.id)}'" />`}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</div>${pvpBattleInfo(local,localHp[localActive],'player-info',localTeam,localHp,localStatus[localActive])}</div></div>
         </div>
         <div class="battle-ui"><div class="battle-log" aria-live="polite" style="margin:0">${escapeHTML(latestLog)}</div><div class="pvp-turn-prompt">${myActionPending?'':activeHp<=0?'Seu Pokémon desmaiou. Escolha quem entrará na batalha.':pvpBattleMenu==='moves'?'Escolha um golpe.':pvpBattleMenu==='switch'?'Escolha um Pokémon para trocar.':'Escolha sua ação.'}</div>${actionMenu}</div>
       </div>`;
@@ -7270,7 +7287,7 @@
         selected = encounters[Math.floor(Math.random() * encounters.length)];
       }
 
-      const wild = { ...selected };
+      const wild = { ...selected, shiny: Math.random() < 0.1 };
       ensurePokemonGender(wild);
       if (wild.minLevel !== undefined && wild.maxLevel !== undefined) {
         wild.level = wild.minLevel + Math.floor(Math.random() * (wild.maxLevel - wild.minLevel + 1));
@@ -7342,8 +7359,8 @@
       document.getElementById('enemyHpBar').style.width = '100%';
       document.getElementById('enemyHpBar').className = 'hp-fill';
       const eSprite = document.getElementById('enemySprite');
-      eSprite.src = SPRITE_ANIM(wild.id);
-      eSprite.onerror = function(){ this.onerror=null; this.src=SPRITE(wild.id); this.onerror=function(){this.src=SPRITE_FB(wild.id)}; };
+      eSprite.src = SPRITE_ANIM_POKEMON(wild);
+      eSprite.onerror = function(){ this.onerror=null; this.src=wild.shiny ? SPRITE_SHINY(wild.id) : SPRITE(wild.id); this.onerror=function(){this.src=SPRITE_FB(wild.id)}; };
       eSprite.className = 'enemy-sprite';
       eSprite.style.removeProperty('opacity');
 
@@ -7358,7 +7375,7 @@
       }
       updatePlayerHpBar();
       const pSprite = document.getElementById('playerSprite');
-      pSprite.src = SPRITE_BACK(player.poke.id);
+      pSprite.src = SPRITE_BACK_POKEMON(player.poke);
       pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_FB(player.poke.id); };
       pSprite.className = 'player-sprite';
       pSprite.style.removeProperty('opacity');
@@ -7493,8 +7510,8 @@
       if (el) el.innerHTML = types.map(t => `<span class="type-badge ${typeClass([t])}">${t}</span>`).join(' ');
       const pSprite = document.getElementById('playerSprite');
       pSprite.className = 'player-sprite';
-      pSprite.src = SPRITE_BACK(p.id);
-      pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE(p.id); };
+      pSprite.src = SPRITE_BACK_POKEMON(p);
+      pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_POKEMON(p); };
       renderBattleStatusIndicators();
       SFX.switchPoke();
       setLog([`Volte! Vá, ${p.name}!`, hazardMessage].filter(Boolean).join(' '));
@@ -7895,8 +7912,8 @@
       if (el) el.innerHTML = types.map(t => `<span class="type-badge ${typeClass([t])}">${t}</span>`).join(' ');
       const pSprite = document.getElementById('playerSprite');
       pSprite.className = 'player-sprite';
-      pSprite.src = SPRITE_BACK(p.id);
-      pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE(p.id); };
+      pSprite.src = SPRITE_BACK_POKEMON(p);
+      pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_POKEMON(p); };
       renderBattleStatusIndicators();
       SFX.switchPoke();
       setLog(`Vai, ${p.name}!`);
@@ -8445,6 +8462,7 @@
           const caught = {
             name: battle.enemy.name,
             id: battle.enemy.id,
+            shiny: !!battle.enemy.shiny,
             gender: battle.enemy.gender,
             type: typeLabel(types),
             typeClass: typeClass(types),
@@ -8572,8 +8590,8 @@
       document.getElementById('enemyHpBar').style.width = '100%';
       document.getElementById('enemyHpBar').className = 'hp-fill';
       const eSprite = document.getElementById('enemySprite');
-      eSprite.src = SPRITE_ANIM(e.id);
-      eSprite.onerror = function(){ this.onerror=null; this.src=SPRITE(e.id); this.onerror=function(){this.src=SPRITE_FB(e.id)}; };
+      eSprite.src = SPRITE_ANIM_POKEMON(e);
+      eSprite.onerror = function(){ this.onerror=null; this.src=e.shiny ? SPRITE_SHINY(e.id) : SPRITE(e.id); this.onerror=function(){this.src=SPRITE_FB(e.id)}; };
       eSprite.className = 'enemy-sprite';
       eSprite.style.removeProperty('opacity');
 
@@ -8590,7 +8608,7 @@
       battle.playerMaxHp = player.poke.maxHp;
       updatePlayerHpBar();
       const pSprite = document.getElementById('playerSprite');
-      pSprite.src = SPRITE_BACK(player.poke.id);
+      pSprite.src = SPRITE_BACK_POKEMON(player.poke);
       pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_FB(player.poke.id); };
       pSprite.className = 'player-sprite';
       pSprite.style.removeProperty('opacity');
@@ -8698,7 +8716,7 @@
       el.innerHTML = player.party.map((p, idx) => `
         <div class="game-card" onclick="openSummary(${idx})" style="${p === player.poke ? 'border-color:var(--primary);' : ''}">
           <div class="game-card-header" style="background:linear-gradient(135deg,#1a1a2e,#0d0d18);">
-            <img src="${SPRITE(p.id)}" style="width:80px;height:80px;object-fit:contain;background:transparent;" onerror="this.src='${SPRITE_FB(p.id)}'" />
+            <img src="${SPRITE_POKEMON(p)}" style="width:80px;height:80px;object-fit:contain;background:transparent;" onerror="this.src='${SPRITE_FB(p.id)}'" />
           </div>
           <div class="game-card-body">
             <div class="game-card-title" title="${getPokemonGenderLabel(p)}">${getPokemonDisplayNameHTML(p)}${p === player.poke ? ' ★' : ''}${canEvolve(p) ? ' ✨' : ''}</div>
@@ -8731,7 +8749,7 @@
       if (!p) return;
       if (normalizePokemonMoves(p)) saveGame();
       ensurePokemonTraits(p);
-      document.getElementById('summarySprite').src = SPRITE(p.id);
+      document.getElementById('summarySprite').src = SPRITE_POKEMON(p);
       document.getElementById('summarySprite').onerror = function(){ this.src = SPRITE_FB(p.id); };
       document.getElementById('summaryName').innerHTML = getPokemonDisplayNameHTML(p);
       document.getElementById('summaryMeta').textContent = `Nv. ${p.level} · ${getPokemonGenderLabel(p)} · HP ${Math.round(p.hp)}/${p.maxHp}`;
@@ -8928,7 +8946,7 @@
             return `<div class="pc-slot empty"><span style="font-size:1.2rem;opacity:0.3;">—</span></div>`;
           }
           return `<div class="pc-slot" onclick="withdrawFromPC(${bi},${slot})" title="Retirar para o time">
-            <img src="${SPRITE(p.id)}" alt="${p.name}" onerror="this.src='${SPRITE_FB(p.id)}'" />
+            <img src="${SPRITE_POKEMON(p)}" alt="${p.name}" onerror="this.src='${SPRITE_FB(p.id)}'" />
             <div class="pc-name" title="${getPokemonGenderLabel(p)}">${getPokemonDisplayNameHTML(p)}</div>
             <div class="pc-lv">Nv. ${p.level}</div>
           </div>`;
@@ -8938,7 +8956,7 @@
       if (row) {
         row.innerHTML = player.party.map((p, idx) => `
           <div class="pc-party-card" onclick="depositFromParty(${idx})" title="Depositar no PC">
-            <img src="${SPRITE(p.id)}" alt="${p.name}" onerror="this.src='${SPRITE_FB(p.id)}'" />
+            <img src="${SPRITE_POKEMON(p)}" alt="${p.name}" onerror="this.src='${SPRITE_FB(p.id)}'" />
             <div class="pc-name" title="${getPokemonGenderLabel(p)}">${getPokemonDisplayNameHTML(p)}</div>
             <div class="pc-lv" style="font-size:0.65rem;color:var(--text-muted);">Nv.${p.level}${p === player.poke ? ' ★' : ''}</div>
           </div>`).join('');
@@ -8987,7 +9005,7 @@
       const active = player.party[0] || player.starter;
       box.innerHTML = `
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-          <img src="${SPRITE(active.id)}" style="width:72px;height:72px;object-fit:contain;background:transparent;" onerror="this.src='${SPRITE_FB(active.id)}'" />
+          <img src="${SPRITE_POKEMON(active)}" style="width:72px;height:72px;object-fit:contain;background:transparent;" onerror="this.src='${SPRITE_FB(active.id)}'" />
           <div>
             <div style="font-size:1.2rem;font-weight:700;">${escapeHTML(player.name)}</div>
             <div style="color:var(--text-muted);font-size:0.85rem;">${escapeHTML(player.gender)} · Origem: ${escapeHTML(player.originRegion)}</div>
