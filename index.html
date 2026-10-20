@@ -1489,6 +1489,10 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#42351d,#201a10);"><img src="assets/gym-badges.png" alt="" style="width:154px;height:92px;object-fit:contain;" /></div>
               <div class="game-card-body"><div class="game-card-title">Ginásios</div><div class="game-card-desc">Desafie os líderes e conquiste insígnias.</div></div>
             </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('battle-tower')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('battle-tower')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#563d75,#241638);font-size:3rem;">🏰</div>
+              <div class="game-card-body"><div class="game-card-title">Torre de Batalha</div><div class="game-card-desc">Desafie treinadores NPC e ganhe BP nas primeiras vitórias.</div></div>
+            </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('center')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('center')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#3b2533,#1d141b);"><img src="assets/pokemon-center.png" alt="" style="width:128px;height:98px;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">Centro Pokémon</div><div class="game-card-desc">Cuide da equipe e restaure HP, PP e status.</div></div>
@@ -1563,6 +1567,13 @@
           <h2 class="panel-title">🏅 Ginásios de Kanto</h2>
           <p class="panel-desc">Desafie os Líderes de Ginásio e conquiste as 8 Insígnias!</p>
           <div class="cards-grid" id="gymsGrid"></div>
+        </div>
+        <div class="panel" id="panel-battle-tower">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
+          <h2 class="panel-title">🏰 Torre de Batalha</h2>
+          <p class="panel-desc">Enfrente treinadores em batalhas com equipes completas. Cada treinador concede BP uma vez; você pode voltar para tentar novamente.</p>
+          <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Recompensas coletadas: <strong id="towerProgress">0/6</strong> · BP: <strong id="towerBattlePoints">0</strong></div>
+          <div class="cards-grid" id="battleTowerGrid"></div>
         </div>
         <div class="panel" id="panel-pokemon">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
@@ -6670,6 +6681,35 @@
       return true;
     }
 
+    const BATTLE_TOWER_TRAINERS = [
+      { id:'joey', name:'Joey', className:'Jovem Treinador', portrait:'youngster', reward:2, team:[
+        {name:'Rattata',id:19,hp:22,level:8,moves:[{name:'Quick Attack',power:40,type:'Normal'},{name:'Bite',power:35,type:'Sombrio'}]},
+        {name:'Pidgey',id:16,hp:24,level:9,moves:[{name:'Gust',power:40,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}]}
+      ]},
+      { id:'maya', name:'Maya', className:'Treinadora', portrait:'lass', reward:3, team:[
+        {name:'Jigglypuff',id:39,hp:30,level:12,moves:[{name:'Pound',power:40,type:'Normal'},{name:'Sing',power:0,type:'Normal'}]},
+        {name:'Clefairy',id:35,hp:30,level:13,moves:[{name:'Pound',power:40,type:'Normal'},{name:'Magical Leaf',power:45,type:'Planta'}]}
+      ]},
+      { id:'oliver', name:'Oliver', className:'Montanhista', portrait:'hiker', reward:3, team:[
+        {name:'Geodude',id:74,hp:28,level:17,moves:[{name:'Rock Throw',power:50,type:'Pedra'},{name:'Tackle',power:35,type:'Normal'}]},
+        {name:'Onix',id:95,hp:40,level:18,moves:[{name:'Rock Throw',power:50,type:'Pedra'},{name:'Bind',power:30,type:'Normal'}]}
+      ]},
+      { id:'marina', name:'Marina', className:'Marinheira', portrait:'sailor', reward:4, team:[
+        {name:'Shellder',id:90,hp:25,level:21,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Ice Shard',power:40,type:'Gelo'}]},
+        {name:'Psyduck',id:54,hp:30,level:22,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}]},
+        {name:'Staryu',id:120,hp:30,level:23,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Swift',power:45,type:'Normal'}]}
+      ]},
+      { id:'lia', name:'Lia', className:'Treinadora Vet', portrait:'cooltrainerf', reward:5, team:[
+        {name:'Growlithe',id:58,hp:32,level:27,moves:[{name:'Ember',power:40,type:'Fogo'},{name:'Bite',power:35,type:'Sombrio'}]},
+        {name:'Pikachu',id:25,hp:28,level:28,moves:[{name:'Thunder Shock',power:40,type:'Eletrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
+        {name:'Kadabra',id:64,hp:32,level:29,moves:[{name:'Confusion',power:50,type:'Psiquico'},{name:'Psybeam',power:55,type:'Psiquico'}]}
+      ]},
+      { id:'bruno', name:'Bruno', className:'Faixa Preta', portrait:'blackbelt', reward:6, team:[
+        {name:'Machop',id:66,hp:34,level:32,moves:[{name:'Low Kick',power:50,type:'Lutador'},{name:'Karate Chop',power:50,type:'Lutador'}]},
+        {name:'Primeape',id:57,hp:38,level:33,moves:[{name:'Low Kick',power:50,type:'Lutador'},{name:'Thrash',power:60,type:'Normal'}]},
+        {name:'Machoke',id:67,hp:42,level:34,moves:[{name:'Brick Break',power:60,type:'Lutador'},{name:'Rock Smash',power:40,type:'Lutador'}]}
+      ]}
+    ];
 
     function renderGyms() {
       const grid = document.getElementById('gymsGrid');
@@ -6693,6 +6733,22 @@
               <span class="reward">Insígnia ${g.badge}</span>
             </div>
           </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderBattleTower() {
+      const grid = document.getElementById('battleTowerGrid');
+      if (!grid) return;
+      if (!Array.isArray(player.battleTowerDefeated)) player.battleTowerDefeated = [];
+      const wins = player.battleTowerDefeated.length;
+      document.getElementById('towerProgress').textContent = `${Math.min(wins, BATTLE_TOWER_TRAINERS.length)}/${BATTLE_TOWER_TRAINERS.length}`;
+      document.getElementById('towerBattlePoints').textContent = (Number(player.battlePoints) || 0).toLocaleString('pt-BR');
+      grid.innerHTML = BATTLE_TOWER_TRAINERS.map(trainer => {
+        const done = player.battleTowerDefeated.includes(trainer.id);
+        return `<div class="game-card" role="button" tabindex="0" onclick="startTowerBattle('${trainer.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startTowerBattle('${trainer.id}')}">
+          <div class="game-card-header" style="background:linear-gradient(135deg,#3a3151,#171321);height:110px"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png" alt="${escapeHTML(trainer.name)}" style="width:86px;height:86px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:2.8rem">🥊</span></div>
+          <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} · ${escapeHTML(trainer.className)}</div><div class="game-card-desc">Equipe com ${trainer.team.length} Pokémon · níveis ${trainer.team[0].level}–${trainer.team[trainer.team.length-1].level}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':'status-available'}">${done?'Rebatalhar':'Desafiar'}</span><span class="reward">${done?'Recompensa resgatada':`+${trainer.reward} BP`}</span></div></div>
         </div>`;
       }).join('');
     }
@@ -6937,6 +6993,7 @@
       if (id === 'pokedex') renderPokedex();
       if (id === 'profile') { refreshProfileUI(); socialRefresh(); }
       if (id === 'gyms') renderGyms();
+      if (id === 'battle-tower') renderBattleTower();
       if (id === 'missions') renderMissions();
       if (id === 'pc') renderPC();
       if (id === 'pvp') renderPvpPanel();
@@ -8615,7 +8672,7 @@
 
     function endBattle(won, captured, capturedName) {
       battle.busy = true;
-      if (won && battle.isGym && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
+      if (won && (battle.isGym || battle.isTower) && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
         const shares = getBattleExperienceShares(getBattleExperience(battle.enemy, true), player.poke);
         battle.experienceShares = battle.experienceShares || new Map();
         for (const [pokemon, amount] of shares) {
@@ -8645,6 +8702,16 @@
           return;
         }
         endGymVictory();
+        return;
+      }
+      if (won && battle.isTower && battle.enemy.currentHp <= 0) {
+        if (battle.towerIndexPoke < battle.towerTeam.length - 1) {
+          result.classList.remove('show');
+          document.getElementById('battleMenu').style.display = 'grid';
+          setTimeout(nextTowerPokemon, 400);
+          return;
+        }
+        endTowerVictory();
         return;
       }
 
@@ -8797,7 +8864,7 @@
         .map(item => {
           const qty = getItemQty(item.key);
           if (qty <= 0) return '';
-          if (item.kind === 'ball' && battle.isGym) return '';
+          if (item.kind === 'ball' && (battle.isGym || battle.isTower)) return '';
           if (item.kind === 'ball' && battle.dungeon === 'Zona do Safari' && !['safari_ball', 'premier_ball', 'masterball'].includes(item.key)) return '';
           if (['battleBoost', 'direHit', 'guardSpec'].includes(item.kind)) {
             if (!player.poke || player.poke.hp <= 0) return '';
@@ -8879,8 +8946,8 @@
 
     async function tryCapture(ballKey) {
       if (!battle || battle.busy) return;
-      if (battle.isGym) {
-        setLog('Não dá para capturar o Pokémon de um Líder de Ginásio!');
+      if (battle.isGym || battle.isTower) {
+        setLog(battle.isTower ? 'Não dá para capturar o Pokémon de um treinador!' : 'Não dá para capturar o Pokémon de um Líder de Ginásio!');
         backToMenu();
         return;
       }
@@ -8967,6 +9034,35 @@
       });
     }
 
+    function startTowerBattle(trainerId) {
+      const trainer = BATTLE_TOWER_TRAINERS.find(entry => entry.id === trainerId);
+      if (!trainer || battle?.busy) return;
+      const eligibleTeam = player.party.filter(pokemon => pokemon && pokemon.hp > 0);
+      if (!eligibleTeam.length) {
+        showToast('Sua equipe precisa estar saudável para entrar na Torre de Batalha.', 'error');
+        return;
+      }
+      if (!player.poke || player.poke.hp <= 0) player.poke = eligibleTeam[0];
+      battle = {
+        isTower: true, towerTrainer: trainer,
+        towerTeam: trainer.team.map(pokemon => {
+          const scaledHp = getLevelScaledHp(pokemon.hp, pokemon.level);
+          return {...pokemon, hp:scaledHp, maxHp:scaledHp, currentHp:scaledHp};
+        }),
+        towerIndexPoke: 0, enemy: null,
+        playerHp: player.poke.hp, playerMaxHp: player.poke.maxHp,
+        turn:'player', busy:false, playerStatStages:{}, enemyStatStages:{}, playerCritStage:0,
+        playerAccuracyStage:0, guardSpecTurns:0, playerScreens:{}, enemyScreens:{}, playerHazards:[], enemyHazards:[]
+      };
+      battle.enemy = battle.towerTeam[0];
+      setupBattleUI(`${trainer.name} te desafiou!`);
+      applyBattleBackground('gym');
+      showBattleIntro(player.poke.name, trainer.name, 'Torre de Batalha', () => {
+        document.getElementById('battleOverlay').classList.add('active');
+        syncMuteButton(); SFX.unlock(); playBattleBgm();
+      });
+    }
+
     function startGymBattle(gymIndex) {
       const gym = GYMS[gymIndex];
       if (!gym) return;
@@ -9029,7 +9125,7 @@
       ensurePokemonTraits(e);
       ensurePokemonTraits(player.poke);
       document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : '');
-      updateEnemyCaughtBadge(e.id, !battle.isGym);
+      updateEnemyCaughtBadge(e.id, !battle.isGym && !battle.isTower);
       document.getElementById('enemyLevel').textContent = `Nv. ${e.level}`;
       {
         const types = getTypes(e.id);
@@ -9074,6 +9170,59 @@
       const sw = document.getElementById('switchMenu');
       if (sw) sw.style.display = 'none';
       renderBattleStatusIndicators();
+    }
+
+    function nextTowerPokemon() {
+      battle.towerIndexPoke++;
+      if (battle.towerIndexPoke >= battle.towerTeam.length) { endTowerVictory(); return; }
+      battle.enemy = battle.towerTeam[battle.towerIndexPoke];
+      battle.experienceAwarded = false;
+      battle.busy = false;
+      battle.turn = 'player';
+      setupBattleUI(`${battle.towerTrainer.name} enviou ${getPokemonDisplayName(battle.enemy)}!`);
+    }
+
+    function endTowerVictory() {
+      const trainer = battle.towerTrainer;
+      const experienceShares = battle.experienceShares || new Map();
+      player.poke.hp = Math.max(0, Math.min(player.poke.maxHp, battle.playerHp));
+      let levelsGained = 0;
+      const sharedExperienceText = [];
+      for (const [pokemon, amount] of experienceShares) {
+        const gained = awardPokemonExperience(pokemon, amount);
+        if (pokemon === player.poke) levelsGained = gained;
+        else if (amount > 0) sharedExperienceText.push(`${pokemon.name}: +${amount} XP`);
+      }
+      const reward = Array.isArray(player.battleTowerDefeated) && player.battleTowerDefeated.includes(trainer.id) ? 0 : trainer.reward;
+      if (!Array.isArray(player.battleTowerDefeated)) player.battleTowerDefeated = [];
+      if (reward > 0) {
+        player.battleTowerDefeated.push(trainer.id);
+        player.battlePoints = (Number(player.battlePoints) || 0) + reward;
+      }
+      const evolvedReady = levelsGained > 0 && canEvolve(player.poke);
+      updatePlayerExperienceBar();
+      if (levelsGained > 0) SFX.levelUp();
+      document.getElementById('battleMenu').style.display = 'none';
+      document.getElementById('movesMenu').style.display = 'none';
+      const bag = document.getElementById('bagMenu');
+      if (bag) bag.style.display = 'none';
+      document.getElementById('battleResult').classList.add('show');
+      document.getElementById('resultTitle').textContent = '🏰 Vitória na Torre!';
+      document.getElementById('resultDesc').textContent = `Você derrotou ${trainer.name} e ${trainer.team.length} Pokémon!`;
+      const rewardRows = [
+        `<div class="reward-row"><span class="reward-label">Battle Points</span><strong class="reward-value">${reward ? `+${reward} BP` : 'Recompensa já coletada'}</strong></div>`,
+        `<div class="reward-row reward-xp"><span class="reward-label">Experiência total</span><strong class="reward-value">+${battle.totalExperience || 0} XP</strong></div>`
+      ];
+      if (levelsGained) rewardRows.push(`<div class="reward-highlight">${player.poke.name} subiu ${levelsGained} nível(is), chegando ao Nv. ${player.poke.level}!</div>`);
+      if (sharedExperienceText.length) rewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${sharedExperienceText.join(' / ')}</strong></div>`);
+      if (!reward) rewardRows.push('<div class="reward-highlight">Esta vitória não concede BP novamente.</div>');
+      document.getElementById('resultRewards').innerHTML = rewardRows.join('');
+      if (evolvedReady) battle._pendingEvo = player.poke;
+      updateStatsUI();
+      renderBattleTower();
+      SFX.victory();
+      onMissionEvent('battle_win', 'Torre de Batalha');
+      saveGame();
     }
 
     function nextGymPokemon() {
