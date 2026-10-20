@@ -638,13 +638,22 @@ begin
   -- Burn and poison deal one eighth of max HP at turn end in this Gen III ruleset.
   foreach v_side in array array['host','guest']::text[] loop
     v_temp_index := case when v_side='host' then v_host_active else v_guest_active end;
+    v_side_team := case when v_side='host' then v_room.host_team else v_room.guest_team end;
     v_status_name := v_state->(v_side||'Status')->v_temp_index->>'status';
     v_current_hp := coalesce((v_state->(v_side||'Hp')->>v_temp_index)::numeric,0);
     if v_status_name in ('burn','poison') and v_current_hp>0 then
-      v_side_team := case when v_side='host' then v_room.host_team else v_room.guest_team end;
       v_residual := greatest(1,floor(coalesce((v_side_team->v_temp_index->>'maxHp')::numeric,1)/8));
-      v_state := jsonb_set(v_state,ARRAY[v_side||'Hp',v_temp_index::text],to_jsonb(greatest(0,v_current_hp-v_residual)),false);
+      v_current_hp := greatest(0,v_current_hp-v_residual);
+      v_state := jsonb_set(v_state,ARRAY[v_side||'Hp',v_temp_index::text],to_jsonb(v_current_hp),false);
       v_logs := v_logs || jsonb_build_array((v_side_team->v_temp_index->>'name')||' sofreu '||v_residual::integer||' de dano pelo status '||v_status_name||'.');
+    end if;
+    -- Leftovers heals 1/16 of max HP at the end of the turn, after residual damage.
+    v_max_hp := coalesce((v_side_team->v_temp_index->>'maxHp')::numeric,1);
+    if v_side_team->v_temp_index->>'heldItem'='leftovers' and v_current_hp>0 and v_current_hp<v_max_hp then
+      v_residual := least(v_max_hp-v_current_hp,greatest(1,floor(v_max_hp/16)));
+      v_current_hp := v_current_hp+v_residual;
+      v_state := jsonb_set(v_state,ARRAY[v_side||'Hp',v_temp_index::text],to_jsonb(v_current_hp),false);
+      v_logs := v_logs || jsonb_build_array((v_side_team->v_temp_index->>'name')||' recuperou '||v_residual::integer||' HP com Leftovers.');
     end if;
   end loop;
 

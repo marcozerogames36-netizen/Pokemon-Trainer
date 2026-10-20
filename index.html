@@ -6473,6 +6473,7 @@
           gender: pokemon.gender || '', level: Math.max(1, Math.min(100, Math.floor(Number(pokemon.level) || 1))), maxHp,
           types: getTypes(pokemon.id), stats: calculatedStats,
           hp: maxHp, ability: ABILITY_INFO[pokemon.ability] ? pokemon.ability : '',
+          heldItem: String(pokemon.heldItem || ''),
           nature: String(pokemon.nature || ''), ivs, evs, moves
         };
       });
