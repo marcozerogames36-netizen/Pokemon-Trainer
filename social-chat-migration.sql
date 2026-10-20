@@ -40,3 +40,6 @@ create policy "Friends can send messages" on public.trainer_messages
       where f.user_id=(select auth.uid()) and f.friend_id=recipient_id
     )
   );
+
+-- Atualiza o cache do PostgREST para a tabela aparecer imediatamente na API.
+notify pgrst, 'reload schema';

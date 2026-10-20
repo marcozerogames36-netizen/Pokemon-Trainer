@@ -1060,3 +1060,4 @@ create policy "Friends can send messages" on public.trainer_messages
       where f.user_id=(select auth.uid()) and f.friend_id=recipient_id
     )
   );
+notify pgrst, 'reload schema';

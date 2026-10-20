@@ -137,7 +137,7 @@
     }
     .social-btn:hover { background: #1a1a24; border-color: #3f3f4e; }
     .social-btn svg { width: 18px; height: 18px; }
-    .social-hub { max-width:1120px; margin-top:28px; overflow:hidden; padding:0 !important; }
+    .social-hub { max-width:1120px; margin-top:0; overflow:hidden; padding:0 !important; }
     .social-hero { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:22px 24px; background:linear-gradient(120deg,#302153,#172b48 70%,#123b46); border-bottom:1px solid var(--border); }
     .social-hero h3 { margin:0 0 5px; font-size:1.15rem; }
     .social-hero p { color:#d0d5e3; font-size:.86rem; margin:0; }
@@ -227,6 +227,21 @@
     .topbar-brand-mark .pokeball-mark { width: 29px; height: 29px; }
     .topbar-brand-name { font-size: 1.05rem; font-weight: 750; letter-spacing: -.02em; }
     .topbar-actions { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .message-notifications { position:relative; flex:0 0 auto; }
+    .message-notification-button { position:relative; display:grid; place-items:center; width:42px; height:42px; padding:0; border:1px solid var(--border); border-radius:12px; background:var(--input-bg); color:var(--text); font-size:1.2rem; cursor:pointer; }
+    .message-notification-button:hover,.message-notification-button[aria-expanded="true"] { border-color:var(--primary); background:rgba(124,58,237,.14); }
+    .message-notification-count { position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 4px; display:grid; place-items:center; border:2px solid var(--bg); border-radius:999px; background:#ef4444; color:white; font-size:.64rem; font-weight:800; }
+    .message-notification-count[hidden] { display:none; }
+    .message-notification-menu { position:absolute; z-index:100; top:calc(100% + 10px); right:0; width:min(350px,calc(100vw - 24px)); max-height:390px; overflow:auto; border:1px solid var(--border); border-radius:14px; background:var(--card); box-shadow:0 18px 50px #0009; }
+    .message-notification-menu[hidden] { display:none; }
+    .message-notification-heading { padding:13px 15px; border-bottom:1px solid var(--border); font-size:.9rem; font-weight:750; }
+    .message-notification-item { display:block; width:100%; padding:12px 15px; border:0; border-bottom:1px solid var(--border); background:transparent; color:var(--text); text-align:left; font:inherit; cursor:pointer; }
+    .message-notification-item:hover { background:rgba(124,58,237,.12); }
+    .message-notification-item.unread { background:rgba(124,58,237,.08); }
+    .message-notification-item strong { display:flex; justify-content:space-between; gap:10px; font-size:.82rem; }
+    .message-notification-item small { color:var(--text-muted); font-size:.68rem; font-weight:400; white-space:nowrap; }
+    .message-notification-preview { display:block; margin-top:5px; color:var(--text-muted); font-size:.8rem; overflow-wrap:anywhere; }
+    .message-notification-empty { padding:18px 15px; color:var(--text-muted); font-size:.82rem; }
     .topbar-profile { display: flex; align-items: center; flex: 0 1 auto; width: auto; min-width: 0; max-width: 190px; padding: 6px 10px; gap: 9px; border: 1px solid var(--border); border-radius: 12px; background: var(--input-bg); color: var(--text); text-align: left; font: inherit; cursor: pointer; transition: border-color .18s, background .18s; }
     .topbar-profile:hover, .topbar-profile.active { border-color: var(--primary); background: rgba(124,58,237,.12); }
     .topbar-profile:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -1511,6 +1526,15 @@
           <div class="stat-pill">⭐ <strong id="dashLevel">Nv. 1</strong></div>
           <div class="stat-pill">🏅 <strong id="dashBadges">0/8</strong></div>
         </div>
+          <div class="message-notifications" id="messageNotifications">
+            <button type="button" class="message-notification-button" id="messageNotificationButton" aria-label="Notifica&#231;&#245;es de mensagens" aria-expanded="false" aria-controls="messageNotificationMenu" onclick="socialToggleNotifications()">
+              <span aria-hidden="true">&#128276;</span><span class="message-notification-count" id="messageNotificationCount" hidden>0</span>
+            </button>
+            <div class="message-notification-menu" id="messageNotificationMenu" role="region" aria-label="Pr&#233;via das mensagens recebidas" hidden>
+              <div class="message-notification-heading">Mensagens recebidas</div>
+              <div id="messageNotificationList" aria-live="polite"><div class="message-notification-empty">Nenhuma mensagem recente.</div></div>
+            </div>
+          </div>
           <button type="button" class="player-card topbar-profile" id="playerProfileLink" onclick="switchPanel('profile')" aria-label="Abrir perfil do treinador">
             <div class="player-avatar" id="dashAvatar">&#9794;&#65039;</div>
             <div class="player-info">
@@ -1796,30 +1820,10 @@
           <div class="pokedex-grid" id="pokedexGrid"></div>
         </div>
 
-        <div class="panel" id="panel-profile">
-          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <h2 class="panel-title">👤 Perfil do Treinador</h2>
-          <p class="panel-desc">Informações do seu personagem e acesso à equipe, mochila e registros.</p>
-          <div id="profileBox" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;"></div>
-          <h3 style="font-size:1.05rem;margin:24px 0 12px;">Acesso rápido</h3>
-          <div class="cards-grid profile-shortcuts">
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('bag')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('bag')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#3b2c1c,#1c1712);"><img src="assets/trainer-backpack.png" alt="" style="width:82px;height:88px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Mochila</div><div class="game-card-desc">Consulte e use seus itens.</div></div>
-            </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pokemon')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pokemon')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#29354d,#151b2a);"><img src="assets/my-pokemon-ball.png" alt="" style="width:82px;height:82px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Meus Pokémon</div><div class="game-card-desc">Veja sua equipe e gerencie seus Pokémon.</div></div>
-            </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pc')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pc')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#26394a,#111922);"><img src="assets/personal-pc.png" alt="" style="width:88px;height:88px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Meu PC</div><div class="game-card-desc">Guarde Pok&eacute;mon e itens.</div></div>
-            </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pokedex')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pokedex')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#38283e,#19121f);"><img src="assets/pokedex-device.png" alt="" style="width:116px;height:92px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Pokédex</div><div class="game-card-desc">Consulte os Pokémon vistos e capturados.</div></div>
-            </div>
-          </div>
+        <div class="panel" id="panel-social">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
+          <h2 class="panel-title">Central de Amizade</h2>
+          <p class="panel-desc">Encontre treinadores, converse, troque Pok&eacute;mon e marque batalhas.</p>
           <section class="social-hub" aria-labelledby="socialHubTitle">
             <header class="social-hero"><div><h3 id="socialHubTitle">Central de amizade</h3><p>Encontre treinadores, converse, troque Pokémon e marque batalhas.</p></div><span class="social-hero-icon" aria-hidden="true">&#128101;</span></header>
             <div class="social-content">
@@ -1845,6 +1849,35 @@
               </div>
             </div>
           </section>
+        </div>
+        <div class="panel" id="panel-profile">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
+          <h2 class="panel-title">👤 Perfil do Treinador</h2>
+          <p class="panel-desc">Informações do seu personagem e acesso à equipe, mochila e registros.</p>
+          <div id="profileBox" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;"></div>
+          <h3 style="font-size:1.05rem;margin:24px 0 12px;">Acesso rápido</h3>
+          <div class="cards-grid profile-shortcuts">
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('bag')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('bag')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#3b2c1c,#1c1712);"><img src="assets/trainer-backpack.png" alt="" style="width:82px;height:88px;object-fit:contain;image-rendering:pixelated;" /></div>
+              <div class="game-card-body"><div class="game-card-title">Mochila</div><div class="game-card-desc">Consulte e use seus itens.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pokemon')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pokemon')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#29354d,#151b2a);"><img src="assets/my-pokemon-ball.png" alt="" style="width:82px;height:82px;object-fit:contain;image-rendering:pixelated;" /></div>
+              <div class="game-card-body"><div class="game-card-title">Meus Pokémon</div><div class="game-card-desc">Veja sua equipe e gerencie seus Pokémon.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pc')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pc')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#26394a,#111922);"><img src="assets/personal-pc.png" alt="" style="width:88px;height:88px;object-fit:contain;image-rendering:pixelated;" /></div>
+              <div class="game-card-body"><div class="game-card-title">Meu PC</div><div class="game-card-desc">Guarde Pok&eacute;mon e itens.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pokedex')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pokedex')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#38283e,#19121f);"><img src="assets/pokedex-device.png" alt="" style="width:116px;height:92px;object-fit:contain;image-rendering:pixelated;" /></div>
+              <div class="game-card-body"><div class="game-card-title">Pok&#233;dex</div><div class="game-card-desc">Consulte os Pok&#233;mon vistos e capturados.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('social')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('social')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#302153,#123b46);"><span aria-hidden="true" style="font-size:3rem;">&#128101;</span></div>
+              <div class="game-card-body"><div class="game-card-title">Central de Amizade</div><div class="game-card-desc">Encontre amigos, converse, troque Pok&#233;mon e marque batalhas.</div></div>
+            </div>
+          </div>
           <div class="profile-danger-zone" style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border);">
             <button class="btn btn-secondary" onclick="if(confirm('Apagar todo o progresso salvo?'))clearSave()" style="width:auto;max-width:280px;margin:0;">&#128465; Apagar dados salvos</button>
           </div>
@@ -7675,7 +7708,8 @@
       if (id === 'item-catalog') renderItemCatalog();
       if (id === 'pokemon') refreshPartyUI();
       if (id === 'pokedex') renderPokedex();
-      if (id === 'profile') { refreshProfileUI(); socialRefresh(); }
+      if (id === 'profile') refreshProfileUI();
+      if (id === 'social') socialRefresh();
       if (id === 'gyms') renderGyms();
       if (id === 'battle-tower') renderBattleTower();
       if (id === 'ss-anne') renderSSAnne();
@@ -10740,6 +10774,11 @@
     let socialChatVersion = 0;
     let socialChatLastRendered = '';
     let socialChatTimer = null;
+    let socialNotificationTimer = null;
+    let socialNotificationBusy = false;
+    let socialNotificationMessages = [];
+    let socialUnreadMessageIds = new Set();
+    let socialNotificationInitializedFor = '';
     let socialProfilesById = new Map();
     const socialKnownStatuses = new Map();
 
@@ -10759,10 +10798,101 @@
       if (!onlineUser || !player || !supabaseClient) return;
       socialEnsureTradeIds();
       socialRefresh();
+      socialLoadMessageNotifications();
       if (!socialTimer) socialTimer = setInterval(socialRefresh, 15000);
+      if (!socialNotificationTimer) socialNotificationTimer = setInterval(socialLoadMessageNotifications, 7000);
       if (!socialChatTimer) socialChatTimer = setInterval(() => {
-        if (socialChatFriend && document.getElementById('panel-profile')?.classList.contains('active')) socialLoadChat();
+        if (socialChatFriend && document.getElementById('panel-social')?.classList.contains('active')) socialLoadChat();
       }, 5000);
+    }
+
+    function socialReadMessagesKey() { return `pokemonTrainer.chat.read.${onlineUser?.id || 'guest'}`; }
+
+    function socialGetReadMessageIds() {
+      try { const value=JSON.parse(localStorage.getItem(socialReadMessagesKey())||'[]'); return new Set(Array.isArray(value)?value:[]); }
+      catch { return new Set(); }
+    }
+
+    function socialSaveReadMessageIds(ids) {
+      try { localStorage.setItem(socialReadMessagesKey(),JSON.stringify([...ids].slice(-250))); } catch {}
+    }
+
+    async function socialLoadMessageNotifications() {
+      if (socialNotificationBusy || !onlineUser || !supabaseClient) return;
+      socialNotificationBusy=true;
+      try {
+        const {data,error}=await supabaseClient.from('trainer_messages').select('id,sender_id,recipient_id,body,created_at')
+          .eq('recipient_id',onlineUser.id).order('created_at',{ascending:false}).limit(50);
+        if (error) throw error;
+        const messages=data||[];
+        const senderIds=[...new Set(messages.map(message=>message.sender_id))];
+        let profiles=[];
+        if (senderIds.length) {
+          const result=await supabaseClient.from('trainer_profiles').select('user_id,trainer_name,last_seen').in('user_id',senderIds);
+          if (result.error) throw result.error;
+          profiles=result.data||[];
+        }
+        for (const profile of profiles) socialProfilesById.set(profile.user_id,profile);
+        const readIds=socialGetReadMessageIds();
+        const initializedKey=socialReadMessagesKey()+'.initialized';
+        let initialized=false;
+        try { initialized=localStorage.getItem(initializedKey)==='1'; } catch {}
+        if (!initialized) {
+          try { localStorage.setItem(initializedKey,'1'); } catch {}
+        }
+        messages.forEach(message=>{ if (!readIds.has(message.id)) socialUnreadMessageIds.add(message.id); });
+        socialNotificationInitializedFor=onlineUser.id;
+        socialNotificationMessages=messages;
+        socialRenderMessageNotifications();
+      } catch(error) {
+        console.warn('[Social] Nao foi possivel atualizar notificacoes:',error);
+      } finally { socialNotificationBusy=false; }
+    }
+
+    function socialRenderMessageNotifications() {
+      const badge=document.getElementById('messageNotificationCount');
+      const list=document.getElementById('messageNotificationList');
+      if (!badge || !list) return;
+      const unreadCount=socialUnreadMessageIds.size;
+      badge.textContent=unreadCount>99?'99+':String(unreadCount);
+      badge.hidden=unreadCount===0;
+      if (!socialNotificationMessages.length) {
+        list.innerHTML='<div class="message-notification-empty">Nenhuma mensagem recente.</div>';
+        return;
+      }
+      list.innerHTML=socialNotificationMessages.map(message=>{
+        const sender=socialProfilesById.get(message.sender_id)?.trainer_name||'Treinador';
+        const preview=String(message.body||'').trim();
+        const sentAt=new Date(message.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+        const unread=socialUnreadMessageIds.has(message.id);
+        return `<button type="button" class="message-notification-item ${unread?'unread':''}" onclick="socialOpenNotification('${message.id}')"><strong><span>${escapeHTML(sender)}${unread?' &middot; Nova':''}</span><small>${escapeHTML(sentAt)}</small></strong><span class="message-notification-preview">${escapeHTML(preview)}</span></button>`;
+      }).join('');
+    }
+
+    function socialToggleNotifications() {
+      const button=document.getElementById('messageNotificationButton');
+      const menu=document.getElementById('messageNotificationMenu');
+      if (!button || !menu) return;
+      const open=button.getAttribute('aria-expanded')!=='true';
+      button.setAttribute('aria-expanded',String(open));
+      menu.hidden=!open;
+      if (open) socialLoadMessageNotifications();
+    }
+
+    function socialOpenNotification(messageId) {
+      const message=socialNotificationMessages.find(item=>item.id===messageId);
+      if (!message) return;
+      const readIds=socialGetReadMessageIds();
+      readIds.add(messageId);
+      socialSaveReadMessageIds(readIds);
+      socialUnreadMessageIds.delete(messageId);
+      socialRenderMessageNotifications();
+      const button=document.getElementById('messageNotificationButton');
+      const menu=document.getElementById('messageNotificationMenu');
+      button?.setAttribute('aria-expanded','false');
+      if (menu) menu.hidden=true;
+      switchPanel('social');
+      socialOpenChat(message.sender_id);
     }
 
     async function socialRefresh() {
@@ -10804,7 +10934,7 @@
       } catch (error) {
         console.warn('[Social] Falha ao atualizar:',error);
         const inbox=document.getElementById('socialInbox');
-        if (inbox && document.getElementById('panel-profile')?.classList.contains('active')) inbox.innerHTML='<span style="color:var(--warning);font-size:.85rem;">Não foi possível carregar as interações. Confira se o SQL social foi aplicado no Supabase.</span>';
+        if (inbox && document.getElementById('panel-social')?.classList.contains('active')) inbox.innerHTML='<span style="color:var(--warning);font-size:.85rem;">Não foi possível carregar as interações. Confira se o SQL social foi aplicado no Supabase.</span>';
       } finally { socialBusy=false; }
     }
 
@@ -10832,6 +10962,10 @@
       const friend=socialProfilesById.get(target);
       if (!friend) { showToast('NÃ£o foi possÃ­vel carregar esse amigo. Atualize a lista e tente novamente.','error'); return; }
       socialChatFriend=friend;
+      const readIds=socialGetReadMessageIds();
+      socialNotificationMessages.filter(message=>message.sender_id===target).forEach(message=>{readIds.add(message.id);socialUnreadMessageIds.delete(message.id);});
+      socialSaveReadMessageIds(readIds);
+      socialRenderMessageNotifications();
       socialChatVersion++;
       socialChatLastRendered='';
       const panel=document.getElementById('socialChat');
@@ -10863,6 +10997,10 @@
         if (error) throw error;
         if (version!==socialChatVersion || socialChatFriend?.user_id!==friend.user_id) return;
         const messages=(data||[]).reverse();
+        const readIds=socialGetReadMessageIds();
+        messages.filter(message=>message.sender_id===friend.user_id).forEach(message=>{readIds.add(message.id);socialUnreadMessageIds.delete(message.id);});
+        socialSaveReadMessageIds(readIds);
+        socialRenderMessageNotifications();
         const last=messages[messages.length-1];
         const signature=`${friend.user_id}:${messages.length}:${last?.id||''}`;
         if (signature===socialChatLastRendered) return;
