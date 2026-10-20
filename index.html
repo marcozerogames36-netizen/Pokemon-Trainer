@@ -1134,9 +1134,13 @@
       display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;
     }
     .pokedex-card {
+      position: relative;
       background: var(--card); border: 1px solid var(--border); border-radius: 14px;
       padding: 12px; text-align: center; cursor: default; transition: border-color 0.2s;
     }
+    .pokedex-ev-tooltip { position:absolute; z-index:20; left:50%; bottom:calc(100% + 9px); width:max-content; max-width:min(260px,calc(100vw - 32px)); padding:9px 12px; border:1px solid #7655d7; border-radius:10px; background:#211936; color:var(--text); box-shadow:0 10px 28px #0009; font-size:.75rem; line-height:1.45; text-align:left; white-space:normal; opacity:0; visibility:hidden; transform:translate(-50%,5px); transition:opacity .15s ease,transform .15s ease,visibility .15s ease; pointer-events:none; }
+    .pokedex-card:hover .pokedex-ev-tooltip,.pokedex-card:focus-visible .pokedex-ev-tooltip { opacity:1; visibility:visible; transform:translate(-50%,0); }
+    .pokedex-ev-tooltip strong { display:block; margin-bottom:3px; color:#c4b5fd; }
     .pokedex-card.caught { border-color: rgba(124,58,237,0.5); }
     .pokedex-card.seen:not(.caught) { opacity: 0.85; }
     .pokedex-card.unknown { opacity: 0.45; filter: grayscale(1); }
@@ -1842,7 +1846,7 @@
                   <header class="social-chat-head"><div><strong id="socialChatName">Conversa</strong><small id="socialChatPresence">Mensagens visíveis apenas para vocês dois.</small></div><button type="button" class="btn btn-secondary" onclick="socialCloseChat()" style="width:auto;margin:0;padding:7px 10px;">Fechar</button></header>
                   <div id="socialChatMessages" class="social-chat-messages" aria-live="polite"><div class="social-chat-empty">Escolha um amigo para iniciar a conversa.</div></div>
                   <form class="social-chat-form" onsubmit="event.preventDefault();socialSendMessage()">
-                    <textarea id="socialChatInput" maxlength="500" rows="1" placeholder="Escreva uma mensagem..." aria-label="Mensagem para seu amigo" required></textarea>
+                    <textarea id="socialChatInput" maxlength="500" rows="1" placeholder="Escreva uma mensagem..." aria-label="Mensagem para seu amigo" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();socialSendMessage()}" required></textarea>
                     <button id="socialChatSend" type="submit" class="btn" style="width:auto;margin:0;">Enviar</button>
                   </form>
                 </section>
@@ -10712,6 +10716,11 @@
       renderBag();
     }
 
+    function getPokedexEvYieldText(id) {
+      const yieldByStat=EV_YIELD_BY_ID[id]||{[EV_YIELD_BY_TYPE[getTypes(id)[0]]||'hp']:1};
+      return Object.entries(yieldByStat).map(([stat,amount])=>`+${amount} EV ${STAT_LABELS[stat]||stat}`).join(', ');
+    }
+
     function renderPokedex() {
       const grid = document.getElementById('pokedexGrid');
       const prog = document.getElementById('pokedexProgress');
@@ -10732,12 +10741,13 @@
           ? `<img class="pokedex-sprite" src="${SPRITE(id)}" alt="${displayName}" onerror="this.src='${SPRITE_FB(id)}'" style="${isCaught ? '' : 'filter:brightness(0.6);'}" />`
           : `<div class="pokedex-sprite" style="display:flex;align-items:center;justify-content:center;font-size:1.8rem;opacity:0.4;">?</div>`;
         cards.push(`
-          <div class="pokedex-card ${statusClass}">
+          <div class="pokedex-card ${statusClass}" ${isSeen ? `tabindex="0" aria-describedby="pokedexEv-${id}"` : ''}>
             <div class="pokedex-num">#${String(id).padStart(3,'0')}</div>
             ${sprite}
             <div class="pokedex-name">${displayName}</div>
             ${isSeen ? `<span class="type-badge ${typeClass(getTypes(id))}" style="font-size:0.55rem;">${typeLabel(getTypes(id))}</span>` : ''}
             <div class="pokedex-status ${statusClass}">${statusText}</div>
+            ${isSeen ? `<div class="pokedex-ev-tooltip" id="pokedexEv-${id}" role="tooltip"><strong>EVs ganhos ao derrotar</strong>${escapeHTML(getPokedexEvYieldText(id))}</div>` : ''}
           </div>`);
       }
       grid.innerHTML = cards.join('');
@@ -10781,6 +10791,7 @@
     let socialNotificationTimer = null;
     let socialNotificationBusy = false;
     let socialNotificationMessages = [];
+    let socialNotificationRequests = [];
     let socialUnreadMessageIds = new Set();
     let socialNotificationInitializedFor = '';
     let socialProfilesById = new Map();
@@ -10825,11 +10836,17 @@
       if (socialNotificationBusy || !onlineUser || !supabaseClient) return;
       socialNotificationBusy=true;
       try {
-        const {data,error}=await supabaseClient.from('trainer_messages').select('id,sender_id,recipient_id,body,created_at')
-          .eq('recipient_id',onlineUser.id).order('created_at',{ascending:false}).limit(50);
-        if (error) throw error;
-        const messages=data||[];
-        const senderIds=[...new Set(messages.map(message=>message.sender_id))];
+        const [messageResult,requestResult]=await Promise.all([
+          supabaseClient.from('trainer_messages').select('id,sender_id,recipient_id,body,created_at')
+            .eq('recipient_id',onlineUser.id).order('created_at',{ascending:false}).limit(50),
+          supabaseClient.from('social_requests').select('id,sender_id,created_at,status')
+            .eq('receiver_id',onlineUser.id).eq('kind','friend').eq('status','pending').order('created_at',{ascending:false}).limit(50)
+        ]);
+        if (messageResult.error) throw messageResult.error;
+        if (requestResult.error) throw requestResult.error;
+        const messages=messageResult.data||[];
+        const requests=requestResult.data||[];
+        const senderIds=[...new Set([...messages.map(message=>message.sender_id),...requests.map(request=>request.sender_id)])];
         let profiles=[];
         if (senderIds.length) {
           const result=await supabaseClient.from('trainer_profiles').select('user_id,trainer_name,last_seen').in('user_id',senderIds);
@@ -10845,8 +10862,14 @@
           try { localStorage.setItem(initializedKey,'1'); } catch {}
         }
         messages.forEach(message=>{ if (!readIds.has(message.id)) socialUnreadMessageIds.add(message.id); });
+        const pendingRequestKeys=new Set(requests.map(request=>`friend-request:${request.id}`));
+        for (const key of socialUnreadMessageIds) {
+          if (key.startsWith('friend-request:')&&!pendingRequestKeys.has(key)) socialUnreadMessageIds.delete(key);
+        }
+        requests.forEach(request=>{const key=`friend-request:${request.id}`;if(!readIds.has(key))socialUnreadMessageIds.add(key);});
         socialNotificationInitializedFor=onlineUser.id;
         socialNotificationMessages=messages;
+        socialNotificationRequests=requests;
         socialRenderMessageNotifications();
       } catch(error) {
         console.warn('[Social] Nao foi possivel atualizar notificacoes:',error);
@@ -10860,16 +10883,20 @@
       const unreadCount=socialUnreadMessageIds.size;
       badge.textContent=unreadCount>99?'99+':String(unreadCount);
       badge.hidden=unreadCount===0;
-      if (!socialNotificationMessages.length) {
+      if (!socialNotificationMessages.length&&!socialNotificationRequests.length) {
         list.innerHTML='<div class="message-notification-empty">Nenhuma mensagem recente.</div>';
         return;
       }
-      list.innerHTML=socialNotificationMessages.map(message=>{
-        const sender=socialProfilesById.get(message.sender_id)?.trainer_name||'Treinador';
-        const preview=String(message.body||'').trim();
-        const sentAt=new Date(message.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-        const unread=socialUnreadMessageIds.has(message.id);
-        return `<button type="button" class="message-notification-item ${unread?'unread':''}" onclick="socialOpenNotification('${message.id}')"><strong><span>${escapeHTML(sender)}${unread?' &middot; Nova':''}</span><small>${escapeHTML(sentAt)}</small></strong><span class="message-notification-preview">${escapeHTML(preview)}</span></button>`;
+      const items=[
+        ...socialNotificationMessages.map(message=>({...message,notificationType:'message',readKey:message.id})),
+        ...socialNotificationRequests.map(request=>({...request,notificationType:'friend-request',readKey:`friend-request:${request.id}`}))
+      ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+      list.innerHTML=items.map(item=>{
+        const sender=socialProfilesById.get(item.sender_id)?.trainer_name||'Treinador';
+        const preview=item.notificationType==='friend-request'?'Enviou um pedido de amizade.':String(item.body||'').trim();
+        const sentAt=new Date(item.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+        const unread=socialUnreadMessageIds.has(item.readKey);
+        return `<button type="button" class="message-notification-item ${unread?'unread':''}" onclick="socialOpenNotification('${item.notificationType}','${item.id}')"><strong><span>${escapeHTML(sender)}${unread?' &middot; Nova':''}</span><small>${escapeHTML(sentAt)}</small></strong><span class="message-notification-preview">${escapeHTML(preview)}</span></button>`;
       }).join('');
     }
 
@@ -10883,20 +10910,22 @@
       if (open) socialLoadMessageNotifications();
     }
 
-    function socialOpenNotification(messageId) {
-      const message=socialNotificationMessages.find(item=>item.id===messageId);
-      if (!message) return;
+    function socialOpenNotification(type,id) {
+      const message=type==='message'?socialNotificationMessages.find(item=>item.id===id):null;
+      const request=type==='friend-request'?socialNotificationRequests.find(item=>item.id===id):null;
+      if (!message&&!request) return;
       const readIds=socialGetReadMessageIds();
-      readIds.add(messageId);
+      const readKey=type==='friend-request'?`friend-request:${id}`:id;
+      readIds.add(readKey);
       socialSaveReadMessageIds(readIds);
-      socialUnreadMessageIds.delete(messageId);
+      socialUnreadMessageIds.delete(readKey);
       socialRenderMessageNotifications();
       const button=document.getElementById('messageNotificationButton');
       const menu=document.getElementById('messageNotificationMenu');
       button?.setAttribute('aria-expanded','false');
       if (menu) menu.hidden=true;
       switchPanel('social');
-      socialOpenChat(message.sender_id);
+      if (message) socialOpenChat(message.sender_id);
     }
 
     async function socialRefresh() {
@@ -11040,6 +11069,12 @@
     function socialRenderInbox(requests,profileById) {
       const root=document.getElementById('socialInbox');
       if (!root) return;
+      if (document.getElementById('panel-social')?.classList.contains('active')) {
+        const readIds=socialGetReadMessageIds();
+        requests.forEach(request=>{const key=`friend-request:${request.id}`;readIds.add(key);socialUnreadMessageIds.delete(key);});
+        socialSaveReadMessageIds(readIds);
+        socialRenderMessageNotifications();
+      }
       const count=document.getElementById('socialRequestCount');
       if (count) count.textContent=String(requests.length);
       if (!requests.length) { root.innerHTML='<span style="color:var(--text-muted);font-size:.85rem;">Nenhuma solicitação pendente.</span>'; return; }
