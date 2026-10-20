@@ -1404,6 +1404,7 @@
         <div class="topbar-actions">
           <div class="topbar-stats">
             <div class="stat-pill">💰 <strong id="dashMoney">₽ 3.000</strong></div>
+            <div class="stat-pill" title="PokeCoins" aria-label="PokeCoins">🪙 <strong id="dashPokeCoins">0 PC</strong></div>
             <div class="stat-pill"><svg class="bp-chip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="#fff"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.58 4.58l2.12 2.12m10.6 10.6 2.12 2.12m0-14.84L17.3 6.7M6.7 17.3l-2.12 2.12" stroke="#fff" stroke-width="1.3"/></svg><span class="bp-red">BP</span> <strong class="bp-amount" id="dashBattlePoints">0</strong></div>
           <div class="stat-pill">⭐ <strong id="dashLevel">Nv. 1</strong></div>
           <div class="stat-pill">🏅 <strong id="dashBadges">0/8</strong></div>
@@ -4471,7 +4472,7 @@
         name, gender: selectedGender, originRegion: region, starter,
         rivalName: '', oakIntroStep: 0, oakIntroFinished: false, oakIntroRewardClaimed: false,
         billIntroStep: 0, billIntroVersion: 2, billTicketRewardClaimed: false, billMissionRewardClaimed: false,
-        money: 3000, battlePoints: 0, level: 1, badges: 0, missionsDone: 0, potions: 5, balls: 8, centerCards: 5,
+        money: 3000, battlePoints: 0, pokeCoins: 0, level: 1, badges: 0, missionsDone: 0, potions: 5, balls: 8, centerCards: 5,
         antidote: 2, antiparalyze: 2, antiburn: 2,
         badgesList: [],
         party: [starterPokemon],
@@ -4496,6 +4497,7 @@
     function updateStatsUI() {
       document.getElementById('dashMoney').textContent = `₽ ${player.money.toLocaleString('pt-BR')}`;
       document.getElementById('dashBattlePoints').textContent = (Number(player.battlePoints) || 0).toLocaleString('pt-BR');
+      document.getElementById('dashPokeCoins').textContent = `${(Number(player.pokeCoins) || 0).toLocaleString('pt-BR')} PC`;
       document.getElementById('statMoney').textContent = `₽ ${player.money.toLocaleString('pt-BR')}`;
       document.getElementById('dashLevel').textContent = `Nv. ${player.level}`;
       document.getElementById('statLevel').textContent = player.level;
@@ -6035,7 +6037,7 @@
     function refreshMarketUI() {
       if (!player) return;
       const moneyEl = document.getElementById('marketMoney');
-      if (moneyEl) moneyEl.innerHTML = '\u20bd ' + player.money.toLocaleString('pt-BR') + ' | <span class="market-bp-label">🎰 BP</span> <span class="bp-amount">' + (Number(player.battlePoints) || 0).toLocaleString('pt-BR') + '</span>';
+      if (moneyEl) moneyEl.innerHTML = '\u20bd ' + player.money.toLocaleString('pt-BR') + ' | 🪙 PokeCoins ' + (Number(player.pokeCoins) || 0).toLocaleString('pt-BR') + ' PC | <span class="market-bp-label">🎰 BP</span> <span class="bp-amount">' + (Number(player.battlePoints) || 0).toLocaleString('pt-BR') + '</span>';
       const grid = document.getElementById('marketGrid');
       if (grid) {
         const parcelBoxAvailable = getMissionState('parcel') === 'active' && getItemQty('parcelbox') === 0;
@@ -6347,6 +6349,7 @@
       const migrateBillDialogue = saved.billIntroVersion !== 2;
       player = saved;
       player.battlePoints = Math.max(0, Math.floor(Number(player.battlePoints) || 0));
+      player.pokeCoins = Math.max(0, Math.floor(Number(player.pokeCoins) || 0));
       player.centerCards = Math.max(0, Math.min(5, Math.floor(Number(player.centerCards ?? 5) || 0)));
       player.antidote = player.antidote || 0;
       player.antiparalyze = player.antiparalyze || 0;
