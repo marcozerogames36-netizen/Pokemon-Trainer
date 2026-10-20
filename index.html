@@ -1404,7 +1404,7 @@
         <div class="topbar-actions">
           <div class="topbar-stats">
             <div class="stat-pill">💰 <strong id="dashMoney">₽ 3.000</strong></div>
-            <div class="stat-pill" title="PokeCoins" aria-label="PokeCoins">🪙 <strong id="dashPokeCoins">0 PC</strong></div>
+            <div class="stat-pill" title="PokeCoins" aria-label="PokeCoins">💎 <strong id="dashPokeCoins">0 PC</strong></div>
             <div class="stat-pill"><svg class="bp-chip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="#fff"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.58 4.58l2.12 2.12m10.6 10.6 2.12 2.12m0-14.84L17.3 6.7M6.7 17.3l-2.12 2.12" stroke="#fff" stroke-width="1.3"/></svg><span class="bp-red">BP</span> <strong class="bp-amount" id="dashBattlePoints">0</strong></div>
           <div class="stat-pill">⭐ <strong id="dashLevel">Nv. 1</strong></div>
           <div class="stat-pill">🏅 <strong id="dashBadges">0/8</strong></div>
@@ -6037,7 +6037,7 @@
     function refreshMarketUI() {
       if (!player) return;
       const moneyEl = document.getElementById('marketMoney');
-      if (moneyEl) moneyEl.innerHTML = '\u20bd ' + player.money.toLocaleString('pt-BR') + ' | 🪙 PokeCoins ' + (Number(player.pokeCoins) || 0).toLocaleString('pt-BR') + ' PC | <span class="market-bp-label">🎰 BP</span> <span class="bp-amount">' + (Number(player.battlePoints) || 0).toLocaleString('pt-BR') + '</span>';
+      if (moneyEl) moneyEl.innerHTML = '\u20bd ' + player.money.toLocaleString('pt-BR') + ' | 💎 PokeCoins ' + (Number(player.pokeCoins) || 0).toLocaleString('pt-BR') + ' PC | <span class="market-bp-label">🎰 BP</span> <span class="bp-amount">' + (Number(player.battlePoints) || 0).toLocaleString('pt-BR') + '</span>';
       const grid = document.getElementById('marketGrid');
       if (grid) {
         const parcelBoxAvailable = getMissionState('parcel') === 'active' && getItemQty('parcelbox') === 0;
