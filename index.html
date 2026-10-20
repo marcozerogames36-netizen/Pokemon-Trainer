@@ -1560,7 +1560,6 @@
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">👤 Perfil do Treinador</h2>
           <p class="panel-desc">Informações do seu personagem e acesso à equipe, mochila e registros.</p>
-          <button class="btn btn-secondary" onclick="if(confirm('Apagar todo o progresso salvo?'))clearSave()" style="max-width:280px;margin-bottom:16px;">🗑️ Apagar dados salvos</button>
           <div id="profileBox" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;"></div>
           <h3 style="font-size:1.05rem;margin:24px 0 12px;">Acesso rápido</h3>
           <div class="cards-grid profile-shortcuts">
@@ -1580,6 +1579,9 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#38283e,#19121f);">📖</div>
               <div class="game-card-body"><div class="game-card-title">Pokédex</div><div class="game-card-desc">Consulte os Pokémon vistos e capturados.</div></div>
             </div>
+          </div>
+          <div class="profile-danger-zone" style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border);">
+            <button class="btn btn-secondary" onclick="if(confirm('Apagar todo o progresso salvo?'))clearSave()" style="width:auto;max-width:280px;margin:0;">&#128465; Apagar dados salvos</button>
           </div>
         </div>
       </div>
@@ -1847,18 +1849,18 @@
       Planta: { Fogo: 0.5, Agua: 2, Planta: 0.5, Veneno: 0.5, Terra: 2, Voador: 0.5, Inseto: 0.5, Pedra: 2, Dragao: 0.5, Aço: 0.5 },
       Eletrico: { Agua: 2, Eletrico: 0.5, Planta: 0.5, Terra: 0, Voador: 2, Dragao: 0.5 },
       Gelo: { Fogo: 0.5, Agua: 0.5, Planta: 2, Gelo: 0.5, Terra: 2, Voador: 2, Dragao: 2, Aço: 0.5 },
-      Lutador: { Normal: 2, Gelo: 2, Veneno: 0.5, Voador: 0.5, Psiquico: 0.5, Inseto: 0.5, Pedra: 2, Fantasma: 0, Sombrio: 2, Aço: 2, Fada: 0.5 },
-      Veneno: { Planta: 2, Veneno: 0.5, Terra: 0.5, Pedra: 0.5, Fantasma: 0.5, Aço: 0, Fada: 2 },
+      Lutador: { Normal: 2, Gelo: 2, Veneno: 0.5, Voador: 0.5, Psiquico: 0.5, Inseto: 0.5, Pedra: 2, Fantasma: 0, Sombrio: 2, Aço: 2 },
+      Veneno: { Planta: 2, Veneno: 0.5, Terra: 0.5, Pedra: 0.5, Fantasma: 0.5, Aço: 0 },
       Terra: { Fogo: 2, Eletrico: 2, Planta: 0.5, Veneno: 2, Voador: 0, Inseto: 0.5, Pedra: 2, Aço: 2 },
       Voador: { Eletrico: 0.5, Planta: 2, Lutador: 2, Inseto: 2, Pedra: 0.5, Aço: 0.5 },
       Psiquico: { Lutador: 2, Veneno: 2, Psiquico: 0.5, Sombrio: 0, Aço: 0.5 },
-      Inseto: { Fogo: 0.5, Planta: 2, Lutador: 0.5, Veneno: 0.5, Voador: 0.5, Psiquico: 2, Fantasma: 0.5, Sombrio: 2, Aço: 0.5, Fada: 0.5 },
+      Inseto: { Fogo: 0.5, Planta: 2, Lutador: 0.5, Veneno: 0.5, Voador: 0.5, Psiquico: 2, Fantasma: 0.5, Sombrio: 2, Aço: 0.5 },
       Pedra: { Fogo: 2, Gelo: 2, Lutador: 0.5, Terra: 0.5, Voador: 2, Inseto: 2, Aço: 0.5 },
-      Fantasma: { Normal: 0, Psiquico: 2, Fantasma: 2, Sombrio: 0.5 },
-      Dragao: { Aço: 0.5, Dragao: 2, Fada: 0 },
-      Sombrio: { Lutador: 0.5, Psiquico: 2, Fantasma: 2, Sombrio: 0.5, Fada: 0.5 },
-      Aço: { Fogo: 0.5, Agua: 0.5, Eletrico: 0.5, Gelo: 2, Pedra: 2, Aço: 0.5, Fada: 2 },
-      Fada: { Fogo: 0.5, Lutador: 2, Veneno: 0.5, Dragao: 2, Sombrio: 2, Aço: 0.5 }
+      Fantasma: { Normal: 0, Psiquico: 2, Fantasma: 2, Sombrio: 0.5, Aço: 0.5 },
+      Dragao: { Aço: 0.5, Dragao: 2 },
+      Sombrio: { Lutador: 0.5, Psiquico: 2, Fantasma: 2, Sombrio: 0.5, Aço: 0.5 },
+      Aço: { Fogo: 0.5, Agua: 0.5, Eletrico: 0.5, Gelo: 2, Pedra: 2, Aço: 0.5 },
+      Fada: {}
     };
 
     const TYPE_NAME_BY_NORMALIZED = Object.fromEntries(Object.keys(TYPE_CHART).map(type => [
@@ -2525,6 +2527,32 @@
       try { return await request; } catch (error) { fireRedLearnsetCache.delete(id); throw error; }
     }
 
+    const GEN4_PLUS_VERSION_GROUP_ORDER = [
+      'diamond-pearl','platinum','heartgold-soulsilver','black-white','black-2-white-2',
+      'x-y','omega-ruby-alpha-sapphire','sun-moon','ultra-sun-ultra-moon',
+      'lets-go-pikachu-lets-go-eevee','sword-shield','brilliant-diamond-shining-pearl',
+      'legends-arceus','scarlet-violet'
+    ];
+    const GEN3_MOVE_TYPE_OVERRIDES = { charm: 'Normal', sweetkiss: 'Normal' };
+    const GEN3_HIDDEN_POWER_TYPES = [
+      'Lutador','Voador','Veneno','Terra','Pedra','Inseto','Fantasma','A\u00e7o',
+      'Fogo','Agua','Planta','Eletrico','Psiquico','Gelo','Dragao','Sombrio'
+    ];
+    function getGeneration3MoveType(moveOrData, pokemon = null) {
+      const moveName = String(moveOrData?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (moveName === 'hiddenpower' && pokemon?.ivs) {
+        const ivOrder = ['hp','attack','defense','speed','specialAttack','specialDefense'];
+        const bitValue = ivOrder.reduce((sum, stat, index) => sum + ((Number(pokemon.ivs[stat]) || 0) & 1) * (2 ** index), 0);
+        return GEN3_HIDDEN_POWER_TYPES[Math.floor(bitValue * 15 / 63)];
+      }
+      if (GEN3_MOVE_TYPE_OVERRIDES[moveName]) return GEN3_MOVE_TYPE_OVERRIDES[moveName];
+      const historicalType = moveOrData?.past_values
+        ?.filter(value => value.type?.name && GEN4_PLUS_VERSION_GROUP_ORDER.includes(value.version_group?.name))
+        ?.sort((a,b) => GEN4_PLUS_VERSION_GROUP_ORDER.indexOf(a.version_group.name) - GEN4_PLUS_VERSION_GROUP_ORDER.indexOf(b.version_group.name))[0]
+        ?.type?.name;
+      return normalizeBattleType(historicalType || moveOrData?.type?.name || moveOrData?.type || 'Normal');
+    }
+
     async function getMoveDataForBattle(slug) {
       if (moveDataCache.has(slug)) return moveDataCache.get(slug);
       const request = (async () => {
@@ -2543,7 +2571,7 @@
         })).filter(change => change.stat && change.stages);
         const move = {
           name: data.name.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' '),
-          type: normalizeBattleType(data.type?.name || 'normal'),
+          type: getGeneration3MoveType(data),
           power: Number(data.power) || 0,
           accuracy: data.accuracy,
           priority: Number(data.priority) || 0,
@@ -2669,8 +2697,6 @@
     // FireRed/Gen III classifica golpes pelo tipo, não por cada golpe individual.
     const PHYSICAL_MOVE_TYPES = new Set(['Normal','Lutador','Voador','Veneno','Terra','Pedra','Inseto','Fantasma','Aço']);
     function getMoveCategory(move) {
-      if (move?.category === 'physical') return 'Físico';
-      if (move?.category === 'special') return 'Especial';
       if (move?.category === 'status') return 'Status';
       if (move && typeof move === 'object' && (!Number.isFinite(Number(move.power)) || Number(move.power) <= 0)) return 'Status';
       const type = move && typeof move === 'object' ? move.type : move;
@@ -2718,6 +2744,8 @@
       pokemon.moves.forEach(move => {
         const originalName = getOriginalMoveName(move.name);
         if (originalName !== move.name) { move.name = originalName; changed = true; }
+        const generation3Type = getGeneration3MoveType(move, pokemon);
+        if (move.type !== generation3Type) { move.type = generation3Type; changed = true; }
         const basePp = getMoveMaxPp(move);
         const ppUps = Math.max(0, Math.min(3, Number.isInteger(move.ppUps) ? move.ppUps : 0));
         const maxPp = Math.min(Math.floor(basePp * 1.6), basePp + Math.ceil(basePp * 0.2) * ppUps);
@@ -4843,6 +4871,7 @@
     function applyHeldItemEndTurn(pokemon) {
       if (!pokemon) return '';
       const hpKey = Number.isFinite(pokemon.currentHp) ? 'currentHp' : 'hp';
+      if (pokemon[hpKey] <= 0) return '';
       if (pokemon.heldItem === 'toxic_orb' && canReceiveStatus(pokemon, 'toxic')) {
         pokemon.status = 'toxic'; pokemon.toxicCounter = 1;
         return `${pokemon.name} foi envenenado pelo Toxic Orb.`;
@@ -4852,6 +4881,20 @@
       const restored = Math.min(pokemon.maxHp - pokemon[hpKey], Math.max(1, Math.floor(pokemon.maxHp / 16)));
       pokemon[hpKey] += restored;
       return `${pokemon.name} recuperou ${restored} HP com Leftovers.`;
+    }
+
+    function applyBattleHeldItemsAtTurnEnd() {
+      const messages = [];
+      const playerMessage = applyHeldItemEndTurn(player?.poke);
+      const enemyMessage = applyHeldItemEndTurn(battle?.enemy);
+      if (playerMessage) messages.push(playerMessage);
+      if (enemyMessage) messages.push(enemyMessage);
+      if (battle && player?.poke) {
+        battle.playerHp = player.poke.hp;
+        updatePlayerHpBar();
+        updateEnemyHpBar();
+      }
+      return messages.join(' ');
     }
 
     function isContactMove(move) {
@@ -6311,7 +6354,7 @@
         const calculatedStats = pvpCalculateStats(baseStats[pokemonIndex], pokemon, ivs, evs);
         const maxHp = calculatedStats.hp;
         const moves = (pokemon.moves || []).filter(move => Number(move.power) > 0 || move.healing>0 || move.drain>0 || move.statChanges?.length || ['burn','paralysis','poison','sleep','freeze'].includes(move.statusEffect?.status)).slice(0,4).map(move => ({
-          name: String(move.name || 'Golpe'), type: normalizeBattleType(move.type || 'Normal'),
+          name: String(move.name || 'Golpe'), type: getGeneration3MoveType(move, pokemon),
           power: Math.max(0, Math.min(250, Math.floor(Number(move.power) || 0))),
           accuracy: move.accuracy !== null && move.accuracy !== undefined && Number.isFinite(Number(move.accuracy)) ? Math.max(1, Math.min(100, Number(move.accuracy))) : 100,
           priority: Math.max(-7,Math.min(7,Math.floor(Number(move.priority ?? ({'quick attack':1,'mach punch':1,'extreme speed':1,'protect':3,'detect':3,'endure':3,'follow me':1,'helping hand':5,'counter':-5,'mirror coat':-5,'vital throw':-1,'focus punch':-3}[String(move.name||'').toLowerCase()] ?? 0))||0))),
@@ -7209,10 +7252,9 @@
         battle.busy = true;
         backToMenu();
         const residual = applyResidualStatus(player.poke);
-        const leftovers = applyHeldItemEndTurn(player.poke);
         battle.playerHp = player.poke.hp;
         updatePlayerHpBar();
-        setLog([statusBlock, residual, leftovers].filter(Boolean).join(' '));
+        setLog([statusBlock, residual].filter(Boolean).join(' '));
         saveGame();
         if (player.poke.hp <= 0) {
           const hasBackup = player.party.some(pokemon => pokemon !== player.poke && pokemon.hp > 0);
@@ -7334,7 +7376,6 @@
         const playerHeldMessage = applyHeldItemTrigger(player.poke);
         const shellBellMessage = applyShellBell(player.poke, dmg);
         const drainMessage = applyMoveDrain(player.poke, move, dmg);
-        const leftoversMessage = applyHeldItemEndTurn(player.poke);
         battle.playerHp = player.poke.hp;
         if (abilityMessage) msg += ` ${abilityMessage}`;
         if (statusMessage) msg += ` ${statusMessage}`;
@@ -7344,7 +7385,6 @@
         if (playerHeldMessage) msg += ` ${playerHeldMessage}`;
         if (shellBellMessage) msg += ` ${shellBellMessage}`;
         if (drainMessage) msg += ` ${drainMessage}`;
-        if (leftoversMessage) msg += ` ${leftoversMessage}`;
         const residualMessage = applyResidualStatus(player.poke);
         if (residualMessage) msg += ` ${residualMessage}`;
         battle.playerHp = player.poke.hp;
@@ -7354,10 +7394,12 @@
         setLog(msg);
 
         if (battle.enemy.currentHp <= 0) {
+          const turnEndHeldMessage = applyBattleHeldItemsAtTurnEnd();
+          if (turnEndHeldMessage) msg += ` ${turnEndHeldMessage}`;
           setTimeout(() => {
             eSprite.classList.add('faint');
             SFX.faint();
-            setLog(`${battle.enemy.name} desmaiou!`);
+            setLog(`${msg} ${battle.enemy.name} desmaiou!`);
             setTimeout(() => endBattle(true), 900);
           }, 600);
         } else if (player.poke.hp <= 0) {
@@ -7390,17 +7432,18 @@
       }
       if (battle.quickClawSkip) {
         battle.quickClawSkip = false; battle.turn = 'player'; battle.busy = false;
-        setLog(`${player.poke.name} se moveu primeiro com Quick Claw!`);
+        const endTurnHeldMessage = applyBattleHeldItemsAtTurnEnd();
+        setLog([`${player.poke.name} se moveu primeiro com Quick Claw!`, endTurnHeldMessage].filter(Boolean).join(' '));
         return;
       }
       const statusBlock = tryActDespiteStatus(battle.enemy);
       if (statusBlock) {
         const residual = applyResidualStatus(battle.enemy);
-        const leftovers = applyHeldItemEndTurn(battle.enemy);
+        const endTurnHeldMessage = applyBattleHeldItemsAtTurnEnd();
         tickGuardSpecTurn();
         tickBattleScreens();
-        if (residual || leftovers) updateEnemyHpBar();
-        setLog([statusBlock, residual, leftovers].filter(Boolean).join(' '));
+        if (residual || endTurnHeldMessage) updateEnemyHpBar();
+        setLog([statusBlock, residual, endTurnHeldMessage].filter(Boolean).join(' '));
         if (battle.enemy.currentHp <= 0) {
           setTimeout(() => endBattle(true), 600);
         } else {
@@ -7485,7 +7528,6 @@
         const enemyHeldMessage = applyHeldItemTrigger(battle.enemy);
         const shellBellMessage = applyShellBell(battle.enemy, dmg);
         const drainMessage = applyMoveDrain(battle.enemy, move, dmg);
-        const leftoversMessage = applyHeldItemEndTurn(battle.enemy);
         battle.playerHp = player.poke.hp;
         if (abilityMessage) msg += ` ${abilityMessage}`;
         if (statusMessage) msg += ` ${statusMessage}`;
@@ -7496,12 +7538,13 @@
         if (enemyHeldMessage) msg += ` ${enemyHeldMessage}`;
         if (shellBellMessage) msg += ` ${shellBellMessage}`;
         if (drainMessage) msg += ` ${drainMessage}`;
-        if (leftoversMessage) msg += ` ${leftoversMessage}`;
         const residualMessage = applyResidualStatus(battle.enemy);
         if (residualMessage) {
           updateEnemyHpBar();
           msg += ` ${residualMessage}`;
         }
+        const endTurnHeldMessage = applyBattleHeldItemsAtTurnEnd();
+        if (endTurnHeldMessage) msg += ` ${endTurnHeldMessage}`;
         updatePlayerHpBar();
         tickBattleScreens();
         setLog(msg);

@@ -87,18 +87,18 @@ begin
     when 'Planta' then '{"Fogo":0.5,"Agua":2,"Planta":0.5,"Veneno":0.5,"Terra":2,"Voador":0.5,"Inseto":0.5,"Pedra":2,"Dragao":0.5,"Aço":0.5}'::jsonb
     when 'Eletrico' then '{"Agua":2,"Eletrico":0.5,"Planta":0.5,"Terra":0,"Voador":2,"Dragao":0.5}'::jsonb
     when 'Gelo' then '{"Fogo":0.5,"Agua":0.5,"Planta":2,"Gelo":0.5,"Terra":2,"Voador":2,"Dragao":2,"Aço":0.5}'::jsonb
-    when 'Lutador' then '{"Normal":2,"Gelo":2,"Veneno":0.5,"Voador":0.5,"Psiquico":0.5,"Inseto":0.5,"Pedra":2,"Fantasma":0,"Sombrio":2,"Aço":2,"Fada":0.5}'::jsonb
-    when 'Veneno' then '{"Planta":2,"Veneno":0.5,"Terra":0.5,"Pedra":0.5,"Fantasma":0.5,"Aço":0,"Fada":2}'::jsonb
+    when 'Lutador' then '{"Normal":2,"Gelo":2,"Veneno":0.5,"Voador":0.5,"Psiquico":0.5,"Inseto":0.5,"Pedra":2,"Fantasma":0,"Sombrio":2,"Aço":2}'::jsonb
+    when 'Veneno' then '{"Planta":2,"Veneno":0.5,"Terra":0.5,"Pedra":0.5,"Fantasma":0.5,"Aço":0}'::jsonb
     when 'Terra' then '{"Fogo":2,"Eletrico":2,"Planta":0.5,"Veneno":2,"Voador":0,"Inseto":0.5,"Pedra":2,"Aço":2}'::jsonb
     when 'Voador' then '{"Eletrico":0.5,"Planta":2,"Lutador":2,"Inseto":2,"Pedra":0.5,"Aço":0.5}'::jsonb
     when 'Psiquico' then '{"Lutador":2,"Veneno":2,"Psiquico":0.5,"Sombrio":0,"Aço":0.5}'::jsonb
-    when 'Inseto' then '{"Fogo":0.5,"Planta":2,"Lutador":0.5,"Veneno":0.5,"Voador":0.5,"Psiquico":2,"Fantasma":0.5,"Sombrio":2,"Aço":0.5,"Fada":0.5}'::jsonb
+    when 'Inseto' then '{"Fogo":0.5,"Planta":2,"Lutador":0.5,"Veneno":0.5,"Voador":0.5,"Psiquico":2,"Fantasma":0.5,"Sombrio":2,"Aço":0.5}'::jsonb
     when 'Pedra' then '{"Fogo":2,"Gelo":2,"Lutador":0.5,"Terra":0.5,"Voador":2,"Inseto":2,"Aço":0.5}'::jsonb
     when 'Fantasma' then '{"Normal":0,"Psiquico":2,"Fantasma":2,"Sombrio":0.5,"A\u00e7o":0.5}'::jsonb
-    when 'Dragao' then '{"Aço":0.5,"Dragao":2,"Fada":0}'::jsonb
-    when 'Sombrio' then '{"Lutador":0.5,"Psiquico":2,"Fantasma":2,"Sombrio":0.5,"A\u00e7o":0.5,"Fada":0.5}'::jsonb
-    when 'Aço' then '{"Fogo":0.5,"Agua":0.5,"Eletrico":0.5,"Gelo":2,"Pedra":2,"Aço":0.5,"Fada":2}'::jsonb
-    when 'Fada' then '{"Fogo":0.5,"Lutador":2,"Veneno":0.5,"Dragao":2,"Sombrio":2,"Aço":0.5}'::jsonb
+    when 'Dragao' then '{"Aço":0.5,"Dragao":2}'::jsonb
+    when 'Sombrio' then '{"Lutador":0.5,"Psiquico":2,"Fantasma":2,"Sombrio":0.5,"A\u00e7o":0.5}'::jsonb
+    when 'Aço' then '{"Fogo":0.5,"Agua":0.5,"Eletrico":0.5,"Gelo":2,"Pedra":2,"Aço":0.5}'::jsonb
+    when 'Fada' then '{}'::jsonb
     else '{}'::jsonb
   end;
   if jsonb_typeof(p_defender_types) <> 'array' then return 1; end if;
