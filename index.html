@@ -1558,6 +1558,7 @@
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
           <h2 class="panel-title">🎒 Mochila</h2>
           <p class="panel-desc">Todos os seus itens: Pokébolas, medicinas, pedras de evolução, berries e mais.</p>
+          <p id="experienceBoostStatus" style="display:none;color:#4ade80;font-weight:700;margin:0 0 14px;"></p>
           <div id="bagCategories"></div>
           <div id="bagUseTarget" style="margin-top:16px;"></div>
         </div>
@@ -2964,6 +2965,10 @@
       return Math.max(1, Math.floor(baseYield * enemy.level / 7 * (isTrainer ? 1.5 : 1)));
     }
 
+    function isExperienceCharmActive() {
+      return Number(player?.experienceBoostExpiresAt) > Date.now();
+    }
+
     function getBattleExperienceShares(totalExperience, activePokemon) {
       const shares = new Map();
       if (!player || !activePokemon || totalExperience <= 0) return shares;
@@ -2971,7 +2976,7 @@
       // O Pokémon ativo recebe sua EXP normal. Só os demais que seguram Exp. Share
       // entram na divisão da metade compartilhada.
       const holders = player.party.filter(p => p !== activePokemon && p.hp > 0 && p.heldItem === 'exp_share');
-      const expCharmMultiplier = getItemQty('exp_charm') > 0 ? 1.5 : 1;
+      const expCharmMultiplier = isExperienceCharmActive() ? 1.5 : 1;
       const addShare = (pokemon, amount) => {
         if (amount <= 0) return;
         const multiplier = expCharmMultiplier * (pokemon.heldItem === 'lucky_egg' ? 1.5 : 1);
@@ -4909,10 +4914,9 @@
       light_clay: { name: 'Light Clay', desc: 'Estende Reflect e Light Screen; esses golpes ainda nao existem no jogo.', type: '' },
       fairy_feather: { name: 'Fairy Feather', desc: 'Aumenta em 10% o dano de golpes do tipo Fada.', type: 'Fada' },
       toxic_orb: { name: 'Toxic Orb', desc: 'Aplica envenenamento ao portador no fim do turno.', type: '' },
-      exp_charm: { name: 'Exp. Charm', desc: 'Aumenta em 50% a experiencia recebida nas batalhas.', type: '' }
     };
 
-    const EXTRA_HELD_ITEM_KEYS = ['choice_band','choice_scarf','choice_specs','quick_claw','focus_band','scope_lens','white_herb','wise_glasses','muscle_band','life_orb','light_clay','rocky_helmet','assault_vest','heavy_duty_boots','covert_cloak','fairy_feather','toxic_orb','exp_charm'];
+    const EXTRA_HELD_ITEM_KEYS = ['choice_band','choice_scarf','choice_specs','quick_claw','focus_band','scope_lens','white_herb','wise_glasses','muscle_band','life_orb','light_clay','rocky_helmet','assault_vest','heavy_duty_boots','covert_cloak','fairy_feather','toxic_orb'];
     EXTRA_HELD_ITEM_KEYS.forEach(key => {
       const item = HELD_ITEM_INFO[key];
       const id = key.replace(/_/g, '-');
@@ -5181,6 +5185,14 @@
       ensureBagItems();
       const root = document.getElementById('bagCategories');
       if (!root) return;
+      const boostStatus = document.getElementById('experienceBoostStatus');
+      const boostRemaining = Number(player.experienceBoostExpiresAt) - Date.now();
+      if (boostStatus) {
+        boostStatus.style.display = boostRemaining > 0 ? 'block' : 'none';
+        boostStatus.textContent = boostRemaining > 0
+          ? `Exp. Charm ativo: +50% EXP nas batalhas · ${Math.ceil(boostRemaining / 60000)} min restantes.`
+          : '';
+      }
       root.innerHTML = BAG_CATEGORIES.map(cat => {
         const ownedItems = cat.items.filter(it => getItemQty(it.key) > 0);
         if (!ownedItems.length) return '';
@@ -5390,10 +5402,29 @@
       root.innerHTML = `<div style="grid-column:1/-1;color:var(--text-muted);">${pokemon.name} pode aprender ${item.move.name}. Escolha um golpe para substituir:</div>${buttons}<button class="move-btn" onclick="${inBattle ? `renderBattleItemTargets(BATTLE_BAG_ITEMS.find(entry=>entry.key==='${itemKey}'))` : 'cancelBagItemUse()'}" style="grid-column:1/-1">Cancelar</button>`;
     }
 
+    function useExperienceCharm() {
+      if (!player || battle || getItemQty('exp_charm') <= 0) return;
+      const now = Date.now();
+      const currentExpiry = Number(player.experienceBoostExpiresAt) || 0;
+      const wasActive = currentExpiry > now;
+      player.experienceBoostExpiresAt = Math.max(now, currentExpiry) + 60 * 60 * 1000;
+      decItemQty('exp_charm', 1);
+      cancelBagItemUse();
+      saveGame();
+      renderBag();
+      showToast(wasActive
+        ? 'Exp. Charm usado! O bônus de +50% EXP foi estendido por mais 1 hora.'
+        : 'Exp. Charm usado! +50% de EXP nas batalhas por 1 hora.');
+    }
+
     function chooseBagItemTarget(key) {
       if (!player || battle) return;
       const item = BAG_FIELD_ITEMS.find(entry => entry.key === key);
       if (!item || getItemQty(key) <= 0) return;
+      if (item.kind === 'expCharm') {
+        useExperienceCharm();
+        return;
+      }
       if (item.kind === 'tm') {
         renderTechnicalMachineTargets(key, false);
         return;
@@ -5684,7 +5715,7 @@
 
     EXTRA_HELD_ITEM_KEYS.forEach(key => {
       const item = HELD_ITEM_INFO[key];
-      if (!SHOP_ITEMS.some(entry => entry.key === key)) SHOP_ITEMS.push({ id: key, name: item.name, icon: '🎒', sprite: key, desc: item.desc, price: key === 'exp_charm' ? 12000 : 4500, key });
+      if (!SHOP_ITEMS.some(entry => entry.key === key)) SHOP_ITEMS.push({ id: key, name: item.name, icon: '🎒', sprite: key, desc: item.desc, price: 4500, key });
     });
 
     const EXTRA_MEDICINE_ITEMS = [
@@ -5707,7 +5738,8 @@
       { id: 'carbos', key: 'carbos', name: 'Carbos', desc: 'Aumenta 10 EVs de Velocidade.', category: 'medicine', kind: 'ev', stat: 'speed', amount: 10, price: 9800 },
       { id: 'calcium', key: 'calcium', name: 'Calcium', desc: 'Aumenta 10 EVs de Ataque Especial.', category: 'medicine', kind: 'ev', stat: 'specialAttack', amount: 10, price: 9800 },
       { id: 'zinc', key: 'zinc', name: 'Zinc', desc: 'Aumenta 10 EVs de Defesa Especial.', category: 'medicine', kind: 'ev', stat: 'specialDefense', amount: 10, price: 9800 },
-      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy', desc: 'Sobe um nível.', category: 'medicine', kind: 'level', price: 1 }
+      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy', desc: 'Sobe um nível.', category: 'medicine', kind: 'level', price: 1 },
+      { id: 'exp-charm', key: 'exp_charm', name: 'Exp. Charm', desc: 'Consumível: aumenta em 50% a experiência recebida em batalhas por 1 hora.', category: 'medicine', kind: 'expCharm', price: 12000 }
     ];
     const EXTRA_SPECIAL_ITEMS = [
       { id: 'heal-powder', key: 'heal_powder', name: 'Heal Powder', desc: 'Cura qualquer problema de status.', category: 'medicine', kind: 'statusCure', price: 450 },
@@ -5732,9 +5764,9 @@
         catalogCategory.items.push({ key: item.key, name: item.name, sprite: item.key, desc: item.desc });
       }
       BAG_FIELD_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount, stat: item.stat });
-      if (!['ev', 'level', 'mint', 'tm'].includes(item.kind)) BATTLE_BAG_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount });
+      if (!['ev', 'level', 'mint', 'tm', 'expCharm'].includes(item.kind)) BATTLE_BAG_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount });
       if (!SHOP_ITEMS.some(entry => entry.key === item.key)) {
-        SHOP_ITEMS.push({ id: item.key, name: item.name, icon: item.kind === 'ev' ? '💊' : item.kind === 'level' ? '🍬' : '🧪', sprite: item.key, desc: item.desc, price: item.price, key: item.key });
+        SHOP_ITEMS.push({ id: item.key, name: item.name, icon: item.kind === 'ev' ? '💊' : item.kind === 'level' ? '🍬' : '🧪', sprite: item.key, desc: item.desc, price: item.price, key: item.key, kind: item.kind });
       }
     });
 
@@ -6357,6 +6389,7 @@
       player = saved;
       player.battlePoints = Math.max(0, Math.floor(Number(player.battlePoints) || 0));
       player.pokeCoins = Math.max(0, Math.floor(Number(player.pokeCoins) || 0));
+      player.experienceBoostExpiresAt = Math.max(0, Math.floor(Number(player.experienceBoostExpiresAt) || 0));
       player.centerCards = Math.max(0, Math.min(5, Math.floor(Number(player.centerCards ?? 5) || 0)));
       player.antidote = player.antidote || 0;
       player.antiparalyze = player.antiparalyze || 0;
@@ -6408,6 +6441,9 @@
       }
       ensurePC();
       ensureBagItems();
+      const legacyExpCharmHolders = [...player.party, ...player.pc.boxes.flat()].filter(pokemon => pokemon?.heldItem === 'exp_charm');
+      legacyExpCharmHolders.forEach(pokemon => { pokemon.heldItem = null; });
+      if (legacyExpCharmHolders.length) setItemQty('exp_charm', getItemQty('exp_charm') + legacyExpCharmHolders.length);
       const migratedMoves = player.party.map(normalizePokemonMoves).some(Boolean);
       const experienceMigrated = player.party.map(normalizePokemonExperience).some(Boolean);
       let idx = 0;
@@ -6431,7 +6467,7 @@
       });
       enterDashboard();
       void hydrateGenerationNineMoveMetadata(player.party);
-      if (experienceMigrated || migratedMoves || genderMigrated || traitsMigrated || reopenLegacyOakIntro || reopenLegacyParcelMission || migrateBillDialogue) saveGame();
+      if (experienceMigrated || migratedMoves || genderMigrated || traitsMigrated || legacyExpCharmHolders.length || reopenLegacyOakIntro || reopenLegacyParcelMission || migrateBillDialogue) saveGame();
     }
 
     async function tryAutoLoad() {
