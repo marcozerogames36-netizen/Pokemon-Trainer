@@ -1489,6 +1489,10 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#42351d,#201a10);"><img src="assets/gym-badges.png" alt="" style="width:154px;height:92px;object-fit:contain;" /></div>
               <div class="game-card-body"><div class="game-card-title">Ginásios</div><div class="game-card-desc">Desafie os líderes e conquiste insígnias.</div></div>
             </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('ss-anne')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('ss-anne')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#1d4960,#102b3a);font-size:3rem;">&#x1F6A2;</div>
+              <div class="game-card-body"><div class="game-card-title">S.S. Anne</div><div class="game-card-desc">Desafie os treinadores do navio em ordem e abra caminho at&eacute; o rival.</div></div>
+            </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('battle-tower')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('battle-tower')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#241638,#100a1d);"><img src="assets/battle-tower-castle.png" alt="Castelo pixel art da Torre de Batalha" style="width:154px;height:92px;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">Torre de Batalha</div><div class="game-card-desc">Desafie treinadores NPC e ganhe BP nas primeiras vitórias.</div></div>
@@ -1567,6 +1571,13 @@
           <h2 class="panel-title">🏅 Ginásios de Kanto</h2>
           <p class="panel-desc">Desafie os Líderes de Ginásio e conquiste as 8 Insígnias!</p>
           <div class="cards-grid" id="gymsGrid"></div>
+        </div>
+        <div class="panel" id="panel-ss-anne">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
+          <h2 class="panel-title">&#x1F6A2; S.S. Anne</h2>
+          <p class="panel-desc">Desafie os treinadores do navio em ordem. O pr&oacute;ximo oponente s&oacute; fica dispon&iacute;vel depois da vit&oacute;ria sobre o atual.</p>
+          <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Treinadores derrotados: <strong id="ssAnneProgress">0/8</strong></div>
+          <div class="cards-grid" id="ssAnneGrid"></div>
         </div>
         <div class="panel" id="panel-battle-tower">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
@@ -6845,6 +6856,46 @@
       ]}
     ];
 
+    const SS_ANNE_TRAINERS = [
+      {id:'anne_sailor_huey',name:'Huey',className:'Marinheiro',portrait:'sailor',moneyReward:180,team:[
+        {name:'Horsea',id:116,hp:34,level:16,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Bubble Beam',power:60,type:'Agua'}]},
+        {name:'Poliwag',id:60,hp:36,level:17,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Body Slam',power:50,type:'Normal'}]}
+      ]},
+      {id:'anne_fisherman_barney',name:'Barney',className:'Pescador',portrait:'fisherman',moneyReward:220,team:[
+        {name:'Goldeen',id:118,hp:40,level:18,moves:[{name:'Waterfall',power:60,type:'Agua'},{name:'Peck',power:35,type:'Voador'}]},
+        {name:'Tentacool',id:72,hp:38,level:18,moves:[{name:'Bubble Beam',power:60,type:'Agua'},{name:'Poison Jab',power:50,type:'Veneno'}]}
+      ]},
+      {id:'anne_sailor_dylan',name:'Dylan',className:'Marinheiro',portrait:'sailor',moneyReward:250,team:[
+        {name:'Shellder',id:90,hp:42,level:19,moves:[{name:'Aurora Beam',power:60,type:'Gelo'},{name:'Water Gun',power:40,type:'Agua'}]},
+        {name:'Staryu',id:120,hp:43,level:20,moves:[{name:'Swift',power:50,type:'Normal'},{name:'Water Gun',power:40,type:'Agua'}]}
+      ]},
+      {id:'anne_gentleman_brooks',name:'Brooks',className:'Cavalheiro',portrait:'gentleman',moneyReward:300,team:[
+        {name:'Ponyta',id:77,hp:48,level:21,moves:[{name:'Flame Wheel',power:60,type:'Fogo'},{name:'Stomp',power:50,type:'Normal'}]},
+        {name:'Growlithe',id:58,hp:47,level:21,moves:[{name:'Flame Wheel',power:60,type:'Fogo'},{name:'Bite',power:45,type:'Sombrio'}]}
+      ]},
+      {id:'anne_lass_ann',name:'Ann',className:'Treinadora',portrait:'lass',moneyReward:340,team:[
+        {name:'Pikachu',id:25,hp:48,level:22,moves:[{name:'Thunderbolt',power:70,type:'Eletrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
+        {name:'Clefairy',id:35,hp:53,level:22,moves:[{name:'Magical Leaf',power:50,type:'Planta'},{name:'Pound',power:40,type:'Normal'}]},
+        {name:'Jigglypuff',id:39,hp:56,level:23,moves:[{name:'Body Slam',power:55,type:'Normal'},{name:'Sing',power:0,type:'Normal'}]}
+      ]},
+      {id:'anne_beauty_nickie',name:'Nickie',className:'Modelo',portrait:'beauty',moneyReward:380,team:[
+        {name:'Goldeen',id:118,hp:50,level:23,moves:[{name:'Waterfall',power:65,type:'Agua'},{name:'Peck',power:40,type:'Voador'}]},
+        {name:'Seaking',id:119,hp:57,level:24,moves:[{name:'Waterfall',power:65,type:'Agua'},{name:'Horn Attack',power:50,type:'Normal'}]},
+        {name:'Vulpix',id:37,hp:48,level:24,moves:[{name:'Flamethrower',power:65,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}]}
+      ]},
+      {id:'anne_sailor_trevor',name:'Trevor',className:'Marinheiro',portrait:'sailor',moneyReward:430,team:[
+        {name:'Tentacool',id:72,hp:57,level:25,moves:[{name:'Bubble Beam',power:65,type:'Agua'},{name:'Poison Jab',power:55,type:'Veneno'}]},
+        {name:'Krabby',id:98,hp:58,level:25,moves:[{name:'Crabhammer',power:70,type:'Agua'},{name:'Vice Grip',power:50,type:'Normal'}]},
+        {name:'Horsea',id:116,hp:54,level:26,moves:[{name:'Water Pulse',power:60,type:'Agua'},{name:'Ice Beam',power:65,type:'Gelo'}]}
+      ]},
+      {id:'anne_rival_blue',name:'Blue',className:'Rival',portrait:'blue',moneyReward:650,team:[
+        {name:'Pidgeotto',id:17,hp:67,level:27,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}]},
+        {name:'Raticate',id:20,hp:70,level:27,moves:[{name:'Hyper Fang',power:70,type:'Normal'},{name:'Bite',power:50,type:'Sombrio'}]},
+        {name:'Kadabra',id:64,hp:64,level:28,moves:[{name:'Psybeam',power:65,type:'Psiquico'},{name:'Shadow Ball',power:60,type:'Fantasma'}]},
+        {name:'Wartortle',id:8,hp:76,level:28,moves:[{name:'Water Pulse',power:60,type:'Agua'},{name:'Bite',power:50,type:'Sombrio'}]}
+      ]}
+    ];
+
     function renderGyms() {
       const grid = document.getElementById('gymsGrid');
       if (!grid) return;
@@ -6883,6 +6934,31 @@
         return `<div class="game-card" role="button" tabindex="0" onclick="startTowerBattle('${trainer.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startTowerBattle('${trainer.id}')}">
           <div class="game-card-header" style="background:linear-gradient(135deg,#3a3151,#171321);height:110px"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png" alt="${escapeHTML(trainer.name)}" style="width:86px;height:86px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:2.8rem">🥊</span></div>
           <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} · ${escapeHTML(trainer.className)}</div><div class="game-card-desc">Equipe com ${trainer.team.length} Pokémon · níveis ${trainer.team[0].level}–${trainer.team[trainer.team.length-1].level}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':'status-available'}">${done?'Rebatalhar':'Desafiar'}</span><span class="reward">${done?'Recompensa resgatada':`+${trainer.reward} BP`}</span></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    function getSSAnneProgress() {
+      const defeated = Array.isArray(player.ssAnneDefeated) ? player.ssAnneDefeated : [];
+      let progress = 0;
+      while (progress < SS_ANNE_TRAINERS.length && defeated.includes(SS_ANNE_TRAINERS[progress].id)) progress++;
+      return progress;
+    }
+
+    function renderSSAnne() {
+      const grid = document.getElementById('ssAnneGrid');
+      if (!grid) return;
+      if (!Array.isArray(player.ssAnneDefeated)) player.ssAnneDefeated = [];
+      const progress = getSSAnneProgress();
+      document.getElementById('ssAnneProgress').textContent = `${progress}/${SS_ANNE_TRAINERS.length}`;
+      grid.innerHTML = SS_ANNE_TRAINERS.map((trainer,index) => {
+        const done = index < progress;
+        const unlocked = index === progress;
+        const action = unlocked ? `startSSAnneBattle('${trainer.id}')` : `showToast('${done ? 'Este treinador já foi derrotado.' : 'Derrote o oponente anterior para liberar este treinador.'}','${done ? 'info' : 'error'}')`;
+        const badge = done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
+        return `<div class="game-card" role="button" tabindex="0" onclick="${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}" style="${unlocked?'':'opacity:.62;'}">
+          <div class="game-card-header" style="background:linear-gradient(135deg,#1d4960,#102b3a);height:100px"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png" alt="${escapeHTML(trainer.name)}" style="width:82px;height:82px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:2.6rem">&#x1F6A2;</span></div>
+          <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} &middot; ${escapeHTML(trainer.className)}</div><div class="game-card-desc">${trainer.team.length} Pok&eacute;mon &middot; n&iacute;veis ${trainer.team[0].level}-${trainer.team[trainer.team.length-1].level}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':unlocked?'status-available':'status-locked'}">${badge}</span><span class="reward">${trainer.moneyReward.toLocaleString('pt-BR')} Pok&eacute;dollar</span></div></div>
         </div>`;
       }).join('');
     }
@@ -7130,6 +7206,7 @@
       if (id === 'profile') { refreshProfileUI(); socialRefresh(); }
       if (id === 'gyms') renderGyms();
       if (id === 'battle-tower') renderBattleTower();
+      if (id === 'ss-anne') renderSSAnne();
       if (id === 'missions') renderMissions();
       if (id === 'pc') renderPC();
       if (id === 'pvp') renderPvpPanel();
@@ -8808,7 +8885,7 @@
 
     function endBattle(won, captured, capturedName) {
       battle.busy = true;
-      if (won && battle.isGym && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
+      if (won && (battle.isGym || battle.isSSAnne) && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
         const shares = getBattleExperienceShares(getBattleExperience(battle.enemy, true), player.poke);
         battle.experienceShares = battle.experienceShares || new Map();
         for (const [pokemon, amount] of shares) {
@@ -8838,6 +8915,16 @@
           return;
         }
         endGymVictory();
+        return;
+      }
+      if (won && battle.isSSAnne && battle.enemy.currentHp <= 0) {
+        if (battle.anneIndexPokemon < battle.anneTeam.length - 1) {
+          result.classList.remove('show');
+          document.getElementById('battleMenu').style.display = 'grid';
+          setTimeout(nextSSAnnePokemon, 400);
+          return;
+        }
+        endSSAnneVictory();
         return;
       }
       if (won && battle.isTower && battle.enemy.currentHp <= 0) {
@@ -9000,7 +9087,7 @@
         .map(item => {
           const qty = getItemQty(item.key);
           if (qty <= 0) return '';
-          if (item.kind === 'ball' && (battle.isGym || battle.isTower)) return '';
+          if (item.kind === 'ball' && (battle.isGym || battle.isTower || battle.isSSAnne)) return '';
           if (item.kind === 'ball' && battle.dungeon === 'Zona do Safari' && !['safari_ball', 'premier_ball', 'masterball'].includes(item.key)) return '';
           if (['battleBoost', 'direHit', 'guardSpec'].includes(item.kind)) {
             if (!player.poke || player.poke.hp <= 0) return '';
@@ -9082,7 +9169,7 @@
 
     async function tryCapture(ballKey) {
       if (!battle || battle.busy) return;
-      if (battle.isGym || battle.isTower) {
+      if (battle.isGym || battle.isTower || battle.isSSAnne) {
         setLog(battle.isTower ? 'Não dá para capturar o Pokémon de um treinador!' : 'Não dá para capturar o Pokémon de um Líder de Ginásio!');
         backToMenu();
         return;
@@ -9199,6 +9286,90 @@
       });
     }
 
+    function startSSAnneBattle(trainerId) {
+      const index = SS_ANNE_TRAINERS.findIndex(entry => entry.id === trainerId);
+      const trainer = SS_ANNE_TRAINERS[index];
+      if (!trainer || battle?.busy) return;
+      if (index !== getSSAnneProgress()) {
+        showToast(index < getSSAnneProgress() ? 'Este treinador já foi derrotado.' : 'Derrote o oponente anterior para liberar este treinador.', 'error');
+        return;
+      }
+      const eligibleTeam = player.party.filter(pokemon => pokemon && pokemon.hp > 0);
+      if (!eligibleTeam.length) {
+        showToast('Sua equipe precisa estar saudável para embarcar na S.S. Anne.', 'error');
+        return;
+      }
+      if (!player.poke || player.poke.hp <= 0) player.poke = eligibleTeam[0];
+      battle = {
+        isSSAnne:true, ssAnneTrainer:trainer, anneTeam:trainer.team.map(pokemon => {
+          const scaledHp=getLevelScaledHp(pokemon.hp,pokemon.level);
+          return {...pokemon,hp:scaledHp,maxHp:scaledHp,currentHp:scaledHp};
+        }), anneIndexPokemon:0, enemy:null,
+        playerHp:player.poke.hp,playerMaxHp:player.poke.maxHp,
+        turn:'player',busy:false,playerStatStages:{},enemyStatStages:{},playerCritStage:0,
+        playerAccuracyStage:0,guardSpecTurns:0,playerScreens:{},enemyScreens:{},playerHazards:[],enemyHazards:[]
+      };
+      battle.enemy=battle.anneTeam[0];
+      setupBattleUI(`${trainer.className} ${trainer.name} te desafiou!`);
+      applyBattleBackground('gym');
+      showBattleIntro(player.poke.name,trainer.name,'S.S. Anne',() => {
+        document.getElementById('battleOverlay').classList.add('active');
+        syncMuteButton(); SFX.unlock(); playBattleBgm();
+      });
+    }
+
+    function nextSSAnnePokemon() {
+      battle.anneIndexPokemon++;
+      battle.enemy=battle.anneTeam[battle.anneIndexPokemon];
+      battle.experienceAwarded=false;
+      battle.busy=false;
+      battle.turn='player';
+      setupBattleUI(`${battle.ssAnneTrainer.name} enviou ${getPokemonDisplayName(battle.enemy)}!`);
+    }
+
+    function endSSAnneVictory() {
+      const trainer=battle.ssAnneTrainer;
+      const xp=battle.totalExperience||0;
+      const effortMessage=formatEffortGain(battle.totalEffort);
+      const shares=battle.experienceShares||new Map([[player.poke,xp]]);
+      player.poke.hp=Math.max(0,Math.min(player.poke.maxHp,battle.playerHp));
+      const levelsGained=awardPokemonExperience(player.poke,shares.get(player.poke)||0);
+      let sharedLevels=0;
+      const shared=[];
+      for(const [pokemon,amount] of shares){
+        if(pokemon===player.poke||amount<=0) continue;
+        sharedLevels+=awardPokemonExperience(pokemon,amount);
+        shared.push(`${pokemon.name}: +${amount} XP`);
+      }
+      const money=Math.floor(trainer.moneyReward*(player.poke?.heldItem==='amulet_coin'?2:1));
+      player.money+=money;
+      if(!Array.isArray(player.ssAnneDefeated)) player.ssAnneDefeated=[];
+      if(!player.ssAnneDefeated.includes(trainer.id)) player.ssAnneDefeated.push(trainer.id);
+      const evolvedReady=levelsGained>0&&canEvolve(player.poke);
+      updatePlayerExperienceBar();
+      if(levelsGained>0||sharedLevels>0) SFX.levelUp();
+      document.getElementById('battleMenu').style.display='none';
+      document.getElementById('movesMenu').style.display='none';
+      const bag=document.getElementById('bagMenu'); if(bag) bag.style.display='none';
+      document.getElementById('battleResult').classList.add('show');
+      document.getElementById('resultTitle').textContent='Vitória na S.S. Anne!';
+      document.getElementById('resultDesc').textContent=`Você derrotou ${trainer.className} ${trainer.name} e ${trainer.team.length} Pokémon!`;
+      const rows=[
+        `<div class="reward-row reward-money"><span class="reward-label">Pokédollar</span><strong class="reward-value">+ ₽ ${money.toLocaleString('pt-BR')}</strong></div>`,
+        `<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`
+      ];
+      if(levelsGained) rows.push(`<div class="reward-highlight">${player.poke.name} subiu ${levelsGained} nível(is), chegando ao Nv. ${player.poke.level}!</div>`);
+      if(effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
+      if(shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
+      document.getElementById('resultRewards').innerHTML=rows.join('');
+      if(evolvedReady) battle._pendingEvo=player.poke;
+      updateStatsUI();
+      renderSSAnne();
+      SFX.victory();
+      onMissionEvent('battle_win','S.S. Anne');
+      saveGame();
+    }
+
     function startGymBattle(gymIndex) {
       const gym = GYMS[gymIndex];
       if (!gym) return;
@@ -9260,8 +9431,8 @@
       ensurePokemonGender(player.poke);
       ensurePokemonTraits(e);
       ensurePokemonTraits(player.poke);
-      document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : '');
-      updateEnemyCaughtBadge(e.id, !battle.isGym && !battle.isTower);
+      document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : battle.isSSAnne ? ` (${escapeHTML(battle.ssAnneTrainer.name)})` : '');
+      updateEnemyCaughtBadge(e.id, !battle.isGym && !battle.isTower && !battle.isSSAnne);
       document.getElementById('enemyLevel').textContent = `Nv. ${e.level}`;
       {
         const types = getTypes(e.id);
