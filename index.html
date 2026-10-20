@@ -1572,7 +1572,7 @@
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">🏰 Torre de Batalha</h2>
           <p class="panel-desc">Enfrente treinadores em batalhas com equipes completas. Cada treinador concede BP uma vez; você pode voltar para tentar novamente.</p>
-          <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Recompensas coletadas: <strong id="towerProgress">0/10</strong> · BP: <strong id="towerBattlePoints">0</strong></div>
+          <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Recompensas coletadas: <strong id="towerProgress">0/20</strong> · BP: <strong id="towerBattlePoints">0</strong></div>
           <div class="cards-grid" id="battleTowerGrid"></div>
         </div>
         <div class="panel" id="panel-pokemon">
@@ -6699,7 +6699,7 @@
         {name:'Psyduck',id:54,hp:30,level:22,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}]},
         {name:'Staryu',id:120,hp:30,level:23,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Swift',power:45,type:'Normal'}]}
       ]},
-      { id:'lia', name:'Lia', className:'Treinadora Vet', portrait:'cooltrainerf', reward:5, team:[
+      { id:'lia', name:'Lia', className:'Treinadora Vet', portrait:'acetrainerf-gen1', reward:5, team:[
         {name:'Growlithe',id:58,hp:32,level:27,moves:[{name:'Ember',power:40,type:'Fogo'},{name:'Bite',power:35,type:'Sombrio'}]},
         {name:'Pikachu',id:25,hp:28,level:28,moves:[{name:'Thunder Shock',power:40,type:'Eletrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Kadabra',id:64,hp:32,level:29,moves:[{name:'Confusion',power:50,type:'Psiquico'},{name:'Psybeam',power:55,type:'Psiquico'}]}
@@ -6713,7 +6713,7 @@
         {name:'Gastly',id:92,hp:28,level:37,moves:[{name:'Shadow Ball',power:60,type:'Fantasma'},{name:'Confuse Ray',power:0,type:'Fantasma'}]},
         {name:'Haunter',id:93,hp:34,level:38,moves:[{name:'Shadow Ball',power:60,type:'Fantasma'},{name:'Night Shade',power:45,type:'Fantasma'}]}
       ]},
-      { id:'nina', name:'Nina', className:'Treinadora Vet', portrait:'cooltrainerf', reward:8, team:[
+      { id:'nina', name:'Nina', className:'Treinadora Vet', portrait:'acetrainerf-gen1', reward:8, team:[
         {name:'Vulpix',id:37,hp:32,level:40,moves:[{name:'Flamethrower',power:65,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Ivysaur',id:2,hp:40,level:41,moves:[{name:'Razor Leaf',power:55,type:'Planta'},{name:'Vine Whip',power:45,type:'Planta'}]},
         {name:'Wartortle',id:8,hp:44,level:42,moves:[{name:'Water Pulse',power:55,type:'Agua'},{name:'Bite',power:35,type:'Sombrio'}]}
@@ -6723,10 +6723,60 @@
         {name:'Scyther',id:123,hp:44,level:45,moves:[{name:'X-Scissor',power:65,type:'Inseto'},{name:'Wing Attack',power:50,type:'Voador'}]},
         {name:'Rhydon',id:112,hp:52,level:46,moves:[{name:'Rock Slide',power:60,type:'Pedra'},{name:'Stomp',power:45,type:'Normal'}]}
       ]},
-      { id:'camila', name:'Camila', className:'Domadora de Dragões', portrait:'champion', reward:10, team:[
+      { id:'camila', name:'Camila', className:'Domadora de Dragões', portrait:'lance', reward:10, team:[
         {name:'Dratini',id:147,hp:34,level:48,moves:[{name:'Dragon Rage',power:60,type:'Dragao'},{name:'Aqua Tail',power:60,type:'Agua'}]},
         {name:'Dragonair',id:148,hp:46,level:49,moves:[{name:'Dragon Claw',power:70,type:'Dragao'},{name:'Thunderbolt',power:65,type:'Eletrico'}]},
         {name:'Aerodactyl',id:142,hp:54,level:50,moves:[{name:'Rock Slide',power:65,type:'Pedra'},{name:'Wing Attack',power:60,type:'Voador'}]}
+      ]},
+      { id:'carlos', name:'Carlos', className:'Observador de Passaros', portrait:'birdkeeper', reward:11, team:[
+        {name:'Pidgeot',id:18,hp:116,level:53,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}]},
+        {name:'Fearow',id:22,hp:108,level:54,moves:[{name:'Drill Peck',power:80,type:'Voador'},{name:'Drill Run',power:70,type:'Terra'}]},
+        {name:'Dodrio',id:85,hp:112,level:55,moves:[{name:'Tri Attack',power:80,type:'Normal'},{name:'Peck',power:35,type:'Voador'}]}
+      ]},
+      { id:'bianca', name:'Bianca', className:'Modelo', portrait:'beauty', reward:12, team:[
+        {name:'Vaporeon',id:134,hp:142,level:56,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Aurora Beam',power:65,type:'Gelo'}]},
+        {name:'Clefable',id:36,hp:138,level:57,moves:[{name:'Moonblast',power:85,type:'Fada'},{name:'Psychic',power:90,type:'Psiquico'}]},
+        {name:'Ninetales',id:38,hp:132,level:58,moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}]}
+      ]},
+      { id:'zeca', name:'Zeca', className:'Motociclista', portrait:'biker', reward:13, team:[
+        {name:'Arbok',id:24,hp:137,level:59,moves:[{name:'Poison Jab',power:80,type:'Veneno'},{name:'Crunch',power:80,type:'Sombrio'}]},
+        {name:'Muk',id:89,hp:158,level:60,moves:[{name:'Sludge Bomb',power:90,type:'Veneno'},{name:'Mega Punch',power:80,type:'Normal'}]},
+        {name:'Weezing',id:110,hp:149,level:61,moves:[{name:'Sludge Bomb',power:90,type:'Veneno'},{name:'Flamethrower',power:90,type:'Fogo'}]}
+      ]},
+      { id:'tito', name:'Tito', className:'Insetomaniaco', portrait:'bugcatcher', reward:14, team:[
+        {name:'Beedrill',id:15,hp:145,level:62,moves:[{name:'X-Scissor',power:80,type:'Inseto'},{name:'Poison Jab',power:80,type:'Veneno'}]},
+        {name:'Scyther',id:123,hp:157,level:63,moves:[{name:'X-Scissor',power:80,type:'Inseto'},{name:'Wing Attack',power:60,type:'Voador'}]},
+        {name:'Pinsir',id:127,hp:163,level:64,moves:[{name:'X-Scissor',power:80,type:'Inseto'},{name:'Brick Break',power:75,type:'Lutador'}]}
+      ]},
+      { id:'otavio', name:'Otavio', className:'Super Nerd', portrait:'supernerd', reward:15, team:[
+        {name:'Magneton',id:82,hp:154,level:65,moves:[{name:'Thunderbolt',power:90,type:'Eletrico'},{name:'Flash Cannon',power:80,type:'Aco'}]},
+        {name:'Electrode',id:101,hp:160,level:66,moves:[{name:'Thunderbolt',power:90,type:'Eletrico'},{name:'Swift',power:60,type:'Normal'}]},
+        {name:'Porygon',id:137,hp:167,level:67,moves:[{name:'Tri Attack',power:80,type:'Normal'},{name:'Psychic',power:90,type:'Psiquico'}]}
+      ]},
+      { id:'raul', name:'Raul', className:'Pescador', portrait:'fisherman', reward:16, team:[
+        {name:'Kingler',id:99,hp:170,level:68,moves:[{name:'Crabhammer',power:100,type:'Agua'},{name:'X-Scissor',power:80,type:'Inseto'}]},
+        {name:'Seadra',id:117,hp:165,level:69,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]},
+        {name:'Gyarados',id:130,hp:191,level:70,moves:[{name:'Waterfall',power:80,type:'Agua'},{name:'Crunch',power:80,type:'Sombrio'}]}
+      ]},
+      { id:'ernesto', name:'Ernesto', className:'Cavalheiro', portrait:'gentleman', reward:17, team:[
+        {name:'Persian',id:53,hp:170,level:71,moves:[{name:'Slash',power:70,type:'Normal'},{name:'Shadow Claw',power:70,type:'Fantasma'}]},
+        {name:'Rapidash',id:78,hp:177,level:72,moves:[{name:'Flare Blitz',power:120,type:'Fogo'},{name:'Drill Run',power:80,type:'Terra'}]},
+        {name:'Tauros',id:128,hp:184,level:73,moves:[{name:'Take Down',power:90,type:'Normal'},{name:'Earthquake',power:100,type:'Terra'}]}
+      ]},
+      { id:'nando', name:'Nando', className:'Pokemon Maniaco', portrait:'pokemaniac', reward:18, team:[
+        {name:'Lickitung',id:108,hp:206,level:74,moves:[{name:'Body Slam',power:85,type:'Normal'},{name:'Power Whip',power:120,type:'Planta'}]},
+        {name:'Kangaskhan',id:115,hp:211,level:75,moves:[{name:'Dizzy Punch',power:70,type:'Normal'},{name:'Crunch',power:80,type:'Sombrio'}]},
+        {name:'Snorlax',id:143,hp:248,level:76,moves:[{name:'Body Slam',power:85,type:'Normal'},{name:'Earthquake',power:100,type:'Terra'}]}
+      ]},
+      { id:'rogerio', name:'Rogerio', className:'Ladrao', portrait:'burglar', reward:19, team:[
+        {name:'Magmar',id:126,hp:193,level:77,moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Psychic',power:90,type:'Psiquico'}]},
+        {name:'Arcanine',id:59,hp:204,level:78,moves:[{name:'Flare Blitz',power:120,type:'Fogo'},{name:'Crunch',power:80,type:'Sombrio'}]},
+        {name:'Flareon',id:136,hp:198,level:79,moves:[{name:'Fire Fang',power:65,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}]}
+      ]},
+      { id:'iris', name:'Iris', className:'Treinadora de Elite', portrait:'acetrainerf-gen1', reward:20, team:[
+        {name:'Lapras',id:131,hp:236,level:80,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]},
+        {name:'Alakazam',id:65,hp:198,level:81,moves:[{name:'Psychic',power:90,type:'Psiquico'},{name:'Shadow Ball',power:80,type:'Fantasma'}]},
+        {name:'Dragonite',id:149,hp:240,level:82,moves:[{name:'Outrage',power:120,type:'Dragao'},{name:'Hurricane',power:110,type:'Voador'}]}
       ]}
     ];
 
