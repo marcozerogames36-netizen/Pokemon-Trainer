@@ -140,6 +140,8 @@
     .footer { text-align: center; margin-top: 26px; font-size: 0.875rem; color: var(--text-muted); }
     .footer a { color: var(--primary-hover); text-decoration: none; font-weight: 600; margin-left: 4px; }
     .footer a:hover { text-decoration: underline; }
+    .site-footer { padding: 18px 16px 14px; text-align: left; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border); }
+    .site-footer strong { color: var(--text); font-weight: 600; }
     .gender-group { display: flex; gap: 12px; }
     .gender-btn {
       flex: 1; padding: 14px; background: var(--input-bg); border: 2px solid var(--border);
@@ -7177,6 +7179,11 @@
       } finally {
         dungeonBattleStarting = false;
       }
+      // Weezing selvagem n?o deve receber Memento do moveset carregado pela API.
+      if (wild.id === 110) {
+        wild.moves = (wild.moves || []).filter(move => String(getOriginalMoveName(move?.name || ''))
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '') !== 'memento');
+      }
       wild.hp = getLevelScaledHp(wild.hp, wild.level);
       wild.maxHp = wild.hp;
       wild.currentHp = wild.maxHp;
@@ -8219,7 +8226,6 @@
             <button class="move-btn" onclick="useBattleBagItem('${item.key}')" style="display:flex;align-items:center;gap:8px;">
               ${itemIcon(item.sprite, 'item-icon-sm')}
               ${item.name}
-              ${item.kind === 'ball' ? `<span class="move-power" data-capture-ball="${item.key}">Calculando…</span>` : ''}
               <span class="move-power">x${qty}</span>
             </button>
           `;
@@ -8231,7 +8237,6 @@
         ${entries || '<div style="padding:10px 0;color:var(--text-muted);">Nenhum item disponível na mochila.</div>'}
         <button class="move-btn" onclick="backToMenu()" style="grid-column:1/-1;text-align:center;justify-content:center;">← Voltar</button>
       `;
-      updateBattleCatchOdds();
     }
 
     function showBag() {
@@ -9062,5 +9067,6 @@
     }
 
   </script>
+<footer class="site-footer">Criado por <strong>Flash Game Company</strong></footer>
 </body>
 </html>
