@@ -1104,6 +1104,12 @@
     .shop-quantity-total { display: flex; justify-content: space-between; margin-top: 14px; font-size: 0.95rem; }
     .shop-quantity-actions { display: flex; gap: 10px; margin-top: 20px; }
     .shop-quantity-actions button { flex: 1; }
+    .market-tabs { display:flex; gap:10px; margin:18px 0 20px; padding:5px; width:max-content; max-width:100%; background:var(--card); border:1px solid var(--border); border-radius:13px; }
+    .market-tab { min-width:130px; padding:11px 22px; color:var(--text-muted); background:transparent; border:0; border-radius:9px; font:inherit; font-weight:800; cursor:pointer; transition:background .18s,color .18s,box-shadow .18s; }
+    .market-tab:hover { color:var(--text); }
+    .market-tab.active { color:#fff; background:linear-gradient(135deg,#7c3aed,#5b21b6); box-shadow:0 4px 14px #7c3aed44; }
+    .market-tab-panel[hidden] { display:none !important; }
+    @media (max-width:480px) { .market-tabs { width:100%; } .market-tab { flex:1; min-width:0; } }
     .shop-quantity-cancel {
       border: 1px solid var(--border); border-radius: 10px; padding: 12px;
       color: var(--text); background: var(--input-bg); font: inherit; cursor: pointer;
@@ -1510,11 +1516,20 @@
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">🏪 Poké Market</h2>
           <p class="panel-desc">Compre itens para a sua aventura. Seu saldo: <strong id="marketMoney">₽ 0</strong></p>
-          <div class="cards-grid" id="marketGrid"></div>
-          <div style="margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;max-width:420px;">
-            <div style="font-weight:600;margin-bottom:10px;">Seu inventário</div>
-            <div id="inventoryList" style="font-size:0.875rem;color:var(--text-muted);"></div>
+          <div class="market-tabs" role="tablist" aria-label="Acoes do Poke Market">
+            <button type="button" class="market-tab active" id="marketBuyTabButton" role="tab" aria-selected="true" aria-controls="marketBuyPanel" onclick="setMarketTab('buy')">Comprar</button>
+            <button type="button" class="market-tab" id="marketSellTabButton" role="tab" aria-selected="false" aria-controls="marketSellPanel" onclick="setMarketTab('sell')">Vender</button>
           </div>
+          <section class="market-tab-panel" id="marketBuyPanel" role="tabpanel" aria-labelledby="marketBuyTabButton">
+            <div class="cards-grid" id="marketGrid"></div>
+          </section>
+          <section class="market-tab-panel" id="marketSellPanel" role="tabpanel" aria-labelledby="marketSellTabButton" hidden>
+            <div style="margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;">
+              <div style="font-weight:600;margin-bottom:10px;">Seu invent\u00e1rio</div>
+              <div id="inventoryList" style="font-size:0.875rem;color:var(--text-muted);"></div>
+            </div>
+            <div id="marketSellList" class="cards-grid"></div>
+          </section>
         </div>
 
         <div class="panel" id="panel-bag">
@@ -2193,7 +2208,7 @@
         element.style.color = status ? STATUS_COLORS[status] : '';
         element.style.display = status ? 'inline-flex' : 'none';
       });
-      const statNames = { attack: 'ATQ', defense: 'DEF', specialAttack: 'ATQ ESP', specialDefense: 'DEF ESP', speed: 'VEL' };
+      const statNames = { attack: 'ATQ', defense: 'DEF', specialAttack: 'ATQ ESP', specialDefense: 'DEF ESP', speed: 'VEL', evasion: 'ESQ' };
       const renderStages = (elementId, stages, accuracy, critical, showGuard) => {
         const element = document.getElementById(elementId);
         if (!element) return;
@@ -2245,7 +2260,7 @@
           if (delta) messages.push(`${change.stat === 'accuracy' ? 'Precisão' : 'chance de crítico'} de ${target.name} ${delta > 0 ? 'aumentou' : 'diminuiu'} ${Math.abs(delta)} estágio(s).`);
           return;
         }
-        const validStats = ['attack', 'defense', 'specialAttack', 'specialDefense', 'speed'];
+        const validStats = ['attack', 'defense', 'specialAttack', 'specialDefense', 'speed', 'evasion'];
         if (!validStats.includes(change.stat)) return;
         const stageKey = isPlayer ? 'playerStatStages' : 'enemyStatStages';
         const stages = battle[stageKey] || (battle[stageKey] = {});
@@ -2253,7 +2268,7 @@
         stages[change.stat] = Math.max(-6, Math.min(6, previous + amount));
         const delta = stages[change.stat] - previous;
         if (delta) {
-          const labels = { attack: 'Ataque', defense: 'Defesa', specialAttack: 'Ataque Especial', specialDefense: 'Defesa Especial', speed: 'Velocidade' };
+          const labels = { attack: 'Ataque', defense: 'Defesa', specialAttack: 'Ataque Especial', specialDefense: 'Defesa Especial', speed: 'Velocidade', evasion: 'Evas\u00e3o' };
           messages.push(`${labels[change.stat]} de ${target.name} ${delta > 0 ? 'aumentou' : 'diminuiu'} ${Math.abs(delta)} estágio(s).`);
         }
       });
@@ -4976,6 +4991,11 @@
 
     function applyBattleHeldItemsAtTurnEnd() {
       const messages = [];
+      // Status residual damage resolves after both actions; Leftovers heals afterward.
+      const playerResidual = applyResidualStatus(player?.poke);
+      const enemyResidual = applyResidualStatus(battle?.enemy);
+      if (playerResidual) messages.push(playerResidual);
+      if (enemyResidual) messages.push(enemyResidual);
       const playerMessage = applyHeldItemEndTurn(player?.poke);
       const enemyMessage = applyHeldItemEndTurn(battle?.enemy);
       if (playerMessage) messages.push(playerMessage);
@@ -4984,6 +5004,7 @@
         battle.playerHp = player.poke.hp;
         updatePlayerHpBar();
         updateEnemyHpBar();
+        saveGame();
       }
       return messages.join(' ');
     }
@@ -5887,6 +5908,21 @@
       if (!player) return;
       treatPokemonAtCenter(player.party.filter(pokemon => centerSelectedPokemon.has(pokemon)));
     }
+    let activeMarketTab = 'buy';
+
+    function setMarketTab(tab) {
+      activeMarketTab = tab === 'sell' ? 'sell' : 'buy';
+      const buying = activeMarketTab === 'buy';
+      document.getElementById('marketBuyPanel')?.toggleAttribute('hidden', !buying);
+      document.getElementById('marketSellPanel')?.toggleAttribute('hidden', buying);
+      const buyButton = document.getElementById('marketBuyTabButton');
+      const sellButton = document.getElementById('marketSellTabButton');
+      buyButton?.classList.toggle('active', buying);
+      sellButton?.classList.toggle('active', !buying);
+      buyButton?.setAttribute('aria-selected', String(buying));
+      sellButton?.setAttribute('aria-selected', String(!buying));
+    }
+
     function refreshMarketUI() {
       if (!player) return;
       const moneyEl = document.getElementById('marketMoney');
@@ -5923,6 +5959,18 @@
             </div>
           </div>`).join('');
       }
+      const sellList = document.getElementById('marketSellList');
+      if (sellList) {
+        const ownedItems = getSellableInventoryItems().filter(item => getItemQty(item.key) > 0);
+        sellList.innerHTML = ownedItems.length ? ownedItems.map(item => {
+          const quantity = getItemQty(item.key);
+          return `<article class="game-card"><div class="game-card-body">
+            <div class="game-card-title">${escapeHTML(item.name)}</div>
+            <div class="game-card-desc">Na mochila: ${quantity} &middot; Venda por &#8381; ${item.salePrice.toLocaleString('pt-BR')} cada</div>
+            <div class="game-card-meta"><button type="button" class="shop-buy-button" onclick="openSellQuantityDialog('${item.key}')">Vender</button></div>
+          </div></article>`;
+        }).join('') : '<p style="color:var(--text-muted);">Voc\u00ea n\u00e3o tem itens dispon\u00edveis para vender.</p>';
+      }
       const inv = document.getElementById('inventoryList');
       if (inv) {
         inv.innerHTML = `
@@ -5934,9 +5982,11 @@
             <span style="display:inline-flex;align-items:center;gap:6px;">${itemIcon('antiburn','item-icon-sm')} Antiqueimadura: <strong style="color:var(--text)">${player.antiburn || 0}</strong></span>
           </div>`;
       }
+      setMarketTab(activeMarketTab);
     }
 
     let pendingShopItemId = null;
+    let pendingShopAction = 'buy';
 
     function openShopQuantityDialog(item) {
       if (!player) return;
@@ -5947,6 +5997,7 @@
       }
 
       pendingShopItemId = item.id;
+      pendingShopAction = 'buy';
       const dialog = document.getElementById('shopQuantityDialog');
       const input = document.getElementById('shopQuantityInput');
       document.getElementById('shopQuantityTitle').textContent = `Comprar ${item.name}`;
@@ -5960,15 +6011,67 @@
       input.select();
     }
 
+    function getSellableInventoryItems() {
+      const entries = [
+        ...SHOP_ITEMS,
+        ...BAG_CATEGORIES.flatMap(category => category.items),
+        ...EXTRA_MEDICINE_ITEMS,
+        ...EXTRA_BATTLE_ITEMS,
+        ...(EXTRA_TM_ITEMS || []),
+        ...Object.entries(HELD_ITEM_INFO).map(([key, item]) => ({ ...item, key }))
+      ];
+      const byKey = new Map();
+      entries.forEach(item => {
+        if (!item?.key || ['parcelbox', 'ss_ticket'].includes(item.key)) return;
+        const existing = byKey.get(item.key);
+        const shopItem = SHOP_ITEMS.find(candidate => candidate.key === item.key);
+        const name = item.name || existing?.name || item.key.replace(/_/g, ' ');
+        byKey.set(item.key, {
+          key: item.key,
+          name,
+          salePrice: shopItem ? Math.max(1, Math.floor(shopItem.price / 2)) : existing?.salePrice || 50
+        });
+      });
+      Object.keys(player?.items || {}).forEach(key => {
+        if (['parcelbox', 'ss_ticket'].includes(key) || byKey.has(key)) return;
+        byKey.set(key, { key, name: key.replace(/_/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase()), salePrice: 50 });
+      });
+      return [...byKey.values()];
+    }
+
+    function openSellQuantityDialog(itemKey) {
+      if (!player) return;
+      const item = getSellableInventoryItems().find(candidate => candidate.key === itemKey);
+      if (!item) return;
+      const available = getItemQty(item.key);
+      if (available < 1) return;
+      pendingShopItemId = item.key;
+      pendingShopAction = 'sell';
+      const salePrice = item.salePrice;
+      const dialog = document.getElementById('shopQuantityDialog');
+      const input = document.getElementById('shopQuantityInput');
+      document.getElementById('shopQuantityTitle').textContent = `Vender ${item.name}`;
+      document.getElementById('shopQuantityDescription').textContent = `Cada unidade ser\u00e1 vendida por \u20bd ${salePrice.toLocaleString('pt-BR')}. Voc\u00ea tem ${available}.`;
+      input.max = String(available);
+      input.value = '1';
+      updateShopQuantityTotal();
+      dialog.showModal();
+      input.focus();
+      input.select();
+    }
+
     function updateShopQuantityTotal() {
-      const item = SHOP_ITEMS.find(candidate => candidate.id === pendingShopItemId);
+      const item = pendingShopAction === 'sell'
+        ? getSellableInventoryItems().find(candidate => candidate.key === pendingShopItemId)
+        : SHOP_ITEMS.find(candidate => candidate.id === pendingShopItemId);
       const input = document.getElementById('shopQuantityInput');
       const quantity = input.valueAsNumber;
       const totalEl = document.getElementById('shopQuantityTotal');
-      const validQuantity = Number.isInteger(quantity) && quantity >= 1 && quantity <= Number(input.max);
+      const unitPrice = pendingShopAction === 'sell' ? item?.salePrice : item?.price;
+      const validQuantity = item && Number.isInteger(quantity) && quantity >= 1 && quantity <= Number(input.max);
       totalEl.textContent = validQuantity
-        ? '₽ ' + (quantity * item.price).toLocaleString('pt-BR')
-        : 'Quantidade inválida';
+        ? '\u20bd ' + (quantity * unitPrice).toLocaleString('pt-BR')
+        : 'Quantidade inv\u00e1lida';
     }
 
     function buyItem(itemId, quantity) {
@@ -6016,6 +6119,25 @@
       return true;
     }
 
+    function sellItem(itemKey, quantity) {
+      const item = getSellableInventoryItems().find(candidate => candidate.key === itemKey);
+      if (!item || !player) return false;
+      const available = getItemQty(item.key);
+      if (!Number.isInteger(quantity) || quantity < 1 || quantity > available) {
+        showToast('Quantidade inv\u00e1lida ou item insuficiente!', 'error');
+        return false;
+      }
+      const salePrice = item.salePrice;
+      setItemQty(item.key, available - quantity);
+      player.money += salePrice * quantity;
+      updateStatsUI();
+      refreshMarketUI();
+      renderBag();
+      saveGame();
+      showToast(`Vendeu ${quantity} ${item.name}${quantity === 1 ? '' : 's'} por \u20bd ${(salePrice * quantity).toLocaleString('pt-BR')}!`);
+      return true;
+    }
+
     document.getElementById('shopQuantityInput').addEventListener('input', updateShopQuantityTotal);
     document.getElementById('shopQuantityCancel').addEventListener('click', () => {
       document.getElementById('shopQuantityDialog').close();
@@ -6028,10 +6150,10 @@
       event.preventDefault();
       if (!pendingShopItemId) return;
       const itemId = pendingShopItemId;
+      const action = pendingShopAction;
       const quantity = document.getElementById('shopQuantityInput').valueAsNumber;
-      if (buyItem(itemId, quantity)) {
-        document.getElementById('shopQuantityDialog').close();
-      }
+      const succeeded = action === 'sell' ? sellItem(itemId, quantity) : buyItem(itemId, quantity);
+      if (succeeded) document.getElementById('shopQuantityDialog').close();
     });
 
     // ===== SAVE / LOAD =====
@@ -7412,10 +7534,9 @@
       if (statusBlock) {
         battle.busy = true;
         backToMenu();
-        const residual = applyResidualStatus(player.poke);
         battle.playerHp = player.poke.hp;
         updatePlayerHpBar();
-        setLog([statusBlock, residual].filter(Boolean).join(' '));
+        setLog(statusBlock);
         saveGame();
         if (player.poke.hp <= 0) {
           const hasBackup = player.party.some(pokemon => pokemon !== player.poke && pokemon.hp > 0);
@@ -7471,7 +7592,7 @@
       const evaded = doesMoveMiss(player.poke, battle.enemy, move);
       const effectiveMult = immunity || evaded ? 0 : mult;
       const critical = Math.random() < getCriticalHitChance((battle.playerCritStage || 0) + (player.poke.heldItem === 'scope_lens' ? 1 : 0));
-      const rawDamage = calcDamage(player.poke.level, battle.enemy.level || 5, move.power, effectiveMult, hasStab);
+      const rawDamage = calcDamage(player.poke.level, battle.enemy.level || 5, move.power, effectiveMult, hasStab) * (Number(player.poke.id) === 80 ? 0.7 : 1);
       const attackStat = physical ? 'attack' : 'specialAttack';
       const defenseStat = physical ? 'defense' : 'specialDefense';
       const traitMultiplier = getPokemonStatMultiplier(player.poke,attackStat) / (getPokemonStatMultiplier(battle.enemy,defenseStat)*getPokemonStatMultiplier(battle.enemy,'hp')) * abilityDamageMultiplier(player.poke, battle.enemy, moveType, physical, hasStab) * getBattleScreenMultiplier(battle.enemy, physical);
@@ -7547,8 +7668,6 @@
         if (playerHeldMessage) msg += ` ${playerHeldMessage}`;
         if (shellBellMessage) msg += ` ${shellBellMessage}`;
         if (drainMessage) msg += ` ${drainMessage}`;
-        const residualMessage = applyResidualStatus(player.poke);
-        if (residualMessage) msg += ` ${residualMessage}`;
         battle.playerHp = player.poke.hp;
         updateEnemyHpBar();
         updatePlayerHpBar();
@@ -7600,12 +7719,11 @@
       }
       const statusBlock = tryActDespiteStatus(battle.enemy);
       if (statusBlock) {
-        const residual = applyResidualStatus(battle.enemy);
         const endTurnHeldMessage = applyBattleHeldItemsAtTurnEnd();
         tickGuardSpecTurn();
         tickBattleScreens();
-        if (residual || endTurnHeldMessage) updateEnemyHpBar();
-        setLog([statusBlock, residual, endTurnHeldMessage].filter(Boolean).join(' '));
+        if (endTurnHeldMessage) updateEnemyHpBar();
+        setLog([statusBlock, endTurnHeldMessage].filter(Boolean).join(' '));
         if (battle.enemy.currentHp <= 0) {
           setTimeout(() => endBattle(true), 600);
         } else {
@@ -7627,7 +7745,7 @@
       const evaded = doesMoveMiss(battle.enemy, player.poke, move);
       const effectiveMult = immunity || evaded ? 0 : mult;
       const critical = Math.random() < getCriticalHitChance((battle.enemyCritStage || 0) + (battle.enemy.heldItem === 'scope_lens' ? 1 : 0));
-      const rawDamage = calcDamage(battle.enemy.level || 5, player.poke.level, move.power, effectiveMult, hasStab);
+      const rawDamage = calcDamage(battle.enemy.level || 5, player.poke.level, move.power, effectiveMult, hasStab) * (Number(battle.enemy.id) === 80 ? 0.7 : 1);
       const attackStat = physical ? 'attack' : 'specialAttack';
       const defenseStat = physical ? 'defense' : 'specialDefense';
       const traitMultiplier = getPokemonStatMultiplier(battle.enemy,attackStat) / (getPokemonStatMultiplier(player.poke,defenseStat)*getPokemonStatMultiplier(player.poke,'hp')) * abilityDamageMultiplier(battle.enemy, player.poke, moveType, physical, hasStab) * getBattleScreenMultiplier(player.poke, physical);
@@ -7701,11 +7819,6 @@
         if (enemyHeldMessage) msg += ` ${enemyHeldMessage}`;
         if (shellBellMessage) msg += ` ${shellBellMessage}`;
         if (drainMessage) msg += ` ${drainMessage}`;
-        const residualMessage = applyResidualStatus(battle.enemy);
-        if (residualMessage) {
-          updateEnemyHpBar();
-          msg += ` ${residualMessage}`;
-        }
         const endTurnHeldMessage = applyBattleHeldItemsAtTurnEnd();
         if (endTurnHeldMessage) msg += ` ${endTurnHeldMessage}`;
         updatePlayerHpBar();

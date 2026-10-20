@@ -594,7 +594,7 @@ begin
     if v_move_type in ('Fogo','Gelo') and v_defender->>'ability'='Thick Fat' then v_ability_mult:=v_ability_mult*0.5; end if;
     if v_power<=0 or v_type_mult=0 then v_damage:=0;
     else
-      v_damage := greatest(1,floor((floor((floor(((2*v_level/5)+2)*v_power*v_attack_value/v_defense_value)/50))+2)*v_stab*v_type_mult*((85+floor(random()*16))/100)*v_ability_mult*(case when v_critical then 2 else 1 end)));
+      v_damage := greatest(1,floor((floor((floor(((2*v_level/5)+2)*v_power*v_attack_value/v_defense_value)/50))+2)*v_stab*v_type_mult*((85+floor(random()*16))/100)*v_ability_mult*(case when v_critical then 2 else 1 end)*(case when (v_attacker->>'id')::integer=80 then 0.7 else 1 end)));
     end if;
     v_current_hp := coalesce((v_state->(v_defender_side||'Hp')->>v_defender_index)::numeric,0);
     v_damage := least(v_damage,v_current_hp);
