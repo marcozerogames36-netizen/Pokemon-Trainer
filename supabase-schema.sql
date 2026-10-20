@@ -853,3 +853,42 @@ grant execute on function public.social_send_trade(uuid,text) to authenticated;
 grant execute on function public.social_accept_trade(uuid,text) to authenticated;
 grant execute on function public.social_send_battle(uuid,text) to authenticated;
 grant execute on function public.social_accept_battle(uuid,text,jsonb) to authenticated;
+
+-- Award PvP Battle Points once for a normal match victory.
+create or replace function public.pvp_claim_battle_points(p_code text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_room public.pvp_rooms;
+  v_player jsonb;
+  v_points integer;
+  v_reward integer := 3;
+begin
+  if auth.uid() is null then raise exception 'Entre na sua conta.'; end if;
+  select * into v_room from public.pvp_rooms where room_code = upper(p_code) for update;
+  if not found or v_room.status <> 'finished' or (v_room.battle->>'result' is distinct from 'normal' and v_room.battle->>'result' is distinct from 'abandoned') or
+     v_room.battle->>'winner_user_id' is distinct from auth.uid()::text then
+    raise exception 'Esta vitoria PvP nao pode receber Battle Points.';
+  end if;
+  select player into v_player from public.game_saves where user_id = auth.uid() for update;
+  if not found then raise exception 'Save do treinador nao encontrado.'; end if;
+  v_points := case when jsonb_typeof(v_player->'battlePoints') = 'number'
+    then greatest(0, (v_player->>'battlePoints')::integer) else 0 end;
+  if v_room.battle->>'battle_points_claimed' = 'true' then
+    return jsonb_build_object('awarded', 0, 'battle_points', v_points);
+  end if;
+  v_points := v_points + v_reward;
+  v_player := jsonb_set(v_player, '{battlePoints}', to_jsonb(v_points), true);
+  update public.game_saves set player = v_player, updated_at = now() where user_id = auth.uid();
+  update public.pvp_rooms
+    set battle = battle || jsonb_build_object('battle_points_claimed', true), updated_at = now()
+    where id = v_room.id;
+  return jsonb_build_object('awarded', v_reward, 'battle_points', v_points);
+end;
+$$;
+
+revoke execute on function public.pvp_claim_battle_points(text) from public, anon;
+grant execute on function public.pvp_claim_battle_points(text) to authenticated;
