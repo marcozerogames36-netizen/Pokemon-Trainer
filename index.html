@@ -2527,11 +2527,24 @@
       try { return await request; } catch (error) { fireRedLearnsetCache.delete(id); throw error; }
     }
 
-    // Usa tipos atuais da Gen IX e corrige dados incorretos de golpes antigos salvos.
-    const CURRENT_MOVE_TYPE_OVERRIDES = { charm: 'Fada', sweetkiss: 'Fada', magicalleaf: 'Planta' };
+    // A lista de Pok?mon Mythology cobre as gera??es I-V; tipagens alteradas depois disso
+    // usam o valor anterior ? Gen VI quando a API registra uma mudan?a hist?rica.
+    const POST_GEN5_MOVE_TYPE_GROUPS = [
+      'x-y','omega-ruby-alpha-sapphire','sun-moon','ultra-sun-ultra-moon',
+      'lets-go-pikachu-lets-go-eevee','sword-shield','brilliant-diamond-shining-pearl',
+      'legends-arceus','scarlet-violet'
+    ];
+    const MOVE_TYPE_OVERRIDES_FROM_REFERENCE = {
+      charm: 'Normal', sweetkiss: 'Normal', magicalleaf: 'Planta', bite: 'Sombrio', poisonpowder: 'Veneno'
+    };
     function getCurrentMoveType(moveOrData) {
       const name = String(moveOrData?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      return CURRENT_MOVE_TYPE_OVERRIDES[name] || normalizeBattleType(moveOrData?.type?.name || moveOrData?.type || 'Normal');
+      if (MOVE_TYPE_OVERRIDES_FROM_REFERENCE[name]) return MOVE_TYPE_OVERRIDES_FROM_REFERENCE[name];
+      const historicalType = moveOrData?.past_values
+        ?.filter(value => value.type?.name && POST_GEN5_MOVE_TYPE_GROUPS.includes(value.version_group?.name))
+        ?.sort((a,b) => POST_GEN5_MOVE_TYPE_GROUPS.indexOf(a.version_group.name) - POST_GEN5_MOVE_TYPE_GROUPS.indexOf(b.version_group.name))[0]
+        ?.type?.name;
+      return normalizeBattleType(historicalType || moveOrData?.type?.name || moveOrData?.type || 'Normal');
     }
 
     async function getMoveDataForBattle(slug) {
@@ -2575,7 +2588,7 @@
 
     async function hydrateGenerationNineMoveMetadata(pokemonList) {
       let changed = false;
-      const forceRefresh = player?.moveMetadataVersion !== 9;
+      const forceRefresh = player?.moveMetadataVersion !== 'mythology-gen1-5';
       const targets = (pokemonList || []).filter(pokemon => Array.isArray(pokemon?.moves));
       await Promise.all(targets.flatMap(pokemon => pokemon.moves.map(async move => {
         if (!forceRefresh && ['physical','special','status'].includes(move.category)) return;
@@ -2590,7 +2603,7 @@
           changed = true;
         } catch (_) { /* Keeps the legacy fallback when a move is unavailable. */ }
       })));
-      if (player && forceRefresh) { player.moveMetadataVersion = 9; changed = true; }
+      if (player && forceRefresh) { player.moveMetadataVersion = 'mythology-gen1-5'; changed = true; }
       if (changed && player) saveGame();
     }
 
@@ -3341,7 +3354,7 @@
         { name: "Farfetch'd", id: 83, hp: 28, rate: 0.5, minLevel: 8, maxLevel: 12, expYield: 132, rarity: 'Ultrarraro', notes: 'Encontro especial / Easter Egg da floresta', moves: [{name:'Ataque de Asa',power:40},{name:'Corte',power:35}] }
       ],
       'Mt. Moon': [
-        { name: 'Zubat', id: 41, hp: 20, rate: 45, minLevel: 8, maxLevel: 15, rarity: 'Muito Comum', notes: 'Habitante clássico e mais abundante das cavernas', moves: [{name:'Supersônico',power:0},{name:'Mordida',power:40,type:'Normal'}] },
+        { name: 'Zubat', id: 41, hp: 20, rate: 45, minLevel: 8, maxLevel: 15, rarity: 'Muito Comum', notes: 'Habitante clássico e mais abundante das cavernas', moves: [{name:'Supersônico',power:0},{name:'Mordida',power:40,type:'Sombrio'}] },
         { name: 'Geodude', id: 74, hp: 24, rate: 25, minLevel: 8, maxLevel: 15, rarity: 'Comum', notes: 'Aparece com frequência nas rochas e paredões', moves: [{name:'Investida',power:35},{name:'Rolamento',power:45,type:'Pedra'}] },
         { name: 'Jigglypuff', id: 39, hp: 28, rate: 10, minLevel: 10, maxLevel: 15, rarity: 'Incomum', notes: 'Encontro raro nas cavernas', moves: [{name:'Pound',power:40},{name:'Sing',power:0}] },
         { name: 'Paras', id: 46, hp: 22, rate: 15, minLevel: 8, maxLevel: 15, rarity: 'Incomum', notes: 'Encontrado nas partes úmidas e entre cogumelos', moves: [{name:'Arranhão',power:40},{name:'Absorver',power:30,type:'Planta'}] },
@@ -3350,7 +3363,7 @@
       'Túnel Rochoso': [
         { name: 'Geodude', id: 74, hp: 26, rate: 25, minLevel: 17, maxLevel: 25, rarity: 'Muito Comum', moves: [{name:'Rolamento',power:45,type:'Pedra'},{name:'Explosão de Rocha',power:50}] },
         { name: 'Sandshrew', id: 27, hp: 28, rate: 10, minLevel: 17, maxLevel: 25, rarity: 'Incomum', notes: 'Pokemon terrestre encontrado no tunel', moves: [{name:'Scratch',power:40,type:'Normal'},{name:'Sand Attack',power:0,type:'Terra'}] },
-        { name: 'Zubat', id: 41, hp: 20, rate: 20, minLevel: 17, maxLevel: 25, rarity: 'Muito Comum', moves: [{name:'Supersônico',power:0},{name:'Mordida',power:40,type:'Normal'}] },
+        { name: 'Zubat', id: 41, hp: 20, rate: 20, minLevel: 17, maxLevel: 25, rarity: 'Muito Comum', moves: [{name:'Supersônico',power:0},{name:'Mordida',power:40,type:'Sombrio'}] },
         { name: 'Drowzee', id: 96, hp: 30, rate: 10, minLevel: 19, maxLevel: 26, rarity: 'Incomum', notes: 'Pokemon psiquico encontrado nas cavernas', moves: [{name:'Pound',power:40},{name:'Confusion',power:50,type:'Psiquico'}] },
         { name: 'Machop', id: 66, hp: 30, rate: 15, minLevel: 19, maxLevel: 26, rarity: 'Incomum', moves: [{name:'Soco',power:40},{name:'Chute Baixo',power:50}] },
         { name: 'Mankey', id: 56, hp: 28, rate: 15, minLevel: 19, maxLevel: 26, rarity: 'Incomum', moves: [{name:'Arranhão',power:40},{name:'Karate Chop',power:50}] },
@@ -3358,13 +3371,13 @@
       ],
       'Rota 24': [
         { name: 'Pidgey', id: 16, hp: 20, rate: 12.5, minLevel: 14, maxLevel: 18, rarity: 'Muito Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Tackle',power:40,type:'Normal'},{name:'Gust',power:40,type:'Voador'}] },
-        { name: 'Oddish', id: 43, hp: 22, rate: 10, minLevel: 15, maxLevel: 20, rarity: 'Muito Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Absorb',power:20,type:'Planta'},{name:'Poison Powder',power:0,type:'Normal'}] },
+        { name: 'Oddish', id: 43, hp: 22, rate: 10, minLevel: 15, maxLevel: 20, rarity: 'Muito Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Absorb',power:20,type:'Planta'},{name:'Poison Powder',power:0,type:'Veneno'}] },
         { name: 'Bellsprout', id: 69, hp: 22, rate: 10, minLevel: 15, maxLevel: 20, rarity: 'Muito Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Vine Whip',power:35,type:'Planta'},{name:'Wrap',power:15,type:'Normal'}] },
         { name: 'Caterpie', id: 10, hp: 18, rate: 2.5, minLevel: 14, maxLevel: 18, rarity: 'Incomum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Tackle',power:30,type:'Normal'},{name:'Bug Bite',power:20,type:'Inseto'}] },
         { name: 'Metapod', id: 11, hp: 22, rate: 2.5, minLevel: 14, maxLevel: 18, rarity: 'Incomum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Harden',power:0,type:'Normal'},{name:'Tackle',power:25,type:'Normal'}] },
         { name: 'Weedle', id: 13, hp: 18, rate: 2.5, minLevel: 14, maxLevel: 18, rarity: 'Incomum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Poison Sting',power:15,type:'Veneno'},{name:'Bug Bite',power:20,type:'Inseto'}] },
         { name: 'Kakuna', id: 14, hp: 22, rate: 2.5, minLevel: 14, maxLevel: 18, rarity: 'Incomum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Harden',power:0,type:'Normal'},{name:'Poison Sting',power:15,type:'Veneno'}] },
-        { name: 'Venonat', id: 48, hp: 24, rate: 5, minLevel: 16, maxLevel: 21, rarity: 'Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Poison Powder',power:0,type:'Normal'}] },
+        { name: 'Venonat', id: 48, hp: 24, rate: 5, minLevel: 16, maxLevel: 21, rarity: 'Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Poison Powder',power:0,type:'Veneno'}] },
         { name: 'Abra', id: 63, hp: 18, rate: 2.5, minLevel: 14, maxLevel: 20, rarity: 'Incomum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Pound',power:40,type:'Normal'},{name:'Teleport',power:0,type:'Normal'}], teleportFlee: true },
         { name: 'Psyduck', id: 54, hp: 32, rate: 17, minLevel: 18, maxLevel: 24, rarity: 'Muito Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}] },
         { name: 'Slowpoke', id: 79, hp: 35, rate: 17, minLevel: 18, maxLevel: 24, rarity: 'Muito Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}] },
@@ -3390,7 +3403,7 @@
         { name: 'Raichu', id: 26, hp: 45, rate: 5, minLevel: 42, maxLevel: 50, rarity: 'Raro', moves: [{name:'Thunder Punch',power:75,type:'Eletrico'},{name:'Slam',power:80,type:'Normal'}] }
       ],
       'Zona do Safari': [
-        { name: 'Kangaskhan', id: 115, hp: 48, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Comet Punch',power:18,type:'Normal'},{name:'Bite',power:60,type:'Normal'}] },
+        { name: 'Kangaskhan', id: 115, hp: 48, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Comet Punch',power:18,type:'Normal'},{name:'Bite',power:60,type:'Sombrio'}] },
         { name: 'Tauros', id: 128, hp: 48, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Stomp',power:65,type:'Normal'},{name:'Take Down',power:90,type:'Normal'}] },
         { name: 'Chansey', id: 113, hp: 55, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Pound',power:40,type:'Normal'},{name:'Sing',power:0,type:'Normal'}] },
         { name: 'Pinsir', id: 127, hp: 45, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Vice Grip',power:55,type:'Normal'},{name:'Seismic Toss',power:50,type:'Lutador'}] },
@@ -3400,7 +3413,7 @@
         { name: 'Nidoran?', id: 32, hp: 30, rate: 10, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Poison Sting',power:15,type:'Veneno'},{name:'Double Kick',power:30,type:'Lutador'}] },
         { name: 'Nidoran?', id: 29, hp: 30, rate: 10, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Poison Sting',power:15,type:'Veneno'},{name:'Double Kick',power:30,type:'Lutador'}] },
         { name: 'Nidorino', id: 33, hp: 38, rate: 0.75, minLevel: 35, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Poison Jab',power:80,type:'Veneno'},{name:'Horn Attack',power:65,type:'Normal'}] },
-        { name: 'Nidorina', id: 30, hp: 38, rate: 0.75, minLevel: 35, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Poison Jab',power:80,type:'Veneno'},{name:'Bite',power:60,type:'Normal'}] },
+        { name: 'Nidorina', id: 30, hp: 38, rate: 0.75, minLevel: 35, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Poison Jab',power:80,type:'Veneno'},{name:'Bite',power:60,type:'Sombrio'}] },
         { name: 'Parasect', id: 47, hp: 40, rate: 5, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Slash',power:70,type:'Normal'},{name:'Giga Drain',power:75,type:'Planta'}] },
         { name: 'Dratini', id: 147, hp: 30, rate: 0.75, minLevel: 32, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Dragon Breath',power:60,type:'Dragao'},{name:'Wrap',power:15,type:'Normal'}] },
         { name: 'Dragonair', id: 148, hp: 42, rate: 0.25, minLevel: 48, maxLevel: 60, rarity: 'Raro', moves: [{name:'Dragon Breath',power:60,type:'Dragao'},{name:'Aqua Tail',power:90,type:'Agua'}] },
@@ -3426,7 +3439,7 @@
       ],
       'Vulcão da Ilha de Cinnabar': [
         { name: 'Vulpix', id: 37, hp: 42, rate: 25, minLevel: 52, maxLevel: 62, rarity: 'Comum', moves: [{name:'Ember',power:40,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}] },
-        { name: 'Growlithe', id: 58, hp: 44, rate: 25, minLevel: 52, maxLevel: 62, rarity: 'Comum', moves: [{name:'Flame Wheel',power:60,type:'Fogo'},{name:'Bite',power:60,type:'Normal'}] },
+        { name: 'Growlithe', id: 58, hp: 44, rate: 25, minLevel: 52, maxLevel: 62, rarity: 'Comum', moves: [{name:'Flame Wheel',power:60,type:'Fogo'},{name:'Bite',power:60,type:'Sombrio'}] },
         { name: 'Ponyta', id: 77, hp: 44, rate: 20, minLevel: 55, maxLevel: 65, rarity: 'Comum', moves: [{name:'Flame Wheel',power:60,type:'Fogo'},{name:'Stomp',power:65,type:'Normal'}] },
         { name: 'Magmar', id: 126, hp: 48, rate: 10, minLevel: 60, maxLevel: 70, rarity: 'Incomum', moves: [{name:'Fire Punch',power:75,type:'Fogo'},{name:'Confusion',power:50,type:'Psiquico'}] },
         { name: 'Ninetales', id: 38, hp: 52, rate: 5, minLevel: 66, maxLevel: 76, rarity: 'Raro', moves: [{name:'Flamethrower',power:90,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}] },
@@ -3524,7 +3537,7 @@
         icon: '🔥', color: 'linear-gradient(135deg,#5c2a1a,#3d1510)',
         portrait: 'https://play.pokemonshowdown.com/sprites/trainers/blaine.png',
         team: [
-          { name: 'Growlithe', id: 58, hp: 40, level: 42, moves: [{name:'Brasas',power:45},{name:'Mordida',power:40,type:'Normal'}] },
+          { name: 'Growlithe', id: 58, hp: 40, level: 42, moves: [{name:'Brasas',power:45},{name:'Mordida',power:40,type:'Sombrio'}] },
           { name: 'Ponyta', id: 77, hp: 42, level: 40, moves: [{name:'Chute de Fogo',power:50},{name:'Investida',power:40}] },
           { name: 'Arcanine', id: 59, hp: 58, level: 47, moves: [{name:'Lança-chamas',power:75},{name:'Ataque Rápido',power:50}] },
           { name: 'Rapidash', id: 78, hp: 52, level: 45, moves: [{name:'Explosão de Fogo',power:80},{name:'Investida',power:45}] }
