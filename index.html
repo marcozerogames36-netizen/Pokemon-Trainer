@@ -137,6 +137,34 @@
     }
     .social-btn:hover { background: #1a1a24; border-color: #3f3f4e; }
     .social-btn svg { width: 18px; height: 18px; }
+    .social-hub { max-width:1120px; margin-top:28px; overflow:hidden; padding:0 !important; }
+    .social-hero { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:22px 24px; background:linear-gradient(120deg,#302153,#172b48 70%,#123b46); border-bottom:1px solid var(--border); }
+    .social-hero h3 { margin:0 0 5px; font-size:1.15rem; }
+    .social-hero p { color:#d0d5e3; font-size:.86rem; margin:0; }
+    .social-hero-icon { display:grid; place-items:center; flex:0 0 52px; width:52px; height:52px; border:1px solid #ffffff2a; border-radius:16px; background:#ffffff12; font-size:1.55rem; }
+    .social-content { padding:18px; }
+    .social-searchbar { display:flex; gap:9px; }
+    .social-searchbar input { min-width:0; flex:1; }
+    .social-grid { display:grid; grid-template-columns:minmax(250px,.85fr) minmax(0,1.4fr); gap:14px; margin-top:14px; }
+    .social-subpanel { min-width:0; padding:15px; border:1px solid var(--border); border-radius:14px; background:color-mix(in srgb,var(--input-bg) 74%,transparent); }
+    .social-subpanel h4 { display:flex; align-items:center; gap:8px; margin:0 0 12px; font-size:.96rem; }
+    .social-subpanel h4 span { display:grid; place-items:center; min-width:25px; height:25px; padding:0 6px; border-radius:8px; background:#ffffff0c; color:var(--text-muted); font-size:.72rem; }
+    .social-friend-row { padding:13px !important; border-radius:12px !important; background:var(--card) !important; }
+    .social-friend-actions { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+    .social-friend-actions select { max-width:180px; min-width:120px !important; }
+    .social-chat { display:none; grid-column:1 / -1; padding:0; overflow:hidden; border-radius:14px; background:var(--card); }
+    .social-chat.open { display:flex; flex-direction:column; min-height:360px; }
+    .social-chat-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px 16px; border-bottom:1px solid var(--border); background:linear-gradient(100deg,#201936,#172b3b); }
+    .social-chat-head small { display:block; margin-top:2px; color:var(--text-muted); }
+    .social-chat-messages { display:flex; flex:1; flex-direction:column; gap:9px; max-height:360px; min-height:210px; overflow:auto; padding:16px; }
+    .social-chat-empty { display:grid; flex:1; place-items:center; color:var(--text-muted); text-align:center; font-size:.85rem; }
+    .social-message { max-width:min(78%,560px); padding:9px 12px; border:1px solid var(--border); border-radius:13px 13px 13px 4px; background:var(--input-bg); overflow-wrap:anywhere; white-space:pre-wrap; }
+    .social-message.mine { align-self:flex-end; border-color:#7655d766; border-radius:13px 13px 4px 13px; background:linear-gradient(135deg,#493278,#32254b); }
+    .social-message time { display:block; margin-top:5px; color:#b9b3c9; font-size:.67rem; text-align:right; }
+    .social-chat-form { display:flex; align-items:flex-end; gap:9px; padding:12px; border-top:1px solid var(--border); }
+    .social-chat-form textarea { flex:1; min-height:44px; max-height:110px; resize:vertical; }
+    @media(max-width:720px) { .social-grid { grid-template-columns:1fr; } .social-chat { grid-column:auto; } }
+    @media(max-width:480px) { .social-content { padding:12px; } .social-hero { padding:17px; } .social-chat-form { align-items:stretch; flex-direction:column; } .social-chat-form .btn { width:100% !important; } .social-message { max-width:90%; } }
     .footer { text-align: center; margin-top: 26px; font-size: 0.875rem; color: var(--text-muted); }
     .footer a { color: var(--primary-hover); text-decoration: none; font-weight: 600; margin-left: 4px; }
     .footer a:hover { text-decoration: underline; }
@@ -220,6 +248,9 @@
     .bp-chip { display:inline-block; width:16px; height:16px; vertical-align:-3px; margin-right:3px; color:#ef4444; }
     .market-controls { display:grid; grid-template-columns:minmax(220px,1.5fr) minmax(180px,1fr); gap:12px; margin:0 0 18px; }
     .market-controls input, .market-controls select { width:100%; min-width:0; min-height:44px; padding:10px 13px; border:1px solid var(--border); border-radius:10px; background:var(--input-bg); color:var(--text); font:inherit; }
+    .market-currency-filters { display:flex; flex-wrap:wrap; gap:9px; margin:0 0 18px; }
+    .market-currency-option { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); font-size:.84rem; font-weight:600; cursor:pointer; }
+    .market-currency-option input { width:16px; height:16px; margin:0; accent-color:var(--primary); }
     .market-results-count { color:var(--text-muted); font-size:.8rem; margin:-8px 0 14px; }
     @media (max-width:560px) { .market-controls { grid-template-columns:1fr; } }
     .content { padding: 28px; flex: 1; }
@@ -1692,6 +1723,11 @@
               <input id="marketSearch" type="search" placeholder="Buscar itens..." aria-label="Buscar itens no Poké Market" autocomplete="off">
               <select id="marketCategoryFilter" aria-label="Filtrar itens por categoria"><option value="">Todas as categorias</option></select>
             </div>
+            <div class="market-currency-filters" role="group" aria-label="Filtrar itens por moeda">
+              <label class="market-currency-option"><input id="marketFilterBP" type="checkbox"><span class="market-bp-label">BP</span></label>
+              <label class="market-currency-option"><input id="marketFilterPokeCoins" type="checkbox"><span>💎 PokeCoins</span></label>
+              <label class="market-currency-option"><input id="marketFilterMoney" type="checkbox"><span>₽ Pokédollar</span></label>
+            </div>
             <p class="market-results-count" id="marketResultsCount" aria-live="polite"></p>
             <div class="cards-grid" id="marketGrid"></div>
           </section>
@@ -1784,18 +1820,30 @@
               <div class="game-card-body"><div class="game-card-title">Pokédex</div><div class="game-card-desc">Consulte os Pokémon vistos e capturados.</div></div>
             </div>
           </div>
-          <section style="margin-top:28px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:900px;">
-            <h3 style="margin:0 0 6px;font-size:1.1rem;">Amigos e interações</h3>
-            <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px;">Encontre treinadores pelo nome, veja quem está online, troque Pokémon e envie desafios PvP.</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <input id="socialSearchInput" type="search" maxlength="24" placeholder="Buscar treinador pelo nome" aria-label="Buscar treinador pelo nome" onkeydown="if(event.key==='Enter')socialSearchTrainers()" style="flex:1 1 220px;min-width:0;">
-              <button type="button" class="btn" onclick="socialSearchTrainers()" style="width:auto;margin:0;">Buscar</button>
+          <section class="social-hub" aria-labelledby="socialHubTitle">
+            <header class="social-hero"><div><h3 id="socialHubTitle">Central de amizade</h3><p>Encontre treinadores, converse, troque Pokémon e marque batalhas.</p></div><span class="social-hero-icon" aria-hidden="true">&#128101;</span></header>
+            <div class="social-content">
+              <div class="social-subpanel">
+                <h4>Encontrar treinadores <span aria-hidden="true">&#128269;</span></h4>
+                <div class="social-searchbar">
+                  <input id="socialSearchInput" type="search" maxlength="24" placeholder="Buscar pelo nome do treinador" aria-label="Buscar treinador pelo nome" onkeydown="if(event.key==='Enter')socialSearchTrainers()">
+                  <button type="button" class="btn" onclick="socialSearchTrainers()" style="width:auto;margin:0;">Buscar</button>
+                </div>
+                <div id="socialSearchResults" style="display:grid;gap:8px;margin-top:10px;"></div>
+              </div>
+              <div class="social-grid">
+                <section class="social-subpanel"><h4>Solicitações <span id="socialRequestCount">0</span></h4><div id="socialInbox" style="display:grid;gap:8px;"><span style="color:var(--text-muted);font-size:.85rem;">Carregando solicitações…</span></div></section>
+                <section class="social-subpanel"><h4>Meus amigos <span id="socialFriendCount">0</span></h4><div id="socialFriends" style="display:grid;gap:8px;"><span style="color:var(--text-muted);font-size:.85rem;">Carregando amigos…</span></div></section>
+                <section id="socialChat" class="social-chat" aria-label="Conversa com amigo">
+                  <header class="social-chat-head"><div><strong id="socialChatName">Conversa</strong><small id="socialChatPresence">Mensagens visíveis apenas para vocês dois.</small></div><button type="button" class="btn btn-secondary" onclick="socialCloseChat()" style="width:auto;margin:0;padding:7px 10px;">Fechar</button></header>
+                  <div id="socialChatMessages" class="social-chat-messages" aria-live="polite"><div class="social-chat-empty">Escolha um amigo para iniciar a conversa.</div></div>
+                  <form class="social-chat-form" onsubmit="event.preventDefault();socialSendMessage()">
+                    <textarea id="socialChatInput" maxlength="500" rows="1" placeholder="Escreva uma mensagem..." aria-label="Mensagem para seu amigo" required></textarea>
+                    <button id="socialChatSend" type="submit" class="btn" style="width:auto;margin:0;">Enviar</button>
+                  </form>
+                </section>
+              </div>
             </div>
-            <div id="socialSearchResults" style="display:grid;gap:8px;margin-top:10px;"></div>
-            <h4 style="margin:20px 0 8px;">Solicitações</h4>
-            <div id="socialInbox" style="display:grid;gap:8px;"><span style="color:var(--text-muted);font-size:.85rem;">Carregando solicitações…</span></div>
-            <h4 style="margin:20px 0 8px;">Minha lista</h4>
-            <div id="socialFriends" style="display:grid;gap:8px;"><span style="color:var(--text-muted);font-size:.85rem;">Carregando amigos…</span></div>
           </section>
           <div class="profile-danger-zone" style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border);">
             <button class="btn btn-secondary" onclick="if(confirm('Apagar todo o progresso salvo?'))clearSave()" style="width:auto;max-width:280px;margin:0;">&#128465; Apagar dados salvos</button>
@@ -4490,6 +4538,7 @@
     const SAVE_KEY = 'pokemonTrainerSave_v1';
     const REMEMBER_KEY = 'pokemonTrainerRemember';
     let supabaseClient = null;
+    let supabaseInitPromise = null;
     let onlineUser = null;
     let saveTimer = null;
     let saveChain = Promise.resolve();
@@ -4501,9 +4550,44 @@
         SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY';
     }
 
+    function getAuthRedirectUrl() {
+      return `${window.location.origin}/`;
+    }
+
     function setAuthStatus(message) {
       const status = document.getElementById('authStatus');
       if (status) status.textContent = message;
+    }
+
+    function loadSupabaseLibrary() {
+      if (window.supabase?.createClient) return Promise.resolve(true);
+      const sources = [
+        'https://unpkg.com/@supabase/supabase-js@2',
+        'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
+      ];
+      return new Promise(resolve => {
+        let sourceIndex = 0;
+        const tryNextSource = () => {
+          if (window.supabase?.createClient) { resolve(true); return; }
+          if (sourceIndex >= sources.length) { resolve(false); return; }
+          const script = document.createElement('script');
+          script.src = sources[sourceIndex++];
+          script.async = true;
+          script.onload = () => window.supabase?.createClient ? resolve(true) : tryNextSource();
+          script.onerror = tryNextSource;
+          document.head.appendChild(script);
+        };
+        tryNextSource();
+      });
+    }
+
+    async function ensureSupabaseClient() {
+      if (supabaseClient) return true;
+      if (!supabaseInitPromise) supabaseInitPromise = initializeOnlineGame();
+      try { await supabaseInitPromise; } catch (error) { console.error('[Auth] Falha ao iniciar Supabase:', error); }
+      if (supabaseClient) return true;
+      showToast('NÃ£o foi possÃ­vel conectar ao serviÃ§o de login. Verifique sua conexÃ£o e recarregue a pÃ¡gina.', 'error');
+      return false;
     }
 
     async function enterAuthenticatedGame() {
@@ -4571,7 +4655,7 @@
         setError('loginEmail', 'loginEmailError', !isValidEmail(email));
         setError('loginPassword', 'loginPasswordError', !password);
         if (!isValidEmail(email) || !password) return;
-        if (!supabaseClient) { showToast('Configure o projeto Supabase antes de entrar.', 'error'); return; }
+        if (!await ensureSupabaseClient()) return;
 
         try {
           const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -4600,13 +4684,13 @@
         setError('regPassword', 'regPasswordError', password.length < 8);
         setError('regConfirm', 'regConfirmError', password !== confirmPassword);
         if (name.length < 2 || !isValidEmail(email) || password.length < 8 || password !== confirmPassword) return;
-        if (!supabaseClient) { showToast('Configure o projeto Supabase antes de criar sua conta.', 'error'); return; }
+        if (!await ensureSupabaseClient()) return;
 
         try {
           const { data, error } = await supabaseClient.auth.signUp({
             email,
             password,
-            options: { data: { full_name: name }, emailRedirectTo: window.location.href.split('#')[0] }
+            options: { data: { full_name: name }, emailRedirectTo: getAuthRedirectUrl() }
           });
           if (error) throw error;
           if (!data.session) {
@@ -4623,11 +4707,11 @@
 
       document.querySelectorAll('.social-btn').forEach(button => {
         button.addEventListener('click', async () => {
-          if (!supabaseClient) { showToast('Configure o projeto Supabase antes de entrar.', 'error'); return; }
+          if (!await ensureSupabaseClient()) return;
           try {
             const { error } = await supabaseClient.auth.signInWithOAuth({
               provider: button.dataset.provider,
-              options: { redirectTo: window.location.href.split('#')[0] }
+              options: { redirectTo: getAuthRedirectUrl() }
             });
             if (error) throw error;
           } catch (error) {
@@ -4643,10 +4727,10 @@
           setError('loginEmail', 'loginEmailError', true, 'Informe seu e-mail para recuperar a senha');
           return;
         }
-        if (!supabaseClient) { showToast('Configure o projeto Supabase antes de recuperar a senha.', 'error'); return; }
+        if (!await ensureSupabaseClient()) return;
         try {
           const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.href.split('#')[0]
+            redirectTo: getAuthRedirectUrl()
           });
           if (error) throw error;
           showToast('Se a conta existir, você receberá um link para redefinir a senha.');
@@ -6294,12 +6378,19 @@
       }
       const search = normalizeMarketText(document.getElementById('marketSearch')?.value?.trim());
       const selectedCategory = categoryFilter.value;
+      const selectedCurrencies = [
+        document.getElementById('marketFilterBP')?.checked && 'bp',
+        document.getElementById('marketFilterPokeCoins')?.checked && 'pokecoins',
+        document.getElementById('marketFilterMoney')?.checked && 'money'
+      ].filter(Boolean);
       const parcelAvailable = getMissionState('parcel') === 'active' && getItemQty('parcelbox') === 0;
-      const parcelMatches = parcelAvailable && (!selectedCategory || selectedCategory === 'other') &&
+      const parcelMatches = parcelAvailable && selectedCurrencies.length === 0 && (!selectedCategory || selectedCategory === 'other') &&
         (!search || normalizeMarketText('Caixa da Parcel Encomenda do Professor Carvalho').includes(search));
       const items = SHOP_ITEMS.filter(item => {
         const category = item.category || marketCategoryByKey.get(item.key) || 'other';
+        const currency = marketItemUsesBattlePoints(item) ? 'bp' : marketItemUsesPokeCoins(item) ? 'pokecoins' : 'money';
         return (!selectedCategory || selectedCategory === category) &&
+          (!selectedCurrencies.length || selectedCurrencies.includes(currency)) &&
           (!search || normalizeMarketText(`${item.name} ${item.desc} ${item.key}`).includes(search));
       });
       [...grid.querySelectorAll('.market-filtered-card')].forEach(card => card.remove());
@@ -6546,6 +6637,9 @@
     document.getElementById('shopQuantityInput').addEventListener('input', updateShopQuantityTotal);
     document.getElementById('marketSearch').addEventListener('input', renderMarketGrid);
     document.getElementById('marketCategoryFilter').addEventListener('change', renderMarketGrid);
+    ['marketFilterBP','marketFilterPokeCoins','marketFilterMoney'].forEach(id => {
+      document.getElementById(id).addEventListener('change', renderMarketGrid);
+    });
     document.getElementById('shopQuantityCancel').addEventListener('click', () => {
       document.getElementById('shopQuantityDialog').close();
       pendingShopItemId = null;
@@ -6599,14 +6693,16 @@
         .maybeSingle();
       if (error) throw error;
       if (!data) return null;
-      if (!data.player || !Array.isArray(data.player.party) || !data.player.party.length) {
+      const hasStoredPokemon = Array.isArray(data.player?.pc?.boxes) && data.player.pc.boxes.some(box => Array.isArray(box) && box.some(Boolean));
+      if (!data.player || !Array.isArray(data.player.party) || (!data.player.party.length && !hasStoredPokemon)) {
         throw new Error('O save online está incompleto e não pode ser carregado.');
       }
       return data.player;
     }
 
     function restorePlayer(saved) {
-      if (!saved || !Array.isArray(saved.party) || !saved.party.length) {
+      const hasStoredPokemon = Array.isArray(saved?.pc?.boxes) && saved.pc.boxes.some(box => Array.isArray(box) && box.some(Boolean));
+      if (!saved || !Array.isArray(saved.party) || (!saved.party.length && !hasStoredPokemon)) {
         throw new Error('O save não contém uma equipe válida.');
       }
       const reopenLegacyOakIntro = !!(
@@ -6700,7 +6796,7 @@
         );
         if (found >= 0) idx = found;
       }
-      player.poke = player.party[idx];
+      player.poke = player.party[idx] || null;
       if (!player.starter && player.party && player.party[0]) {
         player.starter = { name: player.party[0].name, id: player.party[0].id };
       }
@@ -6752,17 +6848,23 @@
     }
 
     async function initializeOnlineGame() {
-      if (!window.supabase || !window.supabase.createClient) {
-        setAuthStatus('Não foi possível carregar a biblioteca de conexão.');
-        showToast('Serviço online indisponível: biblioteca Supabase não carregou.', 'error');
-        return;
-      }
       if (!isSupabaseConfigured()) {
         setAuthStatus('Configure a URL e a chave pública do Supabase para ativar o jogo online.');
-        return;
+        return false;
       }
-
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      setAuthStatus('Conectando ao serviço de contas...');
+      const libraryLoaded=await loadSupabaseLibrary();
+      if (!libraryLoaded) {
+        setAuthStatus('A biblioteca de login não carregou. Verifique a conexão com a internet e recarregue esta página.');
+        return false;
+      }
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } catch (error) {
+        console.error('[Auth] Falha ao criar cliente Supabase:', error);
+        setAuthStatus('Não foi possível iniciar o serviço de contas. Atualize a página e tente novamente.');
+        return false;
+      }
       setAuthStatus('Contas e progresso sincronizados online.');
       supabaseClient.auth.onAuthStateChange(event => {
         if (event === 'PASSWORD_RECOVERY') {
@@ -6790,9 +6892,10 @@
         console.error('[Auth] Falha ao restaurar sessão:', error);
         showToast('Não foi possível restaurar a sessão online: ' + error.message, 'error');
       }
+      return true;
     }
 
-    initializeOnlineGame();
+    supabaseInitPromise = initializeOnlineGame();
 
     async function migrateLegacySaveIfRequested() {
       try {
@@ -7353,7 +7456,7 @@
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Poções</span><span style="font-weight:600;">${player.potions}</span></div>
       `;
 
-      document.getElementById('pokemonTeam').innerHTML = `
+      document.getElementById('pokemonTeam').innerHTML = player.poke ? `
         <div class="game-card">
           <div class="game-card-header" style="background:linear-gradient(135deg,#1a1a2e,#0d0d18);">
             <img src="${SPRITE(player.poke.id)}" style="width:80px;height:80px;object-fit:contain;" onerror="this.src='${SPRITE_FB(player.poke.id)}'" />
@@ -7363,7 +7466,11 @@
             <div class="game-card-desc">Nv. ${player.poke.level} · HP ${player.poke.hp}/${player.poke.maxHp}</div>
             <span class="type-badge ${player.poke.typeClass}">${player.poke.type}</span>
           </div>
-        </div>`;
+        </div>` : `
+        <div class="game-card"><div class="game-card-body">
+          <div class="game-card-title">Equipe vazia</div>
+          <div class="game-card-desc">Retire um Pokémon do PC para continuar sua jornada e participar de batalhas.</div>
+        </div></div>`;
 
       document.getElementById('dungeonsGrid').innerHTML = DUNGEONS.map(dungeonCardHTML).join('');
 
@@ -8368,6 +8475,10 @@
     let dungeonBattleStarting = false;
     async function startDungeonBattle(dungeonName) {
       if (dungeonBattleStarting || battle) return;
+      if (!player.poke) {
+        showToast('Retire um Pokémon do PC antes de iniciar uma batalha.', 'error');
+        return;
+      }
       if (player.poke.hp <= 0) {
         const healthy = player.party.find(p => p.hp > 0);
         if (healthy) {
@@ -10201,6 +10312,10 @@
     function refreshPartyUI() {
       const el = document.getElementById('pokemonTeam');
       if (!el) return;
+      if (!player.party.length) {
+        el.innerHTML = `<div class="game-card"><div class="game-card-body"><div class="game-card-title">Equipe vazia</div><div class="game-card-desc">Retire um Pokémon do PC para continuar sua jornada e participar de batalhas.</div></div></div>`;
+        return;
+      }
       el.innerHTML = player.party.map((p, idx) => `
         <div class="game-card" onclick="openSummary(${idx})" style="${p === player.poke ? 'border-color:var(--primary);' : ''}">
           <div class="game-card-header" style="background:linear-gradient(135deg,#1a1a2e,#0d0d18);">
@@ -10394,14 +10509,10 @@
 
     function depositFromParty(partyIndex) {
       ensurePC();
-      if (player.party.length <= 1) {
-        showToast('Você precisa manter pelo menos 1 Pokémon no time!', 'error');
-        return;
-      }
       const poke = player.party[partyIndex];
       if (!poke) return;
-      if (poke.hp <= 0) {
-        showToast('Cure este Pokémon antes de depositar.', 'error');
+      if (poke.hp <= 0 || poke.status === 'fainted') {
+        showToast('Pokémon desmaiado não pode ser depositado.', 'error');
         return;
       }
       const boxNum = depositToPC(poke);
@@ -10411,7 +10522,7 @@
       }
       const wasActive = player.poke === poke;
       player.party.splice(partyIndex, 1);
-      if (wasActive) player.poke = player.party[0];
+      if (wasActive) player.poke = player.party[0] || null;
       saveGame();
       showToast(poke.name + ' depositado na Box ' + (boxNum + 1));
       renderPC();
@@ -10624,6 +10735,12 @@
     let socialTimer = null;
     let socialBusy = false;
     let socialLastHeartbeat = 0;
+    let socialChatFriend = null;
+    let socialChatBusy = false;
+    let socialChatVersion = 0;
+    let socialChatLastRendered = '';
+    let socialChatTimer = null;
+    let socialProfilesById = new Map();
     const socialKnownStatuses = new Map();
 
     function socialEnsureTradeIds() {
@@ -10643,6 +10760,9 @@
       socialEnsureTradeIds();
       socialRefresh();
       if (!socialTimer) socialTimer = setInterval(socialRefresh, 15000);
+      if (!socialChatTimer) socialChatTimer = setInterval(() => {
+        if (socialChatFriend && document.getElementById('panel-profile')?.classList.contains('active')) socialLoadChat();
+      }, 5000);
     }
 
     async function socialRefresh() {
@@ -10671,6 +10791,7 @@
           profiles = result.data || [];
         }
         const profileById = new Map(profiles.map(profile=>[profile.user_id,profile]));
+        socialProfilesById = profileById;
         socialRenderFriends(friendIds.map(id=>profileById.get(id)).filter(Boolean));
         socialRenderInbox(requests.filter(request=>request.receiver_id===onlineUser.id && request.status==='pending'),profileById);
         for (const request of requests) {
@@ -10694,20 +10815,91 @@
     function socialRenderFriends(friends) {
       const root=document.getElementById('socialFriends');
       if (!root) return;
+      const count=document.getElementById('socialFriendCount');
+      if (count) count.textContent=String(friends.length);
       if (!friends.length) { root.innerHTML='<span style="color:var(--text-muted);font-size:.85rem;">Sua lista está vazia. Busque um treinador pelo nome.</span>'; return; }
       root.innerHTML=friends.map(friend=>{
-        const options=player.party.map((pokemon,index)=>`<option value="${escapeHTML(pokemon.tradeId||'')}">${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</option>`).join('');
+        const options=player.party.map(pokemon=>`<option value="${escapeHTML(pokemon.tradeId||'')}">${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</option>`).join('');
         const online=socialIsOnline(friend);
-        return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--input-bg);">
-          <div style="display:flex;align-items:center;gap:9px;"><span aria-label="${online?'Online':'Offline'}" title="${online?'Online':'Offline'}" style="width:10px;height:10px;border-radius:50%;background:${online?'#22c55e':'#64748b'};box-shadow:${online?'0 0 8px #22c55e':'none'}"></span><strong>${escapeHTML(friend.trainer_name)}</strong><small style="color:var(--text-muted);">${online?'Online':'Offline'}</small></div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;"><select id="social-trade-${friend.user_id}" aria-label="Pokémon para oferecer a ${escapeHTML(friend.trainer_name)}" style="width:auto;min-width:150px;padding:8px;">${options}</select><button type="button" class="btn btn-secondary" style="width:auto;margin:0;padding:8px 10px;" onclick="socialSendTrade('${friend.user_id}')">Trocar</button><button type="button" class="btn" style="width:auto;margin:0;padding:8px 10px;" onclick="socialChallenge('${friend.user_id}')">Chamar para batalhar</button></div>
+        return `<div class="social-friend-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--input-bg);">
+          <div style="display:flex;align-items:center;gap:9px;"><span aria-label="${online?'Online':'Offline'}" title="${online?'Online':'Offline'}" style="width:10px;height:10px;border-radius:50%;background:${online?'#22c55e':'#64748b'};box-shadow:${online?'0 0 8px #22c55e':'none'}"></span><span><strong>${escapeHTML(friend.trainer_name)}</strong><small style="display:block;color:var(--text-muted);margin-top:2px;">${online?'Online agora':'Offline'}</small></span></div>
+          <div class="social-friend-actions"><button type="button" class="btn btn-secondary" style="width:auto;margin:0;padding:8px 10px;" onclick="socialOpenChat('${friend.user_id}')">Conversar</button><select id="social-trade-${friend.user_id}" aria-label="Pokémon para oferecer a ${escapeHTML(friend.trainer_name)}" style="width:auto;min-width:150px;padding:8px;">${options}</select><button type="button" class="btn btn-secondary" style="width:auto;margin:0;padding:8px 10px;" onclick="socialSendTrade('${friend.user_id}')">Trocar</button><button type="button" class="btn" style="width:auto;margin:0;padding:8px 10px;" onclick="socialChallenge('${friend.user_id}')">Batalhar</button></div>
         </div>`;
       }).join('');
+    }
+
+    function socialOpenChat(target) {
+      const friend=socialProfilesById.get(target);
+      if (!friend) { showToast('NÃ£o foi possÃ­vel carregar esse amigo. Atualize a lista e tente novamente.','error'); return; }
+      socialChatFriend=friend;
+      socialChatVersion++;
+      socialChatLastRendered='';
+      const panel=document.getElementById('socialChat');
+      panel?.classList.add('open');
+      document.getElementById('socialChatName').textContent=friend.trainer_name;
+      document.getElementById('socialChatPresence').textContent=socialIsOnline(friend)?'Online agora Â· mensagens visÃ­veis apenas para vocÃªs dois.':'Offline Â· a mensagem aparecerÃ¡ quando voltar.';
+      document.getElementById('socialChatMessages').innerHTML='<div class="social-chat-empty">Carregando conversa...</div>';
+      socialLoadChat();
+      panel?.scrollIntoView({behavior:'smooth',block:'nearest'});
+      document.getElementById('socialChatInput')?.focus({preventScroll:true});
+    }
+
+    function socialCloseChat() {
+      socialChatFriend=null;
+      socialChatVersion++;
+      socialChatLastRendered='';
+      document.getElementById('socialChat')?.classList.remove('open');
+    }
+
+    async function socialLoadChat() {
+      if (socialChatBusy || !socialChatFriend || !onlineUser || !supabaseClient) return;
+      socialChatBusy=true;
+      const friend=socialChatFriend;
+      const version=socialChatVersion;
+      try {
+        const {data,error}=await supabaseClient.from('trainer_messages').select('id,sender_id,recipient_id,body,created_at')
+          .or(`and(sender_id.eq.${onlineUser.id},recipient_id.eq.${friend.user_id}),and(sender_id.eq.${friend.user_id},recipient_id.eq.${onlineUser.id})`)
+          .order('created_at',{ascending:false}).limit(100);
+        if (error) throw error;
+        if (version!==socialChatVersion || socialChatFriend?.user_id!==friend.user_id) return;
+        const messages=(data||[]).reverse();
+        const last=messages[messages.length-1];
+        const signature=`${friend.user_id}:${messages.length}:${last?.id||''}`;
+        if (signature===socialChatLastRendered) return;
+        socialChatLastRendered=signature;
+        const root=document.getElementById('socialChatMessages');
+        root.innerHTML=messages.length ? messages.map(message=>{
+          const sentAt=new Date(message.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+          return `<div class="social-message ${message.sender_id===onlineUser.id?'mine':''}">${escapeHTML(message.body)}<time>${escapeHTML(sentAt)}</time></div>`;
+        }).join('') : '<div class="social-chat-empty">Nenhuma mensagem ainda. Diga oi para comeÃ§ar!</div>';
+        root.scrollTop=root.scrollHeight;
+      } catch(error) {
+        if (version===socialChatVersion) document.getElementById('socialChatMessages').innerHTML=`<div class="social-chat-empty">${escapeHTML(error.message||'NÃ£o foi possÃ­vel carregar as mensagens.')}</div>`;
+      } finally { socialChatBusy=false; }
+    }
+
+    async function socialSendMessage() {
+      if (!socialChatFriend || !onlineUser || !supabaseClient) return;
+      const input=document.getElementById('socialChatInput');
+      const button=document.getElementById('socialChatSend');
+      const body=String(input?.value||'').trim();
+      if (!body) { input?.focus(); return; }
+      button.disabled=true;
+      try {
+        const {error}=await supabaseClient.from('trainer_messages').insert({sender_id:onlineUser.id,recipient_id:socialChatFriend.user_id,body});
+        if (error) throw error;
+        input.value='';
+        socialChatLastRendered='';
+        await socialLoadChat();
+      } catch(error) { showToast('NÃ£o foi possÃ­vel enviar a mensagem: '+error.message,'error'); }
+      finally { button.disabled=false; input?.focus(); }
     }
 
     function socialRenderInbox(requests,profileById) {
       const root=document.getElementById('socialInbox');
       if (!root) return;
+      const count=document.getElementById('socialRequestCount');
+      if (count) count.textContent=String(requests.length);
       if (!requests.length) { root.innerHTML='<span style="color:var(--text-muted);font-size:.85rem;">Nenhuma solicitação pendente.</span>'; return; }
       root.innerHTML=requests.map(request=>{
         const sender=profileById.get(request.sender_id)?.trainer_name || 'Treinador';

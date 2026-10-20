@@ -20,6 +20,8 @@ No Supabase, abra **Authentication → URL Configuration**:
 3. Se usar URLs de Preview, adicione o padrão da sua equipe Vercel, por exemplo `https://*-sua-equipe.vercel.app/**`.
 4. Salve e teste cadastro/confirmação de e-mail, login, recuperação de senha e carregamento do save.
 
+Este jogo navega entre telas internamente e usa a raiz do domínio para retornos de autenticação. Para o domínio de produção atual, mantenha `https://pokemontrainer-swart.vercel.app` como **Site URL** e permita `https://pokemontrainer-swart.vercel.app/` em **Redirect URLs**. Se trocar de domínio, atualize os dois valores.
+
 O jogo já passa a URL atual como destino dos fluxos de cadastro, login social e recuperação de senha. Por isso, cada domínio usado precisa estar permitido na lista de redirecionamentos do Supabase.
 
 ## Observações
@@ -28,5 +30,6 @@ O jogo já passa a URL atual como destino dos fluxos de cadastro, login social e
 
 - A chave `sb_publishable_...` no HTML é uma chave pública de cliente; não coloque uma chave `sb_secret_...` ou `service_role` no navegador.
 - O arquivo `supabase-schema.sql` documenta a tabela e as políticas RLS. Ele não configura o banco automaticamente; aplique-o no SQL Editor do Supabase se ainda não tiver sido aplicado.
+- O chat entre amigos precisa da tabela e das políticas do arquivo `social-chat-migration.sql`. Em projetos que já usam o Supabase, execute esse arquivo no SQL Editor antes de publicar a versão com chat.
 - O PvP amistoso usa a tabela `pvp_rooms`, as funções RPC e o Realtime definidos em `supabase-schema.sql`. Para ativá-lo ou atualizar o relógio de 45 segundos por jogada, aplique novamente o arquivo completo no SQL Editor do Supabase após publicar a versão com PvP.
 - Após publicar, faça um save, atualize a página e confirme que o progresso voltou.
