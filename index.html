@@ -5739,7 +5739,7 @@
       { id: 'calcium', key: 'calcium', name: 'Calcium', desc: 'Aumenta 10 EVs de Ataque Especial.', category: 'medicine', kind: 'ev', stat: 'specialAttack', amount: 10, price: 9800 },
       { id: 'zinc', key: 'zinc', name: 'Zinc', desc: 'Aumenta 10 EVs de Defesa Especial.', category: 'medicine', kind: 'ev', stat: 'specialDefense', amount: 10, price: 9800 },
       { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy', desc: 'Sobe um nível.', category: 'medicine', kind: 'level', price: 1 },
-      { id: 'exp-charm', key: 'exp_charm', name: 'Exp. Charm', desc: 'Consumível: aumenta em 50% a experiência recebida em batalhas por 1 hora.', category: 'medicine', kind: 'expCharm', price: 12000 }
+      { id: 'exp-charm', key: 'exp_charm', name: 'Exp. Charm', desc: 'Consumível: aumenta em 50% a experiência recebida em batalhas por 1 hora.', category: 'medicine', kind: 'expCharm', price: 10 }
     ];
     const EXTRA_SPECIAL_ITEMS = [
       { id: 'heal-powder', key: 'heal_powder', name: 'Heal Powder', desc: 'Cura qualquer problema de status.', category: 'medicine', kind: 'statusCure', price: 450 },
@@ -6030,7 +6030,7 @@
       return ['tm', 'battleBoost', 'guardSpec', 'direHit'].includes(item?.kind);
     }
     function marketItemUsesPokeCoins(item) {
-      return item?.key === 'rarecandy' || item?.id === 'rarecandy' || item?.id === 'rare-candy';
+      return ['rarecandy', 'exp_charm'].includes(item?.key) || item?.id === 'rarecandy' || item?.id === 'rare-candy';
     }
     function normalizeMarketText(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
