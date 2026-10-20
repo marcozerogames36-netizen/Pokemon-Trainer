@@ -1489,6 +1489,10 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#42351d,#201a10);"><img src="assets/gym-badges.png" alt="" style="width:154px;height:92px;object-fit:contain;" /></div>
               <div class="game-card-body"><div class="game-card-title">Ginásios</div><div class="game-card-desc">Desafie os líderes e conquiste insígnias.</div></div>
             </div>
+            <div class="game-card" id="eliteFourHomeCard" role="button" tabindex="0" onclick="switchPanel('elite-four')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('elite-four')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#4a3522,#211728);height:126px;"><img src="assets/elite-four-card.png" alt="Elite Four de Kanto" style="width:100%;height:126px;object-fit:contain;image-rendering:pixelated;" /></div>
+              <div class="game-card-body"><div class="game-card-title">Elite Four</div><div class="game-card-desc" id="eliteFourHomeDesc">Requer todas as 8 InsÃ­gnias de Kanto.</div></div>
+            </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('ss-anne')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('ss-anne')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#1d4960,#102b3a);"><img src="assets/ss-anne-ship-cutout.png" alt="Navio S.S. Anne" style="width:100%;height:92px;object-fit:contain;" /></div>
               <div class="game-card-body"><div class="game-card-title">S.S. Anne</div><div class="game-card-desc">Desafie os treinadores do navio em ordem e abra caminho at&eacute; o rival.</div></div>
@@ -1571,6 +1575,13 @@
           <h2 class="panel-title">🏅 Ginásios de Kanto</h2>
           <p class="panel-desc">Desafie os Líderes de Ginásio e conquiste as 8 Insígnias!</p>
           <div class="cards-grid" id="gymsGrid"></div>
+        </div>
+        <div class="panel" id="panel-elite-four">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
+          <h2 class="panel-title">&#x1F451; Elite Four de Kanto</h2>
+          <p class="panel-desc">Derrote os quatro membros da Elite Four e o Campe&atilde;o. Conquiste todas as 8 Ins&iacute;gnias de Kanto para entrar.</p>
+          <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Desafiantes derrotados: <strong id="eliteFourProgress">0/5</strong> &middot; Ins&iacute;gnias: <strong id="eliteFourBadges">0/8</strong></div>
+          <div class="cards-grid" id="eliteFourGrid"></div>
         </div>
         <div class="panel" id="panel-ss-anne">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
@@ -4607,6 +4618,7 @@
       document.getElementById('dashBadges').textContent = `${player.badges}/8`;
       document.getElementById('statBadges').textContent = `${player.badges} / 8`;
       document.getElementById('statMissions').textContent = `${player.missionsDone} / 12`;
+      updateEliteFourHomeCard();
     }
 
 
@@ -6906,6 +6918,45 @@
       ]}
     ];
 
+    const ELITE_FOUR_TRAINERS = [
+      {id:'lorelei',name:'Lorelei',className:'Elite Four',portrait:'lorelei',moneyReward:12000,team:[
+        {name:'Dewgong',id:87,hp:166,level:52,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]},
+        {name:'Cloyster',id:91,hp:155,level:51,moves:[{name:'Aurora Beam',power:65,type:'Gelo'},{name:'Spike Cannon',power:20,type:'Normal'}]},
+        {name:'Slowbro',id:80,hp:174,level:52,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Psychic',power:90,type:'Psiquico'}]},
+        {name:'Jynx',id:124,hp:160,level:54,moves:[{name:'Psychic',power:90,type:'Psiquico'},{name:'Ice Punch',power:75,type:'Gelo'}]},
+        {name:'Lapras',id:131,hp:206,level:54,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]}
+      ]},
+      {id:'bruno_elite',name:'Bruno',className:'Elite Four',portrait:'bruno',moneyReward:13000,team:[
+        {name:'Onix',id:95,hp:164,level:53,moves:[{name:'Rock Slide',power:75,type:'Pedra'},{name:'Dig',power:80,type:'Terra'}]},
+        {name:'Hitmonchan',id:107,hp:172,level:55,moves:[{name:'Brick Break',power:75,type:'Lutador'},{name:'Thunder Punch',power:75,type:'Eletrico'}]},
+        {name:'Hitmonlee',id:106,hp:170,level:55,moves:[{name:'Brick Break',power:75,type:'Lutador'},{name:'Blaze Kick',power:85,type:'Fogo'}]},
+        {name:'Onix',id:95,hp:176,level:56,moves:[{name:'Rock Slide',power:75,type:'Pedra'},{name:'Earthquake',power:100,type:'Terra'}]},
+        {name:'Machamp',id:68,hp:194,level:58,moves:[{name:'Cross Chop',power:100,type:'Lutador'},{name:'Rock Tomb',power:60,type:'Pedra'}]}
+      ]},
+      {id:'agatha',name:'Agatha',className:'Elite Four',portrait:'agatha',moneyReward:14000,team:[
+        {name:'Gengar',id:94,hp:168,level:54,moves:[{name:'Shadow Ball',power:80,type:'Fantasma'},{name:'Sludge Bomb',power:90,type:'Veneno'}]},
+        {name:'Golbat',id:42,hp:174,level:54,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Bite',power:60,type:'Sombrio'}]},
+        {name:'Haunter',id:93,hp:166,level:53,moves:[{name:'Shadow Ball',power:80,type:'Fantasma'},{name:'Sludge Bomb',power:90,type:'Veneno'}]},
+        {name:'Arbok',id:24,hp:182,level:56,moves:[{name:'Crunch',power:80,type:'Sombrio'},{name:'Poison Jab',power:80,type:'Veneno'}]},
+        {name:'Gengar',id:94,hp:190,level:58,moves:[{name:'Shadow Ball',power:80,type:'Fantasma'},{name:'Sludge Bomb',power:90,type:'Veneno'}]}
+      ]},
+      {id:'lance',name:'Lance',className:'Elite Four',portrait:'lance',moneyReward:15000,team:[
+        {name:'Gyarados',id:130,hp:194,level:56,moves:[{name:'Waterfall',power:80,type:'Agua'},{name:'Bite',power:60,type:'Sombrio'}]},
+        {name:'Dragonair',id:148,hp:182,level:54,moves:[{name:'Dragon Claw',power:80,type:'Dragao'},{name:'Thunderbolt',power:90,type:'Eletrico'}]},
+        {name:'Dragonair',id:148,hp:188,level:54,moves:[{name:'Dragon Claw',power:80,type:'Dragao'},{name:'Ice Beam',power:90,type:'Gelo'}]},
+        {name:'Aerodactyl',id:142,hp:204,level:58,moves:[{name:'Rock Slide',power:75,type:'Pedra'},{name:'Wing Attack',power:60,type:'Voador'}]},
+        {name:'Dragonite',id:149,hp:230,level:60,moves:[{name:'Outrage',power:120,type:'Dragao'},{name:'Wing Attack',power:60,type:'Voador'}]}
+      ]},
+      {id:'champion_blue',name:'Blue',className:'CampeÃ£o de Kanto',portrait:'blue',moneyReward:20000,team:[
+        {name:'Pidgeot',id:18,hp:225,level:61,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}]},
+        {name:'Alakazam',id:65,hp:212,level:59,moves:[{name:'Psychic',power:90,type:'Psiquico'},{name:'Shadow Ball',power:80,type:'Fantasma'}]},
+        {name:'Rhydon',id:112,hp:244,level:59,moves:[{name:'Earthquake',power:100,type:'Terra'},{name:'Rock Slide',power:75,type:'Pedra'}]},
+        {name:'Arcanine',id:59,hp:230,level:61,moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Crunch',power:80,type:'Sombrio'}]},
+        {name:'Exeggutor',id:103,hp:246,level:61,moves:[{name:'Psychic',power:90,type:'Psiquico'},{name:'Energy Ball',power:90,type:'Planta'}]},
+        {name:'Blastoise',id:9,hp:270,level:63,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]}
+      ]}
+    ];
+
     function renderGyms() {
       const grid = document.getElementById('gymsGrid');
       if (!grid) return;
@@ -6969,6 +7020,56 @@
         return `<div class="game-card" role="button" tabindex="0" onclick="${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}" style="${unlocked?'':'opacity:.62;'}">
           <div class="game-card-header" style="background:linear-gradient(135deg,#1d4960,#102b3a);height:100px"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png" alt="${escapeHTML(trainer.name)}" style="width:82px;height:82px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:2.6rem">&#x1F6A2;</span></div>
           <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} &middot; ${escapeHTML(trainer.className)}</div><div class="game-card-desc">${trainer.team.length} Pok&eacute;mon &middot; n&iacute;veis ${trainer.team[0].level}-${trainer.team[trainer.team.length-1].level}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':unlocked?'status-available':'status-locked'}">${badge}</span><span class="reward">${trainer.moneyReward.toLocaleString('pt-BR')} Pok&eacute;dollar</span></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    function getKantoBadgeCount() {
+      const badges = Array.isArray(player.badgesList) ? player.badgesList : [];
+      return GYMS.filter(gym => badges.includes(gym.badge)).length;
+    }
+
+    function hasAllKantoBadges() {
+      return getKantoBadgeCount() === GYMS.length;
+    }
+
+    function updateEliteFourHomeCard() {
+      const card = document.getElementById('eliteFourHomeCard');
+      const description = document.getElementById('eliteFourHomeDesc');
+      if (!card || !description) return;
+      const unlocked = hasAllKantoBadges();
+      card.style.opacity = unlocked ? '1' : '0.62';
+      card.setAttribute('aria-disabled', String(!unlocked));
+      description.textContent = unlocked
+        ? 'Desafie Lorelei, Bruno, Agatha, Lance e o CampeÃ£o.'
+        : `InsÃ­gnias de Kanto: ${getKantoBadgeCount()}/8. Conquiste todas para entrar.`;
+    }
+
+    function getEliteFourProgress() {
+      const defeated = Array.isArray(player.eliteFourDefeated) ? player.eliteFourDefeated : [];
+      let progress = 0;
+      while (progress < ELITE_FOUR_TRAINERS.length && defeated.includes(ELITE_FOUR_TRAINERS[progress].id)) progress++;
+      return progress;
+    }
+
+    function renderEliteFour() {
+      const grid = document.getElementById('eliteFourGrid');
+      if (!grid) return;
+      if (!Array.isArray(player.eliteFourDefeated)) player.eliteFourDefeated = [];
+      const progress = getEliteFourProgress();
+      document.getElementById('eliteFourProgress').textContent = `${progress}/${ELITE_FOUR_TRAINERS.length}`;
+      document.getElementById('eliteFourBadges').textContent = `${getKantoBadgeCount()}/8`;
+      grid.innerHTML = ELITE_FOUR_TRAINERS.map((trainer,index) => {
+        const done = index < progress;
+        const unlocked = index === progress;
+        const action = unlocked
+          ? `startEliteFourBattle('${trainer.id}')`
+          : `showToast('${done ? 'Este desafiante jÃ¡ foi derrotado.' : 'Derrote o desafiante anterior para avanÃ§ar.'}','${done ? 'info' : 'error'}')`;
+        const badge = done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
+        const icon = ['&#x2744;','&#x1F94B;','&#x1F319;','&#x1F409;','&#x1F3C6;'][index];
+        return `<div class="game-card" role="button" tabindex="0" onclick="${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}" style="${unlocked?'':'opacity:.62;'}">
+          <div class="game-card-header" style="background:linear-gradient(135deg,#4a3522,#211728);height:110px"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png" alt="${escapeHTML(trainer.name)}" style="width:86px;height:86px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:2.8rem">${icon}</span></div>
+          <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} &middot; ${escapeHTML(trainer.className)}</div><div class="game-card-desc">Equipe com ${trainer.team.length} Pok&eacute;mon &middot; n&iacute;veis ${trainer.team[0].level}-${trainer.team[trainer.team.length-1].level}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':unlocked?'status-available':'status-locked'}">${badge}</span><span class="reward">${trainer.moneyReward.toLocaleString('pt-BR')} Pok&eacute;dollar</span></div></div>
         </div>`;
       }).join('');
     }
@@ -7197,6 +7298,7 @@
     function switchPanel(id) {
       if (id === 'item-catalog' && !isAdminAccount()) { showToast('Cat\u00e1logo de Itens dispon\u00edvel apenas para o administrador.', 'error'); id = 'home'; }
       if (id === 'admin' && !isAdminAccount()) { showToast('Acesso restrito ao administrador.', 'error'); id = 'home'; }
+      if (id === 'elite-four' && !hasAllKantoBadges()) { showToast(`Conquiste todas as 8 Ins\u00edgnias de Kanto para desafiar a Elite Four (${getKantoBadgeCount()}/8).`, 'error'); id = 'home'; }
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       const panel = document.getElementById('panel-'+id);
       if (panel) panel.classList.add('active');
@@ -7217,6 +7319,7 @@
       if (id === 'gyms') renderGyms();
       if (id === 'battle-tower') renderBattleTower();
       if (id === 'ss-anne') renderSSAnne();
+      if (id === 'elite-four') renderEliteFour();
       if (id === 'missions') renderMissions();
       if (id === 'pc') renderPC();
       if (id === 'pvp') renderPvpPanel();
@@ -8895,7 +8998,7 @@
 
     function endBattle(won, captured, capturedName) {
       battle.busy = true;
-      if (won && (battle.isGym || battle.isSSAnne) && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
+      if (won && (battle.isGym || battle.isSSAnne || battle.isEliteFour) && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
         const shares = getBattleExperienceShares(getBattleExperience(battle.enemy, true), player.poke);
         battle.experienceShares = battle.experienceShares || new Map();
         for (const [pokemon, amount] of shares) {
@@ -8935,6 +9038,16 @@
           return;
         }
         endSSAnneVictory();
+        return;
+      }
+      if (won && battle.isEliteFour && battle.enemy.currentHp <= 0) {
+        if (battle.eliteIndexPokemon < battle.eliteTeam.length - 1) {
+          result.classList.remove('show');
+          document.getElementById('battleMenu').style.display = 'grid';
+          setTimeout(nextEliteFourPokemon, 400);
+          return;
+        }
+        endEliteFourVictory();
         return;
       }
       if (won && battle.isTower && battle.enemy.currentHp <= 0) {
@@ -9097,7 +9210,7 @@
         .map(item => {
           const qty = getItemQty(item.key);
           if (qty <= 0) return '';
-          if (item.kind === 'ball' && (battle.isGym || battle.isTower || battle.isSSAnne)) return '';
+          if (item.kind === 'ball' && (battle.isGym || battle.isTower || battle.isSSAnne || battle.isEliteFour)) return '';
           if (item.kind === 'ball' && battle.dungeon === 'Zona do Safari' && !['safari_ball', 'premier_ball', 'masterball'].includes(item.key)) return '';
           if (['battleBoost', 'direHit', 'guardSpec'].includes(item.kind)) {
             if (!player.poke || player.poke.hp <= 0) return '';
@@ -9179,7 +9292,7 @@
 
     async function tryCapture(ballKey) {
       if (!battle || battle.busy) return;
-      if (battle.isGym || battle.isTower || battle.isSSAnne) {
+      if (battle.isGym || battle.isTower || battle.isSSAnne || battle.isEliteFour) {
         setLog(battle.isTower ? 'Não dá para capturar o Pokémon de um treinador!' : 'Não dá para capturar o Pokémon de um Líder de Ginásio!');
         backToMenu();
         return;
@@ -9380,6 +9493,95 @@
       saveGame();
     }
 
+    function startEliteFourBattle(trainerId) {
+      if (!hasAllKantoBadges()) {
+        showToast(`Conquiste todas as 8 Ins\u00edgnias de Kanto para desafiar a Elite Four (${getKantoBadgeCount()}/8).`, 'error');
+        return;
+      }
+      const index = ELITE_FOUR_TRAINERS.findIndex(entry => entry.id === trainerId);
+      const trainer = ELITE_FOUR_TRAINERS[index];
+      if (!trainer || battle?.busy) return;
+      if (index !== getEliteFourProgress()) {
+        showToast(index < getEliteFourProgress() ? 'Este desafiante j\u00e1 foi derrotado.' : 'Derrote o desafiante anterior para avan\u00e7ar.', 'error');
+        return;
+      }
+      const eligibleTeam = player.party.filter(pokemon => pokemon && pokemon.hp > 0);
+      if (!eligibleTeam.length) {
+        showToast('Sua equipe precisa estar saud\u00e1vel para desafiar a Elite Four.', 'error');
+        return;
+      }
+      if (!player.poke || player.poke.hp <= 0) player.poke = eligibleTeam[0];
+      battle = {
+        isEliteFour:true, eliteTrainer:trainer,
+        eliteTeam:trainer.team.map(pokemon => {
+          const scaledHp=getLevelScaledHp(pokemon.hp,pokemon.level);
+          return {...pokemon,hp:scaledHp,maxHp:scaledHp,currentHp:scaledHp};
+        }), eliteIndexPokemon:0, enemy:null,
+        playerHp:player.poke.hp,playerMaxHp:player.poke.maxHp,
+        turn:'player',busy:false,playerStatStages:{},enemyStatStages:{},playerCritStage:0,
+        playerAccuracyStage:0,guardSpecTurns:0,playerScreens:{},enemyScreens:{},playerHazards:[],enemyHazards:[]
+      };
+      battle.enemy=battle.eliteTeam[0];
+      setupBattleUI(`${trainer.className} ${trainer.name} te desafiou!`);
+      applyBattleBackground('gym');
+      showBattleIntro(player.poke.name,trainer.name,'Elite Four de Kanto',() => {
+        document.getElementById('battleOverlay').classList.add('active');
+        syncMuteButton(); SFX.unlock(); playBattleBgm();
+      });
+    }
+
+    function nextEliteFourPokemon() {
+      battle.eliteIndexPokemon++;
+      battle.enemy=battle.eliteTeam[battle.eliteIndexPokemon];
+      battle.experienceAwarded=false;
+      battle.busy=false;
+      battle.turn='player';
+      setupBattleUI(`${battle.eliteTrainer.name} enviou ${getPokemonDisplayName(battle.enemy)}!`);
+    }
+
+    function endEliteFourVictory() {
+      const trainer=battle.eliteTrainer;
+      const xp=battle.totalExperience||0;
+      const effortMessage=formatEffortGain(battle.totalEffort);
+      const shares=battle.experienceShares||new Map([[player.poke,xp]]);
+      player.poke.hp=Math.max(0,Math.min(player.poke.maxHp,battle.playerHp));
+      const levelsGained=awardPokemonExperience(player.poke,shares.get(player.poke)||0);
+      let sharedLevels=0;
+      const shared=[];
+      for(const [pokemon,amount] of shares){
+        if(pokemon===player.poke||amount<=0) continue;
+        sharedLevels+=awardPokemonExperience(pokemon,amount);
+        shared.push(`${pokemon.name}: +${amount} XP`);
+      }
+      const money=Math.floor(trainer.moneyReward*(player.poke?.heldItem==='amulet_coin'?2:1));
+      player.money+=money;
+      if(!Array.isArray(player.eliteFourDefeated)) player.eliteFourDefeated=[];
+      if(!player.eliteFourDefeated.includes(trainer.id)) player.eliteFourDefeated.push(trainer.id);
+      const evolvedReady=levelsGained>0&&canEvolve(player.poke);
+      updatePlayerExperienceBar();
+      if(levelsGained>0||sharedLevels>0) SFX.levelUp();
+      document.getElementById('battleMenu').style.display='none';
+      document.getElementById('movesMenu').style.display='none';
+      const bag=document.getElementById('bagMenu'); if(bag) bag.style.display='none';
+      document.getElementById('battleResult').classList.add('show');
+      document.getElementById('resultTitle').textContent='Vit\u00f3ria na Elite Four!';
+      document.getElementById('resultDesc').textContent=`Voc\u00ea derrotou ${trainer.className} ${trainer.name} e ${trainer.team.length} Pok\u00e9mon!`;
+      const rows=[
+        `<div class="reward-row reward-money"><span class="reward-label">Pok\u00e9dollar</span><strong class="reward-value">+ \u20bd ${money.toLocaleString('pt-BR')}</strong></div>`,
+        `<div class="reward-row reward-xp"><span class="reward-label">Experi\u00eancia</span><strong class="reward-value">+ ${xp} XP</strong></div>`
+      ];
+      if(levelsGained) rows.push(`<div class="reward-highlight">${player.poke.name} subiu ${levelsGained} n\u00edvel(is), chegando ao Nv. ${player.poke.level}!</div>`);
+      if(effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
+      if(shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
+      document.getElementById('resultRewards').innerHTML=rows.join('');
+      if(evolvedReady) battle._pendingEvo=player.poke;
+      updateStatsUI();
+      renderEliteFour();
+      SFX.victory();
+      onMissionEvent('battle_win','Elite Four');
+      saveGame();
+    }
+
     function startGymBattle(gymIndex) {
       const gym = GYMS[gymIndex];
       if (!gym) return;
@@ -9441,8 +9643,8 @@
       ensurePokemonGender(player.poke);
       ensurePokemonTraits(e);
       ensurePokemonTraits(player.poke);
-      document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : battle.isSSAnne ? ` (${escapeHTML(battle.ssAnneTrainer.name)})` : '');
-      updateEnemyCaughtBadge(e.id, !battle.isGym && !battle.isTower && !battle.isSSAnne);
+      document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : battle.isSSAnne ? ` (${escapeHTML(battle.ssAnneTrainer.name)})` : battle.isEliteFour ? ` (${escapeHTML(battle.eliteTrainer.name)})` : '');
+      updateEnemyCaughtBadge(e.id, !battle.isGym && !battle.isTower && !battle.isSSAnne && !battle.isEliteFour);
       document.getElementById('enemyLevel').textContent = `Nv. ${e.level}`;
       {
         const types = getTypes(e.id);
