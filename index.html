@@ -276,6 +276,43 @@
       .pvp-room-controls .btn { flex:1 1 auto; }
     }
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .admin-panel-shell { max-width: 1120px; }
+    .admin-panel-hero {
+      display:flex; align-items:center; justify-content:space-between; gap:20px; padding:22px 24px;
+      margin:4px 0 22px; border:1px solid rgba(251,191,36,.22); border-radius:18px;
+      background:radial-gradient(ellipse at 90% 0%,rgba(245,158,11,.14),transparent 48%),linear-gradient(135deg,#19170f,#121219 70%);
+    }
+    .admin-panel-hero-copy { display:flex; align-items:center; gap:16px; }
+    .admin-panel-emblem { width:52px;height:52px;display:grid;place-items:center;flex:0 0 auto;border-radius:15px;background:rgba(245,158,11,.13);font-size:27px; }
+    .admin-panel-hero h2 { margin:0 0 5px;font-size:1.25rem; }
+    .admin-panel-hero p { color:var(--text-muted);font-size:.85rem;line-height:1.5; }
+    .admin-access-tag { padding:7px 11px;border:1px solid rgba(52,211,153,.28);border-radius:999px;background:rgba(52,211,153,.08);color:#6ee7b7;font-size:.75rem;font-weight:700;white-space:nowrap; }
+    .admin-panel-grid { display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:18px;align-items:start; }
+    .admin-panel-card { min-width:0;padding:22px;border:1px solid var(--border);border-radius:17px;background:linear-gradient(155deg,#171720,#111117);box-shadow:0 14px 35px rgba(0,0,0,.18); }
+    .admin-step-heading { display:flex;align-items:flex-start;gap:12px;margin-bottom:18px; }
+    .admin-step-number { width:30px;height:30px;display:grid;place-items:center;flex:0 0 auto;border:1px solid rgba(167,139,250,.28);border-radius:10px;background:rgba(124,58,237,.13);color:#c4b5fd;font-size:.8rem;font-weight:800; }
+    .admin-step-heading h3 { font-size:.98rem;margin:1px 0 5px; }
+    .admin-step-heading p { color:var(--text-muted);font-size:.78rem;line-height:1.45; }
+    .admin-search-field { position:relative; }
+    .admin-search-field .form-group input { padding:12px 14px 12px 42px; }
+    .admin-search-icon { position:absolute;left:14px;top:39px;color:#858594;pointer-events:none; }
+    .admin-trainer-results { display:grid;gap:7px;margin:8px 0 14px;max-height:240px;overflow:auto; }
+    .admin-trainer-option { width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid var(--border);border-radius:11px;background:#111119;color:var(--text);font:inherit;text-align:left;cursor:pointer;transition:border-color .18s,background .18s; }
+    .admin-trainer-option:hover,.admin-trainer-option.selected { border-color:#8b5cf6;background:rgba(124,58,237,.12); }
+    .admin-trainer-option small { color:var(--text-muted);font-size:.72rem; }
+    .admin-search-message { padding:11px 12px;color:var(--text-muted);font-size:.8rem; }
+    .admin-selected-trainer { display:flex;align-items:center;gap:11px;padding:13px;margin-top:14px;border:1px dashed #383844;border-radius:12px;color:var(--text-muted);font-size:.83rem; }
+    .admin-selected-trainer.has-trainer { border-style:solid;border-color:rgba(52,211,153,.3);background:rgba(16,185,129,.06);color:var(--text); }
+    .admin-selected-avatar { width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#252532;color:#c4b5fd;font-weight:800; }
+    .admin-selected-caption { display:block;color:var(--text-muted);font-size:.7rem;margin-bottom:3px; }
+    .admin-resource-fields { margin-top:18px; }
+    .admin-amount-wrap { display:flex;align-items:center;gap:10px; }
+    .admin-amount-wrap .form-group { flex:1;margin-bottom:0; }
+    .admin-amount-hint { color:var(--text-muted);font-size:.75rem; }
+    .admin-grant-button { width:100%;margin-top:18px; }
+    .admin-grant-button:disabled { opacity:.6;cursor:wait; }
+    @media (max-width: 760px) { .admin-panel-grid { grid-template-columns:1fr; } }
+    @media (max-width: 520px) { .admin-panel-hero { align-items:flex-start;padding:17px; } .admin-access-tag { display:none; } .admin-panel-card { padding:17px; } }
     .game-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 16px;
       position: relative; overflow: visible;
@@ -1472,17 +1509,29 @@
         </div>
         <div class="panel" id="panel-admin">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <h2 class="panel-title">🛡️ Painel de administrador</h2>
-          <p class="panel-desc">Selecione um treinador e escolha o recurso para conceder.</p>
-          <div class="game-card" style="padding:20px;max-width:760px;">
-            <div class="form-group"><label for="adminTrainerSearch">Buscar treinador pelo nome</label><input id="adminTrainerSearch" type="search" maxlength="40" placeholder="Digite ao menos 2 caracteres" autocomplete="off" /></div>
-            <div id="adminTrainerResults" style="display:grid;gap:8px;margin:10px 0 18px;"></div>
-            <div id="adminSelectedTrainer" class="panel-desc">Nenhum treinador selecionado.</div>
-            <div class="form-group"><label for="adminGrantType">Recurso</label><select id="adminGrantType"><option value="item">Item</option><option value="pokemon">Pokémon da minha equipe</option><option value="money">Pokédollar</option><option value="pokeCoins">PokeCoin</option><option value="battlePoints">BP</option></select></div>
-            <div class="form-group" id="adminItemField"><label for="adminGrantItem">Item</label><select id="adminGrantItem"></select></div>
-            <div class="form-group" id="adminPokemonField" hidden><label for="adminGrantPokemon">Pokémon para copiar</label><select id="adminGrantPokemon"></select></div>
-            <div class="form-group" id="adminAmountField"><label for="adminGrantAmount">Quantidade</label><input id="adminGrantAmount" type="number" min="1" max="1000000" step="1" value="1" /></div>
-            <button type="button" class="btn" id="adminGrantButton" onclick="adminGrantSelectedAsset()">Enviar recurso</button>
+          <div class="admin-panel-shell">
+            <div class="admin-panel-hero">
+              <div class="admin-panel-hero-copy"><div class="admin-panel-emblem" aria-hidden="true">🛡️</div><div><h2>Painel de administrador</h2><p>Gerencie recompensas e envie recursos diretamente para o save de um treinador.</p></div></div>
+              <span class="admin-access-tag">Acesso administrativo</span>
+            </div>
+            <div class="admin-panel-grid">
+              <section class="admin-panel-card" aria-labelledby="adminStepTrainer">
+                <div class="admin-step-heading"><span class="admin-step-number">01</span><div><h3 id="adminStepTrainer">Escolha o treinador</h3><p>Busque pelo nome e confirme o destinatário antes de enviar.</p></div></div>
+                <div class="admin-search-field"><span class="admin-search-icon" aria-hidden="true">⌕</span><div class="form-group"><label for="adminTrainerSearch">Nome do treinador</label><input id="adminTrainerSearch" type="search" maxlength="40" placeholder="Digite pelo menos 2 caracteres" autocomplete="off" /></div></div>
+                <div id="adminTrainerResults" class="admin-trainer-results" aria-live="polite"><div class="admin-search-message">Os treinadores encontrados aparecerão aqui.</div></div>
+                <div id="adminSelectedTrainer" class="admin-selected-trainer"><span class="admin-selected-avatar">?</span><span>Selecione um treinador para continuar.</span></div>
+              </section>
+              <section class="admin-panel-card" aria-labelledby="adminStepResource">
+                <div class="admin-step-heading"><span class="admin-step-number">02</span><div><h3 id="adminStepResource">Configure o envio</h3><p>Selecione o recurso e a quantidade que será adicionada.</p></div></div>
+                <div class="admin-resource-fields">
+                  <div class="form-group"><label for="adminGrantType">Tipo de recurso</label><select id="adminGrantType"><option value="item">Item</option><option value="pokemon">Pokémon da minha equipe</option><option value="money">Pokédollar</option><option value="pokeCoins">PokeCoin</option><option value="battlePoints">BP</option></select></div>
+                  <div class="form-group" id="adminItemField"><label for="adminGrantItem">Item para enviar</label><select id="adminGrantItem"></select></div>
+                  <div class="form-group" id="adminPokemonField" hidden><label for="adminGrantPokemon">Pokémon para copiar</label><select id="adminGrantPokemon"></select></div>
+                  <div id="adminAmountField"><div class="admin-amount-wrap"><div class="form-group"><label for="adminGrantAmount">Quantidade</label><input id="adminGrantAmount" type="number" min="1" max="1000000" step="1" value="1" /></div><span class="admin-amount-hint" id="adminAmountHint">Máximo: 1.000.000</span></div></div>
+                  <button type="button" class="btn admin-grant-button" id="adminGrantButton" onclick="adminGrantSelectedAsset()">Enviar recurso</button>
+                </div>
+              </section>
+            </div>
           </div>
         </div>
         <div class="panel" id="panel-dungeons">
@@ -6704,6 +6753,7 @@
       pokemonSelect.innerHTML = player.party.map((pokemon, index) => `<option value="${index}">${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</option>`).join('');
       document.getElementById('adminTrainerSearch').oninput = adminSearchTrainers;
       document.getElementById('adminGrantType').onchange = adminUpdateGrantFields;
+      document.getElementById('adminGrantButton').disabled = !adminSelectedTrainer;
       adminUpdateGrantFields();
     }
     async function adminSearchTrainers() {
@@ -6711,31 +6761,47 @@
       const query = document.getElementById('adminTrainerSearch').value.trim();
       const resultsNode = document.getElementById('adminTrainerResults');
       const version = ++adminSearchVersion;
-      if (query.length < 2) { resultsNode.replaceChildren(); return; }
-      resultsNode.textContent = 'Buscando treinadores...';
+      adminSelectedTrainer = null;
+      const selectedNode = document.getElementById('adminSelectedTrainer');
+      selectedNode.classList.remove('has-trainer');
+      selectedNode.innerHTML = '<span class="admin-selected-avatar">?</span><span>Selecione um treinador para continuar.</span>';
+      document.getElementById('adminGrantButton').disabled = true;
+      if (query.length < 2) { resultsNode.innerHTML = '<div class="admin-search-message">Digite pelo menos 2 caracteres para buscar.</div>'; return; }
+      resultsNode.innerHTML = '<div class="admin-search-message">Buscando treinadores...</div>';
       const { data, error } = await supabaseClient.rpc('admin_search_trainers', { p_query: query });
       if (version !== adminSearchVersion) return;
-      if (error) { resultsNode.textContent = 'Falha na busca. Aplique a migração SQL do painel de administrador.'; return; }
+      if (error) { resultsNode.innerHTML = '<div class="admin-search-message">Falha na busca. Aplique a migração SQL do painel de administrador.</div>'; return; }
       resultsNode.replaceChildren();
       for (const trainer of data || []) {
         const button = document.createElement('button');
-        button.type = 'button'; button.className = 'btn btn-secondary';
-        button.textContent = `${trainer.trainer_name} · ${trainer.user_id.slice(0, 8)}…`;
+        button.type = 'button'; button.className = 'admin-trainer-option';
+        const name = document.createElement('span'); name.textContent = trainer.trainer_name;
+        const id = document.createElement('small'); id.textContent = `${trainer.user_id.slice(0, 8)}…`;
+        button.append(name, id);
         button.addEventListener('click', () => {
           adminSelectedTrainer = trainer;
-          document.getElementById('adminSelectedTrainer').textContent = `Selecionado: ${trainer.trainer_name}`;
+          const selectedNode = document.getElementById('adminSelectedTrainer');
+          selectedNode.classList.add('has-trainer');
+          selectedNode.replaceChildren();
+          const avatar = document.createElement('span'); avatar.className = 'admin-selected-avatar'; avatar.textContent = trainer.trainer_name.slice(0, 1).toUpperCase();
+          const details = document.createElement('span');
+          details.innerHTML = `<span class="admin-selected-caption">DESTINATÁRIO SELECIONADO</span><strong>${escapeHTML(trainer.trainer_name)}</strong>`;
+          selectedNode.append(avatar, details);
+          document.getElementById('adminGrantButton').disabled = false;
           [...resultsNode.children].forEach(child => child.classList.remove('selected'));
           button.classList.add('selected');
         });
         resultsNode.append(button);
       }
-      if (!resultsNode.children.length) resultsNode.textContent = 'Nenhum treinador encontrado com save.';
+      if (!resultsNode.children.length) resultsNode.innerHTML = '<div class="admin-search-message">Nenhum treinador encontrado com save.</div>';
     }
     function adminUpdateGrantFields() {
       const kind = document.getElementById('adminGrantType').value;
       document.getElementById('adminItemField').hidden = kind !== 'item';
       document.getElementById('adminPokemonField').hidden = kind !== 'pokemon';
       document.getElementById('adminAmountField').hidden = kind === 'pokemon';
+      const labels = { item: 'unidades', money: 'Pokédollars', pokeCoins: 'PokeCoins', battlePoints: 'BP' };
+      document.getElementById('adminAmountHint').textContent = `Até 1.000.000 ${labels[kind] || 'unidades'}`;
     }
     async function adminGrantSelectedAsset() {
       if (!isAdminAccount() || !adminSelectedTrainer || !supabaseClient) return;
@@ -6751,6 +6817,7 @@
           : { amount };
       const button = document.getElementById('adminGrantButton');
       button.disabled = true;
+      button.textContent = 'Enviando recurso...';
       try {
         const { data, error } = await supabaseClient.rpc('admin_grant_trainer_asset', {
           p_target: adminSelectedTrainer.user_id, p_kind: kind, p_payload: payload
@@ -6759,7 +6826,7 @@
         showToast(`${data?.trainer_name || adminSelectedTrainer.trainer_name} recebeu o recurso.`);
       } catch (error) {
         showToast('Falha ao enviar recurso: ' + error.message, 'error');
-      } finally { button.disabled = false; }
+      } finally { button.disabled = !adminSelectedTrainer; button.textContent = 'Enviar recurso'; }
     }
 
     function switchPanel(id) {
