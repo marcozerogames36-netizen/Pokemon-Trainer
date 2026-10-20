@@ -8545,6 +8545,7 @@
           const qty = getItemQty(item.key);
           if (qty <= 0) return '';
           if (item.kind === 'ball' && battle.isGym) return '';
+          if (item.kind === 'ball' && battle.dungeon === 'Zona do Safari' && !['safari_ball', 'premier_ball', 'masterball'].includes(item.key)) return '';
           if (['battleBoost', 'direHit', 'guardSpec'].includes(item.kind)) {
             if (!player.poke || player.poke.hp <= 0) return '';
             if (item.kind === 'battleBoost' && item.stat === 'accuracy' && (battle.playerAccuracyStage || 0) >= 6) return '';
