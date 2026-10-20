@@ -1501,7 +1501,7 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#2b3c25,#141d11);"><img src="assets/poke-market.png" alt="Pok? Market" style="width:100px;height:98px;object-fit:contain;" /></div>
               <div class="game-card-body"><div class="game-card-title">Poké Market</div><div class="game-card-desc">Compre itens para sua jornada.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('item-catalog')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('item-catalog')}">
+            <div class="game-card" id="itemCatalogHomeCard" role="button" tabindex="0" style="display:none" onclick="switchPanel('item-catalog')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('item-catalog')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#293949,#141d26);">🧰</div>
               <div class="game-card-body"><div class="game-card-title">Catálogo de Itens</div><div class="game-card-desc">Consulte itens, categorias e efeitos.</div></div>
             </div>
@@ -5931,6 +5931,7 @@
     }
 
     function renderItemCatalog() {
+      if (!isAdminAccount()) return;
       const catalog = (Array.isArray(window.POKEMON_ITEM_CATALOG) ? window.POKEMON_ITEM_CATALOG : [])
         .filter(item => !['repel', 'escape-rope', 'escape_rope'].includes(String(item.id || '').toLowerCase()));
       const grid = document.getElementById('itemCatalogGrid');
@@ -6893,6 +6894,7 @@
       document.getElementById('dashMeta').textContent = `Origem: ${player.originRegion}`;
       document.getElementById('dashAvatar').textContent = player.gender === 'Masculino' ? '♂️' : '♀️';
       document.getElementById('adminHomeCard').style.display = isAdminAccount() ? '' : 'none';
+      document.getElementById('itemCatalogHomeCard').style.display = isAdminAccount() ? '' : 'none';
       document.getElementById('welcomeName').textContent = player.name;
       document.getElementById('welcomePoke').src = SPRITE(player.starter.id);
       document.getElementById('welcomePoke').onerror = function() { this.src = SPRITE_FB(player.starter.id); };
@@ -7107,6 +7109,7 @@
     }
 
     function switchPanel(id) {
+      if (id === 'item-catalog' && !isAdminAccount()) { showToast('Cat\u00e1logo de Itens dispon\u00edvel apenas para o administrador.', 'error'); id = 'home'; }
       if (id === 'admin' && !isAdminAccount()) { showToast('Acesso restrito ao administrador.', 'error'); id = 'home'; }
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       const panel = document.getElementById('panel-'+id);
@@ -8805,7 +8808,7 @@
 
     function endBattle(won, captured, capturedName) {
       battle.busy = true;
-      if (won && (battle.isGym || battle.isTower) && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
+      if (won && battle.isGym && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
         const shares = getBattleExperienceShares(getBattleExperience(battle.enemy, true), player.poke);
         battle.experienceShares = battle.experienceShares || new Map();
         for (const [pokemon, amount] of shares) {
@@ -9317,40 +9320,25 @@
 
     function endTowerVictory() {
       const trainer = battle.towerTrainer;
-      const experienceShares = battle.experienceShares || new Map();
       player.poke.hp = Math.max(0, Math.min(player.poke.maxHp, battle.playerHp));
-      let levelsGained = 0;
-      const sharedExperienceText = [];
-      for (const [pokemon, amount] of experienceShares) {
-        const gained = awardPokemonExperience(pokemon, amount);
-        if (pokemon === player.poke) levelsGained = gained;
-        else if (amount > 0) sharedExperienceText.push(`${pokemon.name}: +${amount} XP`);
-      }
       const reward = Array.isArray(player.battleTowerDefeated) && player.battleTowerDefeated.includes(trainer.id) ? 0 : trainer.reward;
       if (!Array.isArray(player.battleTowerDefeated)) player.battleTowerDefeated = [];
       if (reward > 0) {
         player.battleTowerDefeated.push(trainer.id);
         player.battlePoints = (Number(player.battlePoints) || 0) + reward;
       }
-      const evolvedReady = levelsGained > 0 && canEvolve(player.poke);
-      updatePlayerExperienceBar();
-      if (levelsGained > 0) SFX.levelUp();
       document.getElementById('battleMenu').style.display = 'none';
       document.getElementById('movesMenu').style.display = 'none';
       const bag = document.getElementById('bagMenu');
       if (bag) bag.style.display = 'none';
       document.getElementById('battleResult').classList.add('show');
-      document.getElementById('resultTitle').textContent = '🏰 Vitória na Torre!';
-      document.getElementById('resultDesc').textContent = `Você derrotou ${trainer.name} e ${trainer.team.length} Pokémon!`;
+      document.getElementById('resultTitle').textContent = '\u{1F3F0} Vit\u00f3ria na Torre!';
+      document.getElementById('resultDesc').textContent = `Voc\u00ea derrotou ${trainer.name} e ${trainer.team.length} Pok\u00e9mon!`;
       const rewardRows = [
-        `<div class="reward-row"><span class="reward-label">Battle Points</span><strong class="reward-value">${reward ? `+${reward} BP` : 'Recompensa já coletada'}</strong></div>`,
-        `<div class="reward-row reward-xp"><span class="reward-label">Experiência total</span><strong class="reward-value">+${battle.totalExperience || 0} XP</strong></div>`
+        `<div class="reward-row"><span class="reward-label">Battle Points</span><strong class="reward-value">${reward ? `+${reward} BP` : 'Recompensa j\u00e1 coletada'}</strong></div>`
       ];
-      if (levelsGained) rewardRows.push(`<div class="reward-highlight">${player.poke.name} subiu ${levelsGained} nível(is), chegando ao Nv. ${player.poke.level}!</div>`);
-      if (sharedExperienceText.length) rewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${sharedExperienceText.join(' / ')}</strong></div>`);
-      if (!reward) rewardRows.push('<div class="reward-highlight">Esta vitória não concede BP novamente.</div>');
+      if (!reward) rewardRows.push('<div class="reward-highlight">Esta vit\u00f3ria n\u00e3o concede BP novamente.</div>');
       document.getElementById('resultRewards').innerHTML = rewardRows.join('');
-      if (evolvedReady) battle._pendingEvo = player.poke;
       updateStatsUI();
       renderBattleTower();
       SFX.victory();
