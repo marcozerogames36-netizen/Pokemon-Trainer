@@ -7372,6 +7372,31 @@
       setTimeout(enemyAttack, 900);
     }
 
+    function applyMoveSelfKnockout(attacker, defender, move) {
+      if (!attacker || !move) return '';
+      const name = String(move.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const isMemento = name === 'memento';
+      const isExplosion = ['explosion', 'selfdestruct', 'autodestruct'].includes(name);
+      if (!isMemento && !isExplosion) return '';
+
+      let message = '';
+      if (isMemento && defender && (!Array.isArray(move.statChanges) || move.statChanges.length === 0)) {
+        message = applyMoveStatChanges(attacker, defender, {
+          ...move, power: 0, statChanges: [
+            { target: 'target', stat: 'attack', stages: -2 },
+            { target: 'target', stat: 'specialAttack', stages: -2 }
+          ]
+        });
+      }
+      const hpKey = Number.isFinite(attacker.currentHp) ? 'currentHp' : 'hp';
+      if (attacker[hpKey] > 0) {
+        attacker[hpKey] = 0;
+        const faintMessage = `${attacker.name} desmaiou ap?s usar ${move.name}!`;
+        return [message, faintMessage].filter(Boolean).join(' ');
+      }
+      return message;
+    }
+
     function playerAttack(moveIdx) {
       if (battle.busy || battle.turn !== 'player') return;
       normalizePokemonMoves(player.poke);
@@ -7499,6 +7524,7 @@
         const statusMessage = evaded ? '' : applyMoveStatus(player.poke, battle.enemy, move);
         const statChangeMessage = evaded ? '' : applyMoveStatChanges(player.poke, battle.enemy, move, dmg);
         const fieldMessage = evaded ? '' : applyBattleFieldMove(player.poke, move);
+        const selfKnockoutMessage = evaded ? '' : applyMoveSelfKnockout(player.poke, battle.enemy, move);
         const heldMessage = applyHeldItemTrigger(battle.enemy, mult >= 2);
         const playerHeldMessage = applyHeldItemTrigger(player.poke);
         const shellBellMessage = applyShellBell(player.poke, dmg);
@@ -7508,6 +7534,7 @@
         if (statusMessage) msg += ` ${statusMessage}`;
         if (statChangeMessage) msg += ` ${statChangeMessage}`;
         if (fieldMessage) msg += ` ${fieldMessage}`;
+        if (selfKnockoutMessage) msg += ` ${selfKnockoutMessage}`;
         if (heldMessage) msg += ` ${heldMessage}`;
         if (playerHeldMessage) msg += ` ${playerHeldMessage}`;
         if (shellBellMessage) msg += ` ${shellBellMessage}`;
@@ -7649,6 +7676,7 @@
         const statusMessage = evaded ? '' : applyMoveStatus(battle.enemy, player.poke, move);
         const statChangeMessage = evaded ? '' : applyMoveStatChanges(battle.enemy, player.poke, move, dmg);
         const fieldMessage = evaded ? '' : applyBattleFieldMove(battle.enemy, move);
+        const selfKnockoutMessage = evaded ? '' : applyMoveSelfKnockout(battle.enemy, player.poke, move);
         tickGuardSpecTurn();
         const heldMessage = applyHeldItemTrigger(player.poke, mult >= 2);
         const enemyHeldMessage = applyHeldItemTrigger(battle.enemy);
@@ -7659,6 +7687,7 @@
         if (statusMessage) msg += ` ${statusMessage}`;
         if (statChangeMessage) msg += ` ${statChangeMessage}`;
         if (fieldMessage) msg += ` ${fieldMessage}`;
+        if (selfKnockoutMessage) msg += ` ${selfKnockoutMessage}`;
         if (rockyHelmetMessage) msg += ` ${rockyHelmetMessage}`;
         if (heldMessage) msg += ` ${heldMessage}`;
         if (enemyHeldMessage) msg += ` ${enemyHeldMessage}`;
