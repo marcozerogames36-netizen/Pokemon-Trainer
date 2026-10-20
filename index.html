@@ -491,6 +491,7 @@
     .enemy-sprite.hit { animation: shake 0.3s ease; }
     .enemy-sprite.faint { animation: faintDown 0.6s ease forwards; }
     .enemy-sprite.capturing { opacity: 0.35; }
+    .enemy-sprite.rillaboom-battle-sprite { width: 160px; height: 160px; }
 
     /* Player side — back sprites already face correct direction (no flip) */
     .battle-player {
@@ -508,6 +509,9 @@
     }
     .player-sprite.hit { animation: shakePlayer 0.3s ease; }
     .player-sprite.faint { animation: faintDownPlayer 0.6s ease forwards; }
+    .player-sprite.rillaboom-battle-sprite { width: 180px; height: 180px; }
+    .pvp-arena .enemy-sprite.rillaboom-battle-sprite { width: clamp(100px,28vw,160px); height: clamp(100px,28vw,160px); }
+    .pvp-arena .player-sprite.rillaboom-battle-sprite { width: clamp(100px,28vw,180px); height: clamp(100px,28vw,180px); }
     .sprite-stage { position: relative; display: flex; align-items: flex-end; justify-content: center; }
     .sprite-shadow {
       position: absolute; bottom: 8px; width: 90px; height: 18px;
@@ -7351,8 +7355,8 @@
         <div class="battle-bg"></div><div class="battle-sky"></div><div class="battle-ground"></div>
         <div class="pvp-room-toolbar"><span>Sala <strong class="pvp-code" style="font-size:1rem">${escapeHTML(room.room_code)}</strong> · Turno ${turn}</span><span class="pvp-room-clock" id="pvpTurnClock">45s</span><button class="btn btn-secondary" onclick="pvpLeaveRoom()">Sair da batalha</button></div>
         <div class="battle-field">
-          <div class="battle-enemy"><div class="enemy-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.guest_name:room.host_name)}</div>${pvpBattleInfo(opponent,foeHp[foeActive],'enemy-info',null,null,foeStatus[foeActive])}</div><div class="sprite-stage enemy-stage ${foeFainted?'pvp-fainted-stage':''}" ${foeFainted?'aria-hidden="true"':''}>${foeFainted?'':'<div class="sprite-shadow"></div>'}${foeFainted?'':`<img class="enemy-sprite" src="${SPRITE_ANIM_POKEMON(opponent)}" alt="${escapeHTML(opponent.name)}" onerror="this.onerror=null;this.src='${SPRITE_FRONT(opponent.id)}'" />`}</div></div>
-          <div class="battle-player"><div class="sprite-stage player-stage ${localFainted?'pvp-fainted-stage':''}" ${localFainted?'aria-hidden="true"':''}>${localFainted?'':'<div class="sprite-shadow"></div>'}${localFainted?'':`<img class="player-sprite" src="${SPRITE_BACK_POKEMON(local)}" alt="${escapeHTML(local.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(local.id)}'" />`}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</div>${pvpBattleInfo(local,localHp[localActive],'player-info',localTeam,localHp,localStatus[localActive])}</div></div>
+          <div class="battle-enemy"><div class="enemy-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.guest_name:room.host_name)}</div>${pvpBattleInfo(opponent,foeHp[foeActive],'enemy-info',null,null,foeStatus[foeActive])}</div><div class="sprite-stage enemy-stage ${foeFainted?'pvp-fainted-stage':''}" ${foeFainted?'aria-hidden="true"':''}>${foeFainted?'':'<div class="sprite-shadow"></div>'}${foeFainted?'':`<img class="enemy-sprite${opponent.id===812?' rillaboom-battle-sprite':''}" src="${SPRITE_ANIM_POKEMON(opponent)}" alt="${escapeHTML(opponent.name)}" onerror="this.onerror=null;this.src='${SPRITE_FRONT(opponent.id)}'" />`}</div></div>
+          <div class="battle-player"><div class="sprite-stage player-stage ${localFainted?'pvp-fainted-stage':''}" ${localFainted?'aria-hidden="true"':''}>${localFainted?'':'<div class="sprite-shadow"></div>'}${localFainted?'':`<img class="player-sprite${local.id===812?' rillaboom-battle-sprite':''}" src="${SPRITE_BACK_POKEMON(local)}" alt="${escapeHTML(local.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(local.id)}'" />`}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</div>${pvpBattleInfo(local,localHp[localActive],'player-info',localTeam,localHp,localStatus[localActive])}</div></div>
         </div>
         <div class="battle-ui"><div class="battle-log" aria-live="polite" style="margin:0">${escapeHTML(latestLog)}</div><div class="pvp-turn-prompt">${myActionPending?'':activeHp<=0?'Seu Pokémon desmaiou. Escolha quem entrará na batalha.':pvpBattleMenu==='moves'?'Escolha um golpe.':pvpBattleMenu==='switch'?'Escolha um Pokémon para trocar.':'Escolha sua ação.'}</div>${actionMenu}</div>
       </div>`;
@@ -7790,7 +7794,7 @@
       const eSprite = document.getElementById('enemySprite');
       eSprite.src = SPRITE_ANIM_POKEMON(wild);
       eSprite.onerror = function(){ this.onerror=null; this.src=wild.shiny ? SPRITE_SHINY(wild.id) : SPRITE(wild.id); this.onerror=function(){this.src=SPRITE_FB(wild.id)}; };
-      eSprite.className = 'enemy-sprite';
+      eSprite.className = 'enemy-sprite' + (wild.id === 812 ? ' rillaboom-battle-sprite' : '');
       eSprite.style.removeProperty('opacity');
 
       document.getElementById('playerPokeName').innerHTML = getPokemonDisplayNameHTML(player.poke);
@@ -7806,7 +7810,7 @@
       const pSprite = document.getElementById('playerSprite');
       pSprite.src = SPRITE_BACK_POKEMON(player.poke);
       pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_FB(player.poke.id); };
-      pSprite.className = 'player-sprite';
+      pSprite.className = 'player-sprite' + (player.poke.id === 812 ? ' rillaboom-battle-sprite' : '');
       pSprite.style.removeProperty('opacity');
 
       document.getElementById('battleLog').textContent = `Um ${wild.name} selvagem apareceu!`;
@@ -7951,7 +7955,7 @@
       const el = document.getElementById('playerTypeBadge');
       if (el) el.innerHTML = types.map(t => `<span class="type-badge ${typeClass([t])}">${t}</span>`).join(' ');
       const pSprite = document.getElementById('playerSprite');
-      pSprite.className = 'player-sprite';
+      pSprite.className = 'player-sprite' + (p.id === 812 ? ' rillaboom-battle-sprite' : '');
       pSprite.src = SPRITE_BACK_POKEMON(p);
       pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_POKEMON(p); };
       renderBattleStatusIndicators();
@@ -8356,7 +8360,7 @@
       const el = document.getElementById('playerTypeBadge');
       if (el) el.innerHTML = types.map(t => `<span class="type-badge ${typeClass([t])}">${t}</span>`).join(' ');
       const pSprite = document.getElementById('playerSprite');
-      pSprite.className = 'player-sprite';
+      pSprite.className = 'player-sprite' + (p.id === 812 ? ' rillaboom-battle-sprite' : '');
       pSprite.src = SPRITE_BACK_POKEMON(p);
       pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_POKEMON(p); };
       renderBattleStatusIndicators();
@@ -9040,7 +9044,7 @@
       const eSprite = document.getElementById('enemySprite');
       eSprite.src = SPRITE_ANIM_POKEMON(e);
       eSprite.onerror = function(){ this.onerror=null; this.src=e.shiny ? SPRITE_SHINY(e.id) : SPRITE(e.id); this.onerror=function(){this.src=SPRITE_FB(e.id)}; };
-      eSprite.className = 'enemy-sprite';
+      eSprite.className = 'enemy-sprite' + (e.id === 812 ? ' rillaboom-battle-sprite' : '');
       eSprite.style.removeProperty('opacity');
 
       document.getElementById('playerPokeName').innerHTML = getPokemonDisplayNameHTML(player.poke);
@@ -9058,7 +9062,7 @@
       const pSprite = document.getElementById('playerSprite');
       pSprite.src = SPRITE_BACK_POKEMON(player.poke);
       pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_FB(player.poke.id); };
-      pSprite.className = 'player-sprite';
+      pSprite.className = 'player-sprite' + (player.poke.id === 812 ? ' rillaboom-battle-sprite' : '');
       pSprite.style.removeProperty('opacity');
 
       document.getElementById('battleLog').textContent = logMsg || 'A batalha começou!';
