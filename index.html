@@ -5753,8 +5753,8 @@
     ITEM_SPRITE_FB.tm40 = ITEM_SPRITE_FB.tm43 || ITEM_SPRITE_FB.tm40;
 
     const EXTRA_BATTLE_ITEMS = [
-      { id: 'guard-spec', key: 'guard_spec', name: 'Guard Spec.', desc: 'Impede reduções de atributos da equipe por 5 turnos.', kind: 'guardSpec', price: 700 },
-      { id: 'dire-hit', key: 'dire_hit', name: 'Dire Hit', desc: 'Aumenta bastante a chance de acerto crítico do Pokémon ativo.', kind: 'direHit', price: 650 },
+      { id: 'guard-spec', key: 'guard_spec', name: 'Guard Spec.', desc: 'Impede reduções de atributos da equipe por 5 turnos.', kind: 'guardSpec', price: 1 },
+      { id: 'dire-hit', key: 'dire_hit', name: 'Dire Hit', desc: 'Aumenta bastante a chance de acerto crítico do Pokémon ativo.', kind: 'direHit', price: 1 },
       { id: 'x-attack', key: 'x_attack', name: 'X Attack', desc: 'Aumenta o Ataque do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'attack', price: 1 },
       { id: 'x-defense', key: 'x_defense', name: 'X Defense', desc: 'Aumenta a Defesa do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'defense', price: 1 },
       { id: 'x-speed', key: 'x_speed', name: 'X Speed', desc: 'Aumenta a Velocidade do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'speed', price: 1 },
@@ -5993,7 +5993,7 @@
 
     const marketCategoryByKey = new Map(BAG_CATEGORIES.flatMap(category => category.items.map(entry => [entry.key, category.id])));
     function marketItemUsesBattlePoints(item) {
-      return item?.kind === 'tm' || item?.kind === 'battleBoost';
+      return ['tm', 'battleBoost', 'guardSpec', 'direHit'].includes(item?.kind);
     }
     function normalizeMarketText(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
