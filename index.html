@@ -374,12 +374,17 @@
     .stat-card .value { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
     .stat-card .label { font-size: 0.75rem; color: var(--text-muted); }
     .mission-list { display: flex; flex-direction: column; gap: 12px; }
+    .mission-tabs { display: flex; gap: 8px; margin: 18px 0 14px; border-bottom: 1px solid var(--border); }
+    .mission-tab { border: 0; border-bottom: 2px solid transparent; padding: 10px 14px; background: transparent; color: var(--text-muted); cursor: pointer; font: inherit; font-weight: 600; }
+    .mission-tab.active { color: var(--text); border-bottom-color: #8b5cf6; }
     .mission-item {
       background: var(--card); border: 1px solid var(--border); border-radius: 14px;
       padding: 16px 18px; display: flex; align-items: center; gap: 16px;
       transition: border-color 0.2s;
     }
     .mission-item:hover { border-color: #3a3a4a; }
+    .gym-card-title { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+    .gym-card-level-cap { color: var(--text-muted); font-size: .72rem; font-weight: 700; white-space: nowrap; }
     .mission-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
     .mission-info { flex: 1; min-width: 0; }
     .mission-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 3px; }
@@ -886,6 +891,31 @@
       background: rgba(0,0,0,0.82); align-items: center; justify-content: center;
     }
     #heldItemPickerOverlay.active { display: flex; }
+    #gymLevelCapOverlay {
+      display: none; position: fixed; inset: 0; z-index: 160; padding: 20px;
+      background: rgba(5, 7, 16, .82); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center;
+    }
+    #gymLevelCapOverlay.active { display: flex; }
+    .gym-cap-card {
+      width: min(460px, 100%); max-height: 88vh; overflow-y: auto; padding: 24px;
+      color: var(--text); background: radial-gradient(ellipse at top right, rgba(239,68,68,.15), transparent 55%), var(--card);
+      border: 1px solid rgba(248,113,113,.35); border-radius: 20px; box-shadow: 0 24px 80px rgba(0,0,0,.55);
+    }
+    .gym-cap-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .gym-cap-emblem { width: 52px; height: 52px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 15px; background: rgba(239,68,68,.14); border: 1px solid rgba(248,113,113,.28); font-size: 1.7rem; }
+    .gym-cap-heading h2 { margin: 0 0 4px; font-size: 1.2rem; }
+    .gym-cap-heading p { margin: 0; color: var(--text-muted); font-size: .86rem; }
+    .gym-cap-note { margin: 0 0 14px; line-height: 1.5; color: var(--text-muted); font-size: .9rem; }
+    .gym-cap-pokemon-list { display: grid; gap: 8px; margin-bottom: 20px; }
+    .gym-cap-pokemon { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border: 1px solid rgba(248,113,113,.2); border-radius: 12px; background: rgba(127,29,29,.16); }
+    .gym-cap-pokemon-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; background: rgba(239,68,68,.14); font-size: 1.15rem; }
+    .gym-cap-pokemon-info { flex: 1; min-width: 0; }
+    .gym-cap-pokemon-info strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .gym-cap-pokemon-info small { color: var(--text-muted); }
+    .gym-cap-level { padding: 5px 8px; border-radius: 8px; background: rgba(239,68,68,.16); color: #fca5a5; font-size: .77rem; font-weight: 700; white-space: nowrap; }
+    .gym-cap-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .gym-cap-actions .btn { width: auto; margin: 0; }
     .held-item-picker-card {
       width: min(420px, 100%); max-height: 85vh; overflow-y: auto; padding: 22px;
       color: var(--text); background: var(--card); border: 1px solid var(--border);
@@ -1497,6 +1527,10 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#1d4960,#102b3a);"><img src="assets/ss-anne-ship-cutout.png" alt="Navio S.S. Anne" style="width:100%;height:92px;object-fit:contain;" /></div>
               <div class="game-card-body"><div class="game-card-title">S.S. Anne</div><div class="game-card-desc">Desafie os treinadores do navio em ordem e abra caminho at&eacute; o rival.</div></div>
             </div>
+            <div class="game-card" id="silphCoHomeCard" role="button" tabindex="0" aria-disabled="true" onclick="switchPanel('silph-co')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('silph-co')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#244b68,#122337);height:100px;overflow:hidden;"><img src="assets/silph-co-building.png" alt="Edifício da Silph Co." title="Silph Co. — imagem: WikiDex" style="width:84px;height:126px;object-fit:contain;image-rendering:pixelated;transform:translateY(12px);" /></div>
+              <div class="game-card-body"><div class="game-card-title">Silph C.O</div><div class="game-card-desc" id="silphCoHomeDesc">Derrote Sabrina no Ginásio de Saffron para liberar o acesso.</div></div>
+            </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('battle-tower')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('battle-tower')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#241638,#100a1d);"><img src="assets/battle-tower-castle.png" alt="Castelo pixel art da Torre de Batalha" style="width:154px;height:92px;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">Torre de Batalha</div><div class="game-card-desc">Desafie treinadores NPC e ganhe BP nas primeiras vitórias.</div></div>
@@ -1560,6 +1594,10 @@
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">📜 Missões de Kanto</h2>
           <p class="panel-desc">Complete missões para ganhar experiência, dinheiro e itens.</p>
+          <div class="mission-tabs" role="tablist" aria-label="Miss&#245;es">
+            <button type="button" id="missionTabOpen" class="mission-tab active" role="tab" aria-selected="true" onclick="setMissionTab('open')">Dispon&#237;veis <span id="missionOpenCount"></span></button>
+            <button type="button" id="missionTabCompleted" class="mission-tab" role="tab" aria-selected="false" onclick="setMissionTab('completed')">Conclu&#237;das <span id="missionCompletedCount"></span></button>
+          </div>
           <div class="mission-list" id="missionsList"></div>
         </div>
 
@@ -1589,6 +1627,13 @@
           <p class="panel-desc">Desafie os treinadores do navio em ordem. O pr&oacute;ximo oponente s&oacute; fica dispon&iacute;vel depois da vit&oacute;ria sobre o atual.</p>
           <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Treinadores derrotados: <strong id="ssAnneProgress">0/8</strong></div>
           <div class="cards-grid" id="ssAnneGrid"></div>
+        </div>
+        <div class="panel" id="panel-silph-co">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
+          <h2 class="panel-title">&#127970; Silph C.O</h2>
+          <p class="panel-desc">Derrote os membros da Equipe Rocket em ordem para avan&ccedil;ar pelos andares e enfrentar Giovanni.</p>
+          <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Treinadores derrotados: <strong id="silphCoProgress">0/20</strong></div>
+          <div class="cards-grid" id="silphCoGrid"></div>
         </div>
         <div class="panel" id="panel-battle-tower">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
@@ -1856,6 +1901,20 @@
       <div id="heldItemPickerList" style="display:grid;gap:8px;"></div>
       <button type="button" class="btn btn-secondary" style="width:100%;margin-top:14px;" onclick="closeHeldItemPicker()">Voltar</button>
     </div>
+  </div>
+  <div id="gymLevelCapOverlay" onclick="if(event.target===this)closeGymLevelCapNotice()">
+    <section class="gym-cap-card" role="dialog" aria-modal="true" aria-labelledby="gymCapTitle">
+      <div class="gym-cap-heading">
+        <div class="gym-cap-emblem" aria-hidden="true">&#128737;</div>
+        <div><h2 id="gymCapTitle">Limite de nível do ginásio</h2><p id="gymCapSubtitle"></p></div>
+      </div>
+      <p class="gym-cap-note">Os Pokémon abaixo estão acima do level cap e não poderão participar deste combate.</p>
+      <div class="gym-cap-pokemon-list" id="gymCapPokemonList"></div>
+      <div class="gym-cap-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeGymLevelCapNotice()">Voltar</button>
+        <button type="button" class="btn" onclick="confirmGymLevelCapChallenge()">Continuar sem eles</button>
+      </div>
+    </section>
   </div>
 
 
@@ -3107,10 +3166,27 @@
         poke.level++;
         poke.maxHp += 3;
         poke.hp = Math.min(poke.maxHp, poke.hp + 3);
-        if (poke.level % 5 === 0) player.level = Math.max(player.level, Math.floor(poke.level / 5));
         learnMovesOnLevelUp(poke);
       }
-      return poke.level - oldLevel;
+      const gainedLevels = poke.level - oldLevel;
+      if (gainedLevels > 0) onMissionEvent('pokemon_level', gainedLevels);
+      return gainedLevels;
+    }
+
+    function getAccountExperienceForLevel(level) {
+      const n = Math.max(1, Math.floor(Number(level) || 1));
+      return 250 * (n - 1) * n;
+    }
+
+    function awardAccountExperience(amount) {
+      if (!player) return 0;
+      const currentLevel = Math.max(1, Math.floor(Number(player.level) || 1));
+      player.accountXp = Math.max(getAccountExperienceForLevel(currentLevel), Math.floor(Number(player.accountXp) || 0));
+      player.accountXp += Math.max(0, Math.floor(Number(amount) || 0));
+      let nextLevel = currentLevel;
+      while (nextLevel < 100 && player.accountXp >= getAccountExperienceForLevel(nextLevel + 1)) nextLevel++;
+      player.level = Math.max(currentLevel, nextLevel);
+      return player.level - currentLevel;
     }
 
     function learnMovesOnLevelUp(poke, level = poke?.level) {
@@ -3900,6 +3976,40 @@
       { id: 'first_evolution', name: 'Novos Horizontes', icon: '✨', desc: 'Evolua um Pokémon da sua equipe.', type: 'evolution', target: 1, money: 1000, unlock: 'catch_3', color: '#8b5cf622' }
     ];
 
+    MISSIONS[9] = { ...MISSIONS[9], name: 'Marujos da S.S. Anne', desc: 'Derrote 5 treinadores a bordo da S.S. Anne.', type: 'battle_in', targetValue: 'S.S. Anne' };
+    MISSIONS.push(
+      { id: 'catch_10', name: 'Colecao em Expansao', icon: '&#127183;', desc: 'Capture 10 Pokemon selvagens.', type: 'capture', target: 10, money: 1200, xp: 350, unlock: 'catch_3', color: '#3b82f622' },
+      { id: 'catch_25', name: 'Especialista em Capturas', icon: '&#127919;', desc: 'Capture 25 Pokemon selvagens.', type: 'capture', target: 25, money: 2500, xp: 700, unlock: 'catch_10', color: '#3b82f622' },
+      { id: 'dex_10', name: 'Pesquisador Iniciante', icon: '&#128214;', desc: 'Registre 10 especies diferentes na Pokedex.', type: 'pokedex', target: 10, money: 900, xp: 300, unlock: 'catch_3', color: '#22c55e22' },
+      { id: 'dex_40', name: 'Pesquisador de Campo', icon: '&#128300;', desc: 'Registre 40 especies diferentes na Pokedex.', type: 'pokedex', target: 40, money: 3500, xp: 1000, unlock: 'dex_10', color: '#22c55e22' },
+      { id: 'team_three', name: 'Equipe em Formacao', icon: '&#128101;', desc: 'Monte uma equipe com 3 Pokemon.', type: 'party_size', target: 3, money: 700, xp: 250, unlock: 'catch_3', color: '#8b5cf622' },
+      { id: 'team_six', name: 'Time Completo', icon: '&#127942;', desc: 'Monte uma equipe com 6 Pokemon.', type: 'party_size', target: 6, money: 1800, xp: 550, unlock: 'team_three', color: '#8b5cf622' },
+      { id: 'battle_10', name: 'Treinamento Constante', icon: '&#9876;', desc: 'Venca 10 batalhas.', type: 'battle', target: 10, money: 1200, xp: 400, unlock: 'explore_1', color: '#ef444422' },
+      { id: 'battle_30', name: 'Veterano de Kanto', icon: '&#129354;', desc: 'Venca 30 batalhas.', type: 'battle', target: 30, money: 4000, xp: 1200, unlock: 'battle_10', color: '#ef444422' },
+      { id: 'battle_60', name: 'Lenda das Batalhas', icon: '&#127775;', desc: 'Venca 60 batalhas.', type: 'battle', target: 60, money: 9000, xp: 2200, unlock: 'battle_30', color: '#ef444422' },
+      { id: 'use_items_10', name: 'Mochila Preparada', icon: '&#129514;', desc: 'Use 10 itens durante batalhas.', type: 'battle_item_used', target: 10, money: 1100, xp: 350, unlock: 'battle_supplies', color: '#ef444422' },
+      { id: 'use_items_25', name: 'Socorro na Hora Certa', icon: '&#128138;', desc: 'Use 25 itens durante batalhas.', type: 'battle_item_used', target: 25, money: 3000, xp: 900, unlock: 'use_items_10', color: '#ef444422' },
+      { id: 'heal_10', name: 'Cliente Frequente', icon: '&#127973;', desc: 'Trate 10 Pokemon no Centro Pokemon.', type: 'center_heal', target: 10, money: 900, xp: 300, unlock: 'center_care', color: '#ec489922' },
+      { id: 'buy_10', name: 'Preparado para a Jornada', icon: '&#128717;', desc: 'Compre 10 unidades de itens no Poke Market.', type: 'item_bought', target: 10, money: 800, xp: 300, unlock: 'catch_3', color: '#f59e0b22' },
+      { id: 'sell_20', name: 'Comerciante de Kanto', icon: '&#129689;', desc: 'Venda 20 itens no Poke Market.', type: 'item_sold', target: 20, money: 1300, xp: 400, unlock: 'market_seller', color: '#f59e0b22' },
+      { id: 'evolve_3', name: 'Crescimento da Equipe', icon: '&#10024;', desc: 'Evolua 3 Pokemon.', type: 'evolution', target: 3, money: 2200, xp: 700, unlock: 'first_evolution', color: '#8b5cf622' },
+      { id: 'evolve_6', name: 'Mestre da Evolucao', icon: '&#128302;', desc: 'Evolua 6 Pokemon.', type: 'evolution', target: 6, money: 5000, xp: 1500, unlock: 'evolve_3', color: '#8b5cf622' },
+      { id: 'level_10', name: 'Treinamento da Equipe', icon: '&#128200;', desc: 'Ganhe 10 niveis com seus Pokemon.', type: 'pokemon_level', target: 10, money: 1400, xp: 450, unlock: 'battle_10', color: '#a855f722' },
+      { id: 'level_30', name: 'Treinador Dedicado', icon: '&#128200;', desc: 'Ganhe 30 niveis com seus Pokemon.', type: 'pokemon_level', target: 30, money: 4000, xp: 1200, unlock: 'level_10', color: '#a855f722' },
+      { id: 'water_catch_5', name: 'Amigo dos Mares', icon: '&#128167;', desc: 'Capture 5 Pokemon do tipo Agua.', type: 'capture_type', filterType: 'Agua', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#3b82f622' },
+      { id: 'fire_catch_5', name: 'Chama de Kanto', icon: '&#128293;', desc: 'Capture 5 Pokemon do tipo Fogo.', type: 'capture_type', filterType: 'Fogo', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#ef444422' },
+      { id: 'tower_5', name: 'Desafiante da Torre', icon: '&#127984;', desc: 'Venca 5 treinadores na Torre de Batalha.', type: 'battle_in', targetValue: 'Torre de Batalha', target: 5, money: 2500, xp: 800, unlock: 'battle_10', color: '#a855f722' },
+      { id: 'elite_5', name: 'Desafio da Elite', icon: '&#128081;', desc: 'Venca 5 combates na Elite Four.', type: 'battle_in', targetValue: 'Elite Four', target: 5, money: 5000, xp: 1600, unlock: 'gym_rest', color: '#a855f722' },
+      { id: 'badges_all', name: 'Orgulho de Kanto', icon: '&#129351;', desc: 'Conquiste as 8 insignias de Kanto.', type: 'badges', target: 8, money: 10000, xp: 3000, unlock: 'gym_rest', color: '#a855f722' }
+    );
+    Object.assign(MISSIONS.find(m => m.id === 'silph'), { name: 'Libertar a Silph Co.', desc: 'Derrote 3 treinadores da Equipe Rocket na Silph Co.', type: 'battle_in', targetValue: 'Silph Co.', target: 3 });
+    MISSIONS.forEach(m => {
+      if (!(m.money > 0)) m.money = m.badgeReward ? 1500 : 300;
+      if (!(m.xp > 0)) m.xp = Math.max(150, Math.floor(m.money * 0.3));
+    });
+
+    let activeMissionTab = 'open';
+
     function getMissionState(id) {
       if (!player) return 'locked';
       if (!player.missions) player.missions = { completed: [], progress: {}, active: [] };
@@ -4206,19 +4316,19 @@
       player.missions.completed.push(id);
       player.missions.active = player.missions.active.filter(x => x !== id);
       player.missionsDone = player.missions.completed.length;
-      if (m.money && !(
+      const legacyRewardAlreadyClaimed =
         (id === 'oak_talk' && player.oakIntroRewardClaimed) ||
         (id === 'parcel' && player.parcelRewardClaimed) ||
-        (id === 'help_bill' && player.billMissionRewardClaimed)
-      )) {
-        player.money += m.money;
-        if (id === 'oak_talk') player.oakIntroRewardClaimed = true;
-        if (id === 'parcel') player.parcelRewardClaimed = true;
-        if (id === 'help_bill') player.billMissionRewardClaimed = true;
-      }
+        (id === 'help_bill' && player.billMissionRewardClaimed);
+      if (!legacyRewardAlreadyClaimed) player.money += Math.max(0, Number(m.money) || 0);
+      if (id === 'oak_talk') player.oakIntroRewardClaimed = true;
+      if (id === 'parcel') player.parcelRewardClaimed = true;
+      if (id === 'help_bill') player.billMissionRewardClaimed = true;
+      const xpReward = Math.max(0, Math.floor(Number(m.xp) || 0));
+      const accountLevelsGained = awardAccountExperience(xpReward);
       updateStatsUI();
       saveGame();
-      showToast('Missão concluída: ' + m.name + (m.money ? ' (+₽ ' + m.money.toLocaleString('pt-BR') + ')' : '') + ' 🎉');
+      showToast('Miss\u00e3o conclu\u00edda: ' + m.name + (legacyRewardAlreadyClaimed ? '' : ' (+\u20bd ' + m.money.toLocaleString('pt-BR') + ')') + ' (+' + xpReward.toLocaleString('pt-BR') + ' XP de conta' + (accountLevelsGained ? ', Nv. ' + player.level : '') + ') \u{1F389}');
       renderMissions();
       if (typeof refreshProfileUI === 'function') refreshProfileUI();
       return true;
@@ -4232,14 +4342,14 @@
         if (st !== 'active' && st !== 'available') return;
         // Auto-activate available when progress would apply for gym/badges/pokedex
         let changed = false;
-        if (m.type === 'capture' && type === 'capture') {
+        if ((m.type === 'capture' && type === 'capture') || (m.type === 'capture_type' && type === 'capture' && getTypes(Number(detail)).includes(m.filterType))) {
           if (st === 'available') { player.missions.active.push(m.id); }
           if (player.missions.active.includes(m.id) || st === 'available') {
             player.missions.progress[m.id] = (player.missions.progress[m.id] || 0) + 1;
             changed = true;
           }
         }
-        if (m.type === 'battle' && type === 'battle_win') {
+        if ((m.type === 'battle' && type === 'battle_win') || (m.type === 'battle_in' && type === 'battle_win' && detail === m.targetValue)) {
           if (st === 'available') { player.missions.active.push(m.id); }
           if (player.missions.active.includes(m.id) || getMissionState(m.id) === 'active') {
             player.missions.progress[m.id] = (player.missions.progress[m.id] || 0) + 1;
@@ -4251,9 +4361,14 @@
           player.missions.progress[m.id] = 1;
           changed = true;
         }
-        if (m.type === type && ['battle_item_used', 'center_heal', 'item_sold', 'evolution'].includes(type)) {
+        if (m.type === type && ['battle_item_used', 'center_heal', 'item_sold', 'item_bought', 'evolution', 'pokemon_level'].includes(type)) {
           if (st === 'available') player.missions.active.push(m.id);
           player.missions.progress[m.id] = (player.missions.progress[m.id] || 0) + Math.max(1, Number(detail) || 1);
+          changed = true;
+        }
+        if (m.type === 'party_size' && player.party.length >= m.target && (type === 'party_changed' || type === 'capture')) {
+          if (st === 'available') player.missions.active.push(m.id);
+          player.missions.progress[m.id] = player.party.length;
           changed = true;
         }
         if (m.type === 'gym' && type === 'gym_win' && detail === m.target) {
@@ -4288,40 +4403,58 @@
       updateStatsUI();
     }
 
+    function setMissionTab(tab) {
+      activeMissionTab = tab === 'completed' ? 'completed' : 'open';
+      renderMissions();
+    }
+
     function renderMissions() {
       const ml = document.getElementById('missionsList');
       if (!ml || !player) return;
       if (!player.missions) player.missions = { completed: [], progress: {}, active: [] };
-      const label = { available: 'Disponível', active: 'Em andamento', locked: 'Bloqueada', done: 'Concluída' };
+      const label = { available: 'Dispon\u00edvel', active: 'Em andamento', locked: 'Bloqueada', done: 'Conclu\u00edda' };
       const cls = { available: 'status-available', active: 'status-available', locked: 'status-locked', done: 'status-available' };
-      ml.innerHTML = MISSIONS.map(m => {
+      const completed = MISSIONS.filter(m => getMissionState(m.id) === 'done');
+      const open = MISSIONS.filter(m => getMissionState(m.id) !== 'done');
+      const openTab = document.getElementById('missionTabOpen');
+      const completedTab = document.getElementById('missionTabCompleted');
+      const openCount = document.getElementById('missionOpenCount');
+      const completedCount = document.getElementById('missionCompletedCount');
+      if (openTab) { openTab.classList.toggle('active', activeMissionTab === 'open'); openTab.setAttribute('aria-selected', String(activeMissionTab === 'open')); }
+      if (completedTab) { completedTab.classList.toggle('active', activeMissionTab === 'completed'); completedTab.setAttribute('aria-selected', String(activeMissionTab === 'completed')); }
+      if (openCount) openCount.textContent = '(' + open.length + ')';
+      if (completedCount) completedCount.textContent = '(' + completed.length + ')';
+      const visible = activeMissionTab === 'completed' ? completed : open;
+      if (!visible.length) {
+        ml.innerHTML = `<p class="panel-desc">${activeMissionTab === 'completed' ? 'Nenhuma miss\u00e3o conclu\u00edda ainda.' : 'Todas as miss\u00f5es foram conclu\u00eddas!'}</p>`;
+      } else ml.innerHTML = visible.map(m => {
         const st = getMissionState(m.id);
         const prog = getMissionProgress(m);
         const need = missionTargetNum(m);
         let progressTxt = '';
         if (st === 'active' || st === 'done') {
-          if (m.type === 'gym') progressTxt = st === 'done' ? 'Insígnia obtida' : 'Pendente';
-          else if (m.type === 'dungeon') progressTxt = prog >= 1 ? 'Concluído' : '0/1';
+          if (m.type === 'gym') progressTxt = st === 'done' ? 'Ins\u00edgnia obtida' : 'Pendente';
+          else if (m.type === 'dungeon') progressTxt = prog >= 1 ? 'Conclu\u00eddo' : '0/1';
           else progressTxt = Math.min(prog, need) + '/' + need;
         }
-        const opacity = st === 'locked' ? 'opacity:0.55;' : st === 'done' ? 'opacity:0.75;' : '';
+        const opacity = st === 'locked' ? 'opacity:0.55;' : '';
         return `
           <div class="mission-item" style="${opacity}">
             <div class="mission-icon" style="background:${m.color};">${m.icon}</div>
             <div class="mission-info">
-              <h4>${m.name}${st === 'done' ? ' ✓' : ''}</h4>
-              <p>${m.desc}${progressTxt && st !== 'done' ? ' · <strong>' + progressTxt + '</strong>' : ''}</p>
+              <h4>${m.name}</h4>
+              <p>${m.desc}${progressTxt && st !== 'done' ? ' \u00b7 <strong>' + progressTxt + '</strong>' : ''}</p>
             </div>
             <div class="mission-right">
               <span class="status-tag ${cls[st]}">${label[st]}</span>
-              <span class="reward" style="font-size:0.75rem;">${m.money ? '₽ ' + m.money.toLocaleString('pt-BR') : (m.badgeReward ? 'Insígnia' : '—')}</span>
+              <span class="reward" style="font-size:0.75rem;">+${Number(m.xp).toLocaleString('pt-BR')} XP \u00b7 \u20bd ${Number(m.money).toLocaleString('pt-BR')}</span>
               ${st === 'available' ? `<button type="button" class="mission-accept-button" onclick="acceptMission('${m.id}')">Aceitar</button>` : ''}
               ${st === 'active' && m.id === 'gym_brock' ? `<button type="button" class="mission-accept-button" onclick="openBrockIntro()">Falar com Brock</button>` : ''}
               ${st === 'active' && m.type === 'talk' ? `<button type="button" class="mission-accept-button" onclick="${m.id === 'oak_talk' ? 'openOakIntro()' : m.id === 'help_bill' ? 'openBillIntro()' : m.id === 'parcel' ? "switchPanel('market')" : `tryCompleteMission('${m.id}')`}">${m.id === 'oak_talk' || m.id === 'help_bill' ? 'Continuar conversa' : m.id === 'parcel' ? 'Ir ao Market' : 'Concluir'}</button>` : ''}
             </div>
           </div>`;
       }).join('');
-      player.missionsDone = (player.missions.completed || []).length;
+      player.missionsDone = completed.length;
       const sm = document.getElementById('statMissions');
       if (sm) sm.textContent = `${player.missionsDone} / ${MISSIONS.length}`;
     }
@@ -4586,7 +4719,7 @@
         name, gender: selectedGender, originRegion: region, starter,
         rivalName: '', oakIntroStep: 0, oakIntroFinished: false, oakIntroRewardClaimed: false,
         billIntroStep: 0, billIntroVersion: 2, billTicketRewardClaimed: false, billMissionRewardClaimed: false,
-        money: 3000, battlePoints: 0, pokeCoins: 0, level: 1, badges: 0, missionsDone: 0, potions: 5, balls: 8, centerCards: 5,
+        money: 3000, battlePoints: 0, pokeCoins: 0, accountXp: 0, level: 1, badges: 0, missionsDone: 0, potions: 5, balls: 8, centerCards: 5,
         antidote: 2, antiparalyze: 2, antiburn: 2,
         badgesList: [],
         party: [starterPokemon],
@@ -4617,8 +4750,9 @@
       document.getElementById('statLevel').textContent = player.level;
       document.getElementById('dashBadges').textContent = `${player.badges}/8`;
       document.getElementById('statBadges').textContent = `${player.badges} / 8`;
-      document.getElementById('statMissions').textContent = `${player.missionsDone} / 12`;
+      document.getElementById('statMissions').textContent = `${player.missionsDone} / ${MISSIONS.length}`;
       updateEliteFourHomeCard();
+      updateSilphCoHomeCard();
     }
 
 
@@ -6380,6 +6514,7 @@
       ensureBagItems();
       player[item.key] = (player[item.key] || 0) + qty * quantity;
       if (player.items) player.items[item.key] = player[item.key];
+      onMissionEvent('item_bought', qty * quantity);
       updateStatsUI();
       refreshMarketUI();
       renderBag();
@@ -6498,6 +6633,7 @@
       );
       const migrateBillDialogue = saved.billIntroVersion !== 2;
       player = saved;
+      player.accountXp = Math.max(getAccountExperienceForLevel(player.level || 1), Math.floor(Number(player.accountXp) || 0));
       player.battlePoints = Math.max(0, Math.floor(Number(player.battlePoints) || 0));
       player.pokeCoins = Math.max(0, Math.floor(Number(player.pokeCoins) || 0));
       player.experienceBoostExpiresAt = Math.max(0, Math.floor(Number(player.experienceBoostExpiresAt) || 0));
@@ -6918,6 +7054,77 @@
       ]}
     ];
 
+    const SILPH_ROCKET_GRUNT_ROSTER = [
+      [{name:'Raticate',id:20,hp:82,moves:[{name:'Hyper Fang',power:70,type:'Normal'},{name:'Bite',power:50,type:'Sombrio'}]},{name:'Koffing',id:109,hp:88,moves:[{name:'Sludge',power:55,type:'Veneno'},{name:'Self-Destruct',power:70,type:'Normal'}]},{name:'Golbat',id:42,hp:86,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Bite',power:50,type:'Sombrio'}]}],
+      [{name:'Ekans',id:23,hp:76,moves:[{name:'Poison Jab',power:65,type:'Veneno'},{name:'Bite',power:50,type:'Sombrio'}]},{name:'Arbok',id:24,hp:94,moves:[{name:'Poison Jab',power:70,type:'Veneno'},{name:'Crunch',power:70,type:'Sombrio'}]},{name:'Persian',id:53,hp:96,moves:[{name:'Slash',power:70,type:'Normal'},{name:'Bite',power:50,type:'Sombrio'}]}],
+      [{name:'Golbat',id:42,hp:90,moves:[{name:'Wing Attack',power:65,type:'Voador'},{name:'Bite',power:55,type:'Sombrio'}]},{name:'Muk',id:89,hp:104,moves:[{name:'Sludge Bomb',power:75,type:'Veneno'},{name:'Slam',power:65,type:'Normal'}]},{name:'Weezing',id:110,hp:100,moves:[{name:'Sludge Bomb',power:75,type:'Veneno'},{name:'Shadow Ball',power:65,type:'Fantasma'}]}],
+      [{name:'Persian',id:53,hp:98,moves:[{name:'Slash',power:70,type:'Normal'},{name:'Bite',power:55,type:'Sombrio'}]},{name:'Weezing',id:110,hp:102,moves:[{name:'Sludge Bomb',power:75,type:'Veneno'},{name:'Flamethrower',power:65,type:'Fogo'}]},{name:'Raticate',id:20,hp:88,moves:[{name:'Hyper Fang',power:70,type:'Normal'},{name:'Quick Attack',power:40,type:'Normal'}]}],
+      [{name:'Magneton',id:82,hp:96,moves:[{name:'Thunderbolt',power:75,type:'Eletrico'},{name:'Flash Cannon',power:65,type:'Aço'}]},{name:'Electrode',id:101,hp:90,moves:[{name:'Thunderbolt',power:75,type:'Eletrico'},{name:'Swift',power:50,type:'Normal'}]},{name:'Golbat',id:42,hp:94,moves:[{name:'Wing Attack',power:65,type:'Voador'},{name:'Poison Fang',power:60,type:'Veneno'}]}],
+      [{name:'Haunter',id:93,hp:92,moves:[{name:'Shadow Ball',power:70,type:'Fantasma'},{name:'Confuse Ray',power:0,type:'Fantasma'}]},{name:'Arbok',id:24,hp:100,moves:[{name:'Poison Jab',power:70,type:'Veneno'},{name:'Crunch',power:70,type:'Sombrio'}]},{name:'Koffing',id:109,hp:96,moves:[{name:'Sludge Bomb',power:70,type:'Veneno'},{name:'Self-Destruct',power:70,type:'Normal'}]}],
+      [{name:'Dugtrio',id:51,hp:90,moves:[{name:'Dig',power:70,type:'Terra'},{name:'Slash',power:65,type:'Normal'}]},{name:'Rhydon',id:112,hp:116,moves:[{name:'Rock Slide',power:70,type:'Pedra'},{name:'Earthquake',power:80,type:'Terra'}]},{name:'Primeape',id:57,hp:102,moves:[{name:'Brick Break',power:70,type:'Lutador'},{name:'Rock Tomb',power:55,type:'Pedra'}]}],
+      [{name:'Slowbro',id:80,hp:112,moves:[{name:'Water Pulse',power:65,type:'Agua'},{name:'Psychic',power:75,type:'Psiquico'}]},{name:'Electabuzz',id:125,hp:100,moves:[{name:'Thunder Punch',power:70,type:'Eletrico'},{name:'Low Kick',power:55,type:'Lutador'}]},{name:'Nidoqueen',id:31,hp:112,moves:[{name:'Earthquake',power:80,type:'Terra'},{name:'Poison Jab',power:65,type:'Veneno'}]}],
+      [{name:'Koffing',id:109,hp:96,moves:[{name:'Sludge Bomb',power:70,type:'Veneno'},{name:'Smokescreen',power:0,type:'Normal'}]},{name:'Golbat',id:42,hp:98,moves:[{name:'Wing Attack',power:65,type:'Voador'},{name:'Poison Fang',power:60,type:'Veneno'}]},{name:'Persian',id:53,hp:100,moves:[{name:'Slash',power:70,type:'Normal'},{name:'Feint Attack',power:60,type:'Sombrio'}]}],
+      [{name:'Vaporeon',id:134,hp:124,moves:[{name:'Surf',power:80,type:'Agua'},{name:'Bite',power:55,type:'Sombrio'}]},{name:'Arbok',id:24,hp:104,moves:[{name:'Poison Jab',power:70,type:'Veneno'},{name:'Earthquake',power:75,type:'Terra'}]},{name:'Weezing',id:110,hp:108,moves:[{name:'Sludge Bomb',power:75,type:'Veneno'},{name:'Fire Blast',power:85,type:'Fogo'}]}],
+      [{name:'Nidoking',id:34,hp:116,moves:[{name:'Earthquake',power:80,type:'Terra'},{name:'Megahorn',power:75,type:'Inseto'}]},{name:'Magneton',id:82,hp:102,moves:[{name:'Thunderbolt',power:75,type:'Eletrico'},{name:'Flash Cannon',power:65,type:'Aço'}]},{name:'Raticate',id:20,hp:98,moves:[{name:'Hyper Fang',power:70,type:'Normal'},{name:'Crunch',power:65,type:'Sombrio'}]}],
+      [{name:'Nidoqueen',id:31,hp:118,moves:[{name:'Earthquake',power:80,type:'Terra'},{name:'Body Slam',power:65,type:'Normal'}]},{name:'Haunter',id:93,hp:100,moves:[{name:'Shadow Ball',power:70,type:'Fantasma'},{name:'Sludge Bomb',power:70,type:'Veneno'}]},{name:'Golbat',id:42,hp:104,moves:[{name:'Air Cutter',power:65,type:'Voador'},{name:'Bite',power:55,type:'Sombrio'}]}],
+      [{name:'Rhydon',id:112,hp:122,moves:[{name:'Rock Slide',power:75,type:'Pedra'},{name:'Earthquake',power:85,type:'Terra'}]},{name:'Muk',id:89,hp:114,moves:[{name:'Sludge Bomb',power:75,type:'Veneno'},{name:'Brick Break',power:65,type:'Lutador'}]},{name:'Persian',id:53,hp:106,moves:[{name:'Slash',power:75,type:'Normal'},{name:'Bite',power:55,type:'Sombrio'}]}],
+      [{name:'Electabuzz',id:125,hp:108,moves:[{name:'Thunder Punch',power:75,type:'Eletrico'},{name:'Low Kick',power:60,type:'Lutador'}]},{name:'Weezing',id:110,hp:116,moves:[{name:'Sludge Bomb',power:80,type:'Veneno'},{name:'Thunderbolt',power:70,type:'Eletrico'}]},{name:'Nidoking',id:34,hp:122,moves:[{name:'Earthquake',power:85,type:'Terra'},{name:'Megahorn',power:80,type:'Inseto'}]}],
+      [{name:'Raticate',id:20,hp:104,moves:[{name:'Hyper Fang',power:75,type:'Normal'},{name:'Crunch',power:70,type:'Sombrio'}]},{name:'Arbok',id:24,hp:112,moves:[{name:'Poison Jab',power:75,type:'Veneno'},{name:'Earthquake',power:80,type:'Terra'}]},{name:'Rhydon',id:112,hp:128,moves:[{name:'Rock Slide',power:80,type:'Pedra'},{name:'Earthquake',power:90,type:'Terra'}]}]
+    ];
+
+    const SILPH_CO_EXTRA_GRUNTS = [
+      ['Mason',false,32,700],['Carla',true,32,720],['Hector',false,33,740],['Nina',true,33,760],['Raul',false,34,780],
+      ['Bianca',true,34,800],['Victor',false,35,820],['Luana',true,35,840],['Sergio',false,36,860],['Marisa',true,36,880],
+      ['Diego',false,37,900],['Tania',true,37,920],['Igor',false,38,940],['Camila',true,38,960],['Bruno',false,39,980]
+    ].map(([name,female,level,moneyReward],index) => ({
+      id:`silph_grunt_extra_${String(index+1).padStart(2,'0')}`,
+      name,
+      className:'Rocket Grunt',
+      portrait:female
+        ? ([3,13].includes(index)?'assets/rocket-grunt-pink.png':[5,11].includes(index)?'assets/rocket-grunt-great.png':index%4===1?'assets/rocket-grunt-blue.png':'assets/rocket-grunt-blonde.png')
+        : (index===4?'assets/rocket-nerd.png':[6,8].includes(index)?'assets/rocket-grunt-muscle.png':index%4===0?'assets/rocket-grunt-fat.png':'rocketgrunt'),
+      moneyReward,
+      team:SILPH_ROCKET_GRUNT_ROSTER[index].map((pokemon,slot) => ({
+        ...pokemon,
+        hp:pokemon.hp+Math.floor((level-32)*2.5),
+        level:level+slot,
+        moves:pokemon.moves.map(move => ({...move}))
+      }))
+    }));
+
+    const SILPH_CO_TRAINERS = [
+      {id:'silph_grunt_marcus',name:'Marcus',className:'Rocket Grunt',portrait:'assets/rocket-grunt-muscle.png',moneyReward:900,team:[
+        {name:'Raticate',id:20,hp:82,level:28,moves:[{name:'Hyper Fang',power:70,type:'Normal'},{name:'Bite',power:50,type:'Sombrio'}]},
+        {name:'Golbat',id:42,hp:86,level:29,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Bite',power:50,type:'Sombrio'}]},
+        {name:'Koffing',id:109,hp:88,level:30,moves:[{name:'Sludge',power:55,type:'Veneno'},{name:'Self-Destruct',power:70,type:'Normal'}]}
+      ]},
+      {id:'silph_scientist_gideon',name:'Gideon',className:'Cientista da Equipe Rocket',portrait:'assets/rocket-nerd.png',moneyReward:1100,team:[
+        {name:'Magnemite',id:81,hp:80,level:30,moves:[{name:'Thunderbolt',power:70,type:'Eletrico'},{name:'Sonic Boom',power:45,type:'Normal'}]},
+        {name:'Voltorb',id:100,hp:84,level:31,moves:[{name:'Thunderbolt',power:70,type:'Eletrico'},{name:'Swift',power:50,type:'Normal'}]},
+        {name:'Weezing',id:110,hp:96,level:32,moves:[{name:'Sludge Bomb',power:80,type:'Veneno'},{name:'Shadow Ball',power:70,type:'Fantasma'}]}
+      ]},
+      {id:'silph_grunt_ava',name:'Ava',className:'Rocket Grunt',portrait:'assets/rocket-grunt-blonde.png',moneyReward:1300,team:[
+        {name:'Ekans',id:23,hp:86,level:32,moves:[{name:'Poison Jab',power:65,type:'Veneno'},{name:'Bite',power:50,type:'Sombrio'}]},
+        {name:'Arbok',id:24,hp:98,level:33,moves:[{name:'Poison Jab',power:70,type:'Veneno'},{name:'Crunch',power:70,type:'Sombrio'}]},
+        {name:'Persian',id:53,hp:100,level:34,moves:[{name:'Slash',power:70,type:'Normal'},{name:'Bite',power:50,type:'Sombrio'}]},
+        {name:'Golbat',id:42,hp:102,level:34,moves:[{name:'Wing Attack',power:65,type:'Voador'},{name:'Poison Fang',power:60,type:'Veneno'}]}
+      ]},
+      ...SILPH_CO_EXTRA_GRUNTS,
+      {id:'silph_admin_archer',name:'Archer',className:'Administrador Rocket',portrait:'gentleman-gen4',moneyReward:1700,team:[
+        {name:'Golbat',id:42,hp:106,level:35,moves:[{name:'Wing Attack',power:65,type:'Voador'},{name:'Bite',power:55,type:'Sombrio'}]},
+        {name:'Weezing',id:110,hp:112,level:36,moves:[{name:'Sludge Bomb',power:80,type:'Veneno'},{name:'Flamethrower',power:70,type:'Fogo'}]},
+        {name:'Houndoom',id:229,hp:110,level:36,moves:[{name:'Flamethrower',power:75,type:'Fogo'},{name:'Crunch',power:75,type:'Sombrio'}]},
+        {name:'Arbok',id:24,hp:112,level:37,moves:[{name:'Poison Jab',power:70,type:'Veneno'},{name:'Earthquake',power:80,type:'Terra'}]}
+      ]},
+      {id:'silph_giovanni',name:'Giovanni',className:'Chefe da Equipe Rocket',portrait:'giovanni',moneyReward:5000,team:[
+        {name:'Nidorino',id:33,hp:118,level:38,moves:[{name:'Poison Jab',power:70,type:'Veneno'},{name:'Horn Attack',power:60,type:'Normal'}]},
+        {name:'Kangaskhan',id:115,hp:135,level:39,moves:[{name:'Body Slam',power:75,type:'Normal'},{name:'Crunch',power:70,type:'Sombrio'}]},
+        {name:'Rhyhorn',id:111,hp:128,level:39,moves:[{name:'Rock Slide',power:70,type:'Pedra'},{name:'Earthquake',power:80,type:'Terra'}]},
+        {name:'Nidoqueen',id:31,hp:142,level:40,moves:[{name:'Earthquake',power:80,type:'Terra'},{name:'Body Slam',power:70,type:'Normal'}]},
+        {name:'Nidoking',id:34,hp:148,level:41,moves:[{name:'Earthquake',power:85,type:'Terra'},{name:'Megahorn',power:80,type:'Inseto'}]}
+      ]}
+    ];
+
     const ELITE_FOUR_TRAINERS = [
       {id:'lorelei',name:'Lorelei',className:'Elite Four',portrait:'lorelei',moneyReward:12000,team:[
         {name:'Dewgong',id:87,hp:166,level:52,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]},
@@ -6963,6 +7170,7 @@
       grid.innerHTML = GYMS.map((g, i) => {
         const done = player.badgesList.includes(g.badge);
         const locked = i > 0 && player.badgesList.length < i;
+        const levelCap = getGymLevelCap(g);
         const portrait = g.portrait
           ? `<img src="${g.portrait}" alt="${g.leader}" style="width:80px;height:80px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4));" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><span style="display:none;font-size:2.5rem;">${g.icon}</span>`
           : `<span style="font-size:2.5rem;">${g.icon}</span>`;
@@ -6972,7 +7180,7 @@
             ${portrait}
           </div>
           <div class="game-card-body">
-            <div class="game-card-title">${g.name}</div>
+            <div class="game-card-title gym-card-title"><span>${g.name}</span><span class="gym-card-level-cap">LV CAP: Nv. ${levelCap}</span></div>
             <div class="game-card-desc"><strong>${g.leader}</strong> · Tipo: ${g.type}<br>${g.team.length} Pokémon</div>
             <div class="game-card-meta">
               <span class="status-tag ${done ? 'status-available' : locked ? 'status-locked' : 'status-available'}">${done ? '✓ Conquistado' : locked ? 'Bloqueado' : 'Desafiar'}</span>
@@ -7024,6 +7232,34 @@
       }).join('');
     }
 
+    function getSilphCoProgress() {
+      const defeated = Array.isArray(player.silphCoDefeated) ? player.silphCoDefeated : [];
+      let progress = 0;
+      while (progress < SILPH_CO_TRAINERS.length && defeated.includes(SILPH_CO_TRAINERS[progress].id)) progress++;
+      return progress;
+    }
+
+    function renderSilphCo() {
+      const grid = document.getElementById('silphCoGrid');
+      if (!grid) return;
+      if (!Array.isArray(player.silphCoDefeated)) player.silphCoDefeated = [];
+      const progress = getSilphCoProgress();
+      document.getElementById('silphCoProgress').textContent = `${progress}/${SILPH_CO_TRAINERS.length}`;
+      grid.innerHTML = SILPH_CO_TRAINERS.map((trainer, index) => {
+        const done = index < progress;
+        const unlocked = index === progress;
+        const action = unlocked ? `startSilphCoBattle('${trainer.id}')` : `showToast('${done ? 'Este treinador já foi derrotado.' : 'Derrote o oponente anterior para liberar este treinador.'}','${done ? 'info' : 'error'}')`;
+        const status = done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
+        const isCustomPortrait = trainer.portrait.startsWith('assets/');
+        const portraitSrc = isCustomPortrait ? trainer.portrait : `https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png`;
+        const portraitScale = isCustomPortrait ? 'transform:scale(1.6);' : '';
+        return `<div class="game-card" role="button" tabindex="0" onclick="${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}" style="${unlocked ? '' : 'opacity:.62;'}">
+          <div class="game-card-header" style="background:linear-gradient(135deg,#244b68,#122337);height:105px"><img src="${portraitSrc}" alt="${escapeHTML(trainer.name)}" style="width:84px;height:84px;object-fit:contain;image-rendering:pixelated;${portraitScale}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:2.7rem">&#128737;</span></div>
+          <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} &middot; ${escapeHTML(trainer.className)}</div><div class="game-card-desc">${trainer.team.length} Pok&eacute;mon &middot; n&iacute;veis ${trainer.team[0].level}-${trainer.team[trainer.team.length - 1].level}</div><div class="game-card-meta"><span class="status-tag ${done ? 'status-locked' : unlocked ? 'status-available' : 'status-locked'}">${status}</span><span class="reward">${trainer.moneyReward.toLocaleString('pt-BR')} Pok&eacute;dollar</span></div></div>
+        </div>`;
+      }).join('');
+    }
+
     function getKantoBadgeCount() {
       const badges = Array.isArray(player.badgesList) ? player.badgesList : [];
       return GYMS.filter(gym => badges.includes(gym.badge)).length;
@@ -7043,6 +7279,22 @@
       description.textContent = unlocked
         ? 'Desafie Lorelei, Bruno, Agatha, Lance e o CampeÃ£o.'
         : `InsÃ­gnias de Kanto: ${getKantoBadgeCount()}/8. Conquiste todas para entrar.`;
+    }
+
+    function hasDefeatedSabrinaGym() {
+      return Array.isArray(player?.badgesList) && player.badgesList.includes('P\u00e2ntano');
+    }
+
+    function updateSilphCoHomeCard() {
+      const card = document.getElementById('silphCoHomeCard');
+      const description = document.getElementById('silphCoHomeDesc');
+      if (!card || !description) return;
+      const unlocked = hasDefeatedSabrinaGym();
+      card.style.opacity = unlocked ? '1' : '0.62';
+      card.setAttribute('aria-disabled', String(!unlocked));
+      description.textContent = unlocked
+        ? 'Acesso liberado: enfrente a Equipe Rocket e avance pelos andares.'
+        : 'Derrote Sabrina no Ginásio de Saffron para liberar o acesso.';
     }
 
     function getEliteFourProgress() {
@@ -7299,6 +7551,7 @@
       if (id === 'item-catalog' && !isAdminAccount()) { showToast('Cat\u00e1logo de Itens dispon\u00edvel apenas para o administrador.', 'error'); id = 'home'; }
       if (id === 'admin' && !isAdminAccount()) { showToast('Acesso restrito ao administrador.', 'error'); id = 'home'; }
       if (id === 'elite-four' && !hasAllKantoBadges()) { showToast(`Conquiste todas as 8 Ins\u00edgnias de Kanto para desafiar a Elite Four (${getKantoBadgeCount()}/8).`, 'error'); id = 'home'; }
+      if (id === 'silph-co' && !hasDefeatedSabrinaGym()) { showToast('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.', 'error'); id = 'home'; }
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       const panel = document.getElementById('panel-'+id);
       if (panel) panel.classList.add('active');
@@ -7319,6 +7572,7 @@
       if (id === 'gyms') renderGyms();
       if (id === 'battle-tower') renderBattleTower();
       if (id === 'ss-anne') renderSSAnne();
+      if (id === 'silph-co') renderSilphCo();
       if (id === 'elite-four') renderEliteFour();
       if (id === 'missions') renderMissions();
       if (id === 'pc') renderPC();
@@ -8998,7 +9252,7 @@
 
     function endBattle(won, captured, capturedName) {
       battle.busy = true;
-      if (won && (battle.isGym || battle.isSSAnne || battle.isEliteFour) && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
+      if (won && (battle.isGym || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour) && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
         const shares = getBattleExperienceShares(getBattleExperience(battle.enemy, true), player.poke);
         battle.experienceShares = battle.experienceShares || new Map();
         for (const [pokemon, amount] of shares) {
@@ -9038,6 +9292,16 @@
           return;
         }
         endSSAnneVictory();
+        return;
+      }
+      if (won && battle.isSilphCo && battle.enemy.currentHp <= 0) {
+        if (battle.silphIndexPokemon < battle.silphTeam.length - 1) {
+          result.classList.remove('show');
+          document.getElementById('battleMenu').style.display = 'grid';
+          setTimeout(nextSilphCoPokemon, 400);
+          return;
+        }
+        endSilphCoVictory();
         return;
       }
       if (won && battle.isEliteFour && battle.enemy.currentHp <= 0) {
@@ -9210,7 +9474,7 @@
         .map(item => {
           const qty = getItemQty(item.key);
           if (qty <= 0) return '';
-          if (item.kind === 'ball' && (battle.isGym || battle.isTower || battle.isSSAnne || battle.isEliteFour)) return '';
+          if (item.kind === 'ball' && (battle.isGym || battle.isTower || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour)) return '';
           if (item.kind === 'ball' && battle.dungeon === 'Zona do Safari' && !['safari_ball', 'premier_ball', 'masterball'].includes(item.key)) return '';
           if (['battleBoost', 'direHit', 'guardSpec'].includes(item.kind)) {
             if (!player.poke || player.poke.hp <= 0) return '';
@@ -9292,7 +9556,7 @@
 
     async function tryCapture(ballKey) {
       if (!battle || battle.busy) return;
-      if (battle.isGym || battle.isTower || battle.isSSAnne || battle.isEliteFour) {
+      if (battle.isGym || battle.isTower || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour) {
         setLog(battle.isTower ? 'Não dá para capturar o Pokémon de um treinador!' : 'Não dá para capturar o Pokémon de um Líder de Ginásio!');
         backToMenu();
         return;
@@ -9356,6 +9620,7 @@
             askCaughtPokemonNickname(caught, namedPokemon => {
               if (player.party.length < 6) {
                 player.party.push(namedPokemon);
+                onMissionEvent('party_changed', player.party.length);
               } else {
                 const boxNum = depositToPC(namedPokemon);
                 if (boxNum >= 0) {
@@ -9493,6 +9758,93 @@
       saveGame();
     }
 
+    function startSilphCoBattle(trainerId) {
+      if (!hasDefeatedSabrinaGym()) { showToast('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.', 'error'); return; }
+      const index = SILPH_CO_TRAINERS.findIndex(entry => entry.id === trainerId);
+      const trainer = SILPH_CO_TRAINERS[index];
+      if (!trainer || battle?.busy) return;
+      if (index !== getSilphCoProgress()) {
+        showToast(index < getSilphCoProgress() ? 'Este treinador já foi derrotado.' : 'Derrote o oponente anterior para liberar este treinador.', 'error');
+        return;
+      }
+      const eligibleTeam = player.party.filter(pokemon => pokemon && pokemon.hp > 0);
+      if (!eligibleTeam.length) {
+        showToast('Sua equipe precisa estar saudável para invadir a Silph Co.', 'error');
+        return;
+      }
+      if (!player.poke || player.poke.hp <= 0) player.poke = eligibleTeam[0];
+      battle = {
+        isSilphCo: true, silphCoTrainer: trainer,
+        silphTeam: trainer.team.map(pokemon => {
+          const scaledHp = getLevelScaledHp(pokemon.hp, pokemon.level);
+          return { ...pokemon, hp: scaledHp, maxHp: scaledHp, currentHp: scaledHp };
+        }),
+        silphIndexPokemon: 0, enemy: null,
+        playerHp: player.poke.hp, playerMaxHp: player.poke.maxHp,
+        turn: 'player', busy: false, playerStatStages: {}, enemyStatStages: {}, playerCritStage: 0,
+        playerAccuracyStage: 0, guardSpecTurns: 0, playerScreens: {}, enemyScreens: {}, playerHazards: [], enemyHazards: []
+      };
+      battle.enemy = battle.silphTeam[0];
+      setupBattleUI(`${trainer.className} ${trainer.name} te desafiou!`);
+      applyBattleBackground('gym');
+      showBattleIntro(player.poke.name, trainer.name, 'Silph C.O', () => {
+        document.getElementById('battleOverlay').classList.add('active');
+        syncMuteButton(); SFX.unlock(); playBattleBgm();
+      });
+    }
+
+    function nextSilphCoPokemon() {
+      battle.silphIndexPokemon++;
+      battle.enemy = battle.silphTeam[battle.silphIndexPokemon];
+      battle.experienceAwarded = false;
+      battle.busy = false;
+      battle.turn = 'player';
+      setupBattleUI(`${battle.silphCoTrainer.name} enviou ${getPokemonDisplayName(battle.enemy)}!`);
+    }
+
+    function endSilphCoVictory() {
+      const trainer = battle.silphCoTrainer;
+      const xp = battle.totalExperience || 0;
+      const effortMessage = formatEffortGain(battle.totalEffort);
+      const shares = battle.experienceShares || new Map([[player.poke, xp]]);
+      player.poke.hp = Math.max(0, Math.min(player.poke.maxHp, battle.playerHp));
+      const levelsGained = awardPokemonExperience(player.poke, shares.get(player.poke) || 0);
+      let sharedLevels = 0;
+      const shared = [];
+      for (const [pokemon, amount] of shares) {
+        if (pokemon === player.poke || amount <= 0) continue;
+        sharedLevels += awardPokemonExperience(pokemon, amount);
+        shared.push(`${pokemon.name}: +${amount} XP`);
+      }
+      const money = Math.floor(trainer.moneyReward * (player.poke?.heldItem === 'amulet_coin' ? 2 : 1));
+      player.money += money;
+      if (!Array.isArray(player.silphCoDefeated)) player.silphCoDefeated = [];
+      if (!player.silphCoDefeated.includes(trainer.id)) player.silphCoDefeated.push(trainer.id);
+      const evolvedReady = levelsGained > 0 && canEvolve(player.poke);
+      updatePlayerExperienceBar();
+      if (levelsGained > 0 || sharedLevels > 0) SFX.levelUp();
+      document.getElementById('battleMenu').style.display = 'none';
+      document.getElementById('movesMenu').style.display = 'none';
+      const bag = document.getElementById('bagMenu'); if (bag) bag.style.display = 'none';
+      document.getElementById('battleResult').classList.add('show');
+      document.getElementById('resultTitle').textContent = 'Vitória na Silph C.O!';
+      document.getElementById('resultDesc').textContent = `Você derrotou ${trainer.className} ${trainer.name} e ${trainer.team.length} Pokémon!`;
+      const rows = [
+        `<div class="reward-row reward-money"><span class="reward-label">Pokédollar</span><strong class="reward-value">+ ₽ ${money.toLocaleString('pt-BR')}</strong></div>`,
+        `<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`
+      ];
+      if (levelsGained) rows.push(`<div class="reward-highlight">${player.poke.name} subiu ${levelsGained} nível(is), chegando ao Nv. ${player.poke.level}!</div>`);
+      if (effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
+      if (shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
+      document.getElementById('resultRewards').innerHTML = rows.join('');
+      if (evolvedReady) battle._pendingEvo = player.poke;
+      updateStatsUI();
+      renderSilphCo();
+      SFX.victory();
+      onMissionEvent('battle_win', 'Silph Co.');
+      saveGame();
+    }
+
     function startEliteFourBattle(trainerId) {
       if (!hasAllKantoBadges()) {
         showToast(`Conquiste todas as 8 Ins\u00edgnias de Kanto para desafiar a Elite Four (${getKantoBadgeCount()}/8).`, 'error');
@@ -9582,7 +9934,33 @@
       saveGame();
     }
 
-    function startGymBattle(gymIndex) {
+    let pendingGymCapChallenge = null;
+
+    function closeGymLevelCapNotice() {
+      const overlay = document.getElementById('gymLevelCapOverlay');
+      if (overlay) overlay.classList.remove('active');
+      pendingGymCapChallenge = null;
+    }
+
+    function confirmGymLevelCapChallenge() {
+      const gymIndex = pendingGymCapChallenge;
+      closeGymLevelCapNotice();
+      if (gymIndex !== null) startGymBattle(gymIndex, true);
+    }
+
+    function showGymLevelCapNotice(gymIndex, gym, overLevelPokemon, levelCap) {
+      pendingGymCapChallenge = gymIndex;
+      document.getElementById('gymCapSubtitle').textContent = `${gym.name} · Level cap Nv. ${levelCap}`;
+      document.getElementById('gymCapPokemonList').innerHTML = overLevelPokemon.map(pokemon => `
+        <div class="gym-cap-pokemon">
+          <div class="gym-cap-pokemon-icon" aria-hidden="true">&#9940;</div>
+          <div class="gym-cap-pokemon-info"><strong>${escapeHTML(pokemon.name)}</strong><small>Não poderá ser usado nesta batalha</small></div>
+          <span class="gym-cap-level">Nv. ${Number(pokemon.level) || 1}</span>
+        </div>`).join('');
+      document.getElementById('gymLevelCapOverlay').classList.add('active');
+    }
+
+    function startGymBattle(gymIndex, levelCapConfirmed = false) {
       const gym = GYMS[gymIndex];
       if (!gym) return;
       // Check if previous badges required (optional soft lock)
@@ -9595,6 +9973,11 @@
         return;
       }
       const levelCap = getGymLevelCap(gym);
+      const overLevelPokemon = player.party.filter(pokemon => !isGymPokemonEligible(pokemon, gym));
+      if (overLevelPokemon.length && !levelCapConfirmed) {
+        showGymLevelCapNotice(gymIndex, gym, overLevelPokemon, levelCap);
+        return;
+      }
       const eligibleTeam = player.party.filter(pokemon => pokemon.hp > 0 && isGymPokemonEligible(pokemon, gym));
       if (!eligibleTeam.length) {
         showToast(`Nenhum Pok\u00e9mon saud\u00e1vel est\u00e1 dentro do limite do gin\u00e1sio (Nv. ${levelCap}).`, 'error');
@@ -9643,8 +10026,8 @@
       ensurePokemonGender(player.poke);
       ensurePokemonTraits(e);
       ensurePokemonTraits(player.poke);
-      document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : battle.isSSAnne ? ` (${escapeHTML(battle.ssAnneTrainer.name)})` : battle.isEliteFour ? ` (${escapeHTML(battle.eliteTrainer.name)})` : '');
-      updateEnemyCaughtBadge(e.id, !battle.isGym && !battle.isTower && !battle.isSSAnne && !battle.isEliteFour);
+      document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : battle.isSSAnne ? ` (${escapeHTML(battle.ssAnneTrainer.name)})` : battle.isSilphCo ? ` (${escapeHTML(battle.silphCoTrainer.name)})` : battle.isEliteFour ? ` (${escapeHTML(battle.eliteTrainer.name)})` : '');
+      updateEnemyCaughtBadge(e.id, !battle.isGym && !battle.isTower && !battle.isSSAnne && !battle.isSilphCo && !battle.isEliteFour);
       document.getElementById('enemyLevel').textContent = `Nv. ${e.level}`;
       {
         const types = getTypes(e.id);
@@ -10001,6 +10384,7 @@
       normalizePokemonMoves(poke);
       box[slotIndex] = null;
       player.party.push(poke);
+      onMissionEvent('party_changed', player.party.length);
       if (!player.poke || player.poke.hp <= 0) player.poke = poke;
       saveGame();
       showToast(poke.name + ' retirado do PC!');
