@@ -20,7 +20,7 @@
       --error: #f87171; --success: #34d399; --warning: #fbbf24;
       --input-bg: #0e0e14; --radius: 12px;
       --shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
-      --sidebar-w: 240px; --hp-green: #22c55e; --hp-yellow: #eab308; --hp-red: #ef4444;
+      --hp-green: #22c55e; --hp-yellow: #eab308; --hp-red: #ef4444;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html {
@@ -184,47 +184,27 @@
     /* DASHBOARD */
     #dashboard { display: none; min-height: 100vh; }
     #dashboard.active { display: flex; }
-    .sidebar {
-      width: var(--sidebar-w); background: var(--card); border-right: 1px solid var(--border);
-      display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0;
-      z-index: 50; transition: transform 0.3s;
-    }
-    .sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); }
-    .sidebar-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; }
-    .sidebar-logo span {
-      width: 36px; height: 36px; background: linear-gradient(135deg, #7c3aed, #a78bfa);
-      border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
-    }
-    .sidebar-logo .pokeball-mark { width: 29px; height: 29px; }
-    .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
-    .nav-item {
-      display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px;
-      color: var(--text-muted); font-size: 0.9rem; font-weight: 500; cursor: pointer;
-      transition: all 0.2s; border: none; background: none; width: 100%; font-family: inherit; text-align: left;
-    }
-    .nav-item:hover { background: var(--input-bg); color: var(--text); }
-    .nav-item.active { background: rgba(124,58,237,0.15); color: var(--primary-hover); }
-    .nav-item .icon { font-size: 1.2rem; width: 24px; text-align: center; }
-    .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
-    .player-card { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 12px; background: var(--input-bg); cursor: pointer; width: 100%; border: 1px solid transparent; color: inherit; text-align: left; font: inherit; transition: border-color .18s, background .18s; }
-    .player-card:hover, .player-card.active { border-color: var(--primary); background: rgba(124,58,237,.12); }
-    .player-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-    .player-avatar {
-      width: 42px; height: 42px; border-radius: 10px;
-      background: linear-gradient(135deg, #7c3aed, #ec4899);
-      display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;
-    }
-    .sidebar .player-info { flex: 1; min-width: 0; overflow: hidden; }
-    .player-name { font-weight: 600; font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .player-meta { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    .main { margin-left: 0; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
     .topbar {
       padding: 16px 28px; border-bottom: 1px solid var(--border);
       background: rgba(20,20,28,0.85); backdrop-filter: blur(12px);
       display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 40;
     }
-    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-left { display: flex; align-items: center; gap: 18px; min-width: 0; }
+    .topbar-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; white-space: nowrap; }
+    .topbar-brand-mark { width: 36px; height: 36px; padding: 3px; border-radius: 10px; background: linear-gradient(135deg,#7c3aed,#a78bfa); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+    .topbar-brand-mark .pokeball-mark { width: 29px; height: 29px; }
+    .topbar-brand-name { font-size: 1.05rem; font-weight: 750; letter-spacing: -.02em; }
+    .topbar-actions { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .topbar-profile { display: flex; align-items: center; flex: 0 1 auto; width: auto; min-width: 0; max-width: 190px; padding: 6px 10px; gap: 9px; border: 1px solid var(--border); border-radius: 12px; background: var(--input-bg); color: var(--text); text-align: left; font: inherit; cursor: pointer; transition: border-color .18s, background .18s; }
+    .topbar-profile:hover, .topbar-profile.active { border-color: var(--primary); background: rgba(124,58,237,.12); }
+    .topbar-profile:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .topbar-profile .player-info { flex: 1; min-width: 0; overflow: hidden; }
+    .topbar-profile .player-avatar { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg,#7c3aed,#ec4899); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex: 0 0 auto; }
+    .topbar-profile .player-name { max-width: 112px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .84rem; font-weight: 700; }
+    .topbar-profile .player-meta { margin-top: 1px; color: var(--text-muted); font-size: .68rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .topbar-logout { flex: 0 0 auto; width: auto; margin: 0; padding: 9px 12px; white-space: nowrap; }
     .location-badge {
       display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px;
       background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.25);
@@ -263,8 +243,12 @@
     .pvp-arena .battle-bg { background:linear-gradient(180deg,#1a2744 0%,#2a4a3a 45%,#1a3a2a 100%); }
     .pvp-arena .battle-field { min-height:360px; }
     .pvp-arena .battle-ui { width:min(100%,700px); }
+    .pvp-arena .pvp-fainted-stage { width:140px; height:140px; flex:0 0 140px; }
     .pvp-room-toolbar { position:absolute; z-index:3; top:12px; left:14px; right:14px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
     .pvp-room-toolbar .btn { width:auto; margin:0; padding:7px 11px; }
+    .pvp-room-clock { color:#fef3c7; font-size:.82rem; font-weight:800; white-space:nowrap; }
+    .pvp-room-clock.urgent { color:#fca5a5; animation:pvpTimerPulse 1s ease-in-out infinite; }
+    @keyframes pvpTimerPulse { 50% { opacity:.55; } }
     .pvp-turn-prompt { margin:12px 0 0; color:var(--text-muted); font-size:.82rem; }
     .pvp-waiting-action { padding:14px; border:1px solid var(--border); border-radius:12px; text-align:center; color:var(--text-muted); background:var(--input-bg); }
     .pvp-trainer-name { margin-bottom:4px; color:var(--text-muted); font-size:.68rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
@@ -275,6 +259,7 @@
       .pvp-arena .battle-enemy, .pvp-arena .battle-player { gap:6px; }
       .pvp-arena .enemy-info, .pvp-arena .player-info { min-width:0; width:min(58%,240px); padding:8px 10px; }
       .pvp-arena .enemy-sprite, .pvp-arena .player-sprite { width:clamp(86px,24vw,140px); height:clamp(86px,24vw,140px); }
+      .pvp-arena .pvp-fainted-stage { width:clamp(86px,24vw,140px); height:clamp(86px,24vw,140px); flex-basis:clamp(86px,24vw,140px); }
       .pvp-arena .battle-ui { padding:12px 12px 14px; }
     }
     @media (max-width:560px) {
@@ -362,8 +347,6 @@
     }
     .mission-accept-button:hover { background: linear-gradient(135deg, #8b5cf6, #7c3aed); transform: translateY(-1px); }
     .mission-accept-button:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 2px; }
-    .menu-toggle { display: none; background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; padding: 4px; }
-    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 45; }
 
     /* ========== BATTLE UI ========== */
     #battleOverlay {
@@ -610,14 +593,20 @@
     }
 
     @media (max-width: 768px) {
-      .sidebar { transform: translateX(-100%); }
-      .sidebar.open { transform: translateX(0); }
-      .sidebar-overlay.open { display: block; }
-      .main { margin-left: 0; }
-      .menu-toggle { display: block; }
       .content { padding: 20px 16px; }
       .welcome-banner { flex-direction: column; text-align: center; }
       .topbar-stats { display: none; }
+      .topbar { padding: 10px 14px; gap: 8px; }
+      .topbar-actions { gap: 7px; }
+      .topbar-profile { min-width: 0; max-width: 142px; padding: 5px 7px; gap: 6px; }
+      .topbar-brand { gap: 7px; }
+      .topbar-brand-mark { width: 32px; height: 32px; padding: 2px; }
+      .topbar-brand-mark .pokeball-mark { width: 27px; height: 27px; }
+      .topbar-brand-name { font-size: .9rem; }
+      .topbar-profile .player-avatar { width: 30px; height: 30px; font-size: .95rem; }
+      .topbar-profile .player-meta { display: none; }
+      .topbar-profile .player-name { max-width: 86px; font-size: .78rem; }
+      .topbar-logout { padding: 7px 9px; font-size: .76rem; }
       .cards-grid { grid-template-columns: 1fr; }
       .enemy-sprite { width: 100px; height: 100px; }
       .player-sprite { width: 110px; height: 110px; }
@@ -628,7 +617,15 @@
       .party-ball { width: 22px; height: 22px; border-width: 1.5px; }
       .party-ball::after { width: 7px; height: 7px; border-width: 1.5px; }
     }
+    @media (max-width: 360px) {
+      .topbar { padding-left: 8px; padding-right: 8px; }
+      .topbar-brand-name { font-size: .76rem; }
+      .topbar-profile { max-width: 105px; padding: 4px 5px; gap: 5px; }
+      .topbar-profile .player-name { max-width: 54px; font-size: .72rem; }
+      .topbar-logout { padding: 6px 7px; font-size: .7rem; }
+    }
     @media (max-width: 480px) {
+      .location-badge { display: none; }
       .card { padding: 32px 20px 26px; }
       .social { flex-direction: column; }
       .starters-grid { gap: 8px; }
@@ -1372,33 +1369,29 @@
 
   <!-- DASHBOARD -->
   <div id="dashboard">
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header"><div class="sidebar-logo"><span><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pokébola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></span> Pokémon Trainer</div></div>
-      <nav class="sidebar-nav">
-        <button class="nav-item active" data-panel="home"><span class="icon">🏠</span> Início</button>
-      </nav>
-      <div class="sidebar-footer">
-        <button type="button" class="player-card" id="playerProfileLink" onclick="switchPanel('profile')" aria-label="Abrir perfil do treinador">
-          <div class="player-avatar" id="dashAvatar">♂️</div>
-          <div class="player-info">
-            <div class="player-name" id="dashName">Treinador</div>
-            <div class="player-meta" id="dashMeta">Kanto</div>
-          </div>
-        </button>
-        <button type="button" class="btn btn-secondary" id="btnLogout" onclick="logoutTrainer()" style="width:100%;margin-top:10px;padding:10px;font-size:0.85rem;">🚪 Sair / Logout</button>
-      </div>
-    </aside>
     <div class="main">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="menu-toggle" id="menuToggle">☰</button>
+          <div class="topbar-brand" aria-label="Pok&#233;mon Trainer">
+            <span class="topbar-brand-mark"><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pok&#233;bola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></span>
+            <span class="topbar-brand-name">Pok&#233;mon Trainer</span>
+          </div>
           <div class="location-badge">📍 Região atual: Kanto</div>
         </div>
-        <div class="topbar-stats">
-          <div class="stat-pill">💰 <strong id="dashMoney">₽ 3.000</strong></div>
+        <div class="topbar-actions">
+          <div class="topbar-stats">
+            <div class="stat-pill">💰 <strong id="dashMoney">₽ 3.000</strong></div>
           <div class="stat-pill">⭐ <strong id="dashLevel">Nv. 1</strong></div>
           <div class="stat-pill">🏅 <strong id="dashBadges">0/8</strong></div>
+        </div>
+          <button type="button" class="player-card topbar-profile" id="playerProfileLink" onclick="switchPanel('profile')" aria-label="Abrir perfil do treinador">
+            <div class="player-avatar" id="dashAvatar">&#9794;&#65039;</div>
+            <div class="player-info">
+              <div class="player-name" id="dashName">Treinador</div>
+              <div class="player-meta" id="dashMeta">Kanto</div>
+            </div>
+          </button>
+          <button type="button" class="btn btn-secondary topbar-logout" id="btnLogout" onclick="logoutTrainer()">&#128682; Sair</button>
         </div>
       </header>
       <div class="content">
@@ -2553,6 +2546,10 @@
           type: normalizeBattleType(data.type?.name || 'normal'),
           power: Number(data.power) || 0,
           accuracy: data.accuracy,
+          priority: Number(data.priority) || 0,
+          target: data.target?.name || '',
+          healing: Math.max(0,Number(data.meta?.healing)||0),
+          drain: Math.max(0,Number(data.meta?.drain)||0),
           pp: Number(data.pp) || 20,
           basePp: Number(data.pp) || 20,
           maxPp: Number(data.pp) || 20,
@@ -6245,8 +6242,6 @@
         if (id === 'profile') profileLink.setAttribute('aria-current', 'page');
         else profileLink.removeAttribute('aria-current');
       }
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('open');
       if (id === 'center') refreshCenterUI();
       if (id === 'market') refreshMarketUI();
       if (id === 'bag') renderBag();
@@ -6273,15 +6268,37 @@
     let pvpSubmitting = false;
     let pvpBattleMenu = 'main';
     let pvpBattleMenuTurn = 0;
+    let pvpTimerInterval = null;
+    let pvpLastTimeoutResolveAt = 0;
+    const pvpBaseStatsCache = new Map();
 
     function pvpGetSelectedTeam() {
       if (!player || !(pvpSelectedIndices instanceof Set)) return [];
       return [...pvpSelectedIndices].sort((a,b)=>a-b).map(index=>player.party[index]).filter(Boolean);
     }
 
-    function pvpBuildTeamSnapshot() {
-      return pvpGetSelectedTeam().map(pokemon => {
-        const maxHp = Math.max(1, Math.round(Number(pokemon.maxHp) || 1));
+    async function pvpBuildTeamSnapshot() {
+      const selected = pvpGetSelectedTeam();
+      const baseStats = await Promise.all(selected.map(async pokemon => {
+        const id = Number(pokemon.id);
+        if (pvpBaseStatsCache.has(id)) return pvpBaseStatsCache.get(id);
+        const request = (async () => {
+        try {
+          const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`);
+          if (!response.ok) throw new Error('stats unavailable');
+          const data = await response.json();
+          return Object.fromEntries(data.stats.map(entry => [
+            ({'hp':'hp','attack':'attack','defense':'defense','special-attack':'specialAttack','special-defense':'specialDefense','speed':'speed'})[entry.stat.name],
+            Number(entry.base_stat) || 1
+          ]));
+        } catch (_) {
+          return {hp:Number(pokemon.maxHp)||10,attack:50,defense:50,specialAttack:50,specialDefense:50,speed:50};
+        }
+        })();
+        pvpBaseStatsCache.set(id,request);
+        return request;
+      }));
+      return selected.map((pokemon, pokemonIndex) => {
         const stats = ['hp','attack','defense','specialAttack','specialDefense','speed'];
         const ivs = Object.fromEntries(stats.map(stat=>{
           const value = Number(pokemon.ivs?.[stat]);
@@ -6291,21 +6308,43 @@
           const value = Number(pokemon.evs?.[stat]);
           return [stat,Number.isInteger(value)&&value>=0&&value<=252?value:0];
         }));
-        const moves = (pokemon.moves || []).filter(move => Number(move.power) > 0).slice(0,4).map(move => ({
+        const calculatedStats = pvpCalculateStats(baseStats[pokemonIndex], pokemon, ivs, evs);
+        const maxHp = calculatedStats.hp;
+        const moves = (pokemon.moves || []).filter(move => Number(move.power) > 0 || move.healing>0 || move.drain>0 || move.statChanges?.length || ['burn','paralysis','poison','sleep','freeze'].includes(move.statusEffect?.status)).slice(0,4).map(move => ({
           name: String(move.name || 'Golpe'), type: normalizeBattleType(move.type || 'Normal'),
-          power: Math.max(1, Math.min(250, Math.floor(Number(move.power) || 1))),
+          power: Math.max(0, Math.min(250, Math.floor(Number(move.power) || 0))),
           accuracy: move.accuracy !== null && move.accuracy !== undefined && Number.isFinite(Number(move.accuracy)) ? Math.max(1, Math.min(100, Number(move.accuracy))) : 100,
+          priority: Math.max(-7,Math.min(7,Math.floor(Number(move.priority ?? ({'quick attack':1,'mach punch':1,'extreme speed':1,'protect':3,'detect':3,'endure':3,'follow me':1,'helping hand':5,'counter':-5,'mirror coat':-5,'vital throw':-1,'focus punch':-3}[String(move.name||'').toLowerCase()] ?? 0))||0))),
+          target: String(move.target||''), healing: Math.max(0,Math.min(100,Number(move.healing)||0)), drain: Math.max(0,Math.min(100,Number(move.drain)||0)),
+          statusEffect: move.statusEffect && ['burn','paralysis','poison','sleep','freeze'].includes(move.statusEffect.status) ? {status:move.statusEffect.status,chance:Math.max(0,Math.min(1,Number(move.statusEffect.chance)||0))} : null,
+          statChanges: Array.isArray(move.statChanges) ? move.statChanges.filter(change=>['self','target','attacker'].includes(change.target)&&['attack','defense','specialAttack','specialDefense','speed','accuracy','evasion'].includes(change.stat)).map(change=>({target:change.target,stat:change.stat,stages:Math.max(-6,Math.min(6,Number(change.stages)||0))})) : [],
           pp: Math.max(1, Math.floor(Number(move.maxPp) || Number(move.pp) || 10)),
           maxPp: Math.max(1, Math.floor(Number(move.maxPp) || Number(move.pp) || 10))
         }));
         return {
           id: Number(pokemon.id) || 1, name: String(pokemon.name || 'Pokémon').slice(0,32),
           gender: pokemon.gender || '', level: Math.max(1, Math.min(100, Math.floor(Number(pokemon.level) || 1))), maxHp,
-          types: getTypes(pokemon.id),
+          types: getTypes(pokemon.id), stats: calculatedStats,
           hp: maxHp, ability: ABILITY_INFO[pokemon.ability] ? pokemon.ability : '',
           nature: String(pokemon.nature || ''), ivs, evs, moves
         };
       });
+    }
+
+    function pvpCalculateStats(base, pokemon, ivs, evs) {
+      const level = Math.max(1,Math.min(100,Math.floor(Number(pokemon.level)||1)));
+      const stats = {};
+      for (const stat of ['hp','attack','defense','specialAttack','specialDefense','speed']) {
+        const baseStat = Math.max(1,Number(base?.[stat])||50);
+        const core = Math.floor(((2*baseStat+(Number(ivs[stat])||0)+Math.floor((Number(evs[stat])||0)/4))*level)/100);
+        if (stat==='hp') { stats.hp=core+level+10; continue; }
+        let nature=1;
+        const label={attack:'Ataque',defense:'Defesa',specialAttack:'Ataque Especial',specialDefense:'Defesa Especial',speed:'Velocidade'}[stat];
+        const trait=NATURES.find(entry=>entry.name===(pokemon.natureMint||pokemon.nature));
+        if(trait?.up===label) nature=1.1; else if(trait?.down===label) nature=0.9;
+        stats[stat]=Math.max(1,Math.floor((core+5)*nature));
+      }
+      return stats;
     }
 
     function pvpRenderTeamSelection() {
@@ -6315,7 +6354,7 @@
       }
       return `<div class="pvp-team-select">${player.party.map((pokemon,index)=>{
         const selected = pvpSelectedIndices.has(index);
-        const moves = (pokemon.moves || []).filter(move=>Number(move.power)>0).length;
+        const moves = (pokemon.moves || []).filter(move=>Number(move.power)>0 || move.healing>0 || move.drain>0 || move.statChanges?.length || ['burn','paralysis','poison','sleep','freeze'].includes(move.statusEffect?.status)).length;
         return `<label class="pvp-select-card"><input type="checkbox" ${selected?'checked':''} onchange="togglePvpPokemon(${index},this.checked)" />
           <img src="${SPRITE(pokemon.id)}" alt="" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" />
           <span><strong>${escapeHTML(pokemon.name)}</strong><br><small>Nv. ${pokemon.level} · ${moves} golpes</small></span></label>`;
@@ -6349,7 +6388,7 @@
           <input id="pvpRoomCodeInput" type="text" maxlength="6" placeholder="Código da sala" aria-label="Código da sala" autocomplete="off" />
           <button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="pvpJoinRoom()">Entrar / retomar</button>
         </div>
-        <p style="color:var(--text-muted);font-size:.78rem;margin:12px 0 0;">Somente golpes de dano direto são habilitados. Não há itens, recompensas ou mudanças no seu save.</p>
+        <p style="color:var(--text-muted);font-size:.78rem;margin:12px 0 0;">Golpes, atributos e efeitos desta batalha seguem as regras centrais da 3ª geração. Não há itens, recompensas ou mudanças no seu save.</p>
       </div>`;
     }
 
@@ -6363,10 +6402,10 @@
 
     async function pvpCreateRoom() {
       if (pvpSubmitting || !onlineUser || !supabaseClient) return;
-      const team = pvpBuildTeamSnapshot();
-      if (!team.length) { showToast('Selecione ao menos um Pokémon.', 'error'); return; }
       pvpSubmitting = true;
       try {
+        const team = await pvpBuildTeamSnapshot();
+        if (!team.length) { showToast('Selecione ao menos um Pokémon.', 'error'); return; }
         let room, error;
         for (let attempt=0; attempt<4; attempt++) {
           const result = await supabaseClient.rpc('pvp_create_room', {
@@ -6388,10 +6427,10 @@
       const input = document.getElementById('pvpRoomCodeInput');
       const code = String(input?.value || '').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
       if (code.length !== 6) { showToast('Digite o código de 6 caracteres.', 'error'); return; }
-      const team = pvpBuildTeamSnapshot();
-      if (!team.length) { showToast('Selecione ao menos um Pokémon.', 'error'); return; }
       pvpSubmitting = true;
       try {
+        const team = await pvpBuildTeamSnapshot();
+        if (!team.length) { showToast('Selecione ao menos um Pokémon.', 'error'); return; }
         const existing = await supabaseClient.from('pvp_rooms').select('*').eq('room_code',code).maybeSingle();
         if (existing.error) throw existing.error;
         if (existing.data && [existing.data.host_id,existing.data.guest_id].includes(onlineUser.id)) {
@@ -6412,10 +6451,12 @@
       if (!room || !room.id) throw new Error('A sala retornou dados inválidos.');
       if (pvpChannel) { await supabaseClient.removeChannel(pvpChannel); pvpChannel = null; }
       pvpRoom = room;
+      pvpEnsureTimer();
       pvpChannel = supabaseClient.channel('pvp-room-' + room.id)
         .on('postgres_changes', { event:'UPDATE', schema:'public', table:'pvp_rooms', filter:'id=eq.' + room.id }, payload => {
           pvpRoom = payload.new;
           renderPvpPanel();
+          if (pvpRoom.status !== 'battle') pvpStopTimer();
           pvpMaybeStartRoom();
           pvpMaybeResolveTurn();
         })
@@ -6425,6 +6466,34 @@
       renderPvpPanel();
       pvpMaybeStartRoom();
       pvpMaybeResolveTurn();
+    }
+
+    function pvpEnsureTimer() {
+      if (pvpTimerInterval) return;
+      pvpTimerInterval = setInterval(pvpTimerTick,1000);
+      pvpTimerTick();
+    }
+
+    function pvpStopTimer() {
+      if (pvpTimerInterval) clearInterval(pvpTimerInterval);
+      pvpTimerInterval = null;
+    }
+
+    function pvpTimerTick() {
+      if (!pvpRoom || pvpRoom.status !== 'battle') return;
+      const clock = document.getElementById('pvpTurnClock');
+      const deadline = Date.parse(pvpRoom.turn_deadline || '');
+      if (!Number.isFinite(deadline)) {
+        if (clock) clock.textContent = 'Relógio indisponível';
+        return;
+      }
+      const remaining = Math.max(0,Math.ceil((deadline-Date.now())/1000));
+      const myAction = pvpIsHost() ? pvpRoom.host_action : pvpRoom.guest_action;
+      if (clock) {
+        clock.textContent = remaining <= 0 ? 'Tempo esgotado…' : `${myAction?'Adversário':'Sua jogada'}: ${remaining}s`;
+        clock.classList.toggle('urgent',remaining<=10);
+      }
+      if (remaining <= 0) pvpMaybeResolveTurn();
     }
 
     async function pvpMaybeStartRoom() {
@@ -6448,7 +6517,7 @@
       return ({Normal:'#a8a878',Fogo:'#f08030',Agua:'#6890f0',Planta:'#78c850',Eletrico:'#f8d030',Gelo:'#98d8d8',Lutador:'#c03028',Veneno:'#a040a0',Terra:'#e0c068',Voador:'#a890f0',Psiquico:'#f85888',Inseto:'#a8b820',Pedra:'#b8a038',Fantasma:'#705898',Dragao:'#7038f8',Sombrio:'#705848','Aço':'#b8b8d0',Fada:'#ee99ac'})[normalizeBattleType(type)] || '#a8a878';
     }
 
-    function pvpBattleInfo(pokemon, hp, className, party = null, partyHp = null) {
+    function pvpBattleInfo(pokemon, hp, className, party = null, partyHp = null, majorStatus = null) {
       const maxHp = Math.max(1, Number(pokemon.maxHp) || 1);
       const currentHp = Math.max(0, Math.min(maxHp, Number(hp) || 0));
       const percent = Math.round(currentHp / maxHp * 100);
@@ -6458,6 +6527,8 @@
       return `<div>${teamBalls}
         <div${className === 'enemy-info' ? ' class="enemy-name-row"' : ''}><div class="poke-name">${getPokemonDisplayNameHTML(pokemon)}</div></div>
         <div class="battle-level-type-row"><div class="poke-level">Nv. ${pokemon.level}</div><div class="battle-level-type-badges">${types.map(type=>`<span class="type-badge ${typeClass([type])}">${type}</span>`).join('')}</div></div>
+        ${majorStatus?.status?`<div class="battle-status-indicators"><span class="battle-stat-stage negative">${escapeHTML(STATUS_LABELS[majorStatus.status]||majorStatus.status)}</span></div>`:''}
+        ${currentHp<=0?'<div class="battle-status-indicators"><span class="battle-stat-stage negative">Desmaiado</span></div>':''}
         <div class="hp-bar-wrap"><div class="hp-label"><span>HP</span><span>${currentHp}/${maxHp}</span></div><div class="hp-bar"><div class="hp-fill ${healthTone}" style="width:${percent}%"></div></div></div>
       </div>`;
     }
@@ -6492,6 +6563,7 @@
         root.innerHTML = `<div style="margin-bottom:12px;color:var(--text-muted)">Sala <strong class="pvp-code" style="font-size:1rem">${escapeHTML(room.room_code)}</strong></div>${pvpRenderRoomStatus()}`;
         return;
       }
+      pvpEnsureTimer();
       const state = room.battle || {};
       const myHost = pvpIsHost();
       const localTeam = pvpMyTeam(), foeTeam = pvpTheirTeam();
@@ -6499,6 +6571,8 @@
       const foeActive = Number(state[myHost?'guestActive':'hostActive']) || 0;
       const localHp = state[myHost?'hostHp':'guestHp'] || [];
       const foeHp = state[myHost?'guestHp':'hostHp'] || [];
+      const localStatus = state[myHost?'hostStatus':'guestStatus'] || [];
+      const foeStatus = state[myHost?'guestStatus':'hostStatus'] || [];
       const localPp = state[myHost?'hostPp':'guestPp'] || [];
       const foeActionPending = Boolean(myHost ? room.guest_action : room.host_action);
       const myActionPending = Boolean(myHost ? room.host_action : room.guest_action);
@@ -6530,15 +6604,18 @@
             : `<div class="battle-actions"><button class="battle-btn fight" ${activeHp<=0?'disabled':''} onclick="pvpSetBattleMenu('moves')">⚔️ Lutar</button><button class="battle-btn pokemon" onclick="pvpSetBattleMenu('switch')">🔄 Trocar Pokémon</button></div>`;
       const latestLog = (state.log || []).slice(-1)[0] || 'A batalha começou!';
       const local = localTeam[localActive], opponent = foeTeam[foeActive];
+      const localFainted = (Number(localHp[localActive]) || 0) <= 0;
+      const foeFainted = (Number(foeHp[foeActive]) || 0) <= 0;
       root.innerHTML = `<div class="pvp-arena">
         <div class="battle-bg"></div><div class="battle-sky"></div><div class="battle-ground"></div>
-        <div class="pvp-room-toolbar"><span>Sala <strong class="pvp-code" style="font-size:1rem">${escapeHTML(room.room_code)}</strong> · Turno ${turn}</span><button class="btn btn-secondary" onclick="pvpLeaveRoom()">Sair da batalha</button></div>
+        <div class="pvp-room-toolbar"><span>Sala <strong class="pvp-code" style="font-size:1rem">${escapeHTML(room.room_code)}</strong> · Turno ${turn}</span><span class="pvp-room-clock" id="pvpTurnClock">45s</span><button class="btn btn-secondary" onclick="pvpLeaveRoom()">Sair da batalha</button></div>
         <div class="battle-field">
-          <div class="battle-enemy"><div class="enemy-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.guest_name:room.host_name)}</div>${pvpBattleInfo(opponent,foeHp[foeActive],'enemy-info')}</div><div class="sprite-stage enemy-stage"><div class="sprite-shadow"></div><img class="enemy-sprite" src="${SPRITE_ANIM(opponent.id)}" alt="${escapeHTML(opponent.name)}" onerror="this.onerror=null;this.src='${SPRITE_FRONT(opponent.id)}'" /></div></div>
-          <div class="battle-player"><div class="sprite-stage player-stage"><div class="sprite-shadow"></div><img class="player-sprite" src="${SPRITE_BACK(local.id)}" alt="${escapeHTML(local.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(local.id)}'" /></div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</div>${pvpBattleInfo(local,localHp[localActive],'player-info',localTeam,localHp)}</div></div>
+          <div class="battle-enemy"><div class="enemy-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.guest_name:room.host_name)}</div>${pvpBattleInfo(opponent,foeHp[foeActive],'enemy-info',null,null,foeStatus[foeActive])}</div><div class="sprite-stage enemy-stage ${foeFainted?'pvp-fainted-stage':''}" ${foeFainted?'aria-hidden="true"':''}>${foeFainted?'':'<div class="sprite-shadow"></div>'}${foeFainted?'':`<img class="enemy-sprite" src="${SPRITE_ANIM(opponent.id)}" alt="${escapeHTML(opponent.name)}" onerror="this.onerror=null;this.src='${SPRITE_FRONT(opponent.id)}'" />`}</div></div>
+          <div class="battle-player"><div class="sprite-stage player-stage ${localFainted?'pvp-fainted-stage':''}" ${localFainted?'aria-hidden="true"':''}>${localFainted?'':'<div class="sprite-shadow"></div>'}${localFainted?'':`<img class="player-sprite" src="${SPRITE_BACK(local.id)}" alt="${escapeHTML(local.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(local.id)}'" />`}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</div>${pvpBattleInfo(local,localHp[localActive],'player-info',localTeam,localHp,localStatus[localActive])}</div></div>
         </div>
         <div class="battle-ui"><div class="battle-log" aria-live="polite" style="margin:0">${escapeHTML(latestLog)}</div><div class="pvp-turn-prompt">${myActionPending?'':activeHp<=0?'Seu Pokémon desmaiou. Escolha quem entrará na batalha.':pvpBattleMenu==='moves'?'Escolha um golpe.':pvpBattleMenu==='switch'?'Escolha um Pokémon para trocar.':'Escolha sua ação.'}</div>${actionMenu}</div>
       </div>`;
+      pvpTimerTick();
     }
 
     async function pvpSubmitAction(action) {
@@ -6557,7 +6634,13 @@
     }
 
     function pvpMaybeResolveTurn() {
-      if (!pvpRoom || pvpRoom.status !== 'battle' || !pvpRoom.host_action || !pvpRoom.guest_action || pvpResolving) return;
+      if (!pvpRoom || pvpRoom.status !== 'battle' || pvpResolving) return;
+      const bothActions = Boolean(pvpRoom.host_action && pvpRoom.guest_action);
+      const deadline = Date.parse(pvpRoom.turn_deadline || '');
+      const timedOut = Number.isFinite(deadline) && deadline <= Date.now();
+      if (!bothActions && !timedOut) return;
+      if (timedOut && Date.now()-pvpLastTimeoutResolveAt<3000) return;
+      if (timedOut) pvpLastTimeoutResolveAt = Date.now();
       pvpResolveTurn();
     }
 
@@ -6568,6 +6651,7 @@
         const { data, error } = await supabaseClient.rpc('pvp_resolve_turn', { p_code:pvpRoom.room_code });
         if (error) throw error;
         pvpRoom = data;
+        if (pvpRoom.status !== 'battle') pvpStopTimer();
         renderPvpPanel();
       } catch (error) { showToast('Falha ao resolver o turno PvP: ' + error.message, 'error'); }
       finally { pvpResolving = false; }
@@ -6579,6 +6663,7 @@
         const { data, error } = await supabaseClient.rpc('pvp_leave_room',{p_code:pvpRoom.room_code});
         if (error) throw error;
         pvpRoom = data;
+        if (pvpRoom.status !== 'battle') pvpStopTimer();
         renderPvpPanel();
       } catch (error) { showToast('Não foi possível sair da sala: ' + error.message, 'error'); }
     }
@@ -6586,18 +6671,11 @@
     async function pvpCloseRoom() {
       if (pvpRoom && ['waiting','ready','battle'].includes(pvpRoom.status)) { await pvpLeaveRoom(); return; }
       if (pvpChannel) { await supabaseClient.removeChannel(pvpChannel); pvpChannel = null; }
+      pvpStopTimer();
       pvpRoom = null;
       renderPvpPanel();
     }
     document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => switchPanel(i.dataset.panel)));
-    document.getElementById('menuToggle').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('open');
-      document.getElementById('sidebarOverlay').classList.toggle('open');
-    });
-    document.getElementById('sidebarOverlay').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('open');
-    });
 
     // ========== BATTLE SFX (Web Audio) ==========
     const SFX = (() => {
@@ -6847,6 +6925,7 @@
         await flushGameSave();
         if (pvpRoom && ['waiting','ready','battle'].includes(pvpRoom.status)) await pvpLeaveRoom();
         if (pvpChannel) { await supabaseClient.removeChannel(pvpChannel); pvpChannel = null; }
+        pvpStopTimer();
         pvpRoom = null;
         pvpSelectedIndices.clear();
         const { error } = await supabaseClient.auth.signOut();
