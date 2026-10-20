@@ -5707,7 +5707,7 @@
       { id: 'carbos', key: 'carbos', name: 'Carbos', desc: 'Aumenta 10 EVs de Velocidade.', category: 'medicine', kind: 'ev', stat: 'speed', amount: 10, price: 9800 },
       { id: 'calcium', key: 'calcium', name: 'Calcium', desc: 'Aumenta 10 EVs de Ataque Especial.', category: 'medicine', kind: 'ev', stat: 'specialAttack', amount: 10, price: 9800 },
       { id: 'zinc', key: 'zinc', name: 'Zinc', desc: 'Aumenta 10 EVs de Defesa Especial.', category: 'medicine', kind: 'ev', stat: 'specialDefense', amount: 10, price: 9800 },
-      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy', desc: 'Sobe um nível.', category: 'medicine', kind: 'level', price: 4800 }
+      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy', desc: 'Sobe um nível.', category: 'medicine', kind: 'level', price: 1 }
     ];
     const EXTRA_SPECIAL_ITEMS = [
       { id: 'heal-powder', key: 'heal_powder', name: 'Heal Powder', desc: 'Cura qualquer problema de status.', category: 'medicine', kind: 'statusCure', price: 450 },
@@ -5997,6 +5997,9 @@
     function marketItemUsesBattlePoints(item) {
       return ['tm', 'battleBoost', 'guardSpec', 'direHit'].includes(item?.kind);
     }
+    function marketItemUsesPokeCoins(item) {
+      return item?.key === 'rarecandy' || item?.id === 'rarecandy' || item?.id === 'rare-candy';
+    }
     function normalizeMarketText(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
     }
@@ -6028,7 +6031,7 @@
       if (legacyParcel) legacyParcel.hidden = !parcelMatches;
       grid.innerHTML = '';
       if (parcelMatches) grid.insertAdjacentHTML('beforeend', `<div class="game-card item-tooltip-card" onclick="buyItem('parcelbox')" data-item-tooltip="Encomenda do Professor Carvalho"><div class="game-card-header" style="background:linear-gradient(135deg,#5b4636,#30251d);font-size:3rem;">📦</div><div class="game-card-body"><div class="game-card-title">Caixa da Parcel</div><div class="game-card-desc">Encomenda do Professor Carvalho</div><div class="game-card-meta"><span class="reward">Grátis</span><button type="button" class="shop-buy-button" onclick="event.stopPropagation(); buyItem('parcelbox')">📦 Pegar</button></div></div></div>`);
-      grid.insertAdjacentHTML('beforeend', items.map(item => `<div class="game-card item-tooltip-card" onclick="buyItem('${item.id}')" data-item-tooltip="${escapeHTML(item.desc)}" aria-label="${escapeHTML(`${item.name}: ${item.desc}`)}"><div class="game-card-header" style="background:linear-gradient(135deg,#1a2a1a,#0d150d);">${itemIcon(item.sprite || item.key, 'shop-item-icon', item.icon || '🎒')}</div><div class="game-card-body"><div class="game-card-title">${item.name}</div><div class="game-card-desc">${item.desc}</div><div class="game-card-meta"><span class="reward">${marketItemUsesBattlePoints(item) ? `<span class="market-bp-label">BP</span> <span class="bp-amount">${item.price}</span>` : '&#8381; ' + item.price}</span><button type="button" class="shop-buy-button" onclick="event.stopPropagation(); buyItem('${item.id}')">🛒 Comprar</button></div></div></div>`).join(''));
+      grid.insertAdjacentHTML('beforeend', items.map(item => `<div class="game-card item-tooltip-card" onclick="buyItem('${item.id}')" data-item-tooltip="${escapeHTML(item.desc)}" aria-label="${escapeHTML(`${item.name}: ${item.desc}`)}"><div class="game-card-header" style="background:linear-gradient(135deg,#1a2a1a,#0d150d);">${itemIcon(item.sprite || item.key, 'shop-item-icon', item.icon || '🎒')}</div><div class="game-card-body"><div class="game-card-title">${item.name}</div><div class="game-card-desc">${item.desc}</div><div class="game-card-meta"><span class="reward">${marketItemUsesPokeCoins(item) ? `<span>💎 PokeCoins</span> <span class="bp-amount">${item.price}</span>` : marketItemUsesBattlePoints(item) ? `<span class="market-bp-label">BP</span> <span class="bp-amount">${item.price}</span>` : '&#8381; ' + item.price}</span><button type="button" class="shop-buy-button" onclick="event.stopPropagation(); buyItem('${item.id}')">🛒 Comprar</button></div></div></div>`).join(''));
       const total = items.length + (parcelMatches ? 1 : 0);
       document.getElementById('marketResultsCount').textContent = `${total} ${total === 1 ? 'item encontrado' : 'itens encontrados'}`;
       if (!total) grid.innerHTML = '<p style="color:var(--text-muted);">Nenhum item encontrado.</p>';
@@ -6103,10 +6106,11 @@
     function openShopQuantityDialog(item) {
       if (!player) return;
       const usesBattlePoints = marketItemUsesBattlePoints(item);
-      const balance = usesBattlePoints ? (Number(player.battlePoints) || 0) : player.money;
+      const usesPokeCoins = marketItemUsesPokeCoins(item);
+      const balance = usesPokeCoins ? (Number(player.pokeCoins) || 0) : usesBattlePoints ? (Number(player.battlePoints) || 0) : player.money;
       const maxQuantity = Math.floor(balance / item.price);
       if (maxQuantity < 1) {
-        showToast(usesBattlePoints ? 'Battle Points insuficientes!' : 'Dinheiro insuficiente!', 'error');
+        showToast(usesPokeCoins ? 'PokeCoins insuficientes!' : usesBattlePoints ? 'Battle Points insuficientes!' : 'Dinheiro insuficiente!', 'error');
         return;
       }
 
@@ -6117,7 +6121,7 @@
       const input = document.getElementById('shopQuantityInput');
       document.getElementById('shopQuantityTitle').textContent = `Comprar ${item.name}`;
       document.getElementById('shopQuantityDescription').innerHTML =
-        `Cada unidade custa ${usesBattlePoints ? '<span class="market-bp-label">BP</span>' : '\u20bd'} ${item.price.toLocaleString('pt-BR')}. Voc\u00ea pode comprar at\u00e9 ${maxQuantity}.`;
+        `Cada unidade custa ${usesPokeCoins ? '💎 PokeCoins' : usesBattlePoints ? '<span class="market-bp-label">BP</span>' : '\u20bd'} ${item.price.toLocaleString('pt-BR')}. Voc\u00ea pode comprar at\u00e9 ${maxQuantity}.`;
       input.max = String(maxQuantity);
       input.value = '1';
       updateShopQuantityTotal();
@@ -6184,9 +6188,10 @@
       const totalEl = document.getElementById('shopQuantityTotal');
       const unitPrice = pendingShopAction === 'sell' ? item?.salePrice : item?.price;
       const usesBattlePoints = pendingShopAction === 'buy' && marketItemUsesBattlePoints(item);
+      const usesPokeCoins = pendingShopAction === 'buy' && marketItemUsesPokeCoins(item);
       const validQuantity = item && Number.isInteger(quantity) && quantity >= 1 && quantity <= Number(input.max);
       totalEl.innerHTML = validQuantity
-        ? (usesBattlePoints ? '<span class="market-bp-label">BP</span> <span class="bp-amount">' : '\u20bd ') + (quantity * unitPrice).toLocaleString('pt-BR') + (usesBattlePoints ? '</span>' : '')
+        ? (usesPokeCoins ? '💎 PokeCoins ' : usesBattlePoints ? '<span class="market-bp-label">BP</span> <span class="bp-amount">' : '\u20bd ') + (quantity * unitPrice).toLocaleString('pt-BR') + (usesBattlePoints ? '</span>' : '')
         : 'Quantidade inv\u00e1lida';
     }
 
@@ -6218,13 +6223,15 @@
         return false;
       }
       const usesBattlePoints = marketItemUsesBattlePoints(item);
-      const balance = usesBattlePoints ? (Number(player.battlePoints) || 0) : player.money;
+      const usesPokeCoins = marketItemUsesPokeCoins(item);
+      const balance = usesPokeCoins ? (Number(player.pokeCoins) || 0) : usesBattlePoints ? (Number(player.battlePoints) || 0) : player.money;
       const maxQuantity = Math.floor(balance / item.price);
       if (!Number.isInteger(quantity) || quantity < 1 || quantity > maxQuantity) {
-        showToast(usesBattlePoints ? 'Quantidade inv\u00e1lida ou Battle Points insuficientes!' : 'Quantidade inv\u00e1lida ou saldo insuficiente!', 'error');
+        showToast(usesPokeCoins ? 'Quantidade inv\u00e1lida ou PokeCoins insuficientes!' : usesBattlePoints ? 'Quantidade inv\u00e1lida ou Battle Points insuficientes!' : 'Quantidade inv\u00e1lida ou saldo insuficiente!', 'error');
         return false;
       }
-      if (usesBattlePoints) player.battlePoints -= item.price * quantity;
+      if (usesPokeCoins) player.pokeCoins -= item.price * quantity;
+      else if (usesBattlePoints) player.battlePoints -= item.price * quantity;
       else player.money -= item.price * quantity;
       const qty = item.qty || 1;
       ensureBagItems();
