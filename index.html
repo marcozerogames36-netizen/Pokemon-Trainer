@@ -5755,12 +5755,12 @@
     const EXTRA_BATTLE_ITEMS = [
       { id: 'guard-spec', key: 'guard_spec', name: 'Guard Spec.', desc: 'Impede reduções de atributos da equipe por 5 turnos.', kind: 'guardSpec', price: 700 },
       { id: 'dire-hit', key: 'dire_hit', name: 'Dire Hit', desc: 'Aumenta bastante a chance de acerto crítico do Pokémon ativo.', kind: 'direHit', price: 650 },
-      { id: 'x-attack', key: 'x_attack', name: 'X Attack', desc: 'Aumenta o Ataque do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'attack', price: 500 },
-      { id: 'x-defense', key: 'x_defense', name: 'X Defense', desc: 'Aumenta a Defesa do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'defense', price: 550 },
-      { id: 'x-speed', key: 'x_speed', name: 'X Speed', desc: 'Aumenta a Velocidade do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'speed', price: 350 },
-      { id: 'x-accuracy', key: 'x_accuracy', name: 'X Accuracy', desc: 'Aumenta a precisão do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'accuracy', price: 950 },
-      { id: 'x-sp-atk', key: 'x_special_attack', name: 'X Sp. Atk', desc: 'Aumenta o Ataque Especial do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'specialAttack', price: 350 },
-      { id: 'x-sp-def', key: 'x_special_defense', name: 'X Sp. Def', desc: 'Aumenta a Defesa Especial do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'specialDefense', price: 350 }
+      { id: 'x-attack', key: 'x_attack', name: 'X Attack', desc: 'Aumenta o Ataque do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'attack', price: 1 },
+      { id: 'x-defense', key: 'x_defense', name: 'X Defense', desc: 'Aumenta a Defesa do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'defense', price: 1 },
+      { id: 'x-speed', key: 'x_speed', name: 'X Speed', desc: 'Aumenta a Velocidade do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'speed', price: 1 },
+      { id: 'x-accuracy', key: 'x_accuracy', name: 'X Accuracy', desc: 'Aumenta a precisão do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'accuracy', price: 1 },
+      { id: 'x-sp-atk', key: 'x_special_attack', name: 'X Sp. Atk', desc: 'Aumenta o Ataque Especial do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'specialAttack', price: 1 },
+      { id: 'x-sp-def', key: 'x_special_defense', name: 'X Sp. Def', desc: 'Aumenta a Defesa Especial do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'specialDefense', price: 1 }
     ];
     BAG_CATEGORIES.push({ id: 'battle-items', title: 'Itens de batalha', items: [] });
     EXTRA_BATTLE_ITEMS.forEach(item => {
@@ -5768,7 +5768,7 @@
       ITEM_SPRITE_FB[item.key] = `https://img.pokemondb.net/sprites/items/${item.id}.png`;
       BAG_CATEGORIES.find(category => category.id === 'battle-items').items.push({ key: item.key, name: item.name, sprite: item.key, desc: item.desc });
       BATTLE_BAG_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, stat: item.stat });
-      if (!SHOP_ITEMS.some(entry => entry.key === item.key)) SHOP_ITEMS.push({ id: item.key, name: item.name, icon: '⚔️', sprite: item.key, desc: item.desc, price: item.price, key: item.key });
+      if (!SHOP_ITEMS.some(entry => entry.key === item.key)) SHOP_ITEMS.push({ id: item.key, name: item.name, icon: '⚔️', sprite: item.key, desc: item.desc, price: item.price, key: item.key, kind: item.kind, stat: item.stat });
     });
 
     const ITEM_CATALOG_PAGE_SIZE = 60;
@@ -5992,6 +5992,9 @@
     }
 
     const marketCategoryByKey = new Map(BAG_CATEGORIES.flatMap(category => category.items.map(entry => [entry.key, category.id])));
+    function marketItemUsesBattlePoints(item) {
+      return item?.kind === 'tm' || item?.kind === 'battleBoost';
+    }
     function normalizeMarketText(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
     }
@@ -6023,7 +6026,7 @@
       if (legacyParcel) legacyParcel.hidden = !parcelMatches;
       grid.innerHTML = '';
       if (parcelMatches) grid.insertAdjacentHTML('beforeend', `<div class="game-card item-tooltip-card" onclick="buyItem('parcelbox')" data-item-tooltip="Encomenda do Professor Carvalho"><div class="game-card-header" style="background:linear-gradient(135deg,#5b4636,#30251d);font-size:3rem;">📦</div><div class="game-card-body"><div class="game-card-title">Caixa da Parcel</div><div class="game-card-desc">Encomenda do Professor Carvalho</div><div class="game-card-meta"><span class="reward">Grátis</span><button type="button" class="shop-buy-button" onclick="event.stopPropagation(); buyItem('parcelbox')">📦 Pegar</button></div></div></div>`);
-      grid.insertAdjacentHTML('beforeend', items.map(item => `<div class="game-card item-tooltip-card" onclick="buyItem('${item.id}')" data-item-tooltip="${escapeHTML(item.desc)}" aria-label="${escapeHTML(`${item.name}: ${item.desc}`)}"><div class="game-card-header" style="background:linear-gradient(135deg,#1a2a1a,#0d150d);">${itemIcon(item.sprite || item.key, 'shop-item-icon', item.icon || '🎒')}</div><div class="game-card-body"><div class="game-card-title">${item.name}</div><div class="game-card-desc">${item.desc}</div><div class="game-card-meta"><span class="reward">${item.kind === 'tm' ? `<span class="market-bp-label">BP</span> <span class="bp-amount">${item.price}</span>` : '&#8381; ' + item.price}</span><button type="button" class="shop-buy-button" onclick="event.stopPropagation(); buyItem('${item.id}')">🛒 Comprar</button></div></div></div>`).join(''));
+      grid.insertAdjacentHTML('beforeend', items.map(item => `<div class="game-card item-tooltip-card" onclick="buyItem('${item.id}')" data-item-tooltip="${escapeHTML(item.desc)}" aria-label="${escapeHTML(`${item.name}: ${item.desc}`)}"><div class="game-card-header" style="background:linear-gradient(135deg,#1a2a1a,#0d150d);">${itemIcon(item.sprite || item.key, 'shop-item-icon', item.icon || '🎒')}</div><div class="game-card-body"><div class="game-card-title">${item.name}</div><div class="game-card-desc">${item.desc}</div><div class="game-card-meta"><span class="reward">${marketItemUsesBattlePoints(item) ? `<span class="market-bp-label">BP</span> <span class="bp-amount">${item.price}</span>` : '&#8381; ' + item.price}</span><button type="button" class="shop-buy-button" onclick="event.stopPropagation(); buyItem('${item.id}')">🛒 Comprar</button></div></div></div>`).join(''));
       const total = items.length + (parcelMatches ? 1 : 0);
       document.getElementById('marketResultsCount').textContent = `${total} ${total === 1 ? 'item encontrado' : 'itens encontrados'}`;
       if (!total) grid.innerHTML = '<p style="color:var(--text-muted);">Nenhum item encontrado.</p>';
@@ -6097,7 +6100,7 @@
 
     function openShopQuantityDialog(item) {
       if (!player) return;
-      const usesBattlePoints = item.kind === 'tm';
+      const usesBattlePoints = marketItemUsesBattlePoints(item);
       const balance = usesBattlePoints ? (Number(player.battlePoints) || 0) : player.money;
       const maxQuantity = Math.floor(balance / item.price);
       if (maxQuantity < 1) {
@@ -6178,7 +6181,7 @@
       const quantity = input.valueAsNumber;
       const totalEl = document.getElementById('shopQuantityTotal');
       const unitPrice = pendingShopAction === 'sell' ? item?.salePrice : item?.price;
-      const usesBattlePoints = pendingShopAction === 'buy' && item?.kind === 'tm';
+      const usesBattlePoints = pendingShopAction === 'buy' && marketItemUsesBattlePoints(item);
       const validQuantity = item && Number.isInteger(quantity) && quantity >= 1 && quantity <= Number(input.max);
       totalEl.innerHTML = validQuantity
         ? (usesBattlePoints ? '<span class="market-bp-label">BP</span> <span class="bp-amount">' : '\u20bd ') + (quantity * unitPrice).toLocaleString('pt-BR') + (usesBattlePoints ? '</span>' : '')
@@ -6212,7 +6215,7 @@
         openShopQuantityDialog(item);
         return false;
       }
-      const usesBattlePoints = item.kind === 'tm';
+      const usesBattlePoints = marketItemUsesBattlePoints(item);
       const balance = usesBattlePoints ? (Number(player.battlePoints) || 0) : player.money;
       const maxQuantity = Math.floor(balance / item.price);
       if (!Number.isInteger(quantity) || quantity < 1 || quantity > maxQuantity) {
