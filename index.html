@@ -1843,24 +1843,24 @@
 
     // ===== TIPOS E EFETIVIDADE =====
     const TYPE_CHART = {
-      Normal: { Pedra: 0.5, Aço: 0.5, Fantasma: 0 },
-      Fogo: { Fogo: 0.5, Agua: 0.5, Planta: 2, Gelo: 2, Inseto: 2, Pedra: 0.5, Dragao: 0.5, Aço: 2 },
-      Agua: { Fogo: 2, Agua: 0.5, Planta: 0.5, Terra: 2, Pedra: 2, Dragao: 0.5 },
-      Planta: { Fogo: 0.5, Agua: 2, Planta: 0.5, Veneno: 0.5, Terra: 2, Voador: 0.5, Inseto: 0.5, Pedra: 2, Dragao: 0.5, Aço: 0.5 },
-      Eletrico: { Agua: 2, Eletrico: 0.5, Planta: 0.5, Terra: 0, Voador: 2, Dragao: 0.5 },
-      Gelo: { Fogo: 0.5, Agua: 0.5, Planta: 2, Gelo: 0.5, Terra: 2, Voador: 2, Dragao: 2, Aço: 0.5 },
-      Lutador: { Normal: 2, Gelo: 2, Veneno: 0.5, Voador: 0.5, Psiquico: 0.5, Inseto: 0.5, Pedra: 2, Fantasma: 0, Sombrio: 2, Aço: 2 },
-      Veneno: { Planta: 2, Veneno: 0.5, Terra: 0.5, Pedra: 0.5, Fantasma: 0.5, Aço: 0 },
-      Terra: { Fogo: 2, Eletrico: 2, Planta: 0.5, Veneno: 2, Voador: 0, Inseto: 0.5, Pedra: 2, Aço: 2 },
-      Voador: { Eletrico: 0.5, Planta: 2, Lutador: 2, Inseto: 2, Pedra: 0.5, Aço: 0.5 },
-      Psiquico: { Lutador: 2, Veneno: 2, Psiquico: 0.5, Sombrio: 0, Aço: 0.5 },
-      Inseto: { Fogo: 0.5, Planta: 2, Lutador: 0.5, Veneno: 0.5, Voador: 0.5, Psiquico: 2, Fantasma: 0.5, Sombrio: 2, Aço: 0.5 },
-      Pedra: { Fogo: 2, Gelo: 2, Lutador: 0.5, Terra: 0.5, Voador: 2, Inseto: 2, Aço: 0.5 },
-      Fantasma: { Normal: 0, Psiquico: 2, Fantasma: 2, Sombrio: 0.5, Aço: 0.5 },
-      Dragao: { Aço: 0.5, Dragao: 2 },
-      Sombrio: { Lutador: 0.5, Psiquico: 2, Fantasma: 2, Sombrio: 0.5, Aço: 0.5 },
-      Aço: { Fogo: 0.5, Agua: 0.5, Eletrico: 0.5, Gelo: 2, Pedra: 2, Aço: 0.5 },
-      Fada: {}
+      "Normal": {"Pedra": 0.5, "A\u00e7o": 0.5, "Fantasma": 0},
+      "Fogo": {"Fogo": 0.5, "Agua": 0.5, "Planta": 2, "Gelo": 2, "Inseto": 2, "Pedra": 0.5, "Dragao": 0.5, "A\u00e7o": 2, "Fada": 0.5},
+      "Agua": {"Fogo": 2, "Agua": 0.5, "Planta": 0.5, "Terra": 2, "Pedra": 2, "Dragao": 0.5},
+      "Planta": {"Fogo": 0.5, "Agua": 2, "Planta": 0.5, "Veneno": 0.5, "Terra": 2, "Voador": 0.5, "Inseto": 0.5, "Pedra": 2, "Dragao": 0.5, "A\u00e7o": 0.5},
+      "Eletrico": {"Agua": 2, "Eletrico": 0.5, "Planta": 0.5, "Terra": 0, "Voador": 2, "Dragao": 0.5},
+      "Gelo": {"Fogo": 0.5, "Agua": 0.5, "Planta": 2, "Gelo": 0.5, "Terra": 2, "Voador": 2, "Dragao": 2, "A\u00e7o": 0.5},
+      "Lutador": {"Normal": 2, "Gelo": 2, "Veneno": 0.5, "Voador": 0.5, "Psiquico": 0.5, "Inseto": 0.5, "Pedra": 2, "Fantasma": 0, "Sombrio": 2, "A\u00e7o": 2, "Fada": 0.5},
+      "Veneno": {"Planta": 2, "Veneno": 0.5, "Terra": 0.5, "Pedra": 0.5, "Fantasma": 0.5, "A\u00e7o": 0, "Fada": 2},
+      "Terra": {"Fogo": 2, "Eletrico": 2, "Planta": 0.5, "Veneno": 2, "Voador": 0, "Inseto": 0.5, "Pedra": 2, "A\u00e7o": 2},
+      "Voador": {"Eletrico": 0.5, "Planta": 2, "Lutador": 2, "Inseto": 2, "Pedra": 0.5, "A\u00e7o": 0.5},
+      "Psiquico": {"Lutador": 2, "Veneno": 2, "Psiquico": 0.5, "Sombrio": 0, "A\u00e7o": 0.5},
+      "Inseto": {"Fogo": 0.5, "Planta": 2, "Lutador": 0.5, "Veneno": 0.5, "Voador": 0.5, "Psiquico": 2, "Fantasma": 0.5, "Sombrio": 2, "A\u00e7o": 0.5},
+      "Pedra": {"Fogo": 2, "Gelo": 2, "Lutador": 0.5, "Terra": 0.5, "Voador": 2, "Inseto": 2, "A\u00e7o": 0.5},
+      "Fantasma": {"Normal": 0, "Psiquico": 2, "Fantasma": 2, "Sombrio": 0.5},
+      "Dragao": {"Dragao": 2, "Fada": 0},
+      "Sombrio": {"Lutador": 0.5, "Psiquico": 2, "Fantasma": 2, "Sombrio": 0.5, "Fada": 0.5},
+      "A\u00e7o": {"Fogo": 0.5, "Agua": 0.5, "Eletrico": 0.5, "Gelo": 2, "Pedra": 2, "A\u00e7o": 0.5, "Fada": 2},
+      "Fada": {"Fogo": 0.5, "Lutador": 2, "Veneno": 0.5, "Dragao": 2, "Sombrio": 2, "A\u00e7o": 0.5}
     };
 
     const TYPE_NAME_BY_NORMALIZED = Object.fromEntries(Object.keys(TYPE_CHART).map(type => [
@@ -2527,30 +2527,11 @@
       try { return await request; } catch (error) { fireRedLearnsetCache.delete(id); throw error; }
     }
 
-    const GEN4_PLUS_VERSION_GROUP_ORDER = [
-      'diamond-pearl','platinum','heartgold-soulsilver','black-white','black-2-white-2',
-      'x-y','omega-ruby-alpha-sapphire','sun-moon','ultra-sun-ultra-moon',
-      'lets-go-pikachu-lets-go-eevee','sword-shield','brilliant-diamond-shining-pearl',
-      'legends-arceus','scarlet-violet'
-    ];
-    const GEN3_MOVE_TYPE_OVERRIDES = { charm: 'Normal', sweetkiss: 'Normal' };
-    const GEN3_HIDDEN_POWER_TYPES = [
-      'Lutador','Voador','Veneno','Terra','Pedra','Inseto','Fantasma','A\u00e7o',
-      'Fogo','Agua','Planta','Eletrico','Psiquico','Gelo','Dragao','Sombrio'
-    ];
-    function getGeneration3MoveType(moveOrData, pokemon = null) {
-      const moveName = String(moveOrData?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (moveName === 'hiddenpower' && pokemon?.ivs) {
-        const ivOrder = ['hp','attack','defense','speed','specialAttack','specialDefense'];
-        const bitValue = ivOrder.reduce((sum, stat, index) => sum + ((Number(pokemon.ivs[stat]) || 0) & 1) * (2 ** index), 0);
-        return GEN3_HIDDEN_POWER_TYPES[Math.floor(bitValue * 15 / 63)];
-      }
-      if (GEN3_MOVE_TYPE_OVERRIDES[moveName]) return GEN3_MOVE_TYPE_OVERRIDES[moveName];
-      const historicalType = moveOrData?.past_values
-        ?.filter(value => value.type?.name && GEN4_PLUS_VERSION_GROUP_ORDER.includes(value.version_group?.name))
-        ?.sort((a,b) => GEN4_PLUS_VERSION_GROUP_ORDER.indexOf(a.version_group.name) - GEN4_PLUS_VERSION_GROUP_ORDER.indexOf(b.version_group.name))[0]
-        ?.type?.name;
-      return normalizeBattleType(historicalType || moveOrData?.type?.name || moveOrData?.type || 'Normal');
+    // Usa tipos atuais da Gen IX e corrige dados incorretos de golpes antigos salvos.
+    const CURRENT_MOVE_TYPE_OVERRIDES = { charm: 'Fada', sweetkiss: 'Fada', magicalleaf: 'Planta' };
+    function getCurrentMoveType(moveOrData) {
+      const name = String(moveOrData?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      return CURRENT_MOVE_TYPE_OVERRIDES[name] || normalizeBattleType(moveOrData?.type?.name || moveOrData?.type || 'Normal');
     }
 
     async function getMoveDataForBattle(slug) {
@@ -2571,7 +2552,7 @@
         })).filter(change => change.stat && change.stages);
         const move = {
           name: data.name.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' '),
-          type: getGeneration3MoveType(data),
+          type: getCurrentMoveType(data),
           power: Number(data.power) || 0,
           accuracy: data.accuracy,
           priority: Number(data.priority) || 0,
@@ -2581,7 +2562,7 @@
           pp: Number(data.pp) || 20,
           basePp: Number(data.pp) || 20,
           maxPp: Number(data.pp) || 20,
-          category: undefined,
+          category: data.damage_class?.name || 'status',
           statusEffect,
           statChanges: statChanges.length ? statChanges : undefined,
           ppUps: 0
@@ -2590,6 +2571,27 @@
       })();
       moveDataCache.set(slug, request);
       try { return await request; } catch (error) { moveDataCache.delete(slug); throw error; }
+    }
+
+    async function hydrateGenerationNineMoveMetadata(pokemonList) {
+      let changed = false;
+      const forceRefresh = player?.moveMetadataVersion !== 9;
+      const targets = (pokemonList || []).filter(pokemon => Array.isArray(pokemon?.moves));
+      await Promise.all(targets.flatMap(pokemon => pokemon.moves.map(async move => {
+        if (!forceRefresh && ['physical','special','status'].includes(move.category)) return;
+        const slug = getOriginalMoveName(move.name).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        if (!slug) return;
+        try {
+          const canonical = await getMoveDataForBattle(slug);
+          if (!['physical','special','status'].includes(canonical.category)) return;
+          move.category = canonical.category;
+          move.type = canonical.type;
+          changed = true;
+        } catch (_) { /* Keeps the legacy fallback when a move is unavailable. */ }
+      })));
+      if (player && forceRefresh) { player.moveMetadataVersion = 9; changed = true; }
+      if (changed && player) saveGame();
     }
 
     async function getFireRedMovesForLevel(speciesId, level) {
@@ -2695,16 +2697,21 @@
     }
 
     // FireRed/Gen III classifica golpes pelo tipo, não por cada golpe individual.
-    const PHYSICAL_MOVE_TYPES = new Set(['Normal','Lutador','Voador','Veneno','Terra','Pedra','Inseto','Fantasma','Aço']);
     function getMoveCategory(move) {
-      if (move?.category === 'status') return 'Status';
-      if (move && typeof move === 'object' && (!Number.isFinite(Number(move.power)) || Number(move.power) <= 0)) return 'Status';
-      const type = move && typeof move === 'object' ? move.type : move;
-      return PHYSICAL_MOVE_TYPES.has(normalizeBattleType(type)) ? 'Físico' : 'Especial';
+      if (move?.category === 'status' || (move && (!Number.isFinite(Number(move.power)) || Number(move.power) <= 0))) return 'Status';
+      if (move?.category === 'physical') return 'F\u00edsico';
+      if (move?.category === 'special') return 'Especial';
+      // Compatibilidade com saves antigos sem categoria persistida.
+      return ['Normal','Lutador','Voador','Veneno','Terra','Pedra','Inseto','Fantasma','A\u00e7o'].includes(normalizeBattleType(move?.type)) ? 'F\u00edsico' : 'Especial';
+    }
+    function isPhysicalMove(move) {
+      if (move?.category === 'physical') return true;
+      if (move?.category === 'special' || move?.category === 'status') return false;
+      return ['Normal','Lutador','Voador','Veneno','Terra','Pedra','Inseto','Fantasma','A\u00e7o'].includes(normalizeBattleType(move?.type));
     }
     function getMoveCategoryClass(move) {
-      const category = getMoveCategory(move);
-      return category === 'Status' ? 'move-category-status' : category === 'Físico' ? 'move-category-physical' : 'move-category-special';
+      if (getMoveCategory(move) === 'Status') return 'move-category-status';
+      return isPhysicalMove(move) ? 'move-category-physical' : 'move-category-special';
     }
 
     Object.assign(MOVE_BASE_PP, {
@@ -2744,8 +2751,8 @@
       pokemon.moves.forEach(move => {
         const originalName = getOriginalMoveName(move.name);
         if (originalName !== move.name) { move.name = originalName; changed = true; }
-        const generation3Type = getGeneration3MoveType(move, pokemon);
-        if (move.type !== generation3Type) { move.type = generation3Type; changed = true; }
+        const currentType = getCurrentMoveType(move);
+        if (move.type !== currentType) { move.type = currentType; changed = true; }
         const basePp = getMoveMaxPp(move);
         const ppUps = Math.max(0, Math.min(3, Number.isInteger(move.ppUps) ? move.ppUps : 0));
         const maxPp = Math.min(Math.floor(basePp * 1.6), basePp + Math.ceil(basePp * 0.2) * ppUps);
@@ -6076,6 +6083,7 @@
         });
       });
       enterDashboard();
+      void hydrateGenerationNineMoveMetadata(player.party);
       if (experienceMigrated || migratedMoves || genderMigrated || traitsMigrated || reopenLegacyOakIntro || reopenLegacyParcelMission || migrateBillDialogue) saveGame();
     }
 
@@ -6354,7 +6362,7 @@
         const calculatedStats = pvpCalculateStats(baseStats[pokemonIndex], pokemon, ivs, evs);
         const maxHp = calculatedStats.hp;
         const moves = (pokemon.moves || []).filter(move => Number(move.power) > 0 || move.healing>0 || move.drain>0 || move.statChanges?.length || ['burn','paralysis','poison','sleep','freeze'].includes(move.statusEffect?.status)).slice(0,4).map(move => ({
-          name: String(move.name || 'Golpe'), type: getGeneration3MoveType(move, pokemon),
+          name: String(move.name || 'Golpe'), type: getCurrentMoveType(move), category: move.category || (isPhysicalMove(move) ? 'physical' : 'special'),
           power: Math.max(0, Math.min(250, Math.floor(Number(move.power) || 0))),
           accuracy: move.accuracy !== null && move.accuracy !== undefined && Number.isFinite(Number(move.accuracy)) ? Math.max(1, Math.min(100, Number(move.accuracy))) : 100,
           priority: Math.max(-7,Math.min(7,Math.floor(Number(move.priority ?? ({'quick attack':1,'mach punch':1,'extreme speed':1,'protect':3,'detect':3,'endure':3,'follow me':1,'helping hand':5,'counter':-5,'mirror coat':-5,'vital throw':-1,'focus punch':-3}[String(move.name||'').toLowerCase()] ?? 0))||0))),
@@ -7304,8 +7312,7 @@
       const mult = typeMultiplier(moveType, defTypes);
       const atkTypes = getTypes(player.poke.id);
       const hasStab = atkTypes.some(t => normalizeBattleType(t) === moveType);
-      const physicalTypes = ['Normal', 'Lutador', 'Voador', 'Veneno', 'Terra', 'Pedra', 'Inseto', 'Fantasma', 'Aço'];
-      const physical = physicalTypes.includes(moveType);
+      const physical = isPhysicalMove(move);
       const burnMultiplier = player.poke.status === 'burn' && physical && player.poke.ability !== 'Guts' ? 0.5 : 1;
       const immunity = abilityTypeImmunity(battle.enemy, moveType);
       const evaded = doesMoveMiss(player.poke, battle.enemy, move);
@@ -7459,8 +7466,7 @@
       const mult = typeMultiplier(moveType, defTypes);
       const atkTypes = getTypes(battle.enemy.id);
       const hasStab = atkTypes.some(t => normalizeBattleType(t) === moveType);
-      const physicalTypes = ['Normal', 'Lutador', 'Voador', 'Veneno', 'Terra', 'Pedra', 'Inseto', 'Fantasma', 'Aço'];
-      const physical = physicalTypes.includes(moveType);
+      const physical = isPhysicalMove(move);
       const burnMultiplier = battle.enemy.status === 'burn' && physical && battle.enemy.ability !== 'Guts' ? 0.5 : 1;
       const immunity = abilityTypeImmunity(player.poke, moveType);
       const evaded = doesMoveMiss(battle.enemy, player.poke, move);

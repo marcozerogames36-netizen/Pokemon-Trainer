@@ -81,24 +81,24 @@ as $$
 declare v_chart jsonb; v_type text; v_result numeric := 1;
 begin
   v_chart := case p_move_type
-    when 'Normal' then '{"Pedra":0.5,"Aço":0.5,"Fantasma":0}'::jsonb
-    when 'Fogo' then '{"Fogo":0.5,"Agua":0.5,"Planta":2,"Gelo":2,"Inseto":2,"Pedra":0.5,"Dragao":0.5,"Aço":2}'::jsonb
+    when 'Normal' then '{"Pedra":0.5,"A\u00e7o":0.5,"Fantasma":0}'::jsonb
+    when 'Fogo' then '{"Fogo":0.5,"Agua":0.5,"Planta":2,"Gelo":2,"Inseto":2,"Pedra":0.5,"Dragao":0.5,"A\u00e7o":2,"Fada":0.5}'::jsonb
     when 'Agua' then '{"Fogo":2,"Agua":0.5,"Planta":0.5,"Terra":2,"Pedra":2,"Dragao":0.5}'::jsonb
-    when 'Planta' then '{"Fogo":0.5,"Agua":2,"Planta":0.5,"Veneno":0.5,"Terra":2,"Voador":0.5,"Inseto":0.5,"Pedra":2,"Dragao":0.5,"Aço":0.5}'::jsonb
+    when 'Planta' then '{"Fogo":0.5,"Agua":2,"Planta":0.5,"Veneno":0.5,"Terra":2,"Voador":0.5,"Inseto":0.5,"Pedra":2,"Dragao":0.5,"A\u00e7o":0.5}'::jsonb
     when 'Eletrico' then '{"Agua":2,"Eletrico":0.5,"Planta":0.5,"Terra":0,"Voador":2,"Dragao":0.5}'::jsonb
-    when 'Gelo' then '{"Fogo":0.5,"Agua":0.5,"Planta":2,"Gelo":0.5,"Terra":2,"Voador":2,"Dragao":2,"Aço":0.5}'::jsonb
-    when 'Lutador' then '{"Normal":2,"Gelo":2,"Veneno":0.5,"Voador":0.5,"Psiquico":0.5,"Inseto":0.5,"Pedra":2,"Fantasma":0,"Sombrio":2,"Aço":2}'::jsonb
-    when 'Veneno' then '{"Planta":2,"Veneno":0.5,"Terra":0.5,"Pedra":0.5,"Fantasma":0.5,"Aço":0}'::jsonb
-    when 'Terra' then '{"Fogo":2,"Eletrico":2,"Planta":0.5,"Veneno":2,"Voador":0,"Inseto":0.5,"Pedra":2,"Aço":2}'::jsonb
-    when 'Voador' then '{"Eletrico":0.5,"Planta":2,"Lutador":2,"Inseto":2,"Pedra":0.5,"Aço":0.5}'::jsonb
-    when 'Psiquico' then '{"Lutador":2,"Veneno":2,"Psiquico":0.5,"Sombrio":0,"Aço":0.5}'::jsonb
-    when 'Inseto' then '{"Fogo":0.5,"Planta":2,"Lutador":0.5,"Veneno":0.5,"Voador":0.5,"Psiquico":2,"Fantasma":0.5,"Sombrio":2,"Aço":0.5}'::jsonb
-    when 'Pedra' then '{"Fogo":2,"Gelo":2,"Lutador":0.5,"Terra":0.5,"Voador":2,"Inseto":2,"Aço":0.5}'::jsonb
-    when 'Fantasma' then '{"Normal":0,"Psiquico":2,"Fantasma":2,"Sombrio":0.5,"A\u00e7o":0.5}'::jsonb
-    when 'Dragao' then '{"Aço":0.5,"Dragao":2}'::jsonb
-    when 'Sombrio' then '{"Lutador":0.5,"Psiquico":2,"Fantasma":2,"Sombrio":0.5,"A\u00e7o":0.5}'::jsonb
-    when 'Aço' then '{"Fogo":0.5,"Agua":0.5,"Eletrico":0.5,"Gelo":2,"Pedra":2,"Aço":0.5}'::jsonb
-    when 'Fada' then '{}'::jsonb
+    when 'Gelo' then '{"Fogo":0.5,"Agua":0.5,"Planta":2,"Gelo":0.5,"Terra":2,"Voador":2,"Dragao":2,"A\u00e7o":0.5}'::jsonb
+    when 'Lutador' then '{"Normal":2,"Gelo":2,"Veneno":0.5,"Voador":0.5,"Psiquico":0.5,"Inseto":0.5,"Pedra":2,"Fantasma":0,"Sombrio":2,"A\u00e7o":2,"Fada":0.5}'::jsonb
+    when 'Veneno' then '{"Planta":2,"Veneno":0.5,"Terra":0.5,"Pedra":0.5,"Fantasma":0.5,"A\u00e7o":0,"Fada":2}'::jsonb
+    when 'Terra' then '{"Fogo":2,"Eletrico":2,"Planta":0.5,"Veneno":2,"Voador":0,"Inseto":0.5,"Pedra":2,"A\u00e7o":2}'::jsonb
+    when 'Voador' then '{"Eletrico":0.5,"Planta":2,"Lutador":2,"Inseto":2,"Pedra":0.5,"A\u00e7o":0.5}'::jsonb
+    when 'Psiquico' then '{"Lutador":2,"Veneno":2,"Psiquico":0.5,"Sombrio":0,"A\u00e7o":0.5}'::jsonb
+    when 'Inseto' then '{"Fogo":0.5,"Planta":2,"Lutador":0.5,"Veneno":0.5,"Voador":0.5,"Psiquico":2,"Fantasma":0.5,"Sombrio":2,"A\u00e7o":0.5}'::jsonb
+    when 'Pedra' then '{"Fogo":2,"Gelo":2,"Lutador":0.5,"Terra":0.5,"Voador":2,"Inseto":2,"A\u00e7o":0.5}'::jsonb
+    when 'Fantasma' then '{"Normal":0,"Psiquico":2,"Fantasma":2,"Sombrio":0.5}'::jsonb
+    when 'Dragao' then '{"Dragao":2,"Fada":0}'::jsonb
+    when 'Sombrio' then '{"Lutador":0.5,"Psiquico":2,"Fantasma":2,"Sombrio":0.5,"Fada":0.5}'::jsonb
+    when 'A'||chr(231)||'o' then '{"Fogo":0.5,"Agua":0.5,"Eletrico":0.5,"Gelo":2,"Pedra":2,"A\u00e7o":0.5,"Fada":2}'::jsonb
+    when 'Fada' then '{"Fogo":0.5,"Lutador":2,"Veneno":0.5,"Dragao":2,"Sombrio":2,"A\u00e7o":0.5}'::jsonb
     else '{}'::jsonb
   end;
   if jsonb_typeof(p_defender_types) <> 'array' then return 1; end if;
@@ -119,7 +119,7 @@ declare
   v_pokemon jsonb;
   v_move jsonb;
   v_type text;
-  v_types text[] := array['Normal','Fogo','Agua','Planta','Eletrico','Gelo','Lutador','Veneno','Terra','Voador','Psiquico','Inseto','Pedra','Fantasma','Dragao','Sombrio','Aço','Fada'];
+  v_types text[] := array['Normal','Fogo','Agua','Planta','Eletrico','Gelo','Lutador','Veneno','Terra','Voador','Psiquico','Inseto','Pedra','Fantasma','Dragao','Sombrio','A'||chr(231)||'o','Fada'];
   v_stats text[] := array['hp','attack','defense','specialAttack','specialDefense','speed'];
 begin
   if jsonb_typeof(p_team) is distinct from 'array' then return false; end if;
@@ -140,7 +140,7 @@ begin
       if jsonb_typeof(v_pokemon->'stats'->v_type) is distinct from 'number' or (v_pokemon->'stats'->>v_type)::integer not between 1 and 1000 then return false; end if;
     end loop;
     for v_move in select jsonb_array_elements(v_pokemon->'moves') loop
-      if jsonb_typeof(v_move) is distinct from 'object' or jsonb_typeof(v_move->'power') is distinct from 'number' or
+      if jsonb_typeof(v_move) is distinct from 'object' or coalesce(v_move->>'category','physical') not in ('physical','special','status') or jsonb_typeof(v_move->'power') is distinct from 'number' or
          (v_move->>'power')::integer not between 0 and 250 or not coalesce((v_move->>'type') = any(v_types),false) or
          jsonb_typeof(v_move->'accuracy') is distinct from 'number' or (v_move->>'accuracy')::numeric not between 1 and 100 or
          (v_move->>'maxPp')::integer not between 1 and 100 or
@@ -572,7 +572,7 @@ begin
       v_state := jsonb_set(v_state,ARRAY[v_defender_side||'Status',v_defender_index::text],'null'::jsonb,true);
       v_logs := v_logs || jsonb_build_array((v_defender->>'name')||' descongelou com o golpe de Fogo!');
     end if;
-    v_physical := v_move_type in ('Normal','Lutador','Voador','Veneno','Terra','Pedra','Inseto','Fantasma','Aço');
+    v_physical := coalesce(v_move->>'category','physical')='physical';
     v_attack_stage := coalesce((v_state->(v_attacker_side||'Stages')->v_attacker_index->>(case when v_physical then 'attack' else 'specialAttack' end))::numeric,0);
     v_defense_stage := coalesce((v_state->(v_defender_side||'Stages')->v_defender_index->>(case when v_physical then 'defense' else 'specialDefense' end))::numeric,0);
     v_critical := random()<1.0/16.0;
