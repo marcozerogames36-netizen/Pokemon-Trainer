@@ -1464,6 +1464,25 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#41234d,#1d1225);overflow:hidden;"><img src="assets/pvp-versus.png" alt="" style="width:230px;height:230px;max-width:none;flex:none;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">PvP Online</div><div class="game-card-desc">Desafie outro treinador por código de sala.</div></div>
             </div>
+            <div class="game-card" id="adminHomeCard" role="button" tabindex="0" style="display:none" onclick="switchPanel('admin')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('admin')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#4a3515,#21190c);font-size:3rem;">🛡️</div>
+              <div class="game-card-body"><div class="game-card-title">Painel de administrador</div><div class="game-card-desc">Envie itens, Pokémon e moedas para treinadores.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel" id="panel-admin">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
+          <h2 class="panel-title">🛡️ Painel de administrador</h2>
+          <p class="panel-desc">Selecione um treinador e escolha o recurso para conceder.</p>
+          <div class="game-card" style="padding:20px;max-width:760px;">
+            <div class="form-group"><label for="adminTrainerSearch">Buscar treinador pelo nome</label><input id="adminTrainerSearch" type="search" maxlength="40" placeholder="Digite ao menos 2 caracteres" autocomplete="off" /></div>
+            <div id="adminTrainerResults" style="display:grid;gap:8px;margin:10px 0 18px;"></div>
+            <div id="adminSelectedTrainer" class="panel-desc">Nenhum treinador selecionado.</div>
+            <div class="form-group"><label for="adminGrantType">Recurso</label><select id="adminGrantType"><option value="item">Item</option><option value="pokemon">Pokémon da minha equipe</option><option value="money">Pokédollar</option><option value="pokeCoins">PokeCoin</option><option value="battlePoints">BP</option></select></div>
+            <div class="form-group" id="adminItemField"><label for="adminGrantItem">Item</label><select id="adminGrantItem"></select></div>
+            <div class="form-group" id="adminPokemonField" hidden><label for="adminGrantPokemon">Pokémon para copiar</label><select id="adminGrantPokemon"></select></div>
+            <div class="form-group" id="adminAmountField"><label for="adminGrantAmount">Quantidade</label><input id="adminGrantAmount" type="number" min="1" max="1000000" step="1" value="1" /></div>
+            <button type="button" class="btn" id="adminGrantButton" onclick="adminGrantSelectedAsset()">Enviar recurso</button>
           </div>
         </div>
         <div class="panel" id="panel-dungeons">
@@ -6627,6 +6646,7 @@
       document.getElementById('dashName').textContent = player.name;
       document.getElementById('dashMeta').textContent = `Origem: ${player.originRegion}`;
       document.getElementById('dashAvatar').textContent = player.gender === 'Masculino' ? '♂️' : '♀️';
+      document.getElementById('adminHomeCard').style.display = isAdminAccount() ? '' : 'none';
       document.getElementById('welcomeName').textContent = player.name;
       document.getElementById('welcomePoke').src = SPRITE(player.starter.id);
       document.getElementById('welcomePoke').onerror = function() { this.src = SPRITE_FB(player.starter.id); };
@@ -6666,7 +6686,84 @@
       saveGame();
     }
 
+    const ADMIN_ACCOUNT_ID = 'c1224d4d-f533-4991-8c05-27d7ae3202e6';
+    const ADMIN_ACCOUNT_EMAIL = 'aleffantunes12@gmail.com';
+    let adminSelectedTrainer = null;
+    let adminSearchVersion = 0;
+    function isAdminAccount() {
+      return onlineUser?.id === ADMIN_ACCOUNT_ID && String(onlineUser?.email || '').toLowerCase() === ADMIN_ACCOUNT_EMAIL;
+    }
+    function renderAdminPanel() {
+      if (!isAdminAccount()) return;
+      const itemSelect = document.getElementById('adminGrantItem');
+      if (!itemSelect.options.length) {
+        const itemList = [...new Map([...BAG_FIELD_ITEMS, ...BATTLE_BAG_ITEMS, ...SHOP_ITEMS].filter(item => item.key).map(item => [item.key, item])).values()];
+        itemSelect.innerHTML = itemList.map(item => `<option value="${escapeHTML(item.key)}">${escapeHTML(item.name)}</option>`).join('');
+      }
+      const pokemonSelect = document.getElementById('adminGrantPokemon');
+      pokemonSelect.innerHTML = player.party.map((pokemon, index) => `<option value="${index}">${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</option>`).join('');
+      document.getElementById('adminTrainerSearch').oninput = adminSearchTrainers;
+      document.getElementById('adminGrantType').onchange = adminUpdateGrantFields;
+      adminUpdateGrantFields();
+    }
+    async function adminSearchTrainers() {
+      if (!isAdminAccount() || !supabaseClient) return;
+      const query = document.getElementById('adminTrainerSearch').value.trim();
+      const resultsNode = document.getElementById('adminTrainerResults');
+      const version = ++adminSearchVersion;
+      if (query.length < 2) { resultsNode.replaceChildren(); return; }
+      resultsNode.textContent = 'Buscando treinadores...';
+      const { data, error } = await supabaseClient.rpc('admin_search_trainers', { p_query: query });
+      if (version !== adminSearchVersion) return;
+      if (error) { resultsNode.textContent = 'Falha na busca. Aplique a migração SQL do painel de administrador.'; return; }
+      resultsNode.replaceChildren();
+      for (const trainer of data || []) {
+        const button = document.createElement('button');
+        button.type = 'button'; button.className = 'btn btn-secondary';
+        button.textContent = `${trainer.trainer_name} · ${trainer.user_id.slice(0, 8)}…`;
+        button.addEventListener('click', () => {
+          adminSelectedTrainer = trainer;
+          document.getElementById('adminSelectedTrainer').textContent = `Selecionado: ${trainer.trainer_name}`;
+          [...resultsNode.children].forEach(child => child.classList.remove('selected'));
+          button.classList.add('selected');
+        });
+        resultsNode.append(button);
+      }
+      if (!resultsNode.children.length) resultsNode.textContent = 'Nenhum treinador encontrado com save.';
+    }
+    function adminUpdateGrantFields() {
+      const kind = document.getElementById('adminGrantType').value;
+      document.getElementById('adminItemField').hidden = kind !== 'item';
+      document.getElementById('adminPokemonField').hidden = kind !== 'pokemon';
+      document.getElementById('adminAmountField').hidden = kind === 'pokemon';
+    }
+    async function adminGrantSelectedAsset() {
+      if (!isAdminAccount() || !adminSelectedTrainer || !supabaseClient) return;
+      const kind = document.getElementById('adminGrantType').value;
+      const amount = Number(document.getElementById('adminGrantAmount').value);
+      if (kind !== 'pokemon' && (!Number.isInteger(amount) || amount < 1 || amount > 1000000)) {
+        showToast('Informe uma quantidade entre 1 e 1.000.000.', 'error'); return;
+      }
+      const payload = kind === 'item'
+        ? { key: document.getElementById('adminGrantItem').value, amount }
+        : kind === 'pokemon'
+          ? { pokemon: player.party[Number(document.getElementById('adminGrantPokemon').value)] }
+          : { amount };
+      const button = document.getElementById('adminGrantButton');
+      button.disabled = true;
+      try {
+        const { data, error } = await supabaseClient.rpc('admin_grant_trainer_asset', {
+          p_target: adminSelectedTrainer.user_id, p_kind: kind, p_payload: payload
+        });
+        if (error) throw error;
+        showToast(`${data?.trainer_name || adminSelectedTrainer.trainer_name} recebeu o recurso.`);
+      } catch (error) {
+        showToast('Falha ao enviar recurso: ' + error.message, 'error');
+      } finally { button.disabled = false; }
+    }
+
     function switchPanel(id) {
+      if (id === 'admin' && !isAdminAccount()) { showToast('Acesso restrito ao administrador.', 'error'); id = 'home'; }
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       const panel = document.getElementById('panel-'+id);
       if (panel) panel.classList.add('active');
@@ -6688,6 +6785,7 @@
       if (id === 'missions') renderMissions();
       if (id === 'pc') renderPC();
       if (id === 'pvp') renderPvpPanel();
+      if (id === 'admin') renderAdminPanel();
       if (id === 'dungeons') {
         const dg = document.getElementById('dungeonsGrid');
         if (dg) dg.innerHTML = DUNGEONS.map(dungeonCardHTML).join('');
