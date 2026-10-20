@@ -1866,9 +1866,15 @@
     const TYPE_NAME_BY_NORMALIZED = Object.fromEntries(Object.keys(TYPE_CHART).map(type => [
       type.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(), type
     ]));
+    const ENGLISH_TYPE_TO_GAME_TYPE = {
+      normal:'Normal', fire:'Fogo', water:'Agua', grass:'Planta', electric:'Eletrico',
+      ice:'Gelo', fighting:'Lutador', poison:'Veneno', ground:'Terra', flying:'Voador',
+      psychic:'Psiquico', bug:'Inseto', rock:'Pedra', ghost:'Fantasma', dragon:'Dragao',
+      dark:'Sombrio', steel:'A\u00e7o', fairy:'Fada'
+    };
     function normalizeBattleType(type) {
       const normalized = String(type || 'Normal').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-      return TYPE_NAME_BY_NORMALIZED[normalized] || 'Normal';
+      return TYPE_NAME_BY_NORMALIZED[normalized] || ENGLISH_TYPE_TO_GAME_TYPE[normalized] || 'Normal';
     }
 
     const POKE_TYPES = window.POKE_TYPES_DATA || {
@@ -2418,9 +2424,13 @@
 
     function typeMultiplier(moveType, defenderTypes) {
       let mult = 1;
-      const chart = TYPE_CHART[normalizeBattleType(moveType)] || {};
-      for (const rawType of defenderTypes || []) {
-        const t = normalizeBattleType(rawType);
+      const attackType = normalizeBattleType(moveType);
+      const types = (defenderTypes || []).map(normalizeBattleType);
+      // Ghost Pokémon are immune to Normal and Fighting attacks. Keep these
+      // immunities explicit so imported/legacy type data cannot bypass them.
+      if (types.includes('Fantasma') && ['Normal', 'Lutador'].includes(attackType)) return 0;
+      const chart = TYPE_CHART[attackType] || {};
+      for (const t of types) {
         if (chart[t] !== undefined) mult *= chart[t];
       }
       return mult;
@@ -2461,6 +2471,22 @@
       25:[{level:1,name:'Choque do Trovão',power:40,type:'Eletrico',typeColor:'#f8d030'},{level:1,name:'Onda Trovão',power:0,type:'Eletrico',typeColor:'#f8d030',statusEffect:{status:'paralysis',chance:1}},{level:9,name:'Ataque Rápido',power:40,type:'Normal',typeColor:'#a8a878'},{level:26,name:'Raio',power:70,type:'Eletrico',typeColor:'#f8d030'},{level:33,name:'Trovão',power:90,type:'Eletrico',typeColor:'#f8d030'}],
       26:[{level:1,name:'Choque do Trovão',power:40,type:'Eletrico',typeColor:'#f8d030'},{level:1,name:'Ataque Rápido',power:40,type:'Normal',typeColor:'#a8a878'},{level:1,name:'Raio',power:70,type:'Eletrico',typeColor:'#f8d030'},{level:1,name:'Trovão',power:90,type:'Eletrico',typeColor:'#f8d030'}]
     };
+    // Slowpoke/Slowbro FireRed & LeafGreen damaging level-up moves, referenced against Pokémon Database.
+    LEVEL_MOVES[79] = [
+      {level:1,name:'Tackle',power:35,type:'Normal',accuracy:95,category:'physical'},
+      {level:13,name:'Water Gun',power:40,type:'Agua',accuracy:100,category:'special'},
+      {level:17,name:'Confusion',power:50,type:'Psiquico',accuracy:100,category:'special'},
+      {level:29,name:'Headbutt',power:70,type:'Normal',accuracy:100,category:'physical'},
+      {level:40,name:'Psychic',power:90,type:'Psiquico',accuracy:100,category:'special'}
+    ];
+    LEVEL_MOVES[80] = [
+      {level:1,name:'Tackle',power:35,type:'Normal',accuracy:95,category:'physical'},
+      {level:13,name:'Water Gun',power:40,type:'Agua',accuracy:100,category:'special'},
+      {level:17,name:'Confusion',power:50,type:'Psiquico',accuracy:100,category:'special'},
+      {level:29,name:'Headbutt',power:70,type:'Normal',accuracy:100,category:'physical'},
+      {level:44,name:'Psychic',power:90,type:'Psiquico',accuracy:100,category:'special'}
+    ];
+
     const TYPE_DEFAULT_MOVES = {
       Planta:[{name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Pó Venenoso',power:0,type:'Planta',typeColor:'#78c850',statusEffect:{status:'poison',chance:0.75}},{name:'Pó do Sono',power:0,type:'Planta',typeColor:'#78c850',statusEffect:{status:'sleep',chance:0.75}},{name:'Chicote de Vinha',power:45,type:'Planta',typeColor:'#78c850'},{name:'Folha Mágica',power:60,type:'Planta',typeColor:'#78c850'},{name:'Raio Solar',power:90,type:'Planta',typeColor:'#78c850'}],
       Fogo:[{name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Brasas',power:40,type:'Fogo',typeColor:'#f08030'},{name:'Lança-chamas',power:70,type:'Fogo',typeColor:'#f08030'},{name:'Explosão de Fogo',power:95,type:'Fogo',typeColor:'#f08030'}],
@@ -2588,7 +2614,7 @@
 
     async function hydrateGenerationNineMoveMetadata(pokemonList) {
       let changed = false;
-      const forceRefresh = player?.moveMetadataVersion !== 'mythology-gen1-5';
+      const forceRefresh = player?.moveMetadataVersion !== 'pokemondb-gen3-move-types-v1';
       const targets = (pokemonList || []).filter(pokemon => Array.isArray(pokemon?.moves));
       await Promise.all(targets.flatMap(pokemon => pokemon.moves.map(async move => {
         if (!forceRefresh && ['physical','special','status'].includes(move.category)) return;
@@ -2603,7 +2629,7 @@
           changed = true;
         } catch (_) { /* Keeps the legacy fallback when a move is unavailable. */ }
       })));
-      if (player && forceRefresh) { player.moveMetadataVersion = 'mythology-gen1-5'; changed = true; }
+      if (player && forceRefresh) { player.moveMetadataVersion = 'pokemondb-gen3-move-types-v1'; changed = true; }
       if (changed && player) saveGame();
     }
 
@@ -3590,6 +3616,32 @@
       { name: 'Cerulean Cave', icon: '💎', imgId: 150, mapKey: 'cerulean', desc: 'Uma caverna remota e profunda, repleta de cristais e caminhos inexplorados.', difficulty: 'extreme', reward: '₽ 2000-5000', color: 'linear-gradient(135deg,#1a1a2e,#0a0a15)' }
     ];
 
+    // Dinheiro por vitória: valores modestos no início e maiores conforme o risco do mapa.
+    // Faixas calibradas contra os níveis mínimos/máximos dos encontros de cada área.
+    const DUNGEON_MONEY_REWARDS = {
+      viridian: { min: 10, max: 18, minLevel: 3, maxLevel: 12 },
+      mt_moon: { min: 14, max: 24, minLevel: 8, maxLevel: 17 },
+      route24: { min: 18, max: 32, minLevel: 14, maxLevel: 34 },
+      rock_tunnel: { min: 20, max: 34, minLevel: 17, maxLevel: 26 },
+      power: { min: 30, max: 48, minLevel: 30, maxLevel: 50 },
+      tower: { min: 22, max: 36, minLevel: 20, maxLevel: 38 },
+      safari: { min: 25, max: 42, minLevel: 28, maxLevel: 50 },
+      seafoam: { min: 38, max: 56, minLevel: 40, maxLevel: 60 },
+      mansion: { min: 35, max: 54, minLevel: 45, maxLevel: 66 },
+      cinnabar_volcano: { min: 42, max: 64, minLevel: 52, maxLevel: 82 },
+      victory: { min: 54, max: 78, minLevel: 65, maxLevel: 88 },
+      cerulean: { min: 65, max: 95, minLevel: 78, maxLevel: 100 }
+    };
+
+    function getDungeonMoneyReward(dungeonName, enemyLevel) {
+      const dungeon = DUNGEONS.find(area => area.name === dungeonName);
+      const range = DUNGEON_MONEY_REWARDS[dungeon?.mapKey];
+      if (!range) return Math.min(100, Math.max(10, Math.floor(8 + enemyLevel * 2)));
+      const level = Math.max(range.minLevel, Math.min(range.maxLevel, Number(enemyLevel) || range.minLevel));
+      const progress = (level - range.minLevel) / Math.max(1, range.maxLevel - range.minLevel);
+      return Math.round(range.min + (range.max - range.min) * progress);
+    }
+
     function dungeonCardHTML(d) {
       const dc = {easy:'diff-easy',medium:'diff-medium',hard:'diff-hard',extreme:'diff-extreme'};
       const dl = {easy:'Fácil',medium:'Médio',hard:'Difícil',extreme:'Extremo'};
@@ -3613,7 +3665,7 @@
             <div class="game-card-desc">${d.desc}</div>
             <div class="game-card-meta">
               <span class="difficulty ${dc[d.difficulty]}">${dl[d.difficulty]}</span>
-              <span class="reward">${d.reward}</span>
+              <span class="reward">₽ ${DUNGEON_MONEY_REWARDS[d.mapKey].min}–${DUNGEON_MONEY_REWARDS[d.mapKey].max} por vitória</span>
             </div>
           </div>
         </div>`;
@@ -7924,7 +7976,7 @@
 
       if (won) {
         // Batalhas selvagens devem complementar a renda, sem substituir recompensas de progressão.
-        const baseMoney = Math.min(100, Math.max(10, Math.floor(8 + battle.enemy.level * 2)));
+        const baseMoney = getDungeonMoneyReward(battle.dungeon, battle.enemy.level);
         const rewardMultiplier = player.poke?.heldItem === 'amulet_coin' ? 2 : 1;
         const money = Math.floor((captured ? baseMoney * 0.5 : baseMoney) * rewardMultiplier);
         const experienceShares = captured ? new Map() : getBattleExperienceShares(getBattleExperience(battle.enemy), player.poke);
