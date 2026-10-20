@@ -1524,9 +1524,9 @@
               <section class="admin-panel-card" aria-labelledby="adminStepResource">
                 <div class="admin-step-heading"><span class="admin-step-number">02</span><div><h3 id="adminStepResource">Configure o envio</h3><p>Selecione o recurso e a quantidade que será adicionada.</p></div></div>
                 <div class="admin-resource-fields">
-                  <div class="form-group"><label for="adminGrantType">Tipo de recurso</label><select id="adminGrantType"><option value="item">Item</option><option value="pokemon">Pokémon da minha equipe</option><option value="money">Pokédollar</option><option value="pokeCoins">PokeCoin</option><option value="battlePoints">BP</option></select></div>
+                  <div class="form-group"><label for="adminGrantType">Tipo de recurso</label><select id="adminGrantType"><option value="item">Item</option><option value="pokemon">Pokémon do catálogo</option><option value="money">Pokédollar</option><option value="pokeCoins">PokeCoin</option><option value="battlePoints">BP</option></select></div>
                   <div class="form-group" id="adminItemField"><label for="adminGrantItem">Item para enviar</label><select id="adminGrantItem"></select></div>
-                  <div class="form-group" id="adminPokemonField" hidden><label for="adminGrantPokemon">Pokémon para copiar</label><select id="adminGrantPokemon"></select></div>
+                  <div id="adminPokemonField" hidden><div class="form-group"><label for="adminPokemonSearch">Buscar Pokémon por nome ou número</label><input id="adminPokemonSearch" type="search" maxlength="40" placeholder="Ex.: Pikachu ou 25" autocomplete="off" /></div><div id="adminPokemonResults" class="admin-trainer-results" aria-live="polite"><div class="admin-search-message">Digite para buscar no catálogo.</div></div><div id="adminSelectedPokemon" class="admin-selected-trainer"><span>Selecione um Pokémon do catálogo.</span></div><div class="form-group" style="margin-top:12px"><label for="adminPokemonLevel">Nível do Pokémon</label><input id="adminPokemonLevel" type="number" min="1" max="100" step="1" value="5" /></div></div>
                   <div id="adminAmountField"><div class="admin-amount-wrap"><div class="form-group"><label for="adminGrantAmount">Quantidade</label><input id="adminGrantAmount" type="number" min="1" max="1000000" step="1" value="1" /></div><span class="admin-amount-hint" id="adminAmountHint">Máximo: 1.000.000</span></div></div>
                   <button type="button" class="btn admin-grant-button" id="adminGrantButton" onclick="adminGrantSelectedAsset()">Enviar recurso</button>
                 </div>
@@ -6739,6 +6739,10 @@
     const ADMIN_ACCOUNT_EMAIL = 'aleffantunes12@gmail.com';
     let adminSelectedTrainer = null;
     let adminSearchVersion = 0;
+    let adminPokemonCatalog = null;
+    let adminPokemonCatalogRequest = null;
+    let adminSelectedPokemon = null;
+    let adminPokemonSearchVersion = 0;
     function isAdminAccount() {
       return onlineUser?.id === ADMIN_ACCOUNT_ID && String(onlineUser?.email || '').toLowerCase() === ADMIN_ACCOUNT_EMAIL;
     }
@@ -6749,10 +6753,9 @@
         const itemList = [...new Map([...BAG_FIELD_ITEMS, ...BATTLE_BAG_ITEMS, ...SHOP_ITEMS].filter(item => item.key).map(item => [item.key, item])).values()];
         itemSelect.innerHTML = itemList.map(item => `<option value="${escapeHTML(item.key)}">${escapeHTML(item.name)}</option>`).join('');
       }
-      const pokemonSelect = document.getElementById('adminGrantPokemon');
-      pokemonSelect.innerHTML = player.party.map((pokemon, index) => `<option value="${index}">${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</option>`).join('');
       document.getElementById('adminTrainerSearch').oninput = adminSearchTrainers;
       document.getElementById('adminGrantType').onchange = adminUpdateGrantFields;
+      document.getElementById('adminPokemonSearch').oninput = adminSearchPokemonCatalog;
       document.getElementById('adminGrantButton').disabled = !adminSelectedTrainer;
       adminUpdateGrantFields();
     }
@@ -6800,8 +6803,78 @@
       document.getElementById('adminItemField').hidden = kind !== 'item';
       document.getElementById('adminPokemonField').hidden = kind !== 'pokemon';
       document.getElementById('adminAmountField').hidden = kind === 'pokemon';
+      if (kind !== 'pokemon') adminSelectedPokemon = null;
       const labels = { item: 'unidades', money: 'Pokédollars', pokeCoins: 'PokeCoins', battlePoints: 'BP' };
       document.getElementById('adminAmountHint').textContent = `Até 1.000.000 ${labels[kind] || 'unidades'}`;
+    }
+    async function adminSearchPokemonCatalog() {
+      const query = document.getElementById('adminPokemonSearch').value.trim().toLowerCase();
+      const results = document.getElementById('adminPokemonResults');
+      const version = ++adminPokemonSearchVersion;
+      adminSelectedPokemon = null;
+      document.getElementById('adminSelectedPokemon').innerHTML = '<span>Selecione um Pokémon do catálogo.</span>';
+      if (!query) { results.innerHTML = '<div class="admin-search-message">Digite para buscar no catálogo.</div>'; return; }
+      results.innerHTML = '<div class="admin-search-message">Carregando catálogo...</div>';
+      try {
+        if (!adminPokemonCatalog) {
+          adminPokemonCatalogRequest ||= fetch('https://pokeapi.co/api/v2/pokemon?limit=1025').then(response => {
+            if (!response.ok) throw new Error('Não foi possível carregar o catálogo.');
+            return response.json();
+          }).then(data => adminPokemonCatalog = data.results.map(entry => {
+            const id = Number(entry.url.match(/\/(\d+)\/$/)?.[1]);
+            return { id, slug: entry.name, name: entry.name.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') };
+          }).filter(entry => entry.id >= 1 && entry.id <= 1025));
+          await adminPokemonCatalogRequest;
+        }
+        if (version !== adminPokemonSearchVersion) return;
+        const normalized = query.replace(/^#/, '');
+        const matches = adminPokemonCatalog.filter(pokemon => String(pokemon.id) === normalized || pokemon.name.toLowerCase().includes(query) || pokemon.slug.includes(query)).slice(0, 20);
+        results.replaceChildren();
+        for (const pokemon of matches) {
+          const option = document.createElement('button'); option.type = 'button'; option.className = 'admin-trainer-option';
+          const name = document.createElement('span'); name.textContent = pokemon.name;
+          const number = document.createElement('small'); number.textContent = `#${pokemon.id}`;
+          option.append(name, number);
+          option.addEventListener('click', () => {
+            adminSelectedPokemon = pokemon;
+            document.getElementById('adminSelectedPokemon').innerHTML = `<span class="admin-selected-avatar">${pokemon.id}</span><span><span class="admin-selected-caption">POKÉMON SELECIONADO</span><strong>${escapeHTML(pokemon.name)} · #${pokemon.id}</strong></span>`;
+            [...results.children].forEach(child => child.classList.remove('selected'));
+            option.classList.add('selected');
+          });
+          results.append(option);
+        }
+        if (!results.children.length) results.innerHTML = '<div class="admin-search-message">Nenhum Pokémon encontrado no catálogo.</div>';
+      } catch (error) {
+        if (version === adminPokemonSearchVersion) results.innerHTML = `<div class="admin-search-message">${escapeHTML(error.message || 'Falha ao carregar o catálogo.')}</div>`;
+      }
+    }
+    async function adminBuildPokemonFromCatalog(selection, level) {
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${selection.id}/`);
+      if (!response.ok) throw new Error('Não foi possível carregar os dados deste Pokémon.');
+      const data = await response.json();
+      const statKeys = { hp: 'hp', attack: 'attack', defense: 'defense', 'special-attack': 'specialAttack', 'special-defense': 'specialDefense', speed: 'speed' };
+      const baseStats = Object.fromEntries(data.stats.map(stat => [statKeys[stat.stat.name], stat.base_stat]));
+      const types = data.types.sort((a,b) => a.slot - b.slot).map(entry => normalizeBattleType(entry.type.name));
+      const pokemon = {
+        id: selection.id, name: selection.name, level, shiny: false,
+        type: typeLabel(types), typeClass: typeClass(types), types,
+        nature: NATURES[Math.floor(Math.random() * NATURES.length)].name,
+        ability: 'Adaptabilidade',
+        ivs: Object.fromEntries(['hp','attack','defense','specialAttack','specialDefense','speed'].map(stat => [stat, Math.floor(Math.random() * 32)])),
+        evs: {hp:0,attack:0,defense:0,specialAttack:0,specialDefense:0,speed:0},
+        growthRate: 'mediumFast', exp: getExperienceForLevel(level),
+        heldItem: '', status: '', moves: []
+      };
+      ensurePokemonTraits(pokemon);
+      const calculated = pvpCalculateStats(baseStats, pokemon, pokemon.ivs, pokemon.evs);
+      pokemon.stats = calculated;
+      pokemon.maxHp = calculated.hp; pokemon.hp = calculated.hp;
+      try { pokemon.moves = await getFireRedMovesForLevel(selection.id, level); }
+      catch (_) { pokemon.moves = getMovesForLevel(selection.id, level); }
+      if (!pokemon.moves.length) pokemon.moves = getMovesForLevel(selection.id, level);
+      normalizePokemonMoves(pokemon);
+      ensurePokemonGender(pokemon);
+      return pokemon;
     }
     async function adminGrantSelectedAsset() {
       if (!isAdminAccount() || !adminSelectedTrainer || !supabaseClient) return;
@@ -6810,15 +6883,22 @@
       if (kind !== 'pokemon' && (!Number.isInteger(amount) || amount < 1 || amount > 1000000)) {
         showToast('Informe uma quantidade entre 1 e 1.000.000.', 'error'); return;
       }
-      const payload = kind === 'item'
-        ? { key: document.getElementById('adminGrantItem').value, amount }
-        : kind === 'pokemon'
-          ? { pokemon: player.party[Number(document.getElementById('adminGrantPokemon').value)] }
-          : { amount };
+      let payload = kind === 'item' ? { key: document.getElementById('adminGrantItem').value, amount } : { amount };
+      if (kind === 'pokemon') {
+        const level = Number(document.getElementById('adminPokemonLevel').value);
+        if (!adminSelectedPokemon) { showToast('Escolha um Pokémon do catálogo.', 'error'); return; }
+        if (!Number.isInteger(level) || level < 1 || level > 100) { showToast('Informe um nível entre 1 e 100.', 'error'); return; }
+      }
       const button = document.getElementById('adminGrantButton');
       button.disabled = true;
       button.textContent = 'Enviando recurso...';
       try {
+        if (kind === 'pokemon') {
+          const level = Number(document.getElementById('adminPokemonLevel').value);
+          button.textContent = 'Criando Pokémon...';
+          payload = { pokemon: await adminBuildPokemonFromCatalog(adminSelectedPokemon, level) };
+          button.textContent = 'Enviando recurso...';
+        }
         const { data, error } = await supabaseClient.rpc('admin_grant_trainer_asset', {
           p_target: adminSelectedTrainer.user_id, p_kind: kind, p_payload: payload
         });
