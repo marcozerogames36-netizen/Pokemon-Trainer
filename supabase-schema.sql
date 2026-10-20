@@ -109,6 +109,8 @@ begin
 end;
 $$;
 
+
+
 create or replace function public.pvp_valid_team(p_team jsonb)
 returns boolean
 language plpgsql
@@ -709,3 +711,136 @@ begin
   end if;
 end;
 $$;
+
+-- Diretório público de treinadores (somente nome e presença) e recursos sociais.
+create table if not exists public.trainer_profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  trainer_name text not null check (char_length(trim(trainer_name)) between 1 and 24),
+  last_seen timestamptz not null default now()
+);
+create index if not exists trainer_profiles_name_idx on public.trainer_profiles(lower(trainer_name));
+create table if not exists public.trainer_friends (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  friend_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(), primary key(user_id,friend_id), check(user_id<>friend_id)
+);
+create table if not exists public.social_requests (
+  id uuid primary key default gen_random_uuid(),
+  sender_id uuid not null references auth.users(id) on delete cascade,
+  receiver_id uuid not null references auth.users(id) on delete cascade,
+  kind text not null check(kind in ('friend','trade','battle')),
+  payload jsonb not null default '{}'::jsonb,
+  status text not null default 'pending' check(status in ('pending','accepted','rejected')),
+  created_at timestamptz not null default now(), responded_at timestamptz, check(sender_id<>receiver_id)
+);
+create index if not exists social_requests_inbox_idx on public.social_requests(receiver_id,status,created_at desc);
+
+alter table public.trainer_profiles enable row level security;
+alter table public.trainer_friends enable row level security;
+alter table public.social_requests enable row level security;
+revoke all on table public.trainer_profiles,public.trainer_friends,public.social_requests from public,anon,authenticated;
+grant select on table public.trainer_profiles,public.trainer_friends,public.social_requests to authenticated;
+drop policy if exists "Authenticated trainers can see names" on public.trainer_profiles;
+create policy "Authenticated trainers can see names" on public.trainer_profiles for select to authenticated using(auth.uid() is not null);
+drop policy if exists "Read own friend list" on public.trainer_friends;
+create policy "Read own friend list" on public.trainer_friends for select to authenticated using((select auth.uid())=user_id);
+drop policy if exists "Read own social requests" on public.social_requests;
+create policy "Read own social requests" on public.social_requests for select to authenticated using((select auth.uid())=sender_id or (select auth.uid())=receiver_id);
+
+create or replace function public.social_presence(p_name text) returns void
+language plpgsql security definer set search_path='' as $$ begin
+  if auth.uid() is null then raise exception 'Entre na sua conta.'; end if;
+  insert into public.trainer_profiles(user_id,trainer_name,last_seen) values(auth.uid(),left(trim(coalesce(p_name,'Treinador')),24),now())
+  on conflict(user_id) do update set trainer_name=excluded.trainer_name,last_seen=excluded.last_seen;
+end; $$;
+
+create or replace function public.social_send_friend_request(p_target uuid) returns uuid
+language plpgsql security definer set search_path='' as $$ declare v_id uuid; begin
+  if auth.uid() is null or p_target is null or p_target=auth.uid() then raise exception 'Treinador inválido.'; end if;
+  if not exists(select 1 from public.trainer_profiles where user_id=p_target) then raise exception 'Treinador não encontrado.'; end if;
+  if exists(select 1 from public.trainer_friends where (user_id=auth.uid() and friend_id=p_target) or (user_id=p_target and friend_id=auth.uid())) then raise exception 'Já são amigos.'; end if;
+  if exists(select 1 from public.social_requests where kind='friend' and status='pending' and ((sender_id=auth.uid() and receiver_id=p_target) or (sender_id=p_target and receiver_id=auth.uid()))) then raise exception 'Já existe um pedido pendente.'; end if;
+  insert into public.social_requests(sender_id,receiver_id,kind) values(auth.uid(),p_target,'friend') returning id into v_id; return v_id;
+end; $$;
+
+create or replace function public.social_respond_friend(p_request uuid,p_accept boolean) returns void
+language plpgsql security definer set search_path='' as $$ declare v_req public.social_requests; begin
+  select * into v_req from public.social_requests where id=p_request for update;
+  if not found or v_req.receiver_id is distinct from auth.uid() or v_req.kind<>'friend' or v_req.status<>'pending' then raise exception 'Pedido indisponível.'; end if;
+  if p_accept then
+    insert into public.trainer_friends(user_id,friend_id) values(v_req.sender_id,v_req.receiver_id),(v_req.receiver_id,v_req.sender_id) on conflict do nothing;
+  end if;
+  update public.social_requests set status=case when p_accept then 'accepted' else 'rejected' end,responded_at=now() where id=p_request;
+end; $$;
+
+create or replace function public.social_decline_request(p_request uuid) returns void
+language plpgsql security definer set search_path='' as $$ declare v_req public.social_requests; begin
+  select * into v_req from public.social_requests where id=p_request for update;
+  if not found or v_req.receiver_id is distinct from auth.uid() or v_req.status<>'pending' then raise exception 'Solicitação indisponível.'; end if;
+  update public.social_requests set status='rejected',responded_at=now() where id=p_request;
+end; $$;
+create or replace function public.social_send_trade(p_target uuid,p_pokemon_id text) returns uuid
+language plpgsql security definer set search_path='' as $$ declare v_save jsonb; v_id uuid; v_pokemon_name text; begin
+  if auth.uid() is null or not exists(select 1 from public.trainer_friends where user_id=auth.uid() and friend_id=p_target) then raise exception 'Trocas só podem ser propostas a amigos.'; end if;
+  select player into v_save from public.game_saves where user_id=auth.uid();
+  select p.value->>'name' into v_pokemon_name from jsonb_array_elements(coalesce(v_save->'party','[]'::jsonb)) p(value) where p.value->>'tradeId'=p_pokemon_id limit 1;
+  if v_pokemon_name is null then raise exception 'Pokémon indisponível na equipe.'; end if;
+  if exists(select 1 from public.social_requests where kind='trade' and status='pending' and (payload->>'offered_id'=p_pokemon_id or payload->>'requested_id'=p_pokemon_id)) then raise exception 'Pokémon já reservado em outra troca.'; end if;
+  insert into public.social_requests(sender_id,receiver_id,kind,payload) values(auth.uid(),p_target,'trade',jsonb_build_object('offered_id',p_pokemon_id,'offered_name',v_pokemon_name)) returning id into v_id; return v_id;
+end; $$;
+
+create or replace function public.social_accept_trade(p_request uuid,p_pokemon_id text) returns jsonb
+language plpgsql security definer set search_path='' as $$ declare
+  v_req public.social_requests; v_sender jsonb; v_receiver jsonb; v_a jsonb; v_b jsonb; v_ai integer; v_bi integer; v_offered text;
+begin
+  select * into v_req from public.social_requests where id=p_request for update;
+  if not found or v_req.receiver_id is distinct from auth.uid() or v_req.kind<>'trade' or v_req.status<>'pending' then raise exception 'Oferta indisponível.'; end if;
+  v_offered:=v_req.payload->>'offered_id';
+  if p_pokemon_id is null or p_pokemon_id=v_offered then raise exception 'Escolha outro Pokémon.'; end if;
+  perform 1 from public.game_saves where user_id in(v_req.sender_id,v_req.receiver_id) order by user_id for update;
+  select player into v_sender from public.game_saves where user_id=v_req.sender_id;
+  select player into v_receiver from public.game_saves where user_id=v_req.receiver_id;
+  select (x.ordinality-1)::integer,x.value into v_ai,v_a from jsonb_array_elements(coalesce(v_sender->'party','[]'::jsonb)) with ordinality x(value,ordinality) where x.value->>'tradeId'=v_offered limit 1;
+  select (x.ordinality-1)::integer,x.value into v_bi,v_b from jsonb_array_elements(coalesce(v_receiver->'party','[]'::jsonb)) with ordinality x(value,ordinality) where x.value->>'tradeId'=p_pokemon_id limit 1;
+  if v_a is null or v_b is null then raise exception 'Um Pokémon não está mais disponível na equipe.'; end if;
+  v_sender:=jsonb_set(v_sender,array['party',v_ai::text],v_b,false);
+  v_receiver:=jsonb_set(v_receiver,array['party',v_bi::text],v_a,false);
+  if v_sender->'poke'->>'tradeId'=v_offered then v_sender:=jsonb_set(v_sender,'{poke}',v_b,false); end if;
+  if v_receiver->'poke'->>'tradeId'=p_pokemon_id then v_receiver:=jsonb_set(v_receiver,'{poke}',v_a,false); end if;
+  update public.game_saves set player=v_sender,updated_at=now() where user_id=v_req.sender_id;
+  update public.game_saves set player=v_receiver,updated_at=now() where user_id=v_req.receiver_id;
+  update public.social_requests set status='accepted',responded_at=now(),payload=payload||jsonb_build_object('requested_id',p_pokemon_id) where id=p_request;
+  return jsonb_build_object('player',v_receiver);
+end; $$;
+
+create or replace function public.social_send_battle(p_target uuid,p_code text) returns uuid
+language plpgsql security definer set search_path='' as $$ declare v_id uuid; begin
+  if auth.uid() is null or not exists(select 1 from public.trainer_friends where user_id=auth.uid() and friend_id=p_target) then raise exception 'Desafios só podem ser enviados a amigos.'; end if;
+  if not exists(select 1 from public.pvp_rooms where room_code=upper(p_code) and host_id=auth.uid() and status='waiting' and expires_at>now()) then raise exception 'Sala de batalha indisponível.'; end if;
+  insert into public.social_requests(sender_id,receiver_id,kind,payload) values(auth.uid(),p_target,'battle',jsonb_build_object('room_code',upper(p_code))) returning id into v_id; return v_id;
+end; $$;
+
+create or replace function public.social_accept_battle(p_request uuid,p_name text,p_team jsonb) returns jsonb
+language plpgsql security definer set search_path='' as $$ declare v_req public.social_requests; v_room jsonb; begin
+  select * into v_req from public.social_requests where id=p_request for update;
+  if not found or v_req.receiver_id is distinct from auth.uid() or v_req.kind<>'battle' or v_req.status<>'pending' then raise exception 'Desafio indisponível.'; end if;
+  v_room:=public.pvp_join_room(v_req.payload->>'room_code',p_name,p_team);
+  update public.social_requests set status='accepted',responded_at=now() where id=p_request; return v_room;
+end; $$;
+
+revoke execute on function public.social_presence(text) from public,anon;
+revoke execute on function public.social_send_friend_request(uuid) from public,anon;
+revoke execute on function public.social_respond_friend(uuid,boolean) from public,anon;
+revoke execute on function public.social_decline_request(uuid) from public,anon;
+revoke execute on function public.social_send_trade(uuid,text) from public,anon;
+revoke execute on function public.social_accept_trade(uuid,text) from public,anon;
+revoke execute on function public.social_send_battle(uuid,text) from public,anon;
+revoke execute on function public.social_accept_battle(uuid,text,jsonb) from public,anon;
+grant execute on function public.social_presence(text) to authenticated;
+grant execute on function public.social_send_friend_request(uuid) to authenticated;
+grant execute on function public.social_respond_friend(uuid,boolean) to authenticated;
+grant execute on function public.social_decline_request(uuid) to authenticated;
+grant execute on function public.social_send_trade(uuid,text) to authenticated;
+grant execute on function public.social_accept_trade(uuid,text) to authenticated;
+grant execute on function public.social_send_battle(uuid,text) to authenticated;
+grant execute on function public.social_accept_battle(uuid,text,jsonb) to authenticated;

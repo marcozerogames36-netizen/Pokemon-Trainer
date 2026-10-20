@@ -1584,6 +1584,19 @@
               <div class="game-card-body"><div class="game-card-title">Pokédex</div><div class="game-card-desc">Consulte os Pokémon vistos e capturados.</div></div>
             </div>
           </div>
+          <section style="margin-top:28px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:900px;">
+            <h3 style="margin:0 0 6px;font-size:1.1rem;">Amigos e interações</h3>
+            <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px;">Encontre treinadores pelo nome, veja quem está online, troque Pokémon e envie desafios PvP.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input id="socialSearchInput" type="search" maxlength="24" placeholder="Buscar treinador pelo nome" aria-label="Buscar treinador pelo nome" onkeydown="if(event.key==='Enter')socialSearchTrainers()" style="flex:1 1 220px;min-width:0;">
+              <button type="button" class="btn" onclick="socialSearchTrainers()" style="width:auto;margin:0;">Buscar</button>
+            </div>
+            <div id="socialSearchResults" style="display:grid;gap:8px;margin-top:10px;"></div>
+            <h4 style="margin:20px 0 8px;">Solicitações</h4>
+            <div id="socialInbox" style="display:grid;gap:8px;"><span style="color:var(--text-muted);font-size:.85rem;">Carregando solicitações…</span></div>
+            <h4 style="margin:20px 0 8px;">Minha lista</h4>
+            <div id="socialFriends" style="display:grid;gap:8px;"><span style="color:var(--text-muted);font-size:.85rem;">Carregando amigos…</span></div>
+          </section>
           <div class="profile-danger-zone" style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border);">
             <button class="btn btn-secondary" onclick="if(confirm('Apagar todo o progresso salvo?'))clearSave()" style="width:auto;max-width:280px;margin:0;">&#128465; Apagar dados salvos</button>
           </div>
@@ -6327,6 +6340,7 @@
       document.getElementById('welcomePoke').src = SPRITE(player.starter.id);
       document.getElementById('welcomePoke').onerror = function() { this.src = SPRITE_FB(player.starter.id); };
       updateStatsUI();
+      socialStart();
 
       document.getElementById('profileBox').innerHTML = `
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
@@ -6378,7 +6392,7 @@
       if (id === 'item-catalog') renderItemCatalog();
       if (id === 'pokemon') refreshPartyUI();
       if (id === 'pokedex') renderPokedex();
-      if (id === 'profile') refreshProfileUI();
+      if (id === 'profile') { refreshProfileUI(); socialRefresh(); }
       if (id === 'gyms') renderGyms();
       if (id === 'missions') renderMissions();
       if (id === 'pc') renderPC();
@@ -6391,6 +6405,7 @@
 
     // PvP amistoso online: salas privadas, turnos sincronizados e progresso isolado.
     let pvpRoom = null;
+    let pvpChallengeTarget = null;
     let pvpChannel = null;
     let pvpSelectedIndices = new Set();
     let pvpResolving = false;
@@ -6512,9 +6527,10 @@
       if (pvpRoom) { renderPvpRoom(); return; }
       root.innerHTML = `<div class="pvp-lobby-box">
         <strong>Escolha sua equipe</strong><div class="panel-desc" style="margin:4px 0 0;">Selecione de 1 a 6 Pokémon. Eles entram com HP e PP completos apenas nesta batalha amistosa.</div>
+        ${pvpChallengeTarget ? `<div style="margin-top:12px;padding:10px;border:1px solid var(--primary);border-radius:10px;">Desafio para <strong>${escapeHTML(pvpChallengeTarget.name)}</strong></div>` : ''}
         ${pvpRenderTeamSelection()}
         <div class="pvp-room-controls">
-          <button type="button" class="btn" style="width:auto;margin:0;" onclick="pvpCreateRoom()">Criar sala</button>
+          ${pvpChallengeTarget ? `<button type="button" class="btn" style="width:auto;margin:0;" onclick="pvpChallengeFriend()">Enviar desafio</button><button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="pvpChallengeTarget=null;renderPvpPanel()">Cancelar</button>` : `<button type="button" class="btn" style="width:auto;margin:0;" onclick="pvpCreateRoom()">Criar sala</button>`}
           <input id="pvpRoomCodeInput" type="text" maxlength="6" placeholder="Código da sala" aria-label="Código da sala" autocomplete="off" />
           <button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="pvpJoinRoom()">Entrar / retomar</button>
         </div>
@@ -6550,6 +6566,31 @@
       } catch (error) {
         showToast('Não foi possível criar a sala: ' + error.message, 'error');
       } finally { pvpSubmitting = false; }
+    }
+
+    async function pvpChallengeFriend() {
+      if (!pvpChallengeTarget || pvpSubmitting || !onlineUser || !supabaseClient) return;
+      pvpSubmitting = true;
+      const target = pvpChallengeTarget;
+      try {
+        const team = await pvpBuildTeamSnapshot();
+        if (!team.length) throw new Error('Selecione pelo menos um Pokémon.');
+        let room, error;
+        for (let attempt=0; attempt<4; attempt++) {
+          const result = await supabaseClient.rpc('pvp_create_room', { p_code:pvpMakeCode(), p_trainer:player.name, p_team:team });
+          room=result.data; error=result.error;
+          if (!error) break;
+          if (!/duplicate|unique/i.test(error.message||'') || attempt===3) throw error;
+        }
+        const invite = await supabaseClient.rpc('social_send_battle', { p_target:target.id, p_code:room.room_code });
+        if (invite.error) throw invite.error;
+        pvpChallengeTarget = null;
+        await pvpAttachRoom(room);
+        switchPanel('pvp');
+        showToast(`Desafio enviado para ${target.name}.`);
+      } catch (error) {
+        showToast('Não foi possível enviar o desafio: ' + error.message, 'error');
+      } finally { pvpSubmitting=false; }
     }
 
     async function pvpJoinRoom() {
@@ -8814,6 +8855,183 @@
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Poções / Bolas</span><span style="font-weight:600;">${player.potions} / ${player.balls}</span></div>
       `;
     }
+    let socialTimer = null;
+    let socialBusy = false;
+    let socialLastHeartbeat = 0;
+    const socialKnownStatuses = new Map();
+
+    function socialEnsureTradeIds() {
+      if (!player || !Array.isArray(player.party)) return;
+      let changed = false;
+      player.party.forEach((pokemon,index) => {
+        if (pokemon && !pokemon.tradeId) {
+          pokemon.tradeId = window.crypto?.randomUUID?.() || `trade-${onlineUser?.id || 'trainer'}-${Date.now()}-${index}-${Math.random().toString(36).slice(2,9)}`;
+          changed = true;
+        }
+      });
+      if (changed) saveGame();
+    }
+
+    function socialStart() {
+      if (!onlineUser || !player || !supabaseClient) return;
+      socialEnsureTradeIds();
+      socialRefresh();
+      if (!socialTimer) socialTimer = setInterval(socialRefresh, 15000);
+    }
+
+    async function socialRefresh() {
+      if (socialBusy || !onlineUser || !player || !supabaseClient) return;
+      socialBusy = true;
+      try {
+        const now = Date.now();
+        if (now - socialLastHeartbeat > 25000) {
+          const heartbeat = await supabaseClient.rpc('social_presence', { p_name:player.name });
+          if (heartbeat.error) throw heartbeat.error;
+          socialLastHeartbeat = now;
+        }
+        const [friendResult, requestResult] = await Promise.all([
+          supabaseClient.from('trainer_friends').select('friend_id').eq('user_id',onlineUser.id),
+          supabaseClient.from('social_requests').select('*').or(`sender_id.eq.${onlineUser.id},receiver_id.eq.${onlineUser.id}`).order('created_at',{ascending:false}).limit(50)
+        ]);
+        if (friendResult.error) throw friendResult.error;
+        if (requestResult.error) throw requestResult.error;
+        const friendIds = friendResult.data.map(row=>row.friend_id);
+        const requests = requestResult.data || [];
+        const allIds = [...new Set([...friendIds,...requests.map(row=>row.sender_id),...requests.map(row=>row.receiver_id)].filter(id=>id!==onlineUser.id))];
+        let profiles = [];
+        if (allIds.length) {
+          const result = await supabaseClient.from('trainer_profiles').select('user_id,trainer_name,last_seen').in('user_id',allIds);
+          if (result.error) throw result.error;
+          profiles = result.data || [];
+        }
+        const profileById = new Map(profiles.map(profile=>[profile.user_id,profile]));
+        socialRenderFriends(friendIds.map(id=>profileById.get(id)).filter(Boolean));
+        socialRenderInbox(requests.filter(request=>request.receiver_id===onlineUser.id && request.status==='pending'),profileById);
+        for (const request of requests) {
+          if (request.kind==='trade' && request.sender_id===onlineUser.id && request.status==='accepted' && socialKnownStatuses.get(request.id)==='pending') {
+            const latest = await loadGame();
+            if (latest) { restorePlayer(latest); showToast('Troca concluída. Sua equipe foi atualizada.'); }
+          }
+          socialKnownStatuses.set(request.id,request.status);
+        }
+      } catch (error) {
+        console.warn('[Social] Falha ao atualizar:',error);
+        const inbox=document.getElementById('socialInbox');
+        if (inbox && document.getElementById('panel-profile')?.classList.contains('active')) inbox.innerHTML='<span style="color:var(--warning);font-size:.85rem;">Não foi possível carregar as interações. Confira se o SQL social foi aplicado no Supabase.</span>';
+      } finally { socialBusy=false; }
+    }
+
+    function socialIsOnline(profile) {
+      return profile?.last_seen && Date.now()-new Date(profile.last_seen).getTime()<75000;
+    }
+
+    function socialRenderFriends(friends) {
+      const root=document.getElementById('socialFriends');
+      if (!root) return;
+      if (!friends.length) { root.innerHTML='<span style="color:var(--text-muted);font-size:.85rem;">Sua lista está vazia. Busque um treinador pelo nome.</span>'; return; }
+      root.innerHTML=friends.map(friend=>{
+        const options=player.party.map((pokemon,index)=>`<option value="${escapeHTML(pokemon.tradeId||'')}">${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</option>`).join('');
+        const online=socialIsOnline(friend);
+        return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--input-bg);">
+          <div style="display:flex;align-items:center;gap:9px;"><span aria-label="${online?'Online':'Offline'}" title="${online?'Online':'Offline'}" style="width:10px;height:10px;border-radius:50%;background:${online?'#22c55e':'#64748b'};box-shadow:${online?'0 0 8px #22c55e':'none'}"></span><strong>${escapeHTML(friend.trainer_name)}</strong><small style="color:var(--text-muted);">${online?'Online':'Offline'}</small></div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;"><select id="social-trade-${friend.user_id}" aria-label="Pokémon para oferecer a ${escapeHTML(friend.trainer_name)}" style="width:auto;min-width:150px;padding:8px;">${options}</select><button type="button" class="btn btn-secondary" style="width:auto;margin:0;padding:8px 10px;" onclick="socialSendTrade('${friend.user_id}')">Trocar</button><button type="button" class="btn" style="width:auto;margin:0;padding:8px 10px;" onclick="socialChallenge('${friend.user_id}')">Chamar para batalhar</button></div>
+        </div>`;
+      }).join('');
+    }
+
+    function socialRenderInbox(requests,profileById) {
+      const root=document.getElementById('socialInbox');
+      if (!root) return;
+      if (!requests.length) { root.innerHTML='<span style="color:var(--text-muted);font-size:.85rem;">Nenhuma solicitação pendente.</span>'; return; }
+      root.innerHTML=requests.map(request=>{
+        const sender=profileById.get(request.sender_id)?.trainer_name || 'Treinador';
+        let actions='';
+        if (request.kind==='friend') actions=`<button type="button" class="btn" style="width:auto;margin:0;padding:7px 10px;" onclick="socialRespondFriend('${request.id}',true)">Aceitar</button><button type="button" class="btn btn-secondary" style="width:auto;margin:0;padding:7px 10px;" onclick="socialDecline('${request.id}')">Recusar</button>`;
+        if (request.kind==='trade') {
+          const options=player.party.map(pokemon=>`<option value="${escapeHTML(pokemon.tradeId||'')}">${escapeHTML(pokemon.name)} · Nv. ${pokemon.level}</option>`).join('');
+          actions=`<select id="social-accept-trade-${request.id}" aria-label="Escolha o Pokémon para trocar" style="width:auto;min-width:145px;padding:7px;">${options}</select><button type="button" class="btn" style="width:auto;margin:0;padding:7px 10px;" onclick="socialAcceptTrade('${request.id}')">Aceitar troca</button><button type="button" class="btn btn-secondary" style="width:auto;margin:0;padding:7px 10px;" onclick="socialDecline('${request.id}')">Recusar</button>`;
+        }
+        if (request.kind==='battle') actions=`<button type="button" class="btn" style="width:auto;margin:0;padding:7px 10px;" onclick="socialAcceptBattle('${request.id}')">Aceitar desafio</button><button type="button" class="btn btn-secondary" style="width:auto;margin:0;padding:7px 10px;" onclick="socialDecline('${request.id}')">Recusar</button>`;
+        const label=request.kind==='friend'?'quer adicionar você como amigo':request.kind==='trade'?`ofereceu ${escapeHTML(request.payload?.offered_name||'um Pokémon')} para troca`:'desafiou você para uma batalha';
+        return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--input-bg);"><span><strong>${escapeHTML(sender)}</strong> ${label}.</span><div style="display:flex;gap:7px;flex-wrap:wrap;">${actions}</div></div>`;
+      }).join('');
+    }
+
+    async function socialSearchTrainers() {
+      if (!onlineUser || !supabaseClient) return;
+      const input=document.getElementById('socialSearchInput');
+      const root=document.getElementById('socialSearchResults');
+      const query=String(input?.value||'').trim();
+      if (query.length<2) { showToast('Digite pelo menos 2 letras do nome.','error'); return; }
+      root.innerHTML='<span style="color:var(--text-muted);font-size:.85rem;">Buscando treinadores…</span>';
+      try {
+        const {data,error}=await supabaseClient.from('trainer_profiles').select('user_id,trainer_name,last_seen').ilike('trainer_name',`%${query.replace(/[%_]/g,'')}%`).neq('user_id',onlineUser.id).order('trainer_name').limit(12);
+        if (error) throw error;
+        if (!data?.length) { root.innerHTML='<span style="color:var(--text-muted);font-size:.85rem;">Nenhum treinador encontrado. Ele precisa entrar no jogo ao menos uma vez.</span>'; return; }
+        const {data:friends,error:friendError}=await supabaseClient.from('trainer_friends').select('friend_id').eq('user_id',onlineUser.id);
+        if (friendError) throw friendError;
+        const friendIds=new Set((friends||[]).map(row=>row.friend_id));
+        root.innerHTML=data.map(trainer=>{
+          const online=socialIsOnline(trainer);
+          return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--input-bg);"><span>${escapeHTML(trainer.trainer_name)} · <span style="color:${online?'#4ade80':'var(--text-muted)'}">${online?'Online':'Offline'}</span></span>${friendIds.has(trainer.user_id)?'<small>Já é amigo</small>':`<button type="button" class="btn btn-secondary" style="width:auto;margin:0;padding:7px 10px;" onclick="socialSendFriendRequest('${trainer.user_id}')">Adicionar amigo</button>`}</div>`;
+        }).join('');
+      } catch(error) { root.innerHTML=`<span style="color:var(--warning);font-size:.85rem;">${escapeHTML(error.message||'Falha na busca.')}</span>`; }
+    }
+
+    async function socialSendFriendRequest(target) {
+      try { const {error}=await supabaseClient.rpc('social_send_friend_request',{p_target:target}); if(error) throw error; showToast('Pedido de amizade enviado.'); socialRefresh(); }
+      catch(error) { showToast('Não foi possível adicionar: '+error.message,'error'); }
+    }
+    async function socialRespondFriend(request,accept) {
+      try { const {error}=await supabaseClient.rpc('social_respond_friend',{p_request:request,p_accept:accept}); if(error) throw error; showToast(accept?'Amizade adicionada!':'Pedido recusado.'); socialRefresh(); }
+      catch(error) { showToast('Não foi possível responder: '+error.message,'error'); }
+    }
+    async function socialDecline(request) {
+      try { const {error}=await supabaseClient.rpc('social_decline_request',{p_request:request}); if(error) throw error; showToast('Solicitação recusada.'); socialRefresh(); }
+      catch(error) { showToast('Não foi possível recusar: '+error.message,'error'); }
+    }
+    async function socialSendTrade(target) {
+      socialEnsureTradeIds();
+      const selected=document.getElementById(`social-trade-${target}`)?.value;
+      if (!selected) { showToast('Escolha um Pokémon para oferecer.','error'); return; }
+      try {
+        await flushGameSave();
+        const {error}=await supabaseClient.rpc('social_send_trade',{p_target:target,p_pokemon_id:selected});
+        if(error) throw error;
+        showToast('Oferta de troca enviada.'); socialRefresh();
+      } catch(error) { showToast('Não foi possível propor a troca: '+error.message,'error'); }
+    }
+    async function socialAcceptTrade(request) {
+      socialEnsureTradeIds();
+      const selected=document.getElementById(`social-accept-trade-${request}`)?.value;
+      if (!selected) { showToast('Escolha um Pokémon para trocar.','error'); return; }
+      try {
+        await flushGameSave();
+        const {data,error}=await supabaseClient.rpc('social_accept_trade',{p_request:request,p_pokemon_id:selected});
+        if(error) throw error;
+        if(data?.player) restorePlayer(data.player);
+        showToast('Troca concluída! Seu Pokémon foi adicionado à equipe.'); socialRefresh();
+      } catch(error) { showToast('Não foi possível concluir a troca: '+error.message,'error'); }
+    }
+    async function socialChallenge(target) {
+      const {data,error}=await supabaseClient.from('trainer_profiles').select('trainer_name').eq('user_id',target).maybeSingle();
+      if (error) { showToast('Não foi possível carregar o perfil do amigo.','error'); return; }
+      pvpChallengeTarget={id:target,name:data?.trainer_name||'amigo'};
+      switchPanel('pvp');
+      renderPvpPanel();
+    }
+    async function socialAcceptBattle(request) {
+      try {
+        if (!pvpSelectedIndices.size) player.party.slice(0,6).forEach((pokemon,index)=>{if(pokemon)pvpSelectedIndices.add(index);});
+        const team=await pvpBuildTeamSnapshot();
+        const {data,error}=await supabaseClient.rpc('social_accept_battle',{p_request:request,p_name:player.name,p_team:team});
+        if(error) throw error;
+        await pvpAttachRoom(data);
+        switchPanel('pvp');
+        showToast('Desafio aceito. Aguardando o anfitrião iniciar a batalha.');
+      } catch(error) { showToast('Não foi possível aceitar o desafio: '+error.message,'error'); }
+    }
+
   </script>
 </body>
 </html>
