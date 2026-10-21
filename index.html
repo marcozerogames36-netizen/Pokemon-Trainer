@@ -767,6 +767,10 @@
       .battle-enemy .enemy-info, .battle-player .player-info { min-width: 140px; padding: 8px 10px; }
       .battle-enemy.daily-boss-enemy { display: grid; grid-template-columns: minmax(0, 1fr) clamp(100px, 30vw, 160px); align-items: start; gap: 8px; padding: 0; }
       .battle-enemy.daily-boss-enemy .enemy-info.daily-boss-info { width: min(100%, 440px); min-width: 0; max-width: none; padding: 10px 11px; }
+      .battle-enemy.daily-boss-enemy .daily-boss-info .hp-label span:nth-child(2) { display: none; }
+      .battle-enemy.daily-boss-enemy .daily-boss-info .hp-bar { height: 10px; border-radius: 5px; }
+      .battle-enemy.daily-boss-enemy .daily-boss-shield-wrap { margin-top: 4px; }
+      .battle-enemy.daily-boss-enemy .daily-boss-shield-bar { height: 10px; border-radius: 5px; }
       .battle-enemy.daily-boss-enemy .enemy-stage { width: clamp(100px, 30vw, 160px); max-width: 100%; justify-self: center; }
       .party-ball-row { gap: 2px; top: -24px; }
       .party-ball { width: 22px; height: 22px; border-width: 1.5px; }
