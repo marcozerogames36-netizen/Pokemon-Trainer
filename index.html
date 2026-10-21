@@ -1612,6 +1612,16 @@
       .daily-login-week, .weekly-login-days { gap: 3px; }
     }
     @media (max-width: 480px) {
+      #panel-home > .cards-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+      #panel-home > .cards-grid > .game-card { display: grid; grid-template-columns: 100px minmax(0, 1fr); align-items: stretch; }
+      #panel-home > .cards-grid > .game-card > .game-card-header { width: 100px; height: auto !important; min-height: 104px; padding: 8px !important; border-radius: 15px 0 0 15px; overflow: hidden; }
+      #panel-home > .cards-grid > .game-card > .game-card-header img { width: auto !important; height: auto !important; max-width: 100% !important; max-height: 100% !important; }
+      #panel-home > .cards-grid > .game-card > .game-card-body { min-width: 0; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; }
+      #panel-home > .cards-grid .game-card-title, #panel-home > .cards-grid .game-card-desc { overflow-wrap: anywhere; }
+      #panel-home > .cards-grid .game-card-desc { margin-bottom: 0; }
+      #panel-home > .cards-grid .quick-mission-title-row { align-items: flex-start; gap: 6px; }
+      #panel-home > .cards-grid .quick-mission-title-row .game-card-title { flex: 1 1 auto; min-width: 0; }
+      #panel-home > .cards-grid .quick-mission-progress { flex: 0 0 auto; gap: 4px; margin-left: 0; padding: 4px 6px; }
       #panel-dungeons #dungeonsGrid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
       #panel-dungeons #dungeonsGrid .game-card-header { height: clamp(140px, 38vw, 170px) !important; }
     }
