@@ -127,3 +127,160 @@ revoke execute on function public.admin_search_trainers(text) from public,anon;
 revoke execute on function public.admin_grant_trainer_asset(uuid,text,jsonb) from public,anon;
 grant execute on function public.admin_search_trainers(text) to authenticated;
 grant execute on function public.admin_grant_trainer_asset(uuid,text,jsonb) to authenticated;
+
+-- Read a limited trainer save summary for the allowlisted administrator.
+create or replace function public.admin_get_trainer_details(p_target uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_player jsonb;
+  v_party jsonb;
+  v_pc jsonb;
+  v_items jsonb;
+  v_key text;
+begin
+  if auth.uid() is distinct from 'c1224d4d-f533-4991-8c05-27d7ae3202e6'::uuid
+     or lower(coalesce(auth.jwt()->>'email','')) is distinct from 'aleffantunes12@gmail.com' then
+    raise exception 'Acesso restrito ao administrador.';
+  end if;
+  if p_target is null then raise exception 'Selecione um treinador.'; end if;
+  select gs.player into v_player from public.game_saves gs where gs.user_id=p_target;
+  if not found then raise exception 'Save do treinador nao encontrado.'; end if;
+
+  select coalesce(jsonb_agg(jsonb_build_object('index',p.ordinality-1,'pokemon',p.value) order by p.ordinality),'[]'::jsonb)
+    into v_party
+    from jsonb_array_elements(case when jsonb_typeof(v_player->'party')='array' then v_player->'party' else '[]'::jsonb end)
+      with ordinality as p(value,ordinality)
+    where jsonb_typeof(p.value)='object';
+
+  select coalesce(jsonb_agg(jsonb_build_object('box_index',b.ordinality-1,'slot_index',s.ordinality-1,'pokemon',s.value)
+      order by b.ordinality,s.ordinality),'[]'::jsonb)
+    into v_pc
+    from jsonb_array_elements(case when jsonb_typeof(v_player#>'{pc,boxes}')='array' then v_player#>'{pc,boxes}' else '[]'::jsonb end)
+      with ordinality as b(value,ordinality)
+    cross join lateral jsonb_array_elements(case when jsonb_typeof(b.value)='array' then b.value else '[]'::jsonb end)
+      with ordinality as s(value,ordinality)
+    where jsonb_typeof(s.value)='object';
+
+  v_items:=case when jsonb_typeof(v_player->'items')='object' then v_player->'items' else '{}'::jsonb end;
+  foreach v_key in array array['balls','potions','antidote','antiparalyze','antiburn'] loop
+    if jsonb_typeof(v_player->v_key)='number' then
+      v_items:=jsonb_set(v_items,array[v_key],v_player->v_key,true);
+    end if;
+  end loop;
+  select coalesce(jsonb_object_agg(i.key,i.value),'{}'::jsonb) into v_items
+    from jsonb_each(v_items) as i(key,value)
+    where jsonb_typeof(i.value)='number' and (i.value#>>'{}')::numeric>0;
+
+  return jsonb_build_object(
+    'user_id',p_target,
+    'trainer_name',coalesce(nullif(trim(v_player->>'name'),''),'Treinador'),
+    'money',case when jsonb_typeof(v_player->'money')='number' then greatest(0,(v_player->>'money')::numeric) else 0 end,
+    'pokeCoins',case when jsonb_typeof(v_player->'pokeCoins')='number' then greatest(0,(v_player->>'pokeCoins')::numeric) else 0 end,
+    'battlePoints',case when jsonb_typeof(v_player->'battlePoints')='number' then greatest(0,(v_player->>'battlePoints')::numeric) else 0 end,
+    'party',v_party,'pc',v_pc,'items',v_items
+  );
+end;
+$$;
+
+-- Remove currencies, items, or an exact Pokemon entry without exposing table write access.
+create or replace function public.admin_remove_trainer_asset(p_target uuid,p_kind text,p_payload jsonb)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_player jsonb;
+  v_key text;
+  v_amount integer;
+  v_current numeric;
+  v_new numeric;
+  v_party jsonb;
+  v_boxes jsonb;
+  v_target jsonb;
+  v_updated_party jsonb;
+  v_index integer;
+  v_box_index integer;
+  v_slot_index integer;
+  v_location text;
+begin
+  if auth.uid() is distinct from 'c1224d4d-f533-4991-8c05-27d7ae3202e6'::uuid
+     or lower(coalesce(auth.jwt()->>'email','')) is distinct from 'aleffantunes12@gmail.com' then
+    raise exception 'Acesso restrito ao administrador.';
+  end if;
+  if p_target is null then raise exception 'Selecione um treinador.'; end if;
+  select gs.player into v_player from public.game_saves gs where gs.user_id=p_target for update;
+  if not found then raise exception 'Save do treinador nao encontrado.'; end if;
+
+  if p_kind in ('currency','item') then
+    if coalesce(p_payload->>'amount','') !~ '^[0-9]{1,10}$' then raise exception 'Quantidade invalida.'; end if;
+    v_amount:=(p_payload->>'amount')::integer;
+    if v_amount<1 then raise exception 'Quantidade deve ser maior que zero.'; end if;
+    if p_kind='currency' then
+      v_key:=p_payload->>'field';
+      if v_key is null or v_key not in ('money','pokeCoins','battlePoints') then raise exception 'Moeda invalida.'; end if;
+      v_current:=case when jsonb_typeof(v_player->v_key)='number' then greatest(0,(v_player->>v_key)::numeric) else 0 end;
+      if v_amount>v_current then raise exception 'Saldo insuficiente.'; end if;
+      v_new:=v_current-v_amount;
+      v_player:=jsonb_set(v_player,array[v_key],to_jsonb(v_new),true);
+    else
+      v_key:=p_payload->>'key';
+      if v_key is null or v_key !~ '^[a-z0-9_]{1,50}$' then raise exception 'Item invalido.'; end if;
+      v_current:=case
+        when jsonb_typeof(v_player->v_key)='number' then greatest(0,(v_player->>v_key)::numeric)
+        when jsonb_typeof(v_player->'items'->v_key)='number' then greatest(0,(v_player->'items'->>v_key)::numeric)
+        else 0 end;
+      if v_amount>v_current then raise exception 'Quantidade de item insuficiente.'; end if;
+      v_new:=v_current-v_amount;
+      v_player:=jsonb_set(v_player,'{items}',case when jsonb_typeof(v_player->'items')='object' then v_player->'items' else '{}'::jsonb end,true);
+      v_player:=jsonb_set(v_player,array['items',v_key],to_jsonb(v_new),true);
+      if jsonb_typeof(v_player->v_key)='number' then v_player:=jsonb_set(v_player,array[v_key],to_jsonb(v_new),true); end if;
+    end if;
+  elsif p_kind='pokemon' then
+    v_location:=p_payload->>'location';
+    if jsonb_typeof(p_payload->'expected') is distinct from 'object' then raise exception 'Pokemon selecionado invalido.'; end if;
+    if v_location='party' then
+      if coalesce(p_payload->>'index','') !~ '^[0-9]{1,3}$' then raise exception 'Posicao invalida.'; end if;
+      v_index:=(p_payload->>'index')::integer;
+      v_party:=case when jsonb_typeof(v_player->'party')='array' then v_player->'party' else '[]'::jsonb end;
+      if v_index<0 or v_index>=jsonb_array_length(v_party) then raise exception 'Equipe alterada; atualize os dados.'; end if;
+      v_target:=v_party->v_index;
+      if v_target is distinct from p_payload->'expected' then raise exception 'Pokemon alterado; atualize os dados.'; end if;
+      if jsonb_array_length(v_party)<=1 then raise exception 'O treinador precisa manter pelo menos um Pokemon na equipe.'; end if;
+      select coalesce(jsonb_agg(p.value order by p.ordinality),'[]'::jsonb) into v_updated_party
+        from jsonb_array_elements(v_party) with ordinality as p(value,ordinality)
+        where p.ordinality<>v_index+1;
+      v_player:=jsonb_set(v_player,'{party}',v_updated_party,true);
+      if v_player->'poke'=v_target then v_player:=jsonb_set(v_player,'{poke}',v_updated_party->0,true); end if;
+    elsif v_location='pc' then
+      if coalesce(p_payload->>'box_index','') !~ '^[0-9]{1,3}$' or coalesce(p_payload->>'slot_index','') !~ '^[0-9]{1,3}$' then raise exception 'Posicao do PC invalida.'; end if;
+      v_box_index:=(p_payload->>'box_index')::integer;
+      v_slot_index:=(p_payload->>'slot_index')::integer;
+      v_boxes:=case when jsonb_typeof(v_player#>'{pc,boxes}')='array' then v_player#>'{pc,boxes}' else '[]'::jsonb end;
+      if v_box_index<0 or v_box_index>=jsonb_array_length(v_boxes) then raise exception 'PC alterado; atualize os dados.'; end if;
+      if jsonb_typeof(v_boxes->v_box_index) is distinct from 'array' or v_slot_index<0 or v_slot_index>=jsonb_array_length(v_boxes->v_box_index) then raise exception 'Posicao do PC invalida.'; end if;
+      v_target:=v_boxes->v_box_index->v_slot_index;
+      if v_target is distinct from p_payload->'expected' then raise exception 'Pokemon alterado; atualize os dados.'; end if;
+      v_player:=jsonb_set(v_player,array['pc','boxes',v_box_index::text,v_slot_index::text],'null'::jsonb,false);
+    else
+      raise exception 'Localizacao do Pokemon invalida.';
+    end if;
+  else
+    raise exception 'Tipo de recurso invalido.';
+  end if;
+
+  update public.game_saves set player=v_player,updated_at=now() where user_id=p_target;
+  return jsonb_build_object('user_id',p_target,'kind',p_kind);
+end;
+$$;
+
+revoke execute on function public.admin_get_trainer_details(uuid) from public,anon;
+revoke execute on function public.admin_remove_trainer_asset(uuid,text,jsonb) from public,anon;
+grant execute on function public.admin_get_trainer_details(uuid) to authenticated;
+grant execute on function public.admin_remove_trainer_asset(uuid,text,jsonb) to authenticated;
+
+notify pgrst, 'reload schema';
