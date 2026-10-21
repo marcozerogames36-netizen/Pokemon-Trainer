@@ -747,13 +747,13 @@
       .topbar-stats { display: none; }
       .topbar { padding: 10px 14px; gap: 8px; }
       .topbar-actions { gap: 7px; }
-      .topbar-profile { min-width: 0; max-width: 142px; padding: 5px 7px; gap: 6px; }
+      .topbar-profile { min-width: 0; max-width: min(142px, 34vw); padding: 5px 8px; gap: 7px; border-radius: 13px; }
       .topbar-brand { gap: 7px; }
       .topbar-brand-mark { width: 32px; height: 32px; padding: 2px; }
       .topbar-brand-mark .pokeball-mark { width: 27px; height: 27px; }
       .topbar-brand-name { font-size: .9rem; }
       .topbar-profile .player-avatar { width: 30px; height: 30px; font-size: .95rem; }
-      .topbar-profile .player-meta { display: none; }
+      .topbar-profile .player-meta { display: block; margin-top: 2px; font-size: .61rem; line-height: 1.1; }
       .topbar-profile .player-name { max-width: 86px; font-size: .78rem; }
       .topbar-logout { padding: 7px 9px; font-size: .76rem; }
       .cards-grid { grid-template-columns: 1fr; }
@@ -1607,6 +1607,7 @@
       .topbar-brand-name { font-size: .72rem; }
       .topbar-actions { gap: 5px; }
       .topbar-profile { max-width: 92px; }
+      .topbar-profile .player-meta { display: none; }
       .topbar-logout { padding: 6px; font-size: .66rem; }
       .content { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
       .daily-login-week, .weekly-login-days { gap: 3px; }
@@ -9441,7 +9442,7 @@
         selected = encounters[Math.floor(Math.random() * encounters.length)];
       }
 
-      const wild = { ...selected, shiny: Math.random() < 0.1 };
+      const wild = { ...selected, shiny: Math.random() < 1 / 8192 };
       ensurePokemonGender(wild);
       if (wild.minLevel !== undefined && wild.maxLevel !== undefined) {
         wild.level = wild.minLevel + Math.floor(Math.random() * (wild.maxLevel - wild.minLevel + 1));
