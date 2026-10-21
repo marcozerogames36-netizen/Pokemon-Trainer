@@ -1814,6 +1814,11 @@
                 <button type="submit" class="btn admin-grant-button" id="adminPromoteAccountButton" style="width:auto;margin:0">Tornar administrador</button>
               </form>
               <p class="admin-promote-note">Somente o administrador principal pode conceder essa permissão. A nova pessoa deve entrar novamente para carregar o acesso.</p>
+              <form class="admin-promote-form" id="adminRevokeAccountForm" style="margin-top:18px">
+                <div class="form-group"><label for="adminRevokeEmail">E-mail do administrador</label><input id="adminRevokeEmail" type="email" maxlength="254" autocomplete="off" placeholder="admin@exemplo.com" required /></div>
+                <button type="submit" class="btn admin-remove-button" id="adminRevokeAccountButton" style="width:auto;margin:0;padding:10px 14px;font-size:.82rem">Remover acesso</button>
+              </form>
+              <p class="admin-promote-note">O administrador principal e outras contas principais protegidas não podem ser removidos por esta opção.</p>
             </section>
           </div>
         </div>
@@ -2770,7 +2775,7 @@
       changes.forEach(change => {
         if (!change || !change.stat) return;
         const target = ['self', 'attacker'].includes(change.target) ? attacker : defender;
-        if (!target || (target === defender && move.power > 0 && damage <= 0)) return;
+        if (!target || (move.power > 0 && damage <= 0)) return;
         const amount = Number(change.stages ?? change.amount ?? change.change) || 0;
         if (!amount) return;
         if (change.stat === 'accuracy' && amount < 0 && target.ability === 'Keen Eye') {
@@ -7797,9 +7802,9 @@
       {id:'dojo_kiyo',name:'Chuck',className:'Mestre do Dojo',sprite:'assets/dojo-chuck.png',icon:'??',moneyReward:900,team:[
         {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:68,level:41,moves:[{name:'Thunder Punch',power:75,type:'Eletrico',punch:true},{name:'Fire Punch',power:75,type:'Fogo',punch:true},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
         {name:'Poliwrath',id:62,ability:'Water Absorb',hp:70,level:44,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Liquidation',power:85,type:'Agua'},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo',punch:true}]},
+        {name:'Annihilape',id:979,ability:'Defiant',heldItem:'leftovers',evs:{hp:252,attack:4,defense:0,specialAttack:0,specialDefense:252,speed:0},hp:84,level:54,moves:[{name:'Rage Fist',power:50,type:'Fantasma'},{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Protect',power:0,type:'Normal',target:'user',protect:true}]},
         {name:'Machamp',id:68,ability:'Guts',heldItem:'flame_orb',evs:{hp:0,attack:0,defense:120,specialAttack:0,specialDefense:140,speed:0},hp:74,level:47,moves:[{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Facade',power:70,type:'Normal'}]},
-        {name:'Primeape',id:57,ability:'Vital Spirit',evs:{hp:0,attack:150,defense:0,specialAttack:0,specialDefense:0,speed:200},hp:80,level:50,moves:[{name:'Rock Slide',power:75,type:'Pedra',accuracy:90},{name:'U-turn',power:70,type:'Inseto'},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
-        {name:'Annihilape',id:979,ability:'Defiant',heldItem:'leftovers',evs:{hp:252,attack:4,defense:0,specialAttack:0,specialDefense:252,speed:0},hp:84,level:54,moves:[{name:'Rage Fist',power:50,type:'Fantasma'},{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Protect',power:0,type:'Normal',target:'user',protect:true}]}
+        {name:'Primeape',id:57,ability:'Vital Spirit',evs:{hp:0,attack:150,defense:0,specialAttack:0,specialDefense:0,speed:200},hp:80,level:50,moves:[{name:'Rock Slide',power:75,type:'Pedra',accuracy:90},{name:'U-turn',power:70,type:'Inseto'},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]}
       ]}
     ];
     const SS_ANNE_TRAINERS = [
@@ -8021,6 +8026,8 @@
       document.getElementById('dojoProgress').textContent = `${progress}/${DOJO_TRAINERS.length}`;
       grid.innerHTML = DOJO_TRAINERS.map((trainer, index) => {
         const done = index < progress;
+        const levels = trainer.team.map(pokemon => pokemon.level);
+        const levelRange = `${Math.min(...levels)}-${Math.max(...levels)}`;
         const unlocked = isAdminAccount() || index === progress;
         const action = isAdminAccount() || (unlocked && !done)
           ? `startDojoBattle('${trainer.id}')`
@@ -8028,7 +8035,7 @@
         const status = isAdminAccount() ? 'Desafiar' : done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
         return `<div class="game-card" role="button" tabindex="0" onclick="${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}" style="${unlocked ? '' : 'opacity:.62;'}">
           <div class="game-card-header" style="background:linear-gradient(135deg,#6b3c20,#29170f);height:105px;overflow:hidden;">${trainer.sprite ? `<img src="${trainer.sprite}" alt="${escapeHTML(trainer.name)}" style="height:100%;max-width:100%;object-fit:contain;image-rendering:pixelated;" />` : `<span style="font-size:3rem;">${trainer.icon}</span>`}</div>
-          <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} &middot; ${escapeHTML(trainer.className)}</div><div class="game-card-desc">${trainer.team.length} Pok&eacute;mon &middot; n&iacute;veis ${trainer.team[0].level}-${trainer.team[trainer.team.length-1].level}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':unlocked?'status-available':'status-locked'}">${status}</span><span class="reward">${trainer.moneyReward.toLocaleString('pt-BR')} Pok&eacute;dollar</span></div></div>
+          <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} &middot; ${escapeHTML(trainer.className)}</div><div class="game-card-desc">${trainer.team.length} Pok&eacute;mon &middot; n&iacute;veis ${levelRange}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':unlocked?'status-available':'status-locked'}">${status}</span><span class="reward">${trainer.moneyReward.toLocaleString('pt-BR')} Pok&eacute;dollar</span></div></div>
         </div>`;
       }).join('');
     }
@@ -8241,6 +8248,10 @@
         event.preventDefault();
         adminPromoteAccount();
       };
+      document.getElementById('adminRevokeAccountForm').onsubmit = event => {
+        event.preventDefault();
+        adminRevokeAccount();
+      };
       const itemSelect = document.getElementById('adminGrantItem');
       if (!itemSelect.options.length) {
         const itemList = [...new Map([...BAG_FIELD_ITEMS, ...BATTLE_BAG_ITEMS, ...SHOP_ITEMS].filter(item => item.key).map(item => [item.key, item])).values()];
@@ -8270,6 +8281,27 @@
       } finally {
         button.disabled=false;
         button.textContent='Tornar administrador';
+      }
+    }
+    async function adminRevokeAccount() {
+      if (!currentUserCanManageAdmins || !supabaseClient) return;
+      const email=document.getElementById('adminRevokeEmail').value.trim().toLowerCase();
+      const button=document.getElementById('adminRevokeAccountButton');
+      if (!email || !email.includes('@')) { showToast('Informe o e-mail da conta que perderá acesso.','error'); return; }
+      if (!window.confirm(`Remover o acesso de administrador de ${email}?`)) return;
+      button.disabled=true;
+      button.textContent='Removendo acesso...';
+      try {
+        const {data,error}=await supabaseClient.rpc('admin_revoke_account',{p_email:email});
+        if (error) throw error;
+        document.getElementById('adminRevokeEmail').value='';
+        showToast(`${data?.trainer_name||email} perdeu o acesso de administrador.`);
+      } catch (error) {
+        const migrationMissing=/admin_revoke_account|schema cache|could not find the function/i.test(error.message||'');
+        showToast(migrationMissing?'Aplique a migração atualizada de admin-panel-migration.sql no SQL Editor do Supabase e tente novamente.':'Não foi possível remover o acesso: '+error.message,'error');
+      } finally {
+        button.disabled=false;
+        button.textContent='Remover acesso';
       }
     }
     async function adminSearchTrainers() {
@@ -9785,6 +9817,67 @@
       }, 500);
     }
 
+    function estimateEnemyMoveDamage(move) {
+      if (!battle || !player?.poke || !battle.enemy || Number(move?.power) <= 0) return -1;
+      if (isDreamEaterMove(move) && player.poke.status !== 'sleep') return -1;
+      const moveType = normalizeBattleType(move.type || 'Normal');
+      const immunity = abilityTypeImmunity(player.poke, moveType);
+      const typeMult = typeMultiplier(moveType, getTypes(player.poke.id));
+      if (immunity || typeMult <= 0) return -1;
+
+      const physical = isPhysicalMove(move);
+      const attackStat = physical ? 'attack' : 'specialAttack';
+      const defenseStat = physical ? 'defense' : 'specialDefense';
+      const hasStab = getTypes(battle.enemy.id).some(type => normalizeBattleType(type) === moveType);
+      const accuracy = Number.isFinite(Number(move.accuracy)) ? Math.max(1, Math.min(100, Number(move.accuracy))) / 100 : 1;
+      const moveName = String(move.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+      const hitChance = ['shadowpunch','socosombrio','socodassombras'].includes(moveName)
+        ? 1
+        : accuracy * (1 - getStatEvasionChance(player.poke, battle.enemy));
+      let power = Number(move.power) || 0;
+      if (move.name === 'Rage Fist') power = Math.min(350, 50 + 50 * (battle.enemy.rageFistHits || 0));
+      const levelTerm = (2 * Math.max(1, Number(battle.enemy.level) || 1) / 5) + 2;
+      let baseDamage = (levelTerm * power) / 50 + 2;
+      if (hasStab) baseDamage *= 1.5;
+      baseDamage *= typeMult;
+      const burnMultiplier = battle.enemy.status === 'burn' && physical && battle.enemy.ability !== 'Guts' ? 0.5 : 1;
+      const facadeMultiplier = move.name === 'Facade' && battle.enemy.status ? 2 : 1;
+      const statMultiplier = getPokemonStatMultiplier(battle.enemy, attackStat) /
+        (getPokemonStatMultiplier(player.poke, defenseStat) * getPokemonStatMultiplier(player.poke, 'hp'));
+      const abilityMultiplier = abilityDamageMultiplier(battle.enemy, player.poke, moveType, physical, hasStab, power, move);
+      const screenMultiplier = getBattleScreenMultiplier(player.poke, physical);
+      const itemMultiplier = heldItemDamageMultiplier(battle.enemy, moveType, physical);
+      const targetPenalty = Number(battle.enemy.id) === 80 ? 0.7 : 1;
+      const damage = Math.max(1, Math.floor(baseDamage * 0.925 * burnMultiplier * facadeMultiplier * statMultiplier * abilityMultiplier * screenMultiplier * itemMultiplier * targetPenalty));
+      return Math.min(Math.max(1, Number(player.poke.hp) || 1), damage) * hitChance;
+    }
+
+    function chooseBestEnemyMove(moves) {
+      if (!moves.length) return {name:'Investida',power:30,type:'Normal'};
+      const damaging = moves
+        .map(move => ({move, score:estimateEnemyMoveDamage(move)}))
+        .filter(entry => entry.score >= 0);
+      if (damaging.length) {
+        const bestScore = Math.max(...damaging.map(entry => entry.score));
+        if (bestScore > 0) return damaging.filter(entry => entry.score === bestScore)[Math.floor(Math.random() * damaging.filter(entry => entry.score === bestScore).length)].move;
+      }
+
+      const supportMoves = moves.filter(move => {
+        if (Number(move.power) > 0) return false;
+        if (move.protect) return !battle.enemyProtected;
+        const effect = getStatusMoveEffect(move);
+        if (effect && canReceiveStatus(player.poke, effect.status)) return true;
+        return (Array.isArray(move.statChanges) ? move.statChanges : []).some(change => {
+          if (!['self','attacker'].includes(change.target)) return false;
+          const stage = change.stat === 'accuracy' ? battle.enemyAccuracyStage || 0 : battle.enemyStatStages?.[change.stat] || 0;
+          return Number(change.stages) > 0 ? stage < 6 : Number(change.stages) < 0 && stage > -6;
+        });
+      });
+      if (supportMoves.length) return supportMoves[Math.floor(Math.random() * supportMoves.length)];
+      if (damaging.length) return damaging[Math.floor(Math.random() * damaging.length)].move;
+      return moves[Math.floor(Math.random() * moves.length)];
+    }
+
     function enemyAttack() {
       if (!battle || battle.enemy.currentHp <= 0) return;
       let dailyBossBuffMessage = '';
@@ -9833,7 +9926,7 @@
         return;
       }
       const moves = (battle.enemy.moves || []).filter(move => move.power > 0 || move.statusEffect || move.statChanges || move.protect || getStatusMoveEffect(move)).filter(move => battle.enemy.heldItem !== 'assault_vest' || move.power > 0);
-      const move = moves[Math.floor(Math.random() * moves.length)] || { name: 'Investida', power: 30, type: 'Normal' };
+      const move = chooseBestEnemyMove(moves);
       if (move.protect) battle.enemyProtected = true;
       const moveType = normalizeBattleType(move.type || 'Normal');
       const defTypes = getTypes(player.poke.id);
@@ -10785,9 +10878,17 @@
       });
     }
 
+    function resetEnemyBattleStages() {
+      if (!battle) return;
+      battle.enemyStatStages = {};
+      battle.enemyAccuracyStage = 0;
+      battle.enemyCritStage = 0;
+    }
+
     function nextDojoPokemon() {
       battle.dojoIndexPokemon++;
       battle.enemy=battle.dojoTeam[battle.dojoIndexPokemon];
+      resetEnemyBattleStages();
       battle.experienceAwarded=false;
       battle.busy=false;
       battle.turn='player';
@@ -10877,6 +10978,7 @@
     function nextSSAnnePokemon() {
       battle.anneIndexPokemon++;
       battle.enemy=battle.anneTeam[battle.anneIndexPokemon];
+      resetEnemyBattleStages();
       battle.experienceAwarded=false;
       battle.busy=false;
       battle.turn='player';
@@ -10964,6 +11066,7 @@
     function nextSilphCoPokemon() {
       battle.silphIndexPokemon++;
       battle.enemy = battle.silphTeam[battle.silphIndexPokemon];
+      resetEnemyBattleStages();
       battle.experienceAwarded = false;
       battle.busy = false;
       battle.turn = 'player';
@@ -11053,6 +11156,7 @@
     function nextEliteFourPokemon() {
       battle.eliteIndexPokemon++;
       battle.enemy=battle.eliteTeam[battle.eliteIndexPokemon];
+      resetEnemyBattleStages();
       battle.experienceAwarded=false;
       battle.busy=false;
       battle.turn='player';
@@ -11249,6 +11353,7 @@
       battle.towerIndexPoke++;
       if (battle.towerIndexPoke >= battle.towerTeam.length) { endTowerVictory(); return; }
       battle.enemy = battle.towerTeam[battle.towerIndexPoke];
+      resetEnemyBattleStages();
       battle.experienceAwarded = false;
       battle.busy = false;
       battle.turn = 'player';
@@ -11291,6 +11396,7 @@
         return;
       }
       battle.enemy = battle.gymTeam[battle.gymIndexPoke];
+      resetEnemyBattleStages();
       battle.experienceAwarded = false;
       battle.busy = false;
       battle.turn = 'player';

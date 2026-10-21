@@ -371,4 +371,54 @@ $$;
 revoke execute on function public.admin_promote_account(text) from public,anon;
 grant execute on function public.admin_promote_account(text) to authenticated;
 
+-- The original owner can revoke another non-super administrator by login email.
+create or replace function public.admin_revoke_account(p_email text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_email text := lower(trim(coalesce(p_email,'')));
+  v_target uuid;
+  v_trainer_name text;
+  v_is_super_admin boolean;
+begin
+  if not public.is_game_super_admin()
+     or lower(coalesce(auth.jwt()->>'email','')) is distinct from 'aleffantunes12@gmail.com' then
+    raise exception 'Somente o administrador principal pode remover acesso administrativo.';
+  end if;
+  if v_email !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$' then
+    raise exception 'Informe um e-mail valido.';
+  end if;
+
+  select u.id into v_target
+  from auth.users u
+  where lower(coalesce(u.email,''))=v_email
+  order by u.created_at desc
+  limit 1;
+  if v_target is null then raise exception 'Nao existe uma conta cadastrada com esse e-mail.'; end if;
+  if v_target=auth.uid() then raise exception 'O acesso do administrador principal nao pode ser removido.'; end if;
+
+  select a.is_super_admin into v_is_super_admin
+  from public.game_admins a
+  where a.user_id=v_target
+  for update;
+  if not found then raise exception 'Essa conta nao possui acesso de administrador.'; end if;
+  if v_is_super_admin then raise exception 'O acesso de outro administrador principal nao pode ser removido por esta opcao.'; end if;
+
+  select coalesce(nullif(trim(tp.trainer_name),''),nullif(trim(gs.player->>'name'),''),'Conta')
+    into v_trainer_name
+  from public.game_saves gs
+  left join public.trainer_profiles tp on tp.user_id=gs.user_id
+  where gs.user_id=v_target;
+
+  delete from public.game_admins where user_id=v_target and is_super_admin=false;
+  return jsonb_build_object('user_id',v_target,'email',v_email,'trainer_name',coalesce(v_trainer_name,'Conta'));
+end;
+$$;
+
+revoke execute on function public.admin_revoke_account(text) from public,anon;
+grant execute on function public.admin_revoke_account(text) to authenticated;
+
 notify pgrst, 'reload schema';
