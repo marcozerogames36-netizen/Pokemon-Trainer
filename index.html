@@ -361,13 +361,13 @@
     .admin-trainer-details { margin-top:14px;padding-top:14px;border-top:1px solid var(--border); }
     .admin-detail-heading { display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px;font-size:.84rem; }
     .admin-detail-section { margin-top:14px; }
-    .admin-detail-pokemon-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:8px; }
-    .admin-detail-pokemon { display:flex;align-items:center;gap:8px;min-width:0;padding:8px;border:1px solid var(--border);border-radius:11px;background:#111119; }
-    .admin-detail-pokemon img { width:52px;height:52px;flex:0 0 52px;object-fit:contain;image-rendering:pixelated; }
-    .admin-detail-pokemon-info { min-width:0;flex:1; }
-    .admin-detail-pokemon-info strong { display:block;overflow:hidden;font-size:.76rem;text-overflow:ellipsis;white-space:nowrap; }
-    .admin-detail-pokemon-info small { display:block;color:var(--text-muted);font-size:.67rem; }
-    .admin-detail-pokemon .admin-remove-button { align-self:flex-start; }
+    .admin-detail-pokemon-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,205px),1fr));gap:10px; }
+    .admin-detail-pokemon { display:grid;grid-template-columns:58px minmax(0,1fr);grid-template-areas:"sprite info" "remove remove";align-items:center;column-gap:10px;row-gap:7px;min-width:0;padding:10px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(145deg,#15151e,#101016); }
+    .admin-detail-pokemon img { grid-area:sprite;width:58px;height:58px;object-fit:contain;image-rendering:pixelated; }
+    .admin-detail-pokemon-info { grid-area:info;min-width:0; }
+    .admin-detail-pokemon-info strong { display:block;overflow:hidden;margin-bottom:4px;font-size:.82rem;text-overflow:ellipsis;white-space:nowrap; }
+    .admin-detail-pokemon-info small { display:block;color:var(--text-muted);font-size:.72rem;line-height:1.4;overflow-wrap:anywhere; }
+    .admin-detail-pokemon .admin-remove-button { grid-area:remove;justify-self:end; }
     .admin-detail-list { display:grid;gap:6px; }
     .admin-detail-row { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:9px;background:#111119;font-size:.78rem; }
     .admin-detail-row span { min-width:0;overflow:hidden;text-overflow:ellipsis; }
@@ -407,6 +407,11 @@
     }
     .game-card.item-tooltip-card::after { bottom: calc(100% + 10px); }
     .game-card-body { padding: 16px 18px 18px; }
+    .quick-mission-title-row { display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px; }
+    .quick-mission-title-row .game-card-title { margin:0; }
+    .quick-mission-progress { display:inline-flex;align-items:center;justify-content:center;gap:5px;margin-left:auto;padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,.025); }
+    .quick-mission-progress strong { color:var(--text);font-size:.86rem;line-height:1.2; }
+    .quick-mission-progress span { color:var(--text-muted);font-size:.68rem; }
     .game-card-title { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
     .game-card-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 12px; }
     .game-card-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; }
@@ -444,6 +449,8 @@
     .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; text-align: center; }
     .stat-card .value { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
     .stat-card .label { font-size: 0.75rem; color: var(--text-muted); }
+    .stat-card-currencies { display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:8px;color:var(--text-muted);font-size:.72rem; }
+    .stat-card-currencies strong { color:var(--text);font-weight:700; }
     .mission-list { display: flex; flex-direction: column; gap: 12px; }
     .mission-tabs { display: flex; gap: 8px; margin: 18px 0 14px; border-bottom: 1px solid var(--border); }
     .mission-tab { border: 0; border-bottom: 2px solid transparent; padding: 10px 14px; background: transparent; color: var(--text-muted); cursor: pointer; font: inherit; font-weight: 600; }
@@ -1678,10 +1685,8 @@
             </div>
           </div>
           <div class="stats-row">
-            <div class="stat-card"><div class="value" id="statMoney">₽ 3.000</div><div class="label">Dinheiro</div></div>
+            <div class="stat-card"><div class="value" id="statMoney">₽ 3.000</div><div class="label">Dinheiro</div><div class="stat-card-currencies"><span>💎 <strong id="statPokeCoins">0</strong> PC</span><span>BP <strong id="statBattlePoints">0</strong></span></div></div>
             <div class="stat-card"><div class="value" id="statLevel">1</div><div class="label">Nível</div></div>
-            <div class="stat-card"><div class="value" id="statBadges">0 / 8</div><div class="label">Insígnias</div></div>
-            <div class="stat-card"><div class="value" id="statMissions">0 / 12</div><div class="label">Missões</div></div>
           </div>
           <h3 style="font-size:1.1rem;margin-bottom:14px;">Acesso rápido</h3>
           <div class="cards-grid">
@@ -1691,11 +1696,11 @@
             </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('missions')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('missions')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#2a1f3d,#15101f);"><img src="assets/missions-tablet.png" alt="" style="width:80px;height:88px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Missões</div><div class="game-card-desc">Acompanhe objetivos e recompensas.</div></div>
+              <div class="game-card-body"><div class="quick-mission-title-row"><div class="game-card-title">Missões</div><div class="quick-mission-progress"><strong id="quickMissionCount">0 / 0</strong><span>concluídas</span></div></div><div class="game-card-desc">Acompanhe objetivos e recompensas.</div></div>
             </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('gyms')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('gyms')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#42351d,#201a10);"><img src="assets/gym-badges.png" alt="" style="width:154px;height:92px;object-fit:contain;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Ginásios</div><div class="game-card-desc">Desafie os líderes e conquiste insígnias.</div></div>
+              <div class="game-card-body"><div class="quick-mission-title-row"><div class="game-card-title">Ginásios</div><div class="quick-mission-progress"><strong id="quickGymCount">0 / 8</strong><span>insígnias</span></div></div><div class="game-card-desc">Desafie os líderes e conquiste insígnias.</div></div>
             </div>
             <div class="game-card" id="eliteFourHomeCard" role="button" tabindex="0" onclick="switchPanel('elite-four')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('elite-four')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#4a3522,#211728);height:126px;"><img src="assets/elite-four-card.png" alt="Elite Four de Kanto" style="width:100%;height:126px;object-fit:contain;image-rendering:pixelated;" /></div>
@@ -4344,6 +4349,27 @@
       { id: 'elite_5', name: 'Desafio da Elite', icon: '&#128081;', desc: 'Venca 5 combates na Elite Four.', type: 'battle_in', targetValue: 'Elite Four', target: 5, money: 5000, xp: 1600, unlock: 'gym_rest', color: '#a855f722' },
       { id: 'badges_all', name: 'Orgulho de Kanto', icon: '&#129351;', desc: 'Conquiste as 8 insignias de Kanto.', type: 'badges', target: 8, money: 10000, xp: 3000, unlock: 'gym_rest', color: '#a855f722' }
     );
+    MISSIONS.push(
+      { id: 'catch_50', name: 'Mestre das Capturas', icon: '&#127919;', desc: 'Capture 50 Pokémon selvagens.', type: 'capture', target: 50, money: 5000, xp: 1500, unlock: 'catch_25', color: '#3b82f622' },
+      { id: 'dex_75', name: 'Enciclopédia de Kanto', icon: '&#128214;', desc: 'Registre 75 espécies diferentes na Pokédex.', type: 'pokedex', target: 75, money: 6000, xp: 1800, unlock: 'dex_40', color: '#22c55e22' },
+      { id: 'grass_catch_5', name: 'Trilha Verde', icon: '&#127793;', desc: 'Capture 5 Pokémon do tipo Planta.', type: 'capture_type', filterType: 'Planta', target: 5, money: 1200, xp: 400, unlock: 'catch_3', color: '#22c55e22' },
+      { id: 'electric_catch_5', name: 'Carga Elétrica', icon: '&#9889;', desc: 'Capture 5 Pokémon do tipo Elétrico.', type: 'capture_type', filterType: 'Eletrico', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#f59e0b22' },
+      { id: 'poison_catch_5', name: 'Pesquisa Tóxica', icon: '&#9760;', desc: 'Capture 5 Pokémon do tipo Veneno.', type: 'capture_type', filterType: 'Veneno', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#a855f722' },
+      { id: 'fighting_catch_5', name: 'Espírito de Luta', icon: '&#129354;', desc: 'Capture 5 Pokémon do tipo Lutador.', type: 'capture_type', filterType: 'Lutador', target: 5, money: 1500, xp: 500, unlock: 'catch_3', color: '#ef444422' },
+      { id: 'battle_100', name: 'Desafio sem Fim', icon: '&#9876;', desc: 'Vença 100 batalhas.', type: 'battle', target: 100, money: 12000, xp: 3000, unlock: 'battle_60', color: '#ef444422' },
+      { id: 'dojo_5', name: 'Respeito no Tatame', icon: '&#129354;', desc: 'Derrote 5 lutadores no Dojo Marcial.', type: 'battle_in', targetValue: 'Dojo Marcial', target: 5, money: 2200, xp: 700, unlock: 'battle_10', color: '#ef444422' },
+      { id: 'silph_10', name: 'Limpeza na Silph Co.', icon: '&#127970;', desc: 'Derrote 10 treinadores na Silph Co.', type: 'battle_in', targetValue: 'Silph Co.', target: 10, money: 3500, xp: 1100, unlock: 'silph', color: '#a855f722' },
+      { id: 'anne_10', name: 'Guardião do Navio', icon: '&#128674;', desc: 'Derrote 10 treinadores na S.S. Anne.', type: 'battle_in', targetValue: 'S.S. Anne', target: 10, money: 2500, xp: 800, unlock: 'ss_anne', color: '#3b82f622' },
+      { id: 'tower_10', name: 'Veterano da Torre', icon: '&#127984;', desc: 'Vença 10 combates na Torre de Batalha.', type: 'battle_in', targetValue: 'Torre de Batalha', target: 10, money: 4500, xp: 1400, unlock: 'tower_5', color: '#a855f722' },
+      { id: 'elite_10', name: 'Lenda da Elite', icon: '&#128081;', desc: 'Vença 10 combates na Elite Four.', type: 'battle_in', targetValue: 'Elite Four', target: 10, money: 8000, xp: 2400, unlock: 'elite_5', color: '#a855f722' },
+      { id: 'use_items_50', name: 'Mochila de Campeão', icon: '&#129514;', desc: 'Use 50 itens durante batalhas.', type: 'battle_item_used', target: 50, money: 5000, xp: 1500, unlock: 'use_items_25', color: '#ef444422' },
+      { id: 'heal_25', name: 'Amigo do Centro Pokémon', icon: '&#127973;', desc: 'Trate 25 Pokémon no Centro Pokémon.', type: 'center_heal', target: 25, money: 1800, xp: 600, unlock: 'heal_10', color: '#ec489922' },
+      { id: 'buy_30', name: 'Estoque Reforçado', icon: '&#128717;', desc: 'Compre 30 unidades de itens no Poké Market.', type: 'item_bought', target: 30, money: 1800, xp: 600, unlock: 'buy_10', color: '#f59e0b22' },
+      { id: 'sell_50', name: 'Magnata do Mercado', icon: '&#129689;', desc: 'Venda 50 unidades de itens no Poké Market.', type: 'item_sold', target: 50, money: 3000, xp: 900, unlock: 'sell_20', color: '#f59e0b22' },
+      { id: 'evolve_10', name: 'Ciclo Evolutivo', icon: '&#10024;', desc: 'Evolua 10 Pokémon.', type: 'evolution', target: 10, money: 6500, xp: 1900, unlock: 'evolve_6', color: '#8b5cf622' },
+      { id: 'level_60', name: 'Treinamento de Elite', icon: '&#128200;', desc: 'Faça seus Pokémon ganharem 60 níveis ao todo.', type: 'pokemon_level', target: 60, money: 6500, xp: 1900, unlock: 'level_30', color: '#a855f722' },
+      { id: 'team_care', name: 'Equipe em Forma', icon: '&#128101;', desc: 'Trate 6 Pokémon de uma vez no Centro Pokémon.', type: 'center_heal', target: 6, money: 1200, xp: 400, unlock: 'team_six', color: '#ec489922' }
+    );
     MISSIONS.push({ id: 'dojo_chuck_reward', name: 'Desafio do Mestre do Dojo', icon: '&#129354;', desc: 'Depois de derrotar Chuck, escolha um Pok?mon: Hitmonlee ou Hitmonchan.', type: 'dojo_chuck_reward', target: 1, money: 0, xp: 0, unlock: null, color: '#ef444422' });
     Object.assign(MISSIONS.find(m => m.id === 'silph'), { name: 'Libertar a Silph Co.', desc: 'Derrote 3 treinadores da Equipe Rocket na Silph Co.', type: 'battle_in', targetValue: 'Silph Co.', target: 3 });
     MISSIONS.forEach(m => {
@@ -4869,6 +4895,8 @@
       player.missionsDone = completed.length;
       const sm = document.getElementById('statMissions');
       if (sm) sm.textContent = `${player.missionsDone} / ${MISSIONS.length}`;
+      const quickMissionCount = document.getElementById('quickMissionCount');
+      if (quickMissionCount) quickMissionCount.textContent = `${player.missionsDone} / ${MISSIONS.length}`;
     }
 
     let selectedGender = null, selectedStarter = null, player = null;
@@ -5354,11 +5382,14 @@
       document.getElementById('dashBattlePoints').textContent = (Number(player.battlePoints) || 0).toLocaleString('pt-BR');
       document.getElementById('dashPokeCoins').textContent = `${(Number(player.pokeCoins) || 0).toLocaleString('pt-BR')} PC`;
       document.getElementById('statMoney').textContent = `₽ ${player.money.toLocaleString('pt-BR')}`;
+      document.getElementById('statPokeCoins').textContent = (Number(player.pokeCoins) || 0).toLocaleString('pt-BR');
+      document.getElementById('statBattlePoints').textContent = (Number(player.battlePoints) || 0).toLocaleString('pt-BR');
       document.getElementById('dashLevel').textContent = `Nv. ${player.level}`;
       document.getElementById('statLevel').textContent = player.level;
       document.getElementById('dashBadges').textContent = `${player.badges}/8`;
-      document.getElementById('statBadges').textContent = `${player.badges} / 8`;
-      document.getElementById('statMissions').textContent = `${player.missionsDone} / ${MISSIONS.length}`;
+      document.getElementById('quickGymCount').textContent = `${player.badges} / 8`;
+      const quickMissionCount = document.getElementById('quickMissionCount');
+      if (quickMissionCount) quickMissionCount.textContent = `${player.missionsDone} / ${MISSIONS.length}`;
       updateEliteFourHomeCard();
       updateSilphCoHomeCard();
     }
@@ -8201,9 +8232,9 @@
       ];
       const pokemonCard=(entry,location)=>{
         const pokemon=entry.pokemon||{};
-        const where=location==='party'?`Equipe \u00b7 posi\u00e7\u00e3o ${entry.index+1}`:`PC \u00b7 caixa ${entry.box_index+1}, espa\u00e7o ${entry.slot_index+1}`;
+        const where=location==='party'?`Equipe · posição ${entry.index+1}`:`PC · Caixa ${entry.box_index+1} · Espaço ${entry.slot_index+1}`;
         const removal={kind:'pokemon',location,index:entry.index,box_index:entry.box_index,slot_index:entry.slot_index,expected:pokemon};
-        return `<article class="admin-detail-pokemon"><img src="${SPRITE_POKEMON(pokemon)}" alt="${escapeHTML(pokemon.name||'Pok\u00e9mon')}" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'"><div class="admin-detail-pokemon-info"><strong>${escapeHTML(pokemon.name||'Pok\u00e9mon')}</strong><small>Nv. ${Number(pokemon.level)||'?'} \u00b7 ${where}</small><small>HP ${Number(pokemon.hp)||0}/${Number(pokemon.maxHp)||0}</small></div><button type="button" class="admin-remove-button" data-admin-remove="${escapeHTML(JSON.stringify(removal))}" aria-label="Remover ${escapeHTML(pokemon.name||'Pok\u00e9mon')}">Remover</button></article>`;
+        return `<article class="admin-detail-pokemon"><img src="${SPRITE_POKEMON(pokemon)}" alt="${escapeHTML(pokemon.name||'Pok\u00e9mon')}" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'"><div class="admin-detail-pokemon-info"><strong>${escapeHTML(pokemon.name||'Pok\u00e9mon')}</strong><small>Nv. ${Number(pokemon.level)||'?'}</small><small>${where}</small><small>HP ${Number(pokemon.hp)||0} / ${Number(pokemon.maxHp)||0}</small></div><button type="button" class="admin-remove-button" data-admin-remove="${escapeHTML(JSON.stringify(removal))}" aria-label="Remover ${escapeHTML(pokemon.name||'Pok\u00e9mon')}">Remover</button></article>`;
       };
       const currencyRows=currencies.map(currency=>`<div class="admin-detail-row"><span>${currency.label}: <strong>${currency.prefix} ${currency.value.toLocaleString('pt-BR')}</strong></span>${currency.value?`<button type="button" class="btn btn-secondary admin-detail-balance-button" data-admin-currency="${currency.field}" data-admin-label="${currency.label}" data-admin-balance="${currency.value}">Remover quantidade</button>`:'<small>Saldo zero</small>'}</div>`).join('');
       const itemRows=items.map(([key,qty])=>`<div class="admin-detail-row"><span>${escapeHTML(adminGetItemLabel(key))} <small style="color:var(--text-muted);">(${escapeHTML(key)})</small>: <strong>${Number(qty).toLocaleString('pt-BR')}</strong></span><button type="button" class="admin-remove-button" data-admin-item="${escapeHTML(key)}" data-admin-label="${escapeHTML(adminGetItemLabel(key))}" data-admin-quantity="${Number(qty)}">Remover</button></div>`).join('');
