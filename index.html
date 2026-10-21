@@ -2771,10 +2771,11 @@
       const changes = Array.isArray(rawChanges)
         ? rawChanges
         : Object.entries(rawChanges).map(([stat, stages]) => ({ target: Number(stages) < 0 ? 'target' : 'self', stat, stages }));
+      const moveSlug = String(move.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const messages = [];
       changes.forEach(change => {
         if (!change || !change.stat) return;
-        const target = ['self', 'attacker'].includes(change.target) ? attacker : defender;
+        const target = moveSlug === 'closecombat' || ['self', 'attacker'].includes(change.target) ? attacker : defender;
         if (!target || (move.power > 0 && damage <= 0)) return;
         const amount = Number(change.stages ?? change.amount ?? change.change) || 0;
         if (!amount) return;
@@ -3191,7 +3192,7 @@
         const statusNames = { paralysis: 'paralysis', sleep: 'sleep', poison: 'poison', burn: 'burn', freeze: 'freeze', confusion: 'confusion' };
         const statusEffect = statusNames[ailment] ? { status: statusNames[ailment], chance: Math.max(0, Number(data.meta?.ailment_chance) || Number(data.effect_chance) || 0) / 100 } : undefined;
         const statNames = { attack: 'attack', defense: 'defense', 'special-attack': 'specialAttack', 'special-defense': 'specialDefense', speed: 'speed', accuracy: 'accuracy', evasion: 'evasion' };
-        const changesTargetUser = ['user', 'users-field', 'user-and-allies'].includes(data.target?.name);
+        const changesTargetUser = ['user', 'users-field', 'user-and-allies'].includes(data.target?.name) || slug === 'close-combat';
         const statChanges = slug === 'swords-dance'
           ? [{ target: 'self', stat: 'attack', stages: 2 }]
           : (data.stat_changes || []).map(change => ({
@@ -7794,17 +7795,17 @@
         {name:'Poliwrath',id:62,ability:'Water Absorb',hp:54,level:36,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Liquidation',power:85,type:'Agua'},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo',punch:true}]}
       ]},
       {id:'dojo_ryu',name:'Ryu',className:'Mestre de combate',sprite:'assets/dojo-blackbelt-gen7.png',icon:'??',moneyReward:600,team:[
+        {name:'Primeape',id:57,ability:'Vital Spirit',evs:{hp:0,attack:150,defense:0,specialAttack:0,specialDefense:0,speed:200},hp:67,level:41,moves:[{name:'Rock Slide',power:75,type:'Pedra',accuracy:90},{name:'U-turn',power:70,type:'Inseto'},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
         {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:56,level:36,moves:[{name:'Thunder Punch',power:75,type:'Eletrico',punch:true},{name:'Fire Punch',power:75,type:'Fogo',punch:true},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
         {name:'Poliwrath',id:62,ability:'Water Absorb',hp:59,level:38,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Liquidation',power:85,type:'Agua'},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo',punch:true}]},
-        {name:'Machamp',id:68,ability:'Guts',heldItem:'flame_orb',evs:{hp:0,attack:0,defense:120,specialAttack:0,specialDefense:140,speed:0},hp:63,level:40,moves:[{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Facade',power:70,type:'Normal'}]},
-        {name:'Primeape',id:57,ability:'Vital Spirit',evs:{hp:0,attack:150,defense:0,specialAttack:0,specialDefense:0,speed:200},hp:67,level:41,moves:[{name:'Rock Slide',power:75,type:'Pedra',accuracy:90},{name:'U-turn',power:70,type:'Inseto'},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]}
+        {name:'Machamp',id:68,ability:'Guts',heldItem:'flame_orb',evs:{hp:0,attack:0,defense:120,specialAttack:0,specialDefense:140,speed:0},hp:63,level:40,moves:[{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Facade',power:70,type:'Normal'}]}
       ]},
       {id:'dojo_kiyo',name:'Chuck',className:'Mestre do Dojo',sprite:'assets/dojo-chuck.png',icon:'??',moneyReward:900,team:[
+        {name:'Primeape',id:57,ability:'Vital Spirit',evs:{hp:0,attack:150,defense:0,specialAttack:0,specialDefense:0,speed:200},hp:80,level:50,moves:[{name:'Rock Slide',power:75,type:'Pedra',accuracy:90},{name:'U-turn',power:70,type:'Inseto'},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
         {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:68,level:41,moves:[{name:'Thunder Punch',power:75,type:'Eletrico',punch:true},{name:'Fire Punch',power:75,type:'Fogo',punch:true},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
         {name:'Poliwrath',id:62,ability:'Water Absorb',hp:70,level:44,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Liquidation',power:85,type:'Agua'},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo',punch:true}]},
-        {name:'Annihilape',id:979,ability:'Defiant',heldItem:'leftovers',evs:{hp:252,attack:4,defense:0,specialAttack:0,specialDefense:252,speed:0},hp:84,level:54,moves:[{name:'Rage Fist',power:50,type:'Fantasma'},{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Protect',power:0,type:'Normal',target:'user',protect:true}]},
         {name:'Machamp',id:68,ability:'Guts',heldItem:'flame_orb',evs:{hp:0,attack:0,defense:120,specialAttack:0,specialDefense:140,speed:0},hp:74,level:47,moves:[{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Facade',power:70,type:'Normal'}]},
-        {name:'Primeape',id:57,ability:'Vital Spirit',evs:{hp:0,attack:150,defense:0,specialAttack:0,specialDefense:0,speed:200},hp:80,level:50,moves:[{name:'Rock Slide',power:75,type:'Pedra',accuracy:90},{name:'U-turn',power:70,type:'Inseto'},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]}
+        {name:'Annihilape',id:979,ability:'Defiant',heldItem:'leftovers',evs:{hp:252,attack:4,defense:0,specialAttack:0,specialDefense:252,speed:0},hp:84,level:54,moves:[{name:'Rage Fist',power:50,type:'Fantasma'},{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Protect',power:0,type:'Normal',target:'user',protect:true}]}
       ]}
     ];
     const SS_ANNE_TRAINERS = [
