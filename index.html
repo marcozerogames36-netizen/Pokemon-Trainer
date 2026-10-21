@@ -1552,6 +1552,52 @@
       .quick-mission-progress { gap: 3px; padding: 4px 6px; }
     }
 
+    /* Mobile layout refinements */
+    @media (max-width: 600px) {
+      html, body { width: 100%; overflow-x: clip; }
+      #dashboard.active, .main { width: 100%; min-width: 0; }
+      .content { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+      .topbar {
+        padding-top: max(8px, env(safe-area-inset-top));
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
+      }
+      .topbar-brand { min-width: 0; }
+      .topbar-brand-name { overflow: hidden; text-overflow: ellipsis; }
+      .topbar-profile .player-name { overflow: hidden; text-overflow: ellipsis; }
+      .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .game-card { min-width: 0; }
+      .game-card-title, .game-card-desc { overflow-wrap: anywhere; }
+      .admin-promote-form { grid-template-columns: minmax(0, 1fr); }
+      .admin-promote-form .btn { width: 100% !important; min-height: 44px; }
+      .admin-panel-hero { gap: 12px; }
+      .summary-card, .held-item-picker-card { width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; }
+      .shop-quantity-content { max-height: calc(100dvh - 24px); overflow-y: auto; }
+      .summary-header { gap: 12px; }
+      .summary-move { gap: 6px; padding: 8px; font-size: .78rem; }
+      .summary-move-controls { margin-left: 4px; }
+      .summary-move-controls button { width: 36px; height: 36px; }
+      #battleOverlay { padding-bottom: env(safe-area-inset-bottom); }
+      .battle-ui { padding: 12px 12px calc(14px + env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; }
+      .battle-log { min-height: 44px; margin-bottom: 10px; padding: 9px 10px; font-size: .82rem; }
+      .battle-btn, .move-btn, .btn { min-height: 44px; }
+      .move-btn { gap: 6px; flex-wrap: wrap; overflow-wrap: anywhere; }
+      .battle-result { max-height: 70dvh; overflow-y: auto; padding: 14px 10px; }
+      .pvp-arena { min-height: calc(100dvh - 150px); }
+      .pvp-side-card, .pvp-lobby-box, .pvp-room-box { min-width: 0; }
+      .pvp-code { font-size: clamp(1.1rem, 6vw, 1.5rem); overflow-wrap: anywhere; }
+    }
+    @media (max-width: 380px) {
+      .cards-grid { grid-template-columns: minmax(0, 1fr); }
+      .topbar { gap: 6px; }
+      .topbar-brand-name { font-size: .72rem; }
+      .topbar-actions { gap: 5px; }
+      .topbar-profile { max-width: 92px; }
+      .topbar-logout { padding: 6px; font-size: .66rem; }
+      .content { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+      .daily-login-week, .weekly-login-days { gap: 3px; }
+    }
+
   </style>
 </head>
 <body>
@@ -6014,7 +6060,7 @@
       return message;
     }
 
-    function applyHeldItemEndTurn(pokemon) {
+    function applyStatusOrbEndTurn(pokemon) {
       if (!pokemon) return '';
       const hpKey = Number.isFinite(pokemon.currentHp) ? 'currentHp' : 'hp';
       if (pokemon[hpKey] <= 0) return '';
@@ -6026,6 +6072,13 @@
         pokemon.status = 'toxic'; pokemon.toxicCounter = 1;
         return `${pokemon.name} foi envenenado pelo Toxic Orb.`;
       }
+      return '';
+    }
+
+    function applyHeldItemEndTurn(pokemon) {
+      if (!pokemon) return '';
+      const hpKey = Number.isFinite(pokemon.currentHp) ? 'currentHp' : 'hp';
+      if (pokemon[hpKey] <= 0) return '';
       if (pokemon.heldItem !== 'leftovers') return '';
       if (pokemon[hpKey] <= 0 || pokemon[hpKey] >= pokemon.maxHp) return '';
       const restored = Math.min(pokemon.maxHp - pokemon[hpKey], Math.max(1, Math.floor(pokemon.maxHp / 16)));
@@ -6035,7 +6088,11 @@
 
     function applyBattleHeldItemsAtTurnEnd() {
       const messages = [];
-      // Status residual damage resolves after both actions; Leftovers heals afterward.
+      // Orbs inflict their status at this turn's end, before that status deals residual damage.
+      const playerOrbMessage = applyStatusOrbEndTurn(player?.poke);
+      const enemyOrbMessage = applyStatusOrbEndTurn(battle?.enemy);
+      if (playerOrbMessage) messages.push(playerOrbMessage);
+      if (enemyOrbMessage) messages.push(enemyOrbMessage);
       const playerResidual = applyResidualStatus(player?.poke);
       const enemyResidual = applyResidualStatus(battle?.enemy);
       if (playerResidual) messages.push(playerResidual);
@@ -6048,6 +6105,7 @@
         battle.playerHp = player.poke.hp;
         updatePlayerHpBar();
         updateEnemyHpBar();
+        renderBattleStatusIndicators();
         saveGame();
       }
       return messages.join(' ');
