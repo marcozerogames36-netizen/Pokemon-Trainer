@@ -765,7 +765,9 @@
       .battle-enemy { gap: 6px; padding: 0 2%; }
       .battle-player { padding-left: 4%; }
       .battle-enemy .enemy-info, .battle-player .player-info { min-width: 140px; padding: 8px 10px; }
-      .battle-enemy .enemy-info.daily-boss-info { flex: 0 1 auto; width: min(62vw, 280px); min-width: 0; max-width: calc(100% - 92px); padding: 10px 11px; }
+      .battle-enemy.daily-boss-enemy { display: grid; grid-template-columns: minmax(0, 1fr) clamp(100px, 30vw, 160px); align-items: start; gap: 8px; padding: 0; }
+      .battle-enemy.daily-boss-enemy .enemy-info.daily-boss-info { width: min(100%, 440px); min-width: 0; max-width: none; padding: 10px 11px; }
+      .battle-enemy.daily-boss-enemy .enemy-stage { width: clamp(100px, 30vw, 160px); max-width: 100%; justify-self: center; }
       .party-ball-row { gap: 2px; top: -24px; }
       .party-ball { width: 22px; height: 22px; border-width: 1.5px; }
       .party-ball::after { width: 7px; height: 7px; border-width: 1.5px; }
@@ -11354,6 +11356,7 @@
     function setupBattleUI(logMsg) {
       const e = battle.enemy;
       document.getElementById('enemyInfoBox')?.classList.toggle('daily-boss-info', Boolean(battle.isDailyBoss));
+      document.querySelector('#battleOverlay .battle-enemy')?.classList.toggle('daily-boss-enemy', Boolean(battle.isDailyBoss));
       renderPartyBalls();
       if (normalizePokemonMoves(player.poke)) saveGame();
       normalizePokemonMoves(e);
