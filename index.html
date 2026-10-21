@@ -9620,7 +9620,6 @@
           : `Causou ${dmg} de dano em ${player.poke.name}!`;
         if (dailyBossBuffMessage) msg += ` ${dailyBossBuffMessage}`;
         if (critical && dmg > 0) msg += ' Acerto crítico!';
-        if (shieldDamageMessage) msg += ` ${shieldDamageMessage}`;
         if (mult >= 2) msg += ' É super efetivo!';
         else if (mult > 0 && mult < 1) msg += ' Não é muito efetivo...';
         let abilityMessage = evaded ? `${player.poke.name} desviou do golpe!` : '';
