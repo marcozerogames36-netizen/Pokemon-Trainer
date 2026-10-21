@@ -1612,6 +1612,16 @@
       .daily-login-week, .weekly-login-days { gap: 3px; }
     }
     @media (max-width: 480px) {
+      #gymsGrid .game-card-meta, #eliteFourGrid .game-card-meta,
+      #ssAnneGrid .game-card-meta, #silphCoGrid .game-card-meta,
+      #dojoGrid .game-card-meta {
+        flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 7px;
+      }
+      #gymsGrid .game-card-meta .reward, #eliteFourGrid .game-card-meta .reward,
+      #ssAnneGrid .game-card-meta .reward, #silphCoGrid .game-card-meta .reward,
+      #dojoGrid .game-card-meta .reward {
+        max-width: 100%; overflow-wrap: anywhere; line-height: 1.25;
+      }
       #panel-home > .cards-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
       #panel-home > .cards-grid > .game-card { display: grid; grid-template-columns: 100px minmax(0, 1fr); align-items: stretch; }
       #panel-home > .cards-grid > .game-card > .game-card-header { width: 100px; height: auto !important; min-height: 104px; padding: 8px !important; border-radius: 15px 0 0 15px; overflow: hidden; }
