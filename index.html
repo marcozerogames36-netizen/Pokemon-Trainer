@@ -1519,6 +1519,36 @@
     .battle-intro-sep { color: var(--text-muted); font-weight: 500; }
     .battle-intro-sub { margin-top: 14px; color: var(--text-muted); font-size: 0.9rem; }
 
+    @media (max-width: 600px) {
+      .main { min-width: 0; }
+      .content { padding: 18px 12px; }
+      .panel-title { font-size: clamp(1.2rem, 5vw, 1.45rem); }
+      .panel-desc { margin-bottom: 18px; }
+      .stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 22px; }
+      .stat-card { min-width: 0; padding: 14px 9px; }
+      .stat-card .value { font-size: clamp(1.08rem, 5vw, 1.4rem); overflow-wrap: anywhere; }
+      .stat-card-currencies { gap: 7px; font-size: .66rem; }
+      .cards-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .game-card, .admin-panel-card, .social-subpanel { min-width: 0; }
+      .admin-detail-pokemon-grid, .pc-item-grid, .item-catalog-grid { grid-template-columns: minmax(0, 1fr); }
+      .market-controls { grid-template-columns: minmax(0, 1fr); }
+      .market-tabs { width: 100%; }
+      .market-tab { min-width: 0; flex: 1 1 0; padding: 10px 8px; }
+      .pvp-sides { grid-template-columns: minmax(0, 1fr); }
+      .profile-overview-grid { grid-template-columns: minmax(0, 1fr); }
+      .topbar-left { gap: 8px; }
+      .topbar-actions { flex: 0 0 auto; }
+    }
+    @media (max-width: 380px) {
+      .content { padding: 15px 9px; }
+      .topbar { padding-left: 8px; padding-right: 8px; }
+      .stats-row { gap: 8px; }
+      .stat-card { padding: 12px 7px; }
+      .stat-card-currencies { gap: 5px; font-size: .62rem; }
+      .quick-mission-title-row { gap: 5px; }
+      .quick-mission-progress { gap: 3px; padding: 4px 6px; }
+    }
+
   </style>
 </head>
 <body>
@@ -2434,6 +2464,13 @@
       Guts:'Com status, causa 50% mais dano físico e ignora a penalidade de queimadura.',
       'Flash Fire':'É imune a Fogo; após isso, golpes Fogo ficam 50% mais fortes.'
     };
+    ABILITY_INFO['Keen Eye'] = 'Impede que a precis\u00e3o seja reduzida.';
+    ABILITY_INFO.Limber = 'Impede que o Pok\u00e9mon fique paralisado.';
+    ABILITY_INFO.Technician = 'Aumenta em 50% a for\u00e7a de golpes com poder at\u00e9 60.';
+    ABILITY_INFO.Steadfast = 'Aumenta a Velocidade quando o Pok\u00e9mon hesita.';
+    ABILITY_INFO['Iron Fist'] = 'Aumenta em 20% a for\u00e7a dos golpes de soco.';
+    ABILITY_INFO['Vital Spirit'] = 'Impede que o Pok\u00e9mon adorme\u00e7a.';
+    ABILITY_INFO.Defiant = 'Aumenta muito o Ataque quando um oponente reduz seus atributos.';
     const ABILITY_BY_ID = {
       1:'Overgrow',2:'Overgrow',3:'Overgrow',4:'Blaze',5:'Blaze',6:'Blaze',7:'Torrent',8:'Torrent',9:'Torrent',10:'Swarm',11:'Swarm',12:'Swarm',
       25:'Static',26:'Static',29:'Poison Point',30:'Poison Point',31:'Poison Point',32:'Poison Point',33:'Poison Point',34:'Poison Point',
@@ -2564,8 +2601,10 @@
       const nature = NATURES.find(n=>n.name===(pokemon?.natureMint || pokemon?.nature));
       return nature?.up===stat ? 1.1 : nature?.down===stat ? 0.9 : 1;
     }
-    function abilityDamageMultiplier(attacker, defender, moveType, physical, hasStab) {
+    function abilityDamageMultiplier(attacker, defender, moveType, physical, hasStab, movePower = 0, moveData = null) {
       let multiplier = hasStab && attacker.ability==='Adaptabilidade' ? (2 / 1.5) : 1;
+      if (attacker.ability==='Technician' && movePower > 0 && movePower <= 60) multiplier *= 1.5;
+      if (attacker.ability==='Iron Fist' && moveData?.punch) multiplier *= 1.2;
       const hp = Number.isFinite(attacker.currentHp) ? attacker.currentHp : attacker.hp;
       const maxHp = attacker.maxHp || 1;
       const abilityType = {Overgrow:'Planta',Blaze:'Fogo',Torrent:'Agua',Swarm:'Inseto'}[attacker.ability];
@@ -2723,6 +2762,10 @@
         if (!target || (target === defender && move.power > 0 && damage <= 0)) return;
         const amount = Number(change.stages ?? change.amount ?? change.change) || 0;
         if (!amount) return;
+        if (change.stat === 'accuracy' && amount < 0 && target.ability === 'Keen Eye') {
+          messages.push(`Keen Eye impediu a redu\u00e7\u00e3o de precis\u00e3o de ${target.name}.`);
+          return;
+        }
         const isPlayer = target === player?.poke;
         if (amount < 0 && isPlayer && battle.guardSpecTurns > 0) {
           messages.push(`Guard Spec. impediu a redução de atributo de ${target.name}.`);
@@ -2739,6 +2782,12 @@
             : Math.max(-6, Math.min(max, previous + amount));
           const delta = battle[stageKey] - previous;
           if (delta) messages.push(`${change.stat === 'accuracy' ? 'Precisão' : 'chance de crítico'} de ${target.name} ${delta > 0 ? 'aumentou' : 'diminuiu'} ${Math.abs(delta)} estágio(s).`);
+          if (delta < 0 && target !== attacker && target.ability === 'Defiant') {
+            const stages = battle[isPlayer ? 'playerStatStages' : 'enemyStatStages'] || (battle[isPlayer ? 'playerStatStages' : 'enemyStatStages'] = {});
+            const attackPrevious = Number(stages.attack) || 0;
+            stages.attack = Math.min(6, attackPrevious + 2);
+            if (stages.attack > attackPrevious) messages.push(`Defiant aumentou muito o Ataque de ${target.name}!`);
+          }
           return;
         }
         const validStats = ['attack', 'defense', 'specialAttack', 'specialDefense', 'speed', 'evasion'];
@@ -2751,6 +2800,11 @@
         if (delta) {
           const labels = { attack: 'Ataque', defense: 'Defesa', specialAttack: 'Ataque Especial', specialDefense: 'Defesa Especial', speed: 'Velocidade', evasion: 'Evas\u00e3o' };
           messages.push(`${labels[change.stat]} de ${target.name} ${delta > 0 ? 'aumentou' : 'diminuiu'} ${Math.abs(delta)} estágio(s).`);
+        }
+        if (delta < 0 && target !== attacker && target.ability === 'Defiant') {
+          const attackPrevious = Number(stages.attack) || 0;
+          stages.attack = Math.min(6, attackPrevious + 2);
+          if (stages.attack > attackPrevious) messages.push(`Defiant aumentou muito o Ataque de ${target.name}!`);
         }
       });
       if (battle) [attacker, defender].forEach(holder => {
@@ -2824,6 +2878,8 @@
     function canReceiveStatus(pokemon, status) {
       const hp = pokemon && Number.isFinite(pokemon.currentHp) ? pokemon.currentHp : pokemon && pokemon.hp;
       if (!pokemon || hp <= 0 || pokemon.status) return false;
+      if (status === 'paralysis' && pokemon.ability === 'Limber') return false;
+      if (status === 'sleep' && pokemon.ability === 'Vital Spirit') return false;
       const types = getTypes(pokemon.id);
       if (status === 'burn' && types.includes('Fogo')) return false;
       if (['poison', 'toxic'].includes(status) && (types.includes('Veneno') || types.includes('Aço'))) return false;
@@ -5944,6 +6000,10 @@
       if (!pokemon) return '';
       const hpKey = Number.isFinite(pokemon.currentHp) ? 'currentHp' : 'hp';
       if (pokemon[hpKey] <= 0) return '';
+      if (pokemon.heldItem === 'flame_orb' && canReceiveStatus(pokemon, 'burn')) {
+        pokemon.status = 'burn';
+        return `${pokemon.name} foi queimado pelo Flame Orb.`;
+      }
       if (pokemon.heldItem === 'toxic_orb' && canReceiveStatus(pokemon, 'toxic')) {
         pokemon.status = 'toxic'; pokemon.toxicCounter = 1;
         return `${pokemon.name} foi envenenado pelo Toxic Orb.`;
@@ -7705,29 +7765,29 @@
 
     const DOJO_TRAINERS = [
       {id:'dojo_yoshi',name:'Yoshi',className:'Lutador iniciante',sprite:'assets/dojo-blackbelt-gen9.png',icon:'??',moneyReward:250,team:[
-        {name:'Mankey',id:56,hp:32,level:17,moves:[{name:'Karate Chop',power:50,type:'Lutador'},{name:'Scratch',power:40,type:'Normal'}]},
-        {name:'Machop',id:66,hp:34,level:20,moves:[{name:'Low Kick',power:45,type:'Lutador'},{name:'Karate Chop',power:50,type:'Lutador'}]}
+        {name:'Hitmonchan',id:107,gender:'male',ability:'Keen Eye',hp:32,level:17,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50},{name:'Thunder Punch',power:75,type:'Eletrico'},{name:'Rapid Spin',power:50,type:'Normal'},{name:'Rock Slide',power:75,type:'Pedra',accuracy:90}]},
+        {name:'Hitmonlee',id:106,gender:'male',ability:'Limber',hp:34,level:20,moves:[{name:'Low Kick',power:50,type:'Lutador'},{name:'Mach Punch',power:40,type:'Lutador',priority:1},{name:'Rock Tomb',power:60,type:'Pedra',accuracy:95},{name:'Poison Jab',power:80,type:'Veneno'}]}
       ]},
       {id:'dojo_kenji',name:'Kenji',className:'Faixa branca',sprite:'assets/dojo-blackbelt-gen6.png',icon:'??',moneyReward:350,team:[
-        {name:'Primeape',id:57,hp:42,level:23,moves:[{name:'Low Kick',power:55,type:'Lutador'},{name:'Fury Swipes',power:45,type:'Normal'}]},
-        {name:'Machoke',id:67,hp:46,level:28,moves:[{name:'Brick Break',power:60,type:'Lutador'},{name:'Rock Tomb',power:50,type:'Pedra'}]}
+        {name:'Hitmontop',id:237,gender:'male',ability:'Technician',hp:42,level:23,moves:[{name:'Bulldoze',power:60,type:'Terra'},{name:'Thief',power:60,type:'Sombrio'},{name:'Mach Punch',power:40,type:'Lutador',priority:1},{name:'Rapid Spin',power:50,type:'Normal'}]},
+        {name:'Machoke',id:67,ability:'Steadfast',hp:46,level:28,moves:[{name:'Brutal Swing',power:60,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo'},{name:'Drain Punch',power:75,type:'Lutador',drain:50},{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]}]}
       ]},
       {id:'dojo_mako',name:'Mako',className:'Faixa marrom',sprite:'assets/dojo-blackbelt-gen4.png',icon:'??',moneyReward:450,team:[
-        {name:'Machoke',id:67,hp:52,level:31,moves:[{name:'Brick Break',power:65,type:'Lutador'},{name:'Rock Throw',power:50,type:'Pedra'}]},
-        {name:'Hitmontop',id:237,hp:54,level:36,moves:[{name:'Triple Kick',power:60,type:'Lutador'},{name:'Mach Punch',power:45,type:'Lutador'}]}
+        {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:52,level:31,moves:[{name:'Thunder Punch',power:75,type:'Eletrico',punch:true},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
+        {name:'Poliwrath',id:62,ability:'Water Absorb',hp:54,level:36,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Liquidation',power:85,type:'Agua'},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo',punch:true}]}
       ]},
       {id:'dojo_ryu',name:'Ryu',className:'Mestre de combate',sprite:'assets/dojo-blackbelt-gen7.png',icon:'??',moneyReward:600,team:[
-        {name:'Mankey',id:56,hp:56,level:36,moves:[{name:'Karate Chop',power:55,type:'Lutador'},{name:'Thrash',power:60,type:'Normal'}]},
-        {name:'Machop',id:66,hp:59,level:38,moves:[{name:'Low Kick',power:60,type:'Lutador'},{name:'Rock Tomb',power:55,type:'Pedra'}]},
-        {name:'Primeape',id:57,hp:63,level:40,moves:[{name:'Cross Chop',power:65,type:'Lutador'},{name:'Thrash',power:65,type:'Normal'}]},
-        {name:'Machoke',id:67,hp:67,level:41,moves:[{name:'Brick Break',power:70,type:'Lutador'},{name:'Rock Slide',power:60,type:'Pedra'}]}
+        {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:56,level:36,moves:[{name:'Thunder Punch',power:75,type:'Eletrico',punch:true},{name:'Fire Punch',power:75,type:'Fogo',punch:true},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
+        {name:'Poliwrath',id:62,ability:'Water Absorb',hp:59,level:38,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Liquidation',power:85,type:'Agua'},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo',punch:true}]},
+        {name:'Machamp',id:68,ability:'Guts',heldItem:'flame_orb',evs:{hp:0,attack:0,defense:120,specialAttack:0,specialDefense:140,speed:0},hp:63,level:40,moves:[{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Facade',power:70,type:'Normal'}]},
+        {name:'Primeape',id:57,ability:'Vital Spirit',evs:{hp:0,attack:150,defense:0,specialAttack:0,specialDefense:0,speed:200},hp:67,level:41,moves:[{name:'Rock Slide',power:75,type:'Pedra',accuracy:90},{name:'U-turn',power:70,type:'Inseto'},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]}
       ]},
       {id:'dojo_kiyo',name:'Chuck',className:'Mestre do Dojo',sprite:'assets/dojo-chuck.png',icon:'??',moneyReward:900,team:[
-        {name:'Hitmonchan',id:107,hp:68,level:41,moves:[{name:'Sky Uppercut',power:70,type:'Lutador'},{name:'Ice Punch',power:60,type:'Gelo'}]},
-        {name:'Hitmonlee',id:106,hp:70,level:44,moves:[{name:'High Jump Kick',power:75,type:'Lutador'},{name:'Blaze Kick',power:65,type:'Fogo'}]},
-        {name:'Hitmontop',id:237,hp:74,level:47,moves:[{name:'Triple Kick',power:70,type:'Lutador'},{name:'Rock Slide',power:60,type:'Pedra'}]},
-        {name:'Machamp',id:68,hp:80,level:50,moves:[{name:'Cross Chop',power:80,type:'Lutador'},{name:'Rock Slide',power:65,type:'Pedra'}]},
-        {name:'Annihilape',id:979,hp:84,level:54,moves:[{name:'Rage Fist',power:75,type:'Fantasma'},{name:'Close Combat',power:80,type:'Lutador'}]}
+        {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:68,level:41,moves:[{name:'Thunder Punch',power:75,type:'Eletrico',punch:true},{name:'Fire Punch',power:75,type:'Fogo',punch:true},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
+        {name:'Poliwrath',id:62,ability:'Water Absorb',hp:70,level:44,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Liquidation',power:85,type:'Agua'},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo',punch:true}]},
+        {name:'Machamp',id:68,ability:'Guts',heldItem:'flame_orb',evs:{hp:0,attack:0,defense:120,specialAttack:0,specialDefense:140,speed:0},hp:74,level:47,moves:[{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Facade',power:70,type:'Normal'}]},
+        {name:'Primeape',id:57,ability:'Vital Spirit',evs:{hp:0,attack:150,defense:0,specialAttack:0,specialDefense:0,speed:200},hp:80,level:50,moves:[{name:'Rock Slide',power:75,type:'Pedra',accuracy:90},{name:'U-turn',power:70,type:'Inseto'},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
+        {name:'Annihilape',id:979,ability:'Defiant',heldItem:'leftovers',evs:{hp:252,attack:4,defense:0,specialAttack:0,specialDefense:252,speed:0},hp:84,level:54,moves:[{name:'Rage Fist',power:50,type:'Fantasma'},{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Protect',power:0,type:'Normal',target:'user',protect:true}]}
       ]}
     ];
     const SS_ANNE_TRAINERS = [
@@ -7852,7 +7912,7 @@
     ];
 
     const ELITE_FOUR_TRAINERS = [
-      {id:'lorelei',name:'Lorelei',className:'Elite Four',portrait:'lorelei',moneyReward:12000,team:[
+      {id:'lorelei',name:'Lorelei',className:'Elite Four',portrait:'lorelei-lgpe',moneyReward:12000,team:[
         {name:'Dewgong',id:87,hp:166,level:52,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]},
         {name:'Cloyster',id:91,hp:155,level:51,moves:[{name:'Aurora Beam',power:65,type:'Gelo'},{name:'Spike Cannon',power:20,type:'Normal'}]},
         {name:'Slowbro',id:80,hp:174,level:52,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Psychic',power:90,type:'Psiquico'}]},
@@ -7866,7 +7926,7 @@
         {name:'Onix',id:95,hp:176,level:56,moves:[{name:'Rock Slide',power:75,type:'Pedra'},{name:'Earthquake',power:100,type:'Terra'}]},
         {name:'Machamp',id:68,hp:194,level:58,moves:[{name:'Cross Chop',power:100,type:'Lutador'},{name:'Rock Tomb',power:60,type:'Pedra'}]}
       ]},
-      {id:'agatha',name:'Agatha',className:'Elite Four',portrait:'agatha',moneyReward:14000,team:[
+      {id:'agatha',name:'Agatha',className:'Elite Four',portrait:'agatha-lgpe',moneyReward:14000,team:[
         {name:'Gengar',id:94,hp:168,level:54,moves:[{name:'Shadow Ball',power:80,type:'Fantasma'},{name:'Sludge Bomb',power:90,type:'Veneno'}]},
         {name:'Golbat',id:42,hp:174,level:54,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Bite',power:60,type:'Sombrio'}]},
         {name:'Haunter',id:93,hp:166,level:53,moves:[{name:'Shadow Ball',power:80,type:'Fantasma'},{name:'Sludge Bomb',power:90,type:'Veneno'}]},
@@ -8065,8 +8125,11 @@
       const progress = getEliteFourProgress();
       document.getElementById('eliteFourProgress').textContent = `${progress}/${ELITE_FOUR_TRAINERS.length}`;
       document.getElementById('eliteFourBadges').textContent = `${getKantoBadgeCount()}/8`;
-      grid.innerHTML = ELITE_FOUR_TRAINERS.map((trainer,index) => {
+      grid.innerHTML = ELITE_FOUR_TRAINERS
+        .filter((trainer) => trainer.id !== 'champion_blue' || progress >= 4 || isAdminAccount())
+        .map((trainer,index) => {
         const done = index < progress;
+        const icon = trainer.id === 'champion_blue' ? '&#128081;' : '&#9876;';
         const unlocked = isAdminAccount() || index === progress;
         const action = isAdminAccount() || (unlocked && !done)
           ? `startEliteFourBattle('${trainer.id}')`
@@ -9535,6 +9598,8 @@
         move.pp -= 1;
         saveGame();
       }
+      const protectBlocked = Boolean(battle.enemyProtected && move.target !== 'user');
+      if (protectBlocked) battle.enemyProtected = false;
       battle.busy = true;
       backToMenu();
       const moveType = normalizeBattleType(move.type || 'Normal');
@@ -9547,12 +9612,12 @@
       const burnMultiplier = player.poke.status === 'burn' && physical && player.poke.ability !== 'Guts' ? 0.5 : 1;
       const immunity = abilityTypeImmunity(battle.enemy, moveType);
       const evaded = isSelfTargetingStatusMove(move) ? false : doesMoveMiss(player.poke, battle.enemy, move);
-      const effectiveMult = immunity || evaded || dreamEaterBlocked ? 0 : mult;
+      const effectiveMult = immunity || evaded || dreamEaterBlocked || protectBlocked ? 0 : mult;
       const critical = Math.random() < getCriticalHitChance((battle.playerCritStage || 0) + (player.poke.heldItem === 'scope_lens' ? 1 : 0));
-      const rawDamage = calcDamage(player.poke.level, battle.enemy.level || 5, move.power, effectiveMult, hasStab) * (Number(player.poke.id) === 80 ? 0.7 : 1);
+      const rawDamage = calcDamage(player.poke.level, battle.enemy.level || 5, move.power, effectiveMult, hasStab) * (Number(player.poke.id) === 80 ? 0.7 : 1) * (move.name === 'Facade' && player.poke.status ? 2 : 1);
       const attackStat = physical ? 'attack' : 'specialAttack';
       const defenseStat = physical ? 'defense' : 'specialDefense';
-      const traitMultiplier = getPokemonStatMultiplier(player.poke,attackStat) / (getPokemonStatMultiplier(battle.enemy,defenseStat)*getPokemonStatMultiplier(battle.enemy,'hp')) * abilityDamageMultiplier(player.poke, battle.enemy, moveType, physical, hasStab) * getBattleScreenMultiplier(battle.enemy, physical);
+      const traitMultiplier = getPokemonStatMultiplier(player.poke,attackStat) / (getPokemonStatMultiplier(battle.enemy,defenseStat)*getPokemonStatMultiplier(battle.enemy,'hp')) * abilityDamageMultiplier(player.poke, battle.enemy, moveType, physical, hasStab, move.power, move) * getBattleScreenMultiplier(battle.enemy, physical);
       let dmg = dreamEaterBlocked ? 0 : rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(player.poke, moveType, physical) * (critical ? 1.5 : 1))) : 0;
 
       const pSprite = document.getElementById('playerSprite');
@@ -9565,6 +9630,7 @@
         const sash = applyFocusSash(battle.enemy, battle.enemy.currentHp, dmg);
         dmg = sash.damage;
         const bossDamage = applyEnemyDamage(dmg);
+        if (dmg > 0 && Number(battle.enemy.id) === 979) battle.enemy.rageFistHits = (battle.enemy.rageFistHits || 0) + 1;
         const shieldDamageMessage = bossDamage.shieldDamage ? `O escudo absorveu ${Math.round(bossDamage.shieldDamage)} de dano.` : '';
         let recoilMessage = '';
         if (dmg > 0 && player.poke.heldItem === 'life_orb' && player.poke.hp > 0) {
@@ -9593,6 +9659,7 @@
           ? (move.power <= 0 ? `${player.poke.name} não causou dano.` : 'Não teve efeito...')
           : `Causou ${dmg} de dano!`;
         if (dreamEaterBlocked) msg = `${move.name} falhou: o alvo precisa estar dormindo.`;
+        if (protectBlocked) msg = `${battle.enemy.name} se protegeu e bloqueou o golpe!`;
         if (critical && dmg > 0) msg += ' Acerto crítico!';
         if (shieldDamageMessage) msg += ` ${shieldDamageMessage}`;
         if (!dreamEaterBlocked && mult >= 2) msg += ' É super efetivo!';
@@ -9610,10 +9677,11 @@
         } else if (immunity) abilityMessage = `${battle.enemy.name} evitou o golpe com ${immunity}!`;
         const abilityStatus = applyAbilityOnHit(player.poke, battle.enemy, dmg > 0);
         if (abilityStatus) abilityMessage = `${abilityMessage} ${abilityStatus}`.trim();
-        const statusMessage = evaded ? '' : applyMoveStatus(player.poke, battle.enemy, move);
-        const statChangeMessage = evaded ? '' : applyMoveStatChanges(player.poke, battle.enemy, move, dmg);
-        const fieldMessage = evaded ? '' : applyBattleFieldMove(player.poke, move);
-        const selfKnockoutMessage = evaded ? '' : applyMoveSelfKnockout(player.poke, battle.enemy, move);
+        const targetEffectBlocked = evaded || protectBlocked;
+        const statusMessage = targetEffectBlocked ? '' : applyMoveStatus(player.poke, battle.enemy, move);
+        const statChangeMessage = targetEffectBlocked ? '' : applyMoveStatChanges(player.poke, battle.enemy, move, dmg);
+        const fieldMessage = targetEffectBlocked ? '' : applyBattleFieldMove(player.poke, move);
+        const selfKnockoutMessage = targetEffectBlocked ? '' : applyMoveSelfKnockout(player.poke, battle.enemy, move);
         const heldMessage = applyHeldItemTrigger(battle.enemy, mult >= 2);
         const playerHeldMessage = applyHeldItemTrigger(player.poke);
         const shellBellMessage = applyShellBell(player.poke, dmg);
@@ -9711,8 +9779,9 @@
         }
         return;
       }
-      const moves = (battle.enemy.moves || []).filter(move => move.power > 0 || move.statusEffect || move.statChanges || getStatusMoveEffect(move)).filter(move => battle.enemy.heldItem !== 'assault_vest' || move.power > 0);
+      const moves = (battle.enemy.moves || []).filter(move => move.power > 0 || move.statusEffect || move.statChanges || move.protect || getStatusMoveEffect(move)).filter(move => battle.enemy.heldItem !== 'assault_vest' || move.power > 0);
       const move = moves[Math.floor(Math.random() * moves.length)] || { name: 'Investida', power: 30, type: 'Normal' };
+      if (move.protect) battle.enemyProtected = true;
       const moveType = normalizeBattleType(move.type || 'Normal');
       const defTypes = getTypes(player.poke.id);
       const mult = typeMultiplier(moveType, defTypes);
@@ -9725,10 +9794,11 @@
       const evaded = isSelfTargetingStatusMove(move) ? false : doesMoveMiss(battle.enemy, player.poke, move);
       const effectiveMult = immunity || evaded || dreamEaterBlocked ? 0 : mult;
       const critical = Math.random() < getCriticalHitChance((battle.enemyCritStage || 0) + (battle.enemy.heldItem === 'scope_lens' ? 1 : 0));
-      const rawDamage = calcDamage(battle.enemy.level || 5, player.poke.level, move.power, effectiveMult, hasStab) * (Number(battle.enemy.id) === 80 ? 0.7 : 1);
+      const effectivePower = move.name === 'Rage Fist' ? Math.min(350, 50 + 50 * (battle.enemy.rageFistHits || 0)) : move.power;
+      const rawDamage = calcDamage(battle.enemy.level || 5, player.poke.level, effectivePower, effectiveMult, hasStab) * (Number(battle.enemy.id) === 80 ? 0.7 : 1) * (move.name === 'Facade' && battle.enemy.status ? 2 : 1);
       const attackStat = physical ? 'attack' : 'specialAttack';
       const defenseStat = physical ? 'defense' : 'specialDefense';
-      const traitMultiplier = getPokemonStatMultiplier(battle.enemy,attackStat) / (getPokemonStatMultiplier(player.poke,defenseStat)*getPokemonStatMultiplier(player.poke,'hp')) * abilityDamageMultiplier(battle.enemy, player.poke, moveType, physical, hasStab) * getBattleScreenMultiplier(player.poke, physical);
+      const traitMultiplier = getPokemonStatMultiplier(battle.enemy,attackStat) / (getPokemonStatMultiplier(player.poke,defenseStat)*getPokemonStatMultiplier(player.poke,'hp')) * abilityDamageMultiplier(battle.enemy, player.poke, moveType, physical, hasStab, effectivePower, move) * getBattleScreenMultiplier(player.poke, physical);
       let dmg = dreamEaterBlocked ? 0 : rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(battle.enemy, moveType, physical) * (critical ? 1.5 : 1))) : 0;
 
       const eSprite = document.getElementById('enemySprite');
@@ -9763,6 +9833,7 @@
         let msg = dmg === 0
           ? (move.power <= 0 ? `${battle.enemy.name} não causou dano.` : 'Não teve efeito...')
           : `Causou ${dmg} de dano em ${player.poke.name}!`;
+        if (move.protect) msg = `${battle.enemy.name} usou Protect e se protegeu dos golpes deste turno.`;
         if (dreamEaterBlocked) msg = `${move.name} falhou: o alvo precisa estar dormindo.`;
         if (dailyBossBuffMessage) msg += ` ${dailyBossBuffMessage}`;
         if (critical && dmg > 0) msg += ' Acerto crítico!';
