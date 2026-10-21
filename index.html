@@ -382,6 +382,9 @@
     .admin-amount-hint { color:var(--text-muted);font-size:.75rem; }
     .admin-grant-button { width:100%;margin-top:18px; }
     .admin-grant-button:disabled { opacity:.6;cursor:wait; }
+    .admin-promote-form { display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end; }
+    .admin-promote-form .form-group { margin:0; }
+    .admin-promote-note { margin-top:10px;color:var(--text-muted);font-size:.78rem;line-height:1.5; }
     @media (max-width: 760px) { .admin-panel-grid { grid-template-columns:1fr; } }
     @media (max-width: 520px) { .admin-panel-hero { align-items:flex-start;padding:17px; } .admin-access-tag { display:none; } .admin-panel-card { padding:17px; } }
     .game-card {
@@ -1804,6 +1807,14 @@
                 </div>
               </section>
             </div>
+            <section class="admin-panel-card" id="adminManageAdminsCard" aria-labelledby="adminManageAdminsTitle" hidden style="margin-top:18px">
+              <div class="admin-step-heading"><span class="admin-step-number">03</span><div><h3 id="adminManageAdminsTitle">Conceder acesso de administrador</h3><p>Adicione uma conta cadastrada pelo e-mail de login.</p></div></div>
+              <form class="admin-promote-form" id="adminPromoteAccountForm">
+                <div class="form-group"><label for="adminPromoteEmail">E-mail da conta</label><input id="adminPromoteEmail" type="email" maxlength="254" autocomplete="off" placeholder="treinador@exemplo.com" required /></div>
+                <button type="submit" class="btn admin-grant-button" id="adminPromoteAccountButton" style="width:auto;margin:0">Tornar administrador</button>
+              </form>
+              <p class="admin-promote-note">Somente o administrador principal pode conceder essa permissão. A nova pessoa deve entrar novamente para carregar o acesso.</p>
+            </section>
           </div>
         </div>
         <div class="panel" id="panel-dungeons">
@@ -5039,6 +5050,7 @@
     }
 
     async function enterAuthenticatedGame() {
+      await refreshAdminAccess();
       await beginAccountGame();
       if (document.getElementById('dashboard')?.classList.contains('active')) openDailyLoginRewardIfAvailable();
     }
@@ -8196,6 +8208,8 @@
 
     const ADMIN_ACCOUNT_ID = 'c1224d4d-f533-4991-8c05-27d7ae3202e6';
     const ADMIN_ACCOUNT_EMAIL = 'aleffantunes12@gmail.com';
+    let currentUserIsAdmin = false;
+    let currentUserCanManageAdmins = false;
     let adminSelectedTrainer = null;
     let adminSearchVersion = 0;
     let adminTrainerDetailsVersion = 0;
@@ -8204,10 +8218,29 @@
     let adminSelectedPokemon = null;
     let adminPokemonSearchVersion = 0;
     function isAdminAccount() {
-      return onlineUser?.id === ADMIN_ACCOUNT_ID && String(onlineUser?.email || '').toLowerCase() === ADMIN_ACCOUNT_EMAIL;
+      return Boolean(onlineUser?.id && currentUserIsAdmin);
+    }
+    async function refreshAdminAccess() {
+      const isOriginalAdmin = onlineUser?.id === ADMIN_ACCOUNT_ID && String(onlineUser?.email || '').toLowerCase() === ADMIN_ACCOUNT_EMAIL;
+      currentUserIsAdmin = isOriginalAdmin;
+      currentUserCanManageAdmins = isOriginalAdmin;
+      if (!onlineUser || !supabaseClient) return;
+      try {
+        const {data,error}=await supabaseClient.rpc('admin_access_status');
+        if (error) throw error;
+        currentUserIsAdmin = Boolean(data?.is_admin) || isOriginalAdmin;
+        currentUserCanManageAdmins = Boolean(data?.can_manage_admins) || isOriginalAdmin;
+      } catch (error) {
+        console.warn('[Admin] Não foi possível carregar as permissões administrativas:',error);
+      }
     }
     function renderAdminPanel() {
       if (!isAdminAccount()) return;
+      document.getElementById('adminManageAdminsCard').hidden = !currentUserCanManageAdmins;
+      document.getElementById('adminPromoteAccountForm').onsubmit = event => {
+        event.preventDefault();
+        adminPromoteAccount();
+      };
       const itemSelect = document.getElementById('adminGrantItem');
       if (!itemSelect.options.length) {
         const itemList = [...new Map([...BAG_FIELD_ITEMS, ...BATTLE_BAG_ITEMS, ...SHOP_ITEMS].filter(item => item.key).map(item => [item.key, item])).values()];
@@ -8218,6 +8251,26 @@
       document.getElementById('adminPokemonSearch').oninput = adminSearchPokemonCatalog;
       document.getElementById('adminGrantButton').disabled = !adminSelectedTrainer;
       adminUpdateGrantFields();
+    }
+    async function adminPromoteAccount() {
+      if (!currentUserCanManageAdmins || !supabaseClient) return;
+      const email=document.getElementById('adminPromoteEmail').value.trim().toLowerCase();
+      const button=document.getElementById('adminPromoteAccountButton');
+      if (!email || !email.includes('@')) { showToast('Informe o e-mail da conta que receberá acesso.','error'); return; }
+      button.disabled=true;
+      button.textContent='Concedendo acesso...';
+      try {
+        const {data,error}=await supabaseClient.rpc('admin_promote_account',{p_email:email});
+        if (error) throw error;
+        document.getElementById('adminPromoteEmail').value='';
+        showToast(data?.already_admin?`${data?.trainer_name||email} já tem acesso de administrador.`:`${data?.trainer_name||email} agora tem acesso de administrador.`);
+      } catch (error) {
+        const migrationMissing=/admin_promote_account|admin_access_status|schema cache|could not find the function/i.test(error.message||'');
+        showToast(migrationMissing?'Aplique o arquivo admin-panel-migration.sql no SQL Editor do Supabase e tente novamente.':'Não foi possível conceder acesso: '+error.message,'error');
+      } finally {
+        button.disabled=false;
+        button.textContent='Tornar administrador';
+      }
     }
     async function adminSearchTrainers() {
       if (!isAdminAccount() || !supabaseClient) return;
@@ -10209,11 +10262,6 @@
         battle.experienceShares = battle.experienceShares || new Map();
         for (const [pokemon, amount] of shares) {
           battle.experienceShares.set(pokemon, (battle.experienceShares.get(pokemon) || 0) + amount);
-          const effort = awardPokemonEffort(pokemon, battle.enemy);
-          if (pokemon === player.poke) {
-            battle.totalEffort = battle.totalEffort || {};
-            for (const [stat, value] of Object.entries(effort)) battle.totalEffort[stat] = (battle.totalEffort[stat] || 0) + value;
-          }
         }
         battle.totalExperience = [...battle.experienceShares.values()].reduce((sum, amount) => sum + amount, 0);
         battle.experienceAwarded = true;

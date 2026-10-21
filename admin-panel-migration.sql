@@ -1,4 +1,49 @@
--- Administrative trainer grants. Both RPCs enforce the allowlisted auth user server-side.
+-- Administrative roles and trainer tools. Role checks are enforced in Postgres.
+create table if not exists public.game_admins (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  granted_by uuid references auth.users(id) on delete set null,
+  granted_at timestamptz not null default now(),
+  is_super_admin boolean not null default false
+);
+
+alter table public.game_admins enable row level security;
+revoke all on table public.game_admins from public, anon, authenticated;
+
+-- Keep the original owner as the only account allowed to grant admin access.
+insert into public.game_admins(user_id,granted_by,is_super_admin)
+values ('c1224d4d-f533-4991-8c05-27d7ae3202e6'::uuid,'c1224d4d-f533-4991-8c05-27d7ae3202e6'::uuid,true)
+on conflict (user_id) do update set is_super_admin=true;
+
+create or replace function public.is_game_admin()
+returns boolean
+language sql stable security definer
+set search_path = ''
+as $$
+  select exists(select 1 from public.game_admins a where a.user_id=(select auth.uid()))
+$$;
+
+create or replace function public.is_game_super_admin()
+returns boolean
+language sql stable security definer
+set search_path = ''
+as $$
+  select exists(select 1 from public.game_admins a where a.user_id=(select auth.uid()) and a.is_super_admin)
+$$;
+
+create or replace function public.admin_access_status()
+returns jsonb
+language sql stable security definer
+set search_path = ''
+as $$
+  select jsonb_build_object('is_admin',public.is_game_admin(),'can_manage_admins',public.is_game_super_admin())
+$$;
+
+revoke execute on function public.is_game_admin() from public,anon;
+revoke execute on function public.is_game_super_admin() from public,anon;
+revoke execute on function public.admin_access_status() from public,anon;
+grant execute on function public.admin_access_status() to authenticated;
+
+-- Administrative trainer grants. RPCs enforce the registered admin role server-side.
 create or replace function public.admin_search_trainers(p_query text)
 returns jsonb
 language plpgsql
@@ -7,8 +52,7 @@ set search_path = ''
 as $$
 declare v_result jsonb;
 begin
-  if auth.uid() is distinct from 'c1224d4d-f533-4991-8c05-27d7ae3202e6'::uuid
-     or lower(coalesce(auth.jwt()->>'email','')) is distinct from 'aleffantunes12@gmail.com' then
+  if not public.is_game_admin() then
     raise exception 'Acesso restrito ao administrador.';
   end if;
   if length(trim(coalesce(p_query,''))) < 2 then return '[]'::jsonb; end if;
@@ -50,8 +94,7 @@ declare
   v_trainer_name text;
   v_pokemon_inserted boolean := false;
 begin
-  if auth.uid() is distinct from 'c1224d4d-f533-4991-8c05-27d7ae3202e6'::uuid
-     or lower(coalesce(auth.jwt()->>'email','')) is distinct from 'aleffantunes12@gmail.com' then
+  if not public.is_game_admin() then
     raise exception 'Acesso restrito ao administrador.';
   end if;
   if p_target is null then raise exception 'Selecione um treinador.'; end if;
@@ -142,8 +185,7 @@ declare
   v_items jsonb;
   v_key text;
 begin
-  if auth.uid() is distinct from 'c1224d4d-f533-4991-8c05-27d7ae3202e6'::uuid
-     or lower(coalesce(auth.jwt()->>'email','')) is distinct from 'aleffantunes12@gmail.com' then
+  if not public.is_game_admin() then
     raise exception 'Acesso restrito ao administrador.';
   end if;
   if p_target is null then raise exception 'Selecione um treinador.'; end if;
@@ -208,8 +250,7 @@ declare
   v_slot_index integer;
   v_location text;
 begin
-  if auth.uid() is distinct from 'c1224d4d-f533-4991-8c05-27d7ae3202e6'::uuid
-     or lower(coalesce(auth.jwt()->>'email','')) is distinct from 'aleffantunes12@gmail.com' then
+  if not public.is_game_admin() then
     raise exception 'Acesso restrito ao administrador.';
   end if;
   if p_target is null then raise exception 'Selecione um treinador.'; end if;
@@ -282,5 +323,52 @@ revoke execute on function public.admin_get_trainer_details(uuid) from public,an
 revoke execute on function public.admin_remove_trainer_asset(uuid,text,jsonb) from public,anon;
 grant execute on function public.admin_get_trainer_details(uuid) to authenticated;
 grant execute on function public.admin_remove_trainer_asset(uuid,text,jsonb) to authenticated;
+
+-- The original owner can promote an existing account by its login email.
+create or replace function public.admin_promote_account(p_email text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_email text := lower(trim(coalesce(p_email,'')));
+  v_target uuid;
+  v_trainer_name text;
+  v_already_admin boolean := false;
+begin
+  if not public.is_game_super_admin()
+     or lower(coalesce(auth.jwt()->>'email','')) is distinct from 'aleffantunes12@gmail.com' then
+    raise exception 'Somente o administrador principal pode conceder acesso administrativo.';
+  end if;
+  if v_email !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$' then
+    raise exception 'Informe um e-mail valido.';
+  end if;
+
+  select u.id into v_target
+  from auth.users u
+  where lower(coalesce(u.email,''))=v_email
+  order by u.created_at desc
+  limit 1;
+  if v_target is null then raise exception 'Nao existe uma conta cadastrada com esse e-mail.'; end if;
+  if v_target=auth.uid() then raise exception 'Sua conta ja e administradora.'; end if;
+
+  select exists(select 1 from public.game_admins a where a.user_id=v_target) into v_already_admin;
+  insert into public.game_admins(user_id,granted_by,is_super_admin)
+  values (v_target,auth.uid(),false)
+  on conflict (user_id) do nothing;
+
+  select coalesce(nullif(trim(tp.trainer_name),''),nullif(trim(gs.player->>'name'),''),'Conta')
+    into v_trainer_name
+  from public.game_saves gs
+  left join public.trainer_profiles tp on tp.user_id=gs.user_id
+  where gs.user_id=v_target;
+
+  return jsonb_build_object('user_id',v_target,'email',v_email,'trainer_name',coalesce(v_trainer_name,'Conta'),'already_admin',v_already_admin);
+end;
+$$;
+
+revoke execute on function public.admin_promote_account(text) from public,anon;
+grant execute on function public.admin_promote_account(text) to authenticated;
 
 notify pgrst, 'reload schema';
