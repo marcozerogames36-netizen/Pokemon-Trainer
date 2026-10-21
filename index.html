@@ -515,6 +515,18 @@
       height: 10px; background: #1a1a22; border-radius: 5px; overflow: hidden;
       border: 1px solid #333;
     }
+    .battle-enemy .enemy-info.daily-boss-info {
+      width: min(440px, 62vw); min-width: min(440px, 62vw); padding: 15px 20px;
+      border-color: rgba(251,191,36,.38); box-shadow: 0 8px 30px rgba(0,0,0,.5), 0 0 20px rgba(245,158,11,.1);
+    }
+    .daily-boss-info .hp-label span:nth-child(2) { display: none; }
+    .daily-boss-info .hp-bar { height: 16px; border-radius: 9px; }
+    .daily-boss-info .hp-fill { border-radius: 9px; }
+    .daily-boss-shield-wrap { margin-top: 8px; }
+    .daily-boss-shield-wrap[hidden] { display: none; }
+    .daily-boss-shield-wrap .hp-label { color: #cbd5e1; }
+    .daily-boss-shield-bar { height: 12px; overflow: hidden; border: 1px solid #64748b; border-radius: 8px; background: #111827; }
+    .daily-boss-shield-fill { width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#64748b,#cbd5e1); box-shadow: inset 0 1px rgba(255,255,255,.35); transition: width .35s ease; }
     .xp-bar {
       height: 6px; margin-top: 4px; background: #1a1a22; border-radius: 4px;
       overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
@@ -542,7 +554,7 @@
     .enemy-sprite.hit { animation: shake 0.3s ease; }
     .enemy-sprite.faint { animation: faintDown 0.6s ease forwards; }
     .enemy-sprite.capturing { opacity: 0.35; }
-    .enemy-sprite.rillaboom-battle-sprite { width: 194px; height: 194px; }
+    .enemy-sprite.rillaboom-battle-sprite, .enemy-sprite.annihilape-battle-sprite { width: 194px; height: 194px; }
 
     /* Player side — back sprites already face correct direction (no flip) */
     .battle-player {
@@ -560,9 +572,10 @@
     }
     .player-sprite.hit { animation: shakePlayer 0.3s ease; }
     .player-sprite.faint { animation: faintDownPlayer 0.6s ease forwards; }
-    .player-sprite.rillaboom-battle-sprite { width: 218px; height: 218px; }
+    .player-sprite.rillaboom-battle-sprite, .player-sprite.annihilape-battle-sprite { width: 218px; height: 218px; }
     .pvp-arena .enemy-sprite.rillaboom-battle-sprite { width: clamp(121px,33.9vw,194px); height: clamp(121px,33.9vw,194px); }
-    .pvp-arena .player-sprite.rillaboom-battle-sprite { width: clamp(121px,33.9vw,218px); height: clamp(121px,33.9vw,218px); }
+    .pvp-arena .player-sprite.rillaboom-battle-sprite, .pvp-arena .player-sprite.annihilape-battle-sprite { width: clamp(121px,33.9vw,218px); height: clamp(121px,33.9vw,218px); }
+    .pvp-arena .enemy-sprite.annihilape-battle-sprite { width: clamp(121px,33.9vw,194px); height: clamp(121px,33.9vw,194px); }
     .sprite-stage { position: relative; display: flex; align-items: flex-end; justify-content: center; }
     .sprite-shadow {
       position: absolute; bottom: 8px; width: 90px; height: 18px;
@@ -714,6 +727,7 @@
       .battle-enemy { padding: 0 4% 0 2%; }
       .battle-player { padding-left: 4%; }
       .battle-enemy .enemy-info, .battle-player .player-info { min-width: 140px; padding: 8px 10px; }
+      .battle-enemy .enemy-info.daily-boss-info { width: min(84vw, 360px); min-width: min(84vw, 360px); padding: 10px 13px; }
       .party-ball-row { gap: 2px; top: -24px; }
       .party-ball { width: 22px; height: 22px; border-width: 1.5px; }
       .party-ball::after { width: 7px; height: 7px; border-width: 1.5px; }
@@ -943,6 +957,81 @@
       align-items: center; justify-content: center;
     }
     #gymLevelCapOverlay.active { display: flex; }
+    #dojoRewardOverlay { display:none; position:fixed; inset:0; z-index:170; padding:20px; background:rgba(5,7,16,.84); backdrop-filter:blur(8px); align-items:center; justify-content:center; }
+    #dojoRewardOverlay.active { display:flex; }
+    .dojo-reward-card { width:min(520px,100%); padding:24px; color:var(--text); background:radial-gradient(ellipse at top right,rgba(124,58,237,.18),transparent 58%),var(--card); border:1px solid rgba(167,139,250,.32); border-radius:20px; box-shadow:0 24px 80px rgba(0,0,0,.55); }
+    .dojo-reward-card h2 { margin:0 0 8px; font-size:1.2rem; }
+    .dojo-reward-card p { margin:0 0 18px; color:var(--text-muted); font-size:.88rem; line-height:1.5; }
+    .dojo-reward-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .dojo-reward-option { min-width:0; display:flex; flex-direction:column; align-items:center; gap:8px; padding:16px 10px; color:var(--text); background:rgba(255,255,255,.035); border:1px solid var(--border); border-radius:15px; cursor:pointer; font:inherit; }
+    .dojo-reward-option:hover { border-color:#a78bfa; background:rgba(124,58,237,.12); }
+    .dojo-reward-option img { width:96px; height:96px; object-fit:contain; image-rendering:pixelated; }
+    .dojo-reward-option strong { font-size:.92rem; }
+    .dojo-reward-option small { color:var(--text-muted); font-size:.73rem; }
+    @media(max-width:420px) { .dojo-reward-card { padding:18px; } .dojo-reward-option img { width:76px;height:76px; } }
+    #dailyLoginOverlay { display:none; position:fixed; inset:0; z-index:190; padding:20px; background:rgba(5,7,16,.86); backdrop-filter:blur(9px); align-items:center; justify-content:center; }
+    #dailyLoginOverlay.active { display:flex; }
+    .daily-login-card { width:min(540px,100%); max-height:90vh; overflow:auto; padding:24px; color:var(--text); background:radial-gradient(ellipse at top right,rgba(245,158,11,.18),transparent 58%),var(--card); border:1px solid rgba(251,191,36,.34); border-radius:20px; box-shadow:0 24px 80px rgba(0,0,0,.6); }
+    .daily-login-heading { display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+    .daily-login-emblem { width:54px; height:54px; flex:0 0 54px; display:grid; place-items:center; border-radius:16px; background:rgba(245,158,11,.14); font-size:1.8rem; }
+    .daily-login-heading h2 { margin:0 0 4px; font-size:1.2rem; }
+    .daily-login-heading p,.daily-login-note { margin:0; color:var(--text-muted); font-size:.84rem; line-height:1.5; }
+    .daily-login-streak { padding:11px 13px; margin:14px 0; border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,.035); font-weight:700; }
+    .daily-login-reward { display:flex; align-items:center; gap:12px; padding:14px; margin-bottom:14px; border:1px solid rgba(251,191,36,.24); border-radius:14px; background:rgba(245,158,11,.08); }
+    .daily-login-reward-icon { width:56px; height:56px; flex:0 0 56px; display:flex; align-items:center; justify-content:center; gap:2px; }
+    .daily-login-reward-icon img { width:42px; height:42px; object-fit:contain; image-rendering:pixelated; }
+    .daily-login-reward strong { display:block; }
+    .daily-login-reward small { display:block; margin-top:3px; color:var(--text-muted); }
+    .daily-login-week { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; margin:14px 0; }
+    .daily-login-day { min-width:0; padding:7px 2px; text-align:center; border:1px solid var(--border); border-radius:10px; color:var(--text-muted); font-size:.62rem; }
+    .daily-login-day.active { color:#fde68a; border-color:rgba(251,191,36,.55); background:rgba(245,158,11,.12); }
+    .daily-login-day.claimed { color:#86efac; border-color:rgba(34,197,94,.3); background:rgba(34,197,94,.08); }
+    .daily-login-day.upcoming { opacity:.72; }
+    .daily-login-day-icons { display:flex; align-items:center; justify-content:center; height:25px; gap:1px; }
+    .daily-login-day-icons img { width:22px; height:22px; object-fit:contain; image-rendering:pixelated; }
+    .daily-login-day strong { display:block; margin-top:4px; overflow-wrap:anywhere; font-size:.62rem; }
+    .daily-login-actions { display:flex; gap:10px; margin-top:16px; }
+    .daily-login-actions .btn { margin:0; }
+    @media(max-width:420px) { .daily-login-card { padding:18px; } .daily-login-week { gap:4px; } .daily-login-day { font-size:.62rem; } }
+    .profile-overview-grid { display:grid; grid-template-columns:minmax(320px,420px) minmax(360px,1fr); align-items:stretch; gap:16px; width:100%; }
+    #profileBox { width:100%; max-width:none !important; }
+    .weekly-login-panel { position:relative; min-width:0; overflow:hidden; padding:22px; border:1px solid rgba(251,191,36,.24); border-radius:18px; background:radial-gradient(ellipse at 100% 0,rgba(245,158,11,.16),transparent 42%),linear-gradient(145deg,#181725,#12131c 68%); box-shadow:0 14px 38px rgba(0,0,0,.2); }
+    .weekly-login-panel::after { content:'7'; position:absolute; top:-35px; right:12px; color:rgba(251,191,36,.035); font-size:12rem; line-height:1; font-weight:900; pointer-events:none; }
+    .weekly-login-heading { position:relative; z-index:1; display:flex; align-items:center; gap:13px; margin-bottom:16px; }
+    .weekly-login-emblem { width:48px; height:48px; flex:0 0 48px; display:grid; place-items:center; border:1px solid rgba(251,191,36,.3); border-radius:14px; background:linear-gradient(145deg,rgba(245,158,11,.2),rgba(245,158,11,.06)); box-shadow:inset 0 1px rgba(255,255,255,.08); font-size:1.45rem; }
+    .weekly-login-heading h3 { margin:0 0 4px; font-size:1.08rem; letter-spacing:.01em; }
+    .weekly-login-heading p { margin:0; color:var(--text-muted); font-size:.78rem; }
+    .weekly-login-heading::after { content:'7 DIAS'; margin-left:auto; padding:6px 9px; border:1px solid rgba(251,191,36,.24); border-radius:999px; background:rgba(245,158,11,.08); color:#fcd34d; font-size:.65rem; font-weight:800; letter-spacing:.08em; }
+    .weekly-login-status { position:relative; z-index:1; display:flex; align-items:center; gap:10px; padding:11px 13px; margin:12px 0 13px; border:1px solid rgba(251,191,36,.18); border-radius:12px; background:rgba(245,158,11,.065); font-size:.82rem; font-weight:700; }
+    .weekly-login-status::before { content:''; width:8px; height:8px; flex:0 0 8px; border-radius:50%; background:#fbbf24; box-shadow:0 0 12px rgba(251,191,36,.55); }
+    .weekly-login-progress-copy { display:flex; justify-content:space-between; gap:8px; margin:0 1px 7px; color:var(--text-muted); font-size:.7rem; }
+    .weekly-login-progress-copy strong { color:#fde68a; font-variant-numeric:tabular-nums; }
+    .weekly-login-progress-track { height:7px; overflow:hidden; border-radius:99px; background:#292837; box-shadow:inset 0 1px 2px rgba(0,0,0,.4); }
+    .weekly-login-progress-fill { width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,#f59e0b,#fde047); box-shadow:0 0 12px rgba(251,191,36,.35); transition:width .3s ease; }
+    .weekly-login-featured { position:relative; z-index:1; display:flex; align-items:center; gap:13px; min-height:84px; padding:12px 14px; margin:15px 0; border:1px solid rgba(251,191,36,.28); border-radius:14px; background:linear-gradient(100deg,rgba(245,158,11,.12),rgba(245,158,11,.035)); }
+    .weekly-login-featured-icon { width:54px; height:54px; flex:0 0 54px; display:grid; place-items:center; border-radius:13px; background:rgba(0,0,0,.17); }
+    .weekly-login-featured-icon img { width:44px; height:44px; object-fit:contain; image-rendering:pixelated; }
+    .weekly-login-featured-copy { min-width:0; }
+    .weekly-login-featured-label { display:block; margin-bottom:3px; color:#fcd34d; font-size:.65rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .weekly-login-featured-copy strong { display:block; font-size:.93rem; }
+    .weekly-login-featured-copy small { display:block; margin-top:3px; color:var(--text-muted); font-size:.73rem; line-height:1.35; }
+    .weekly-login-days { position:relative; z-index:1; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px; }
+    .weekly-login-days .daily-login-day { min-height:94px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:8px 3px 6px; border-radius:12px; font-size:.64rem; transition:transform .16s,border-color .16s,background .16s; }
+    .weekly-login-days .daily-login-day.active { border-color:#fbbf24; background:linear-gradient(180deg,rgba(245,158,11,.17),rgba(245,158,11,.07)); box-shadow:0 0 0 1px rgba(251,191,36,.1),0 5px 15px rgba(245,158,11,.08); transform:translateY(-2px); }
+    .weekly-login-days .daily-login-day.claimed { border-color:rgba(34,197,94,.3); background:linear-gradient(180deg,rgba(34,197,94,.1),rgba(34,197,94,.035)); }
+    .weekly-login-days .daily-login-day.upcoming { background:rgba(255,255,255,.018); }
+    .weekly-login-day-label { color:var(--text-muted); font-size:.62rem; }
+    .weekly-login-days .daily-login-day-icons { height:34px; margin:3px 0 2px; }
+    .weekly-login-days .daily-login-day-icons img { width:29px; height:29px; }
+    .weekly-login-days .daily-login-day strong { min-height:22px; margin:0; font-size:.64rem; }
+    .weekly-login-day-state { margin-top:3px; color:var(--text-muted); font-size:.55rem; }
+    .weekly-login-days .daily-login-day.active .weekly-login-day-state { color:#fde68a; font-weight:800; }
+    .weekly-login-days .daily-login-day.claimed .weekly-login-day-state { color:#86efac; }
+    .weekly-login-footer { position:relative; z-index:1; display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:15px; padding-top:13px; border-top:1px solid rgba(255,255,255,.07); }
+    .weekly-login-footer small { max-width:225px; color:var(--text-muted); font-size:.7rem; line-height:1.45; }
+    .weekly-login-footer .btn { width:auto; margin:0; padding:9px 13px; font-size:.78rem; white-space:nowrap; }
+    @media(max-width:850px) { .profile-overview-grid { grid-template-columns:minmax(0,1fr); max-width:600px; } }
+    @media(max-width:480px) { .profile-overview-grid { grid-template-columns:minmax(0,1fr); } .weekly-login-panel { padding:17px 12px; } .weekly-login-heading { gap:9px; } .weekly-login-heading::after { padding:5px 7px; font-size:.58rem; } .weekly-login-days { gap:4px; } .weekly-login-days .daily-login-day { min-height:86px; padding:7px 1px 5px; } .weekly-login-days .daily-login-day-icons img { width:23px;height:23px; } .weekly-login-days .daily-login-day strong { min-height:24px; font-size:.56rem; } .weekly-login-day-label,.weekly-login-day-state { font-size:.52rem; } .weekly-login-footer { align-items:flex-start; flex-direction:column; } .weekly-login-footer .btn { width:100%; } }
     .gym-cap-card {
       width: min(460px, 100%); max-height: 88vh; overflow-y: auto; padding: 24px;
       color: var(--text); background: radial-gradient(ellipse at top right, rgba(239,68,68,.15), transparent 55%), var(--card);
@@ -1011,6 +1100,11 @@
       padding: 10px 12px; background: var(--input-bg); border-radius: 10px;
       border: 1px solid var(--border); font-size: 0.875rem;
     }
+    .summary-move-main { min-width: 0; display: flex; align-items: center; gap: 8px; }
+    .summary-move-controls { display: flex; gap: 4px; flex: 0 0 auto; margin-left: 10px; }
+    .summary-move-controls button { width: 30px; height: 30px; padding: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); cursor: pointer; }
+    .summary-move-controls button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+    .summary-move-controls button:disabled { opacity: .35; cursor: not-allowed; }
     .held-item-summary { display: flex; align-items: center; justify-content: flex-start; gap: 10px; min-width: 0; }
     .held-item-summary-icon { width: 32px; height: 32px; flex: 0 0 32px; object-fit: contain; }
     .held-item-summary-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
@@ -1580,7 +1674,7 @@
             </div>
             <div class="game-card" id="eliteFourHomeCard" role="button" tabindex="0" onclick="switchPanel('elite-four')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('elite-four')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#4a3522,#211728);height:126px;"><img src="assets/elite-four-card.png" alt="Elite Four de Kanto" style="width:100%;height:126px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Elite Four</div><div class="game-card-desc" id="eliteFourHomeDesc">Requer todas as 8 InsÃ­gnias de Kanto.</div></div>
+              <div class="game-card-body"><div class="game-card-title">Elite Four</div><div class="game-card-desc" id="eliteFourHomeDesc">Requer todas as 8 Ins&iacute;gnias de Kanto.</div></div>
             </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('ss-anne')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('ss-anne')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#1d4960,#102b3a);"><img src="assets/ss-anne-ship-cutout.png" alt="Navio S.S. Anne" style="width:100%;height:92px;object-fit:contain;" /></div>
@@ -1593,6 +1687,14 @@
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('battle-tower')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('battle-tower')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#241638,#100a1d);"><img src="assets/battle-tower-castle.png" alt="Castelo pixel art da Torre de Batalha" style="width:154px;height:92px;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">Torre de Batalha</div><div class="game-card-desc">Desafie treinadores NPC e ganhe BP nas primeiras vitórias.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('dojo')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('dojo')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#6b3c20,#29170f);height:126px;padding:0;overflow:hidden;"><img src="assets/martial-dojo.png" alt="Dojo Marcial" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+              <div class="game-card-body"><div class="game-card-title">Dojo Marcial</div><div class="game-card-desc">Desafie os lutadores do dojo e prove sua força.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('daily-boss')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('daily-boss')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#55351c,#21111c);height:126px;overflow:hidden;"><img src="assets/daily-boss-legendary-birds.png" alt="Zapdos, Articuno e Moltres" style="width:220%;height:220%;max-width:none;flex:none;object-fit:contain;image-rendering:pixelated;" /></div>
+              <div class="game-card-body"><div class="game-card-title">Boss Di&aacute;rio</div><div class="game-card-desc">Desafie Zapdos, Moltres e Articuno para ganhar recompensas especiais.</div></div>
             </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('center')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('center')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#3b2533,#1d141b);"><img src="assets/pokemon-center.png" alt="" style="width:128px;height:98px;object-fit:contain;image-rendering:pixelated;" /></div>
@@ -1700,6 +1802,19 @@
           <p class="panel-desc">Enfrente treinadores em batalhas com equipes completas. Cada treinador concede BP uma vez; você pode voltar para tentar novamente.</p>
           <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Recompensas coletadas: <strong id="towerProgress">0/20</strong> · BP: <strong id="towerBattlePoints">0</strong></div>
           <div class="cards-grid" id="battleTowerGrid"></div>
+        </div>
+        <div class="panel" id="panel-dojo">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
+          <h2 class="panel-title">&#129354; Dojo Marcial</h2>
+          <p class="panel-desc">Enfrente os lutadores do dojo em ordem. Cada treinador libera o pr&oacute;ximo desafio quando for derrotado.</p>
+          <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Lutadores derrotados: <strong id="dojoProgress">0/5</strong></div>
+          <div class="cards-grid" id="dojoGrid"></div>
+        </div>
+        <div class="panel" id="panel-daily-boss">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
+          <h2 class="panel-title">&#x1F525; Boss Di&aacute;rio</h2>
+          <p class="panel-desc">Cada lend&aacute;rio pode ser derrotado uma vez por dia. A vit&oacute;ria concede apenas o pr&ecirc;mio indicado.</p>
+          <div class="cards-grid" id="dailyBossGrid"></div>
         </div>
         <div class="panel" id="panel-pokemon">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
@@ -1858,7 +1973,21 @@
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
           <h2 class="panel-title">👤 Perfil do Treinador</h2>
           <p class="panel-desc">Informações do seu personagem e acesso à equipe, mochila e registros.</p>
-          <div id="profileBox" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;"></div>
+          <div class="profile-overview-grid">
+            <div id="profileBox" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;"></div>
+            <section class="weekly-login-panel" aria-labelledby="weeklyLoginTitle">
+              <div class="weekly-login-heading">
+                <div class="weekly-login-emblem" aria-hidden="true">&#128197;</div>
+                <div><h3 id="weeklyLoginTitle">Recompensas semanais</h3><p>Entre e resgate um pr&ecirc;mio a cada dia.</p></div>
+              </div>
+              <div class="weekly-login-status" id="weeklyLoginStatus" aria-live="polite"></div>
+              <div class="weekly-login-progress-copy"><span>Progresso da sequência</span><strong id="weeklyLoginProgressText">0/7 dias</strong></div>
+              <div class="weekly-login-progress-track" role="progressbar" aria-label="Progresso das recompensas semanais" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"><div class="weekly-login-progress-fill" id="weeklyLoginProgressFill"></div></div>
+              <div class="weekly-login-featured"><span class="weekly-login-featured-icon" id="weeklyLoginFeaturedIcon" aria-hidden="true"></span><div class="weekly-login-featured-copy"><span class="weekly-login-featured-label" id="weeklyLoginFeaturedLabel">Recompensa de hoje</span><strong id="weeklyLoginFeaturedTitle"></strong><small id="weeklyLoginFeaturedDetail"></small></div></div>
+              <div class="weekly-login-days" id="weeklyLoginDays" aria-label="Calend&aacute;rio de recompensas dos sete dias"></div>
+              <div class="weekly-login-footer"><small id="weeklyLoginHint">A sequ&ecirc;ncia volta ao primeiro dia se passar um dia sem resgatar.</small><button type="button" class="btn" id="weeklyLoginClaimButton" onclick="openDailyLoginRewardIfAvailable()">Ver recompensa</button></div>
+            </section>
+          </div>
           <h3 style="font-size:1.05rem;margin:24px 0 12px;">Acesso rápido</h3>
           <div class="cards-grid profile-shortcuts">
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('bag')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('bag')}">
@@ -1987,6 +2116,30 @@
       <button type="button" class="btn btn-secondary" style="width:100%;margin-top:14px;" onclick="closeHeldItemPicker()">Voltar</button>
     </div>
   </div>
+  <div id="dojoRewardOverlay" onclick="if(event.target===this)closeDojoRewardChoice()">
+    <section class="dojo-reward-card" role="dialog" aria-modal="true" aria-labelledby="dojoRewardTitle">
+      <h2 id="dojoRewardTitle">Escolha sua recompensa do Dojo</h2>
+      <p>Chuck reconhece sua vit&oacute;ria. Escolha um dos dois lutadores para entrar na sua equipe. A escolha s&oacute; pode ser feita uma vez.</p>
+      <div class="dojo-reward-options">
+        <button type="button" class="dojo-reward-option" onclick="chooseDojoRewardPokemon(106)"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/106.png" alt="Hitmonlee" /><strong>Hitmonlee</strong><small>Chute &middot; Lutador</small></button>
+        <button type="button" class="dojo-reward-option" onclick="chooseDojoRewardPokemon(107)"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/107.png" alt="Hitmonchan" /><strong>Hitmonchan</strong><small>Soco &middot; Lutador</small></button>
+      </div>
+      <button type="button" class="btn btn-secondary" style="width:100%;margin-top:14px;" onclick="closeDojoRewardChoice()">Escolher depois</button>
+    </section>
+  </div>
+  <div id="dailyLoginOverlay">
+    <section class="daily-login-card" role="dialog" aria-modal="true" aria-labelledby="dailyLoginTitle" aria-describedby="dailyLoginDescription">
+      <div class="daily-login-heading">
+        <div class="daily-login-emblem" aria-hidden="true">&#127881;</div>
+        <div><h2 id="dailyLoginTitle">Recompensa diária</h2><p id="dailyLoginDescription">Entre todos os dias para manter sua sequência e receber novos prêmios.</p></div>
+      </div>
+      <div class="daily-login-streak" id="dailyLoginStreak"></div>
+      <div class="daily-login-week" id="dailyLoginWeek" aria-label="Recompensas da sequência semanal"></div>
+      <div class="daily-login-reward"><span class="daily-login-reward-icon" id="dailyLoginRewardIcon" aria-hidden="true"></span><div><strong id="dailyLoginRewardTitle"></strong><small id="dailyLoginRewardDetail"></small></div></div>
+      <p class="daily-login-note">A sequência reinicia se você deixar passar um dia. A recompensa é liberada uma vez por dia.</p>
+      <div class="daily-login-actions"><button type="button" class="btn" id="claimDailyLoginButton" onclick="claimDailyLoginReward()">Resgatar recompensa</button><button type="button" class="btn btn-secondary" onclick="closeDailyLoginReward()">Depois</button></div>
+    </section>
+  </div>
   <div id="gymLevelCapOverlay" onclick="if(event.target===this)closeGymLevelCapNotice()">
     <section class="gym-cap-card" role="dialog" aria-modal="true" aria-labelledby="gymCapTitle">
       <div class="gym-cap-heading">
@@ -2038,6 +2191,10 @@
           <div class="hp-bar-wrap">
             <div class="hp-label"><span>HP</span><span id="enemyHpText">20/20</span></div>
             <div class="hp-bar"><div class="hp-fill" id="enemyHpBar" style="width:100%"></div></div>
+          </div>
+          <div class="hp-bar-wrap daily-boss-shield-wrap" id="dailyBossShieldWrap" hidden>
+            <div class="hp-label"><span>SHIELD</span><span id="dailyBossShieldText">2.500/2.500</span></div>
+            <div class="daily-boss-shield-bar"><div class="daily-boss-shield-fill" id="dailyBossShieldBar" style="width:100%"></div></div>
           </div>
         </div>
         <div class="sprite-stage enemy-stage">
@@ -2703,6 +2860,20 @@
       return '';
     }
 
+    function applyEnemyDamage(damage) {
+      const remaining = Math.max(0, Number(damage) || 0);
+      if (!battle?.enemy || remaining <= 0) return {shieldDamage:0,hpDamage:0};
+      let hpDamage = remaining;
+      let shieldDamage = 0;
+      if (battle.isDailyBoss && (battle.enemy.shieldHp || 0) > 0) {
+        shieldDamage = Math.min(battle.enemy.shieldHp, remaining);
+        battle.enemy.shieldHp -= shieldDamage;
+        hpDamage -= shieldDamage;
+      }
+      if (hpDamage > 0) battle.enemy.currentHp = Math.max(0, battle.enemy.currentHp - hpDamage);
+      updateEnemyHpBar();
+      return {shieldDamage,hpDamage};
+    }
     function applyResidualStatus(pokemon) {
       if (!pokemon || !['burn', 'poison', 'toxic'].includes(pokemon.status)) return '';
       const hpKey = Number.isFinite(pokemon.currentHp) ? 'currentHp' : 'hp';
@@ -2711,14 +2882,21 @@
       const toxicCounter = status === 'toxic' ? Math.max(1, Math.min(15, Number(pokemon.toxicCounter) || 1)) : 0;
       const damage = Math.max(1, Math.floor(pokemon.maxHp * (status === 'toxic' ? toxicCounter / 16 : 1 / 8)));
       if (status === 'toxic') pokemon.toxicCounter = Math.min(15, toxicCounter + 1);
-      pokemon[hpKey] = Math.max(0, pokemon[hpKey] - damage);
+      let shieldDamage = 0;
+      let hpDamage = damage;
+      if (pokemon === battle?.enemy) {
+        const result = applyEnemyDamage(damage);
+        shieldDamage = result.shieldDamage;
+        hpDamage = result.hpDamage;
+      } else pokemon[hpKey] = Math.max(0, pokemon[hpKey] - damage);
       if (pokemon[hpKey] <= 0) {
         pokemon.status = '';
         delete pokemon.sleepTurns;
         delete pokemon.toxicCounter;
         renderBattleStatusIndicators();
       }
-      return `${pokemon.name} sofreu ${damage} de dano por ${STATUS_LABELS[status].toLowerCase()}.`;
+      const detail = shieldDamage ? `; o escudo absorveu ${shieldDamage}` : '';
+      return `${pokemon.name} sofreu ${hpDamage} de dano por ${STATUS_LABELS[status].toLowerCase()}${detail}.`;
     }
 
     const STATUS_CURES = {
@@ -3350,7 +3528,8 @@
     }
 
     // Sprites: official-artwork for UI; animated GIFs (pokemondb BW) in battle
-    const SPRITE_FRONT = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+    // Annihilape fan sprite by RetroNC: https://www.deviantart.com/retronc/art/Annihilape-Sprite-977387918
+    const SPRITE_FRONT = id => id === 979 ? 'assets/annihilape-retronc.gif' : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
     const SPRITE_FB = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     const SPRITE = SPRITE_FRONT;
 
@@ -3406,6 +3585,7 @@
 
     // Animated battle sprites (Black/White GIFs — pokemondb)
     const SPRITE_BACK = id => {
+      if (id === 237) return 'assets/hitmontop-back.gif';
       if (id === 810) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/810.gif';
       if (id === 811) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/811.gif';
       if (id === 812) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/812.gif';
@@ -3414,6 +3594,8 @@
       return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`;
     };
     const SPRITE_ANIM = id => {
+      if (id === 237) return 'assets/hitmontop-front.gif';
+      if (id === 979) return 'assets/annihilape-retronc.gif';
       if (id === 810) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/810.gif';
       if (id === 811) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/811.gif';
       if (id === 812) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/812.gif';
@@ -3753,6 +3935,18 @@
         { name: 'Paras', id: 46, hp: 22, rate: 15, minLevel: 8, maxLevel: 15, rarity: 'Incomum', notes: 'Encontrado nas partes úmidas e entre cogumelos', moves: [{name:'Arranhão',power:40},{name:'Absorver',power:30,type:'Planta'}] },
         { name: 'Clefairy', id: 35, hp: 28, rate: 5, minLevel: 12, maxLevel: 17, rarity: 'Raro', notes: 'Encontro especial do Mt. Moon', moves: [{name:'Pancada',power:40},{name:'Metrônomo',power:50}] }
       ],
+      'Rota 4': [
+        { name: 'Ekans', id: 23, hp: 28, rate: 31.5, minLevel: 10, maxLevel: 15, rarity: 'Comum', moves: [{name:'Poison Sting',power:25,type:'Veneno'},{name:'Bite',power:40,type:'Sombrio'}] },
+        { name: 'Arbok', id: 24, hp: 42, rate: 3.5, minLevel: 15, maxLevel: 18, rarity: 'Raro', moves: [{name:'Poison Jab',power:50,type:'Veneno'},{name:'Bite',power:45,type:'Sombrio'}] },
+        { name: 'Butterfree', id: 12, hp: 34, rate: 17.5, minLevel: 10, maxLevel: 16, rarity: 'Incomum', moves: [{name:'Confusion',power:40,type:'Psiquico'},{name:'Gust',power:35,type:'Voador'}] },
+        { name: 'Beedrill', id: 15, hp: 34, rate: 17.5, minLevel: 10, maxLevel: 16, rarity: 'Incomum', moves: [{name:'Twineedle',power:40,type:'Inseto'},{name:'Poison Sting',power:25,type:'Veneno'}] },
+        { name: 'Meowth', id: 52, hp: 30, rate: 20, minLevel: 10, maxLevel: 16, rarity: 'Incomum', moves: [{name:'Scratch',power:40,type:'Normal'},{name:'Bite',power:40,type:'Sombrio'}] },
+        { name: 'Pidgeotto', id: 17, hp: 38, rate: 10, minLevel: 14, maxLevel: 18, rarity: 'Raro', moves: [{name:'Gust',power:40,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}] }
+      ],
+      "Diglett's Cave": [
+        { name: 'Diglett', id: 50, hp: 34, rate: 95, minLevel: 29, maxLevel: 31, rarity: 'Muito Comum', moves: [{name:'Scratch',power:40,type:'Normal'},{name:'Magnitude',power:60,type:'Terra'}] },
+        { name: 'Dugtrio', id: 51, hp: 42, rate: 5, minLevel: 29, maxLevel: 31, rarity: 'Raro', moves: [{name:'Scratch',power:40,type:'Normal'},{name:'Earthquake',power:80,type:'Terra'}] }
+      ],
       'Túnel Rochoso': [
         { name: 'Geodude', id: 74, hp: 26, rate: 25, minLevel: 17, maxLevel: 25, rarity: 'Muito Comum', moves: [{name:'Rolamento',power:45,type:'Pedra'},{name:'Explosão de Rocha',power:50}] },
         { name: 'Sandshrew', id: 27, hp: 28, rate: 10, minLevel: 17, maxLevel: 25, rarity: 'Incomum', notes: 'Pokemon terrestre encontrado no tunel', moves: [{name:'Scratch',power:40,type:'Normal'},{name:'Sand Attack',power:0,type:'Terra'}] },
@@ -3796,29 +3990,35 @@
         { name: 'Raichu', id: 26, hp: 45, rate: 5, minLevel: 42, maxLevel: 50, rarity: 'Raro', moves: [{name:'Thunder Punch',power:75,type:'Eletrico'},{name:'Slam',power:80,type:'Normal'}] }
       ],
       'Zona do Safari': [
-        { name: 'Kangaskhan', id: 115, hp: 48, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Comet Punch',power:18,type:'Normal'},{name:'Bite',power:60,type:'Sombrio'}] },
-        { name: 'Tauros', id: 128, hp: 48, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Stomp',power:65,type:'Normal'},{name:'Take Down',power:90,type:'Normal'}] },
-        { name: 'Chansey', id: 113, hp: 55, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Pound',power:40,type:'Normal'},{name:'Sing',power:0,type:'Normal'}] },
-        { name: 'Pinsir', id: 127, hp: 45, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Vice Grip',power:55,type:'Normal'},{name:'Seismic Toss',power:50,type:'Lutador'}] },
-        { name: 'Exeggcute', id: 102, hp: 32, rate: 5, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Bullet Seed',power:25,type:'Planta'}] },
-        { name: 'Rhyhorn', id: 111, hp: 40, rate: 5, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Rock Blast',power:25,type:'Pedra'},{name:'Stomp',power:65,type:'Normal'}] },
-        { name: 'Venomoth', id: 49, hp: 38, rate: 5, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Psybeam',power:65,type:'Psiquico'},{name:'Bug Buzz',power:90,type:'Inseto'}] },
-        { name: 'Nidoran?', id: 32, hp: 30, rate: 10, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Poison Sting',power:15,type:'Veneno'},{name:'Double Kick',power:30,type:'Lutador'}] },
-        { name: 'Nidoran?', id: 29, hp: 30, rate: 10, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Poison Sting',power:15,type:'Veneno'},{name:'Double Kick',power:30,type:'Lutador'}] },
-        { name: 'Nidorino', id: 33, hp: 38, rate: 0.75, minLevel: 35, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Poison Jab',power:80,type:'Veneno'},{name:'Horn Attack',power:65,type:'Normal'}] },
-        { name: 'Nidorina', id: 30, hp: 38, rate: 0.75, minLevel: 35, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Poison Jab',power:80,type:'Veneno'},{name:'Bite',power:60,type:'Sombrio'}] },
-        { name: 'Parasect', id: 47, hp: 40, rate: 5, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Slash',power:70,type:'Normal'},{name:'Giga Drain',power:75,type:'Planta'}] },
-        { name: 'Dratini', id: 147, hp: 30, rate: 0.75, minLevel: 32, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Dragon Breath',power:60,type:'Dragao'},{name:'Wrap',power:15,type:'Normal'}] },
-        { name: 'Dragonair', id: 148, hp: 42, rate: 0.25, minLevel: 48, maxLevel: 60, rarity: 'Raro', moves: [{name:'Dragon Breath',power:60,type:'Dragao'},{name:'Aqua Tail',power:90,type:'Agua'}] },
-        { name: 'Psyduck', id: 54, hp: 32, rate: 7, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}] },
-        { name: 'Goldeen', id: 118, hp: 30, rate: 10, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Peck',power:35,type:'Voador'},{name:'Water Gun',power:40,type:'Agua'}] },
-        { name: 'Seaking', id: 119, hp: 40, rate: 0.75, minLevel: 34, maxLevel: 44, rarity: 'Incomum', moves: [{name:'Waterfall',power:80,type:'Agua'},{name:'Peck',power:35,type:'Voador'}] },
-        { name: 'Poliwag', id: 60, hp: 30, rate: 6, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Bubble',power:40,type:'Agua'},{name:'Hypnosis',power:0,type:'Psiquico'}] },
-        { name: 'Poliwhirl', id: 61, hp: 40, rate: 0.75, minLevel: 34, maxLevel: 44, rarity: 'Incomum', moves: [{name:'Bubble Beam',power:65,type:'Agua'},{name:'Double Slap',power:15,type:'Normal'}] },
-        { name: 'Doduo', id: 84, hp: 28, rate: 8, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Peck',power:35,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}] },
-        { name: 'Scyther', id: 123, hp: 45, rate: 2, minLevel: 38, maxLevel: 50, rarity: 'Raro', moves: [{name:'Slash',power:70,type:'Normal'},{name:'Wing Attack',power:60,type:'Voador'}] },
-        { name: 'Tangela', id: 114, hp: 40, rate: 5, minLevel: 28, maxLevel: 40, rarity: 'Incomum', moves: [{name:'Vine Whip',power:45,type:'Planta'},{name:'Bind',power:15,type:'Normal'}] },
-        { name: 'Lickitung', id: 108, hp: 42, rate: 2, minLevel: 38, maxLevel: 50, rarity: 'Raro', moves: [{name:'Lick',power:30,type:'Fantasma'},{name:'Stomp',power:65,type:'Normal'}] },
+        { name: 'Kangaskhan', id: 115, hp: 48, rate: 3.2, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Comet Punch',power:18,type:'Normal'},{name:'Bite',power:60,type:'Sombrio'}] },
+        { name: 'Tauros', id: 128, hp: 48, rate: 3.2, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Stomp',power:65,type:'Normal'},{name:'Take Down',power:90,type:'Normal'}] },
+        { name: 'Chansey', id: 113, hp: 55, rate: 3.2, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Pound',power:40,type:'Normal'},{name:'Sing',power:0,type:'Normal'}] },
+        { name: 'Pinsir', id: 127, hp: 45, rate: 3.2, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Vice Grip',power:55,type:'Normal'},{name:'Seismic Toss',power:50,type:'Lutador'}] },
+        { name: 'Exeggcute', id: 102, hp: 32, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Bullet Seed',power:25,type:'Planta'}] },
+        { name: 'Rhyhorn', id: 111, hp: 40, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Rock Blast',power:25,type:'Pedra'},{name:'Stomp',power:65,type:'Normal'}] },
+        { name: 'Venomoth', id: 49, hp: 38, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Psybeam',power:65,type:'Psiquico'},{name:'Bug Buzz',power:90,type:'Inseto'}] },
+        { name: 'Nidoran?', id: 32, hp: 30, rate: 8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Poison Sting',power:15,type:'Veneno'},{name:'Double Kick',power:30,type:'Lutador'}] },
+        { name: 'Nidoran?', id: 29, hp: 30, rate: 8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Poison Sting',power:15,type:'Veneno'},{name:'Double Kick',power:30,type:'Lutador'}] },
+        { name: 'Nidorino', id: 33, hp: 38, rate: 0.6, minLevel: 35, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Poison Jab',power:80,type:'Veneno'},{name:'Horn Attack',power:65,type:'Normal'}] },
+        { name: 'Nidorina', id: 30, hp: 38, rate: 0.6, minLevel: 35, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Poison Jab',power:80,type:'Veneno'},{name:'Bite',power:60,type:'Sombrio'}] },
+        { name: 'Parasect', id: 47, hp: 40, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Slash',power:70,type:'Normal'},{name:'Giga Drain',power:75,type:'Planta'}] },
+        { name: 'Dratini', id: 147, hp: 30, rate: 0.6, minLevel: 32, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Dragon Breath',power:60,type:'Dragao'},{name:'Wrap',power:15,type:'Normal'}] },
+        { name: 'Dragonair', id: 148, hp: 42, rate: 0.2, minLevel: 48, maxLevel: 60, rarity: 'Raro', moves: [{name:'Dragon Breath',power:60,type:'Dragao'},{name:'Aqua Tail',power:90,type:'Agua'}] },
+        { name: 'Psyduck', id: 54, hp: 32, rate: 5.6, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}] },
+        { name: 'Goldeen', id: 118, hp: 30, rate: 8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Peck',power:35,type:'Voador'},{name:'Water Gun',power:40,type:'Agua'}] },
+        { name: 'Seaking', id: 119, hp: 40, rate: 0.6, minLevel: 34, maxLevel: 44, rarity: 'Incomum', moves: [{name:'Waterfall',power:80,type:'Agua'},{name:'Peck',power:35,type:'Voador'}] },
+        { name: 'Poliwag', id: 60, hp: 30, rate: 4.8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Bubble',power:40,type:'Agua'},{name:'Hypnosis',power:0,type:'Psiquico'}] },
+        { name: 'Poliwhirl', id: 61, hp: 40, rate: 0.6, minLevel: 34, maxLevel: 44, rarity: 'Incomum', moves: [{name:'Bubble Beam',power:65,type:'Agua'},{name:'Double Slap',power:15,type:'Normal'}] },
+        { name: 'Doduo', id: 84, hp: 28, rate: 6.4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Peck',power:35,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}] },
+        { name: 'Scyther', id: 123, hp: 45, rate: 1.6, minLevel: 38, maxLevel: 50, rarity: 'Raro', moves: [{name:'Slash',power:70,type:'Normal'},{name:'Wing Attack',power:60,type:'Voador'}] },
+        { name: 'Tangela', id: 114, hp: 40, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Incomum', moves: [{name:'Vine Whip',power:45,type:'Planta'},{name:'Bind',power:15,type:'Normal'}] },
+        { name: 'Lickitung', id: 108, hp: 42, rate: 1.6, minLevel: 38, maxLevel: 50, rarity: 'Raro', moves: [{name:'Lick',power:30,type:'Fantasma'},{name:'Stomp',power:65,type:'Normal'}] },
+        { name: 'Kingler', id: 99, hp: 44, rate: 2.5, minLevel: 34, maxLevel: 44, rarity: 'Raro', moves: [{name:'Crabhammer',power:75,type:'Agua'},{name:'Vice Grip',power:55,type:'Normal'}] },
+        { name: 'Horsea', id: 116, hp: 28, rate: 5, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Bubble Beam',power:50,type:'Agua'}] },
+        { name: 'Seadra', id: 117, hp: 38, rate: 1.5, minLevel: 35, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Dragon Breath',power:50,type:'Dragao'}] },
+        { name: 'Gyarados', id: 130, hp: 55, rate: 0.5, minLevel: 45, maxLevel: 50, rarity: 'Muito Raro', moves: [{name:'Bite',power:55,type:'Sombrio'},{name:'Aqua Tail',power:70,type:'Agua'}] },
+        { name: 'Krabby', id: 98, hp: 28, rate: 8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Bubble',power:40,type:'Agua'},{name:'Vice Grip',power:50,type:'Normal'}] },
+        { name: 'Exeggutor', id: 103, hp: 48, rate: 2.5, minLevel: 35, maxLevel: 45, rarity: 'Raro', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Seed Bomb',power:60,type:'Planta'}] },
       ],
       'Ilhas Espuma': [
         { name: 'Seel', id: 86, hp: 32, minLevel: 40, maxLevel: 52, moves: [{name:'Cabeçada',power:45},{name:'Raio de Gelo',power:55,type:'Gelo'}] },
@@ -3827,12 +4027,23 @@
         { name: 'Shellder', id: 90, hp: 30, minLevel: 40, maxLevel: 52, moves: [{name:'Ice Shard',power:40,type:'Gelo'},{name:'Water Gun',power:40,type:'Agua'}] },
         { name: 'Cloyster', id: 91, hp: 42, minLevel: 48, maxLevel: 60, moves: [{name:'Ice Beam',power:55,type:'Gelo'},{name:'Water Pulse',power:60,type:'Agua'}] },
         { name: 'Lapras', id: 131, hp: 50, minLevel: 48, maxLevel: 60, moves: [{name:'Ice Beam',power:55,type:'Gelo'},{name:'Surf',power:70,type:'Agua'}] },
-        { name: 'Slowbro', id: 80, hp: 45, minLevel: 48, maxLevel: 60, moves: [{name:'Confusão',power:50},{name:'Hidro Bomba',power:70,type:'Agua'}] }
+        { name: 'Slowbro', id: 80, hp: 45, minLevel: 48, maxLevel: 60, moves: [{name:'Confusão',power:50},{name:'Hidro Bomba',power:70,type:'Agua'}] },
+        { name: 'Tentacool', id: 72, hp: 30, minLevel: 40, maxLevel: 52, moves: [{name:'Poison Sting',power:30,type:'Veneno'},{name:'Water Gun',power:40,type:'Agua'}] }
       ],
       'Mansão Pokémon': [
         { name: 'Koffing', id: 109, hp: 30, minLevel: 45, maxLevel: 56, moves: [{name:'Gás Tóxico',power:0},{name:'Investida',power:40}] },
         { name: 'Weezing', id: 110, hp: 38, minLevel: 55, maxLevel: 66, moves: [{name:'Lodo',power:50,type:'Veneno'},{name:'Explosão',power:70}] },
-        { name: 'Ditto', id: 132, hp: 35, minLevel: 50, maxLevel: 62, moves: [{name:'Transformação',power:40},{name:'Investida',power:35}] }
+        { name: 'Ditto', id: 132, hp: 35, minLevel: 50, maxLevel: 62, moves: [{name:'Transformação',power:40},{name:'Investida',power:35}] },
+        { name: 'Ekans', id: 23, hp: 32, minLevel: 45, maxLevel: 56, moves: [{name:'Poison Sting',power:25,type:'Veneno'},{name:'Bite',power:40,type:'Sombrio'}] },
+        { name: 'Raticate', id: 20, hp: 45, minLevel: 45, maxLevel: 56, moves: [{name:'Hyper Fang',power:65,type:'Normal'},{name:'Bite',power:50,type:'Sombrio'}] },
+        { name: 'Muk', id: 89, hp: 50, minLevel: 55, maxLevel: 66, moves: [{name:'Lodo',power:55,type:'Veneno'},{name:'Soco de Lama',power:50,type:'Terra'}] },
+        { name: 'Arbok', id: 24, hp: 46, minLevel: 50, maxLevel: 62, moves: [{name:'Poison Jab',power:55,type:'Veneno'},{name:'Bite',power:45,type:'Sombrio'}] }
+      ],
+      'Esgoto Industrial': [
+        { name: 'Grimer', id: 88, hp: 36, rate: 40, minLevel: 25, maxLevel: 35, rarity: 'Comum', moves: [{name:'Lodo',power:40,type:'Veneno'},{name:'Ácido',power:40,type:'Veneno'}] },
+        { name: 'Muk', id: 89, hp: 48, rate: 10, minLevel: 30, maxLevel: 38, rarity: 'Raro', moves: [{name:'Lodo',power:55,type:'Veneno'},{name:'Soco de Lama',power:50,type:'Terra'}] },
+        { name: 'Rattata', id: 19, hp: 30, rate: 40, minLevel: 25, maxLevel: 35, rarity: 'Comum', moves: [{name:'Investida',power:35,type:'Normal'},{name:'Mordida',power:40,type:'Sombrio'}] },
+        { name: 'Raticate', id: 20, hp: 42, rate: 10, minLevel: 30, maxLevel: 38, rarity: 'Raro', moves: [{name:'Hiper Presa',power:65,type:'Normal'},{name:'Mordida',power:50,type:'Sombrio'}] }
       ],
       'Vulcão da Ilha de Cinnabar': [
         { name: 'Vulpix', id: 37, hp: 42, rate: 25, minLevel: 52, maxLevel: 62, rarity: 'Comum', moves: [{name:'Ember',power:40,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}] },
@@ -3958,6 +4169,9 @@
 
 
     const DUNGEON_MAPS = {
+      industrial_sewer: 'assets/industrial-sewer.png',
+      route4: 'assets/route-4.png',
+      diglett_cave: 'assets/diglett-cave.png',
       cinnabar_volcano: 'assets/cinnabar-volcano.jpg',
       route24: 'assets/rota-24.png',
       viridian: 'data:image/jpeg;base64,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',
@@ -3975,6 +4189,8 @@
     const DUNGEONS = [
       { name: 'Floresta de Viridian', icon: '🌲', imgId: 25, mapKey: 'viridian', desc: 'Uma mata fechada de trilhas estreitas, árvores antigas e clareiras tranquilas.', difficulty: 'easy', reward: '₽ 200-500', color: 'linear-gradient(135deg,#1e3a2f,#0f1f18)' },
       { name: 'Mt. Moon', icon: '🌙', imgId: 35, mapKey: 'mt_moon', desc: 'Uma montanha rochosa cheia de cavernas, fósseis e passagens subterrâneas.', difficulty: 'easy', reward: '₽ 300-700', color: 'linear-gradient(135deg,#1a1a2e,#0d0d1a)' },
+      { name: 'Rota 4', icon: '🏝️', imgId: 23, mapKey: 'route4', desc: 'Uma passagem costeira entre a saída do Mt. Moon e a região de Cerulean.', difficulty: 'easy', reward: '₽ 180-300', color: 'linear-gradient(135deg,#276448,#163a30)' },
+      { name: "Diglett's Cave", icon: '🕳️', imgId: 50, mapKey: 'diglett_cave', desc: 'Um túnel subterrâneo estreito habitado por Diglett e Dugtrio.', difficulty: 'medium', reward: '₽ 300-420', color: 'linear-gradient(135deg,#3b3025,#1d1712)' },
       { name: 'Rota 24', icon: '🗺️', imgId: 63, mapKey: 'route24', desc: 'Uma rota ensolarada com pontes, gramados e águas calmas ao norte de Cerulean.', difficulty: 'medium', reward: '₽ 500-900', color: 'linear-gradient(135deg,#1a2a2e,#0d181a)' },
       { name: 'Túnel Rochoso', icon: '🪨', imgId: 95, mapKey: 'rock_tunnel', desc: 'Uma longa travessia subterrânea, marcada por corredores escuros e paredões de pedra.', difficulty: 'medium', reward: '₽ 500-1000', color: 'linear-gradient(135deg,#2d2a26,#1a1815)' },
       { name: 'Usina Elétrica', icon: '⚡', imgId: 101, mapKey: 'power', desc: 'Uma instalação abandonada tomada por máquinas, cabos e descargas elétricas.', difficulty: 'hard', reward: '₽ 800-1500', color: 'linear-gradient(135deg,#2d2a1a,#1a1810)' },
@@ -3982,6 +4198,7 @@
       { name: 'Zona do Safari', icon: '🦒', imgId: 113, mapKey: 'safari', desc: 'Uma extensa reserva natural de campos, lagoas e vegetação selvagem.', difficulty: 'medium', reward: '₽ 500-1200', color: 'linear-gradient(135deg,#1e3a2f,#152a20)' },
       { name: 'Ilhas Espuma', icon: '🌊', imgId: 87, mapKey: 'seafoam', desc: 'Um arquipélago de grutas geladas, marés fortes e passagens sobre o oceano.', difficulty: 'hard', reward: '₽ 1000-2000', color: 'linear-gradient(135deg,#1a2a3d,#0d1520)' },
       { name: 'Mansão Pokémon', icon: '🏚️', imgId: 110, mapKey: 'mansion', desc: 'As ruínas de uma antiga mansão de Cinnabar escondem corredores e laboratórios esquecidos.', difficulty: 'hard', reward: '₽ 800-1800', color: 'linear-gradient(135deg,#2a1a1a,#1a1010)' },
+      { name: 'Esgoto Industrial', icon: '☣️', imgId: 88, mapKey: 'industrial_sewer', desc: 'Um labirinto de canais e tubulações tomado por Pokémon venenosos e roedores.', difficulty: 'medium', reward: '₽ 220-340', color: 'linear-gradient(135deg,#34402b,#171d16)' },
       { name: 'Vulcão da Ilha de Cinnabar', icon: '🌋', imgId: 126, mapKey: 'cinnabar_volcano', desc: 'Uma região vulcânica de lava incandescente, rochas escurecidas e calor intenso.', difficulty: 'hard', reward: '₽ 900-1800', color: 'linear-gradient(135deg,#3b1b16,#1f100d)' },
       { name: 'Victory Road', icon: '⛰️', imgId: 76, mapKey: 'victory', desc: 'Uma rota montanhosa desafiadora que leva aos portões da Liga Pokémon.', difficulty: 'extreme', reward: '₽ 1500-3000', color: 'linear-gradient(135deg,#2a2a3d,#151520)' },
       { name: 'Cerulean Cave', icon: '💎', imgId: 150, mapKey: 'cerulean', desc: 'Uma caverna remota e profunda, repleta de cristais e caminhos inexplorados.', difficulty: 'extreme', reward: '₽ 2000-5000', color: 'linear-gradient(135deg,#1a1a2e,#0a0a15)' }
@@ -3992,6 +4209,8 @@
     const DUNGEON_MONEY_REWARDS = {
       viridian: { min: 100, max: 180, minLevel: 3, maxLevel: 12 },
       mt_moon: { min: 140, max: 240, minLevel: 8, maxLevel: 17 },
+      route4: { min: 180, max: 300, minLevel: 10, maxLevel: 18 },
+      diglett_cave: { min: 240, max: 300, minLevel: 29, maxLevel: 31 },
       route24: { min: 180, max: 320, minLevel: 14, maxLevel: 34 },
       rock_tunnel: { min: 200, max: 340, minLevel: 17, maxLevel: 26 },
       power: { min: 300, max: 480, minLevel: 30, maxLevel: 50 },
@@ -3999,6 +4218,7 @@
       safari: { min: 250, max: 420, minLevel: 28, maxLevel: 50 },
       seafoam: { min: 380, max: 560, minLevel: 40, maxLevel: 60 },
       mansion: { min: 350, max: 540, minLevel: 45, maxLevel: 66 },
+      industrial_sewer: { min: 220, max: 340, minLevel: 25, maxLevel: 38 },
       cinnabar_volcano: { min: 420, max: 640, minLevel: 52, maxLevel: 82 },
       victory: { min: 540, max: 780, minLevel: 65, maxLevel: 88 },
       cerulean: { min: 650, max: 950, minLevel: 78, maxLevel: 100 }
@@ -4091,11 +4311,13 @@
       { id: 'elite_5', name: 'Desafio da Elite', icon: '&#128081;', desc: 'Venca 5 combates na Elite Four.', type: 'battle_in', targetValue: 'Elite Four', target: 5, money: 5000, xp: 1600, unlock: 'gym_rest', color: '#a855f722' },
       { id: 'badges_all', name: 'Orgulho de Kanto', icon: '&#129351;', desc: 'Conquiste as 8 insignias de Kanto.', type: 'badges', target: 8, money: 10000, xp: 3000, unlock: 'gym_rest', color: '#a855f722' }
     );
+    MISSIONS.push({ id: 'dojo_chuck_reward', name: 'Desafio do Mestre do Dojo', icon: '&#129354;', desc: 'Depois de derrotar Chuck, escolha um Pok?mon: Hitmonlee ou Hitmonchan.', type: 'dojo_chuck_reward', target: 1, money: 0, xp: 0, unlock: null, color: '#ef444422' });
     Object.assign(MISSIONS.find(m => m.id === 'silph'), { name: 'Libertar a Silph Co.', desc: 'Derrote 3 treinadores da Equipe Rocket na Silph Co.', type: 'battle_in', targetValue: 'Silph Co.', target: 3 });
     MISSIONS.forEach(m => {
       if (!(m.money > 0)) m.money = m.badgeReward ? 1500 : 300;
       if (!(m.xp > 0)) m.xp = Math.max(150, Math.floor(m.money * 0.3));
     });
+    Object.assign(MISSIONS.find(m => m.id === 'dojo_chuck_reward'), { money: 0, xp: 0 });
 
     let activeMissionTab = 'open';
 
@@ -4105,6 +4327,7 @@
       if (player.missions.completed.includes(id)) return 'done';
       const m = MISSIONS.find(x => x.id === id);
       if (!m) return 'locked';
+      if (id === 'dojo_chuck_reward' && !player.dojoDefeated?.includes('dojo_kiyo')) return 'locked';
       if (m.unlock && !player.missions.completed.includes(m.unlock)) return 'locked';
       if (player.missions.active.includes(id)) return 'active';
       return 'available';
@@ -4392,6 +4615,7 @@
       if (id === 'help_bill' &&
           (player.billIntroStep !== 8 || !player.billTicketRewardClaimed || getItemQty('ss_ticket') < 1)) return false;
       if (id === 'parcel' && (player.missions.progress.parcel < 1 || getItemQty('parcelbox') < 1)) return false;
+      if (id === 'dojo_chuck_reward' && !player.dojoRewardClaimed) return false;
       // Must be unlocked
       if (m.unlock && !player.missions.completed.includes(m.unlock)) return false;
       const prog = getMissionProgress(m);
@@ -4417,7 +4641,7 @@
       const accountLevelsGained = awardAccountExperience(xpReward);
       updateStatsUI();
       saveGame();
-      showToast('Miss\u00e3o conclu\u00edda: ' + m.name + (legacyRewardAlreadyClaimed ? '' : ' (+\u20bd ' + m.money.toLocaleString('pt-BR') + ')') + ' (+' + xpReward.toLocaleString('pt-BR') + ' XP de conta' + (accountLevelsGained ? ', Nv. ' + player.level : '') + ') \u{1F389}');
+      showToast(id === 'dojo_chuck_reward' ? `Miss\u00e3o conclu\u00edda: ${m.name}. Voc\u00ea escolheu ${player.dojoRewardChoice}!` : 'Miss\u00e3o conclu\u00edda: ' + m.name + (legacyRewardAlreadyClaimed ? '' : ' (+\u20bd ' + m.money.toLocaleString('pt-BR') + ')') + ' (+' + xpReward.toLocaleString('pt-BR') + ' XP de conta' + (accountLevelsGained ? ', Nv. ' + player.level : '') + ') \u{1F389}');
       renderMissions();
       if (typeof refreshProfileUI === 'function') refreshProfileUI();
       return true;
@@ -4492,19 +4716,83 @@
       updateStatsUI();
     }
 
+    function openDojoRewardChoice() {
+      if (!player || getMissionState('dojo_chuck_reward') !== 'active' || player.dojoRewardClaimed) return;
+      document.getElementById('dojoRewardOverlay').classList.add('active');
+    }
+
+    function closeDojoRewardChoice() {
+      document.getElementById('dojoRewardOverlay')?.classList.remove('active');
+    }
+
+    async function chooseDojoRewardPokemon(pokemonId) {
+      const choices = { 106: 'Hitmonlee', 107: 'Hitmonchan' };
+      const pokemonName = choices[Number(pokemonId)];
+      if (!pokemonName || !player || getMissionState('dojo_chuck_reward') !== 'active' || player.dojoRewardClaimed) return;
+      const buttons = [...document.querySelectorAll('.dojo-reward-option')];
+      buttons.forEach(button => { button.disabled = true; });
+      try {
+        const reward = await adminBuildPokemonFromCatalog({ id: Number(pokemonId), name: pokemonName }, 30);
+        ensurePC();
+        let destination = 'equipe';
+        if (player.party.length < 6) {
+          player.party.push(reward);
+          if (!player.poke || player.poke.hp <= 0) player.poke = reward;
+          onMissionEvent('party_changed', player.party.length);
+        } else {
+          const box = depositToPC(reward);
+          if (box < 0) throw new Error('Equipe e PC cheios. Libere um espaco e tente novamente.');
+          destination = `Box ${box + 1} do PC`;
+        }
+        markPokedex(reward.id, true);
+        player.dojoRewardClaimed = true;
+        player.dojoRewardChoice = pokemonName;
+        player.missions.progress.dojo_chuck_reward = 1;
+        if (!tryCompleteMission('dojo_chuck_reward')) throw new Error('Nao foi possivel concluir a missao. Tente novamente.');
+        closeDojoRewardChoice();
+        refreshPartyUI();
+        updateStatsUI();
+        renderPC();
+        renderMissions();
+        saveGame();
+        showToast(`${pokemonName} foi adicionado a ${destination}!`);
+      } catch (error) {
+        buttons.forEach(button => { button.disabled = false; });
+        showToast(error.message || 'Nao foi possivel receber a recompensa.', 'error');
+      }
+    }
+
     function setMissionTab(tab) {
       activeMissionTab = tab === 'completed' ? 'completed' : 'open';
       renderMissions();
+    }
+
+    function syncDojoRewardMission() {
+      if (!player) return;
+      if (!player.missions) player.missions = { completed: [], progress: {}, active: [] };
+      if (!Array.isArray(player.missions.completed)) player.missions.completed = [];
+      if (!Array.isArray(player.missions.active)) player.missions.active = [];
+      if (!player.missions.progress) player.missions.progress = {};
+      const id = 'dojo_chuck_reward';
+      if (player.dojoDefeated?.includes('dojo_kiyo') && !player.dojoRewardClaimed && !player.missions.completed.includes(id)) {
+        if (!player.missions.active.includes(id)) player.missions.active.push(id);
+        player.missions.progress[id] = 1;
+      }
     }
 
     function renderMissions() {
       const ml = document.getElementById('missionsList');
       if (!ml || !player) return;
       if (!player.missions) player.missions = { completed: [], progress: {}, active: [] };
+      syncDojoRewardMission();
       const label = { available: 'Dispon\u00edvel', active: 'Em andamento', locked: 'Bloqueada', done: 'Conclu\u00edda' };
       const cls = { available: 'status-available', active: 'status-available', locked: 'status-locked', done: 'status-available' };
       const completed = MISSIONS.filter(m => getMissionState(m.id) === 'done');
-      const open = MISSIONS.filter(m => getMissionState(m.id) !== 'done');
+      const missionOrder = (a, b) => {
+        const rank = { active: 0, available: 1, locked: 2 };
+        return rank[getMissionState(a.id)] - rank[getMissionState(b.id)];
+      };
+      const open = MISSIONS.filter(m => getMissionState(m.id) !== 'done').sort(missionOrder);
       const openTab = document.getElementById('missionTabOpen');
       const completedTab = document.getElementById('missionTabCompleted');
       const openCount = document.getElementById('missionOpenCount');
@@ -4523,6 +4811,7 @@
         let progressTxt = '';
         if (st === 'active' || st === 'done') {
           if (m.type === 'gym') progressTxt = st === 'done' ? 'Ins\u00edgnia obtida' : 'Pendente';
+          else if (m.id === 'dojo_chuck_reward') progressTxt = st === 'active' ? 'Escolha pendente' : '';
           else if (m.type === 'dungeon') progressTxt = prog >= 1 ? 'Conclu\u00eddo' : '0/1';
           else progressTxt = Math.min(prog, need) + '/' + need;
         }
@@ -4532,12 +4821,13 @@
             <div class="mission-icon" style="background:${m.color};">${m.icon}</div>
             <div class="mission-info">
               <h4>${m.name}</h4>
-              <p>${m.desc}${progressTxt && st !== 'done' ? ' \u00b7 <strong>' + progressTxt + '</strong>' : ''}</p>
+              <p>${m.desc}${progressTxt && st !== 'done' ? ' \u00b7 <strong>' + progressTxt + '</strong>' : ''}${m.id === 'dojo_chuck_reward' && player.dojoRewardChoice ? ' <strong>Recompensa escolhida: ' + escapeHTML(player.dojoRewardChoice) + '</strong>' : ''}</p>
             </div>
             <div class="mission-right">
               <span class="status-tag ${cls[st]}">${label[st]}</span>
-              <span class="reward" style="font-size:0.75rem;">+${Number(m.xp).toLocaleString('pt-BR')} XP \u00b7 \u20bd ${Number(m.money).toLocaleString('pt-BR')}</span>
+              <span class="reward" style="font-size:0.75rem;">${m.id === 'dojo_chuck_reward' ? 'Escolha 1: Hitmonlee ou Hitmonchan' : `+${Number(m.xp).toLocaleString('pt-BR')} XP \u00b7 \u20bd ${Number(m.money).toLocaleString('pt-BR')}`}</span>
               ${st === 'available' ? `<button type="button" class="mission-accept-button" onclick="acceptMission('${m.id}')">Aceitar</button>` : ''}
+              ${st === 'active' && m.id === 'dojo_chuck_reward' ? `<button type="button" class="mission-accept-button" onclick="openDojoRewardChoice()">Escolher Pok?mon</button>` : ''}
               ${st === 'active' && m.id === 'gym_brock' ? `<button type="button" class="mission-accept-button" onclick="openBrockIntro()">Falar com Brock</button>` : ''}
               ${st === 'active' && m.type === 'talk' ? `<button type="button" class="mission-accept-button" onclick="${m.id === 'oak_talk' ? 'openOakIntro()' : m.id === 'help_bill' ? 'openBillIntro()' : m.id === 'parcel' ? "switchPanel('market')" : `tryCompleteMission('${m.id}')`}">${m.id === 'oak_talk' || m.id === 'help_bill' ? 'Continuar conversa' : m.id === 'parcel' ? 'Ir ao Market' : 'Concluir'}</button>` : ''}
             </div>
@@ -4633,6 +4923,163 @@
 
     async function enterAuthenticatedGame() {
       await beginAccountGame();
+      if (document.getElementById('dashboard')?.classList.contains('active')) openDailyLoginRewardIfAvailable();
+    }
+
+    const DAILY_LOGIN_REWARDS = [
+      { short: '₽500', title: '500 Pokédollars', detail: 'Um pequeno incentivo para sua jornada.', icons: ['assets/daily-money.svg'], money: 500 },
+      { short: '2 bolas', title: '2 Pokébolas', detail: 'Mais uma chance de capturar novos Pokémon.', icons: ['item:balls'], items: { balls: 2 } },
+      { short: 'Poção', title: '1 Poção', detail: 'Recupere 25 HP de um Pokémon.', icons: ['item:potions'], items: { potions: 1 } },
+      { short: '₽1 mil', title: '1.000 Pokédollars', detail: 'Uma ajuda extra para comprar itens.', icons: ['assets/daily-money.svg'], money: 1000 },
+      { short: '3 BP', title: '3 BP', detail: 'Pontos de Batalha para gastar no Poké Market.', icons: ['assets/daily-bp.svg'], battlePoints: 3 },
+      { short: '1 PC', title: '1 PokeCoin', detail: 'Uma PokeCoin para usar no Poké Market.', icons: ['assets/daily-pokecoin.svg'], pokeCoins: 1 },
+      { short: '₽2 mil + 5 BP', title: '2.000 Pokédollars + 5 BP', detail: 'Prêmio especial por completar os sete dias.', icons: ['assets/daily-money.svg', 'assets/daily-bp.svg'], money: 2000, battlePoints: 5 }
+    ];
+    let dailyLoginClaimInProgress = false;
+
+    function getDailyLoginDateKey(date = new Date()) {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).formatToParts(date).reduce((result, part) => {
+        if (part.type !== 'literal') result[part.type] = part.value;
+        return result;
+      }, {});
+      return `${parts.year}-${parts.month}-${parts.day}`;
+    }
+
+    function dailyLoginDayNumber(dateKey) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateKey || ''))) return NaN;
+      const [year, month, day] = dateKey.split('-').map(Number);
+      return Math.floor(Date.UTC(year, month - 1, day) / 86400000);
+    }
+
+    function dailyLoginIconHTML(reward, className = '') {
+      const icons = reward.icons || [];
+      return `<span class="${className}">${icons.map(icon => {
+        if (icon.startsWith('item:')) {
+          const key = icon.slice(5);
+          const src = ITEM_SPRITE[key] || ITEM_SPRITE.balls;
+          const fallback = ITEM_SPRITE_FB[key] || ITEM_SPRITE_FB.balls;
+          return `<img src="${escapeHTML(src)}" alt="" data-fallback-src="${escapeHTML(fallback)}" onerror="handleItemIconError(this)" />`;
+        }
+        return `<img src="${escapeHTML(icon)}" alt="" />`;
+      }).join('')}</span>`;
+    }
+
+    function renderWeeklyLoginRewards() {
+      const daysEl = document.getElementById('weeklyLoginDays');
+      if (!daysEl || !player) return;
+      const today = getDailyLoginDateKey();
+      const alreadyClaimed = player.dailyLoginLastClaimDate === today;
+      const claimInfo = getDailyLoginClaimInfo();
+      const streak = alreadyClaimed
+        ? Math.max(1, Math.floor(Number(player.dailyLoginStreak) || 1))
+        : (claimInfo?.streak || 1);
+      const currentDay = alreadyClaimed
+        ? ((streak - 1) % DAILY_LOGIN_REWARDS.length) + 1
+        : (claimInfo?.day || 1);
+      const status = document.getElementById('weeklyLoginStatus');
+      if (status) status.textContent = alreadyClaimed
+        ? `Prêmio resgatado hoje · Sequência de ${streak} ${streak === 1 ? 'dia' : 'dias'}`
+        : `Sua recompensa de hoje está pronta para resgate`;
+      const reward = DAILY_LOGIN_REWARDS[currentDay - 1];
+      const earnedDays = alreadyClaimed ? currentDay : currentDay - 1;
+      const progressText = document.getElementById('weeklyLoginProgressText');
+      const progressFill = document.getElementById('weeklyLoginProgressFill');
+      const progressBar = progressFill?.parentElement;
+      if (progressText) progressText.textContent = `${earnedDays}/7 dias`;
+      if (progressFill) progressFill.style.width = `${Math.round(earnedDays / 7 * 100)}%`;
+      if (progressBar) progressBar.setAttribute('aria-valuenow', String(earnedDays));
+      const featuredIcon = document.getElementById('weeklyLoginFeaturedIcon');
+      const featuredLabel = document.getElementById('weeklyLoginFeaturedLabel');
+      const featuredTitle = document.getElementById('weeklyLoginFeaturedTitle');
+      const featuredDetail = document.getElementById('weeklyLoginFeaturedDetail');
+      if (featuredIcon) featuredIcon.innerHTML = dailyLoginIconHTML(reward);
+      if (featuredLabel) featuredLabel.textContent = alreadyClaimed ? `Dia ${currentDay} · resgatado` : `Dia ${currentDay} · recompensa de hoje`;
+      if (featuredTitle) featuredTitle.textContent = reward.title;
+      if (featuredDetail) featuredDetail.textContent = alreadyClaimed ? 'Volte amanhã para continuar sua sequência.' : reward.detail;
+      daysEl.innerHTML = DAILY_LOGIN_REWARDS.map((reward, index) => {
+        const day = index + 1;
+        const dayClass = day === currentDay ? (alreadyClaimed ? 'claimed' : 'active') : day < currentDay ? 'claimed' : 'upcoming';
+        const stateLabel = day < currentDay || (day === currentDay && alreadyClaimed) ? 'Resgatado' : day === currentDay ? 'Hoje' : 'Próximo';
+        return `<div class="daily-login-day ${dayClass}" title="Dia ${day}: ${escapeHTML(reward.title)}"><span class="weekly-login-day-label">Dia ${day}</span>${dailyLoginIconHTML(reward, 'daily-login-day-icons')}<strong>${escapeHTML(reward.short)}</strong><small class="weekly-login-day-state">${stateLabel}</small></div>`;
+      }).join('');
+      const button = document.getElementById('weeklyLoginClaimButton');
+      if (button) {
+        button.disabled = alreadyClaimed;
+        button.textContent = alreadyClaimed ? 'Resgatado hoje' : 'Resgatar recompensa';
+      }
+    }
+
+    function getDailyLoginClaimInfo() {
+      if (!player) return null;
+      const today = getDailyLoginDateKey();
+      const lastDate = typeof player.dailyLoginLastClaimDate === 'string' ? player.dailyLoginLastClaimDate : '';
+      if (lastDate === today) return { alreadyClaimed: true, today };
+      const yesterday = dailyLoginDayNumber(today) - 1;
+      const streak = dailyLoginDayNumber(lastDate) === yesterday
+        ? Math.max(0, Math.floor(Number(player.dailyLoginStreak) || 0)) + 1
+        : 1;
+      const day = ((streak - 1) % DAILY_LOGIN_REWARDS.length) + 1;
+      return { alreadyClaimed: false, today, streak, day, reward: DAILY_LOGIN_REWARDS[day - 1] };
+    }
+
+    function openDailyLoginRewardIfAvailable() {
+      const overlay = document.getElementById('dailyLoginOverlay');
+      const info = getDailyLoginClaimInfo();
+      if (!overlay || !info || info.alreadyClaimed || dailyLoginClaimInProgress) return;
+      document.getElementById('dailyLoginStreak').textContent = `Sequência: ${info.streak} ${info.streak === 1 ? 'dia' : 'dias'} · Recompensa do dia ${info.day}`;
+      document.getElementById('dailyLoginRewardIcon').innerHTML = dailyLoginIconHTML(info.reward);
+      document.getElementById('dailyLoginRewardTitle').textContent = info.reward.title;
+      document.getElementById('dailyLoginRewardDetail').textContent = info.reward.detail;
+      document.getElementById('dailyLoginWeek').innerHTML = DAILY_LOGIN_REWARDS.map((reward, index) =>
+        `<div class="daily-login-day${index + 1 === info.day ? ' active' : ''}">Dia ${index + 1}${dailyLoginIconHTML(reward, 'daily-login-day-icons')}<strong>${escapeHTML(reward.short)}</strong></div>`
+      ).join('');
+      const button = document.getElementById('claimDailyLoginButton');
+      button.disabled = false;
+      button.textContent = 'Resgatar recompensa';
+      overlay.classList.add('active');
+      button.focus({ preventScroll: true });
+    }
+
+    function closeDailyLoginReward() {
+      document.getElementById('dailyLoginOverlay')?.classList.remove('active');
+    }
+
+    async function claimDailyLoginReward() {
+      const button = document.getElementById('claimDailyLoginButton');
+      const info = getDailyLoginClaimInfo();
+      if (!info || info.alreadyClaimed || dailyLoginClaimInProgress) return;
+      dailyLoginClaimInProgress = true;
+      button.disabled = true;
+      button.textContent = 'Salvando recompensa…';
+      const previousPlayer = JSON.parse(JSON.stringify(player));
+      const reward = info.reward;
+      player.dailyLoginLastClaimDate = info.today;
+      player.dailyLoginStreak = info.streak;
+      player.money = Math.max(0, Number(player.money) || 0) + (Number(reward.money) || 0);
+      player.battlePoints = Math.max(0, Number(player.battlePoints) || 0) + (Number(reward.battlePoints) || 0);
+      player.pokeCoins = Math.max(0, Number(player.pokeCoins) || 0) + (Number(reward.pokeCoins) || 0);
+      Object.entries(reward.items || {}).forEach(([key, quantity]) => setItemQty(key, getItemQty(key) + quantity));
+      try {
+        updateStatsUI();
+        renderBag();
+        renderWeeklyLoginRewards();
+        await flushGameSave();
+        closeDailyLoginReward();
+        showToast(`Recompensa diária resgatada: ${reward.title}!`);
+      } catch (error) {
+        player = previousPlayer;
+        updateStatsUI();
+        renderBag();
+        renderWeeklyLoginRewards();
+        button.disabled = false;
+        button.textContent = 'Tentar novamente';
+        console.error('[Daily login] Falha ao salvar recompensa:', error);
+        showToast('Não foi possível salvar a recompensa. Tente novamente.', 'error');
+      } finally {
+        dailyLoginClaimInProgress = false;
+      }
     }
 
     (function initAuth() {
@@ -4844,7 +5291,7 @@
         name, gender: selectedGender, originRegion: region, starter,
         rivalName: '', oakIntroStep: 0, oakIntroFinished: false, oakIntroRewardClaimed: false,
         billIntroStep: 0, billIntroVersion: 2, billTicketRewardClaimed: false, billMissionRewardClaimed: false,
-        money: 3000, battlePoints: 0, pokeCoins: 0, accountXp: 0, level: 1, badges: 0, missionsDone: 0, potions: 5, balls: 8, centerCards: 5,
+        money: 3000, battlePoints: 0, pokeCoins: 0, dailyLoginLastClaimDate: null, dailyLoginStreak: 0, accountXp: 0, level: 1, badges: 0, missionsDone: 0, potions: 5, balls: 8, centerCards: 5,
         antidote: 2, antiparalyze: 2, antiburn: 2,
         badgesList: [],
         party: [starterPokemon],
@@ -4862,7 +5309,10 @@
       markPokedex(starter.id, true);
       showToast('Personagem criado! Bem-vindo a Kanto! 🎉');
       saveGame();
-      setTimeout(enterDashboard, 700);
+      setTimeout(() => {
+        enterDashboard();
+        openDailyLoginRewardIfAvailable();
+      }, 700);
     });
     document.getElementById('backToAuth').addEventListener('click', () => showAuthScreen('authScreen'));
 
@@ -4947,7 +5397,9 @@
       chesto: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/chesto.png',
       rawst: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/rawst.png',
       cherri: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/cheri.png',
-      rarecandy: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/rare-candy.png'
+      rarecandy: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/rare-candy.png',
+      naturebox: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/adamant-mint.png',
+      bottlecap: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/bottle-cap.png'
     };
     const ITEM_SPRITE_FB = {
       balls: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png',
@@ -5012,7 +5464,9 @@
       chesto: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/chesto-berry.png',
       rawst: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rawst-berry.png',
       cherri: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/cheri-berry.png',
-      rarecandy: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png'
+      rarecandy: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png',
+      naturebox: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/adamant-mint.png',
+      bottlecap: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/bottle-cap.png'
     };
     function itemIcon(key, cls, fallbackIcon = '🎒') {
       const src = ITEM_SPRITE[key] || ITEM_SPRITE.balls;
@@ -5128,6 +5582,8 @@
         items: [
           { key: 'ss_ticket', name: 'S.S. TICKET', desc: 'Ingresso para embarcar no navio de luxo S.S. Anne, em Vermilion.' },
           { key: 'rarecandy', name: 'Doce Raro', sprite: 'rarecandy', desc: 'Sobe 1 nível' },
+          { key: 'naturebox', name: 'Caixa de Nature', sprite: 'naturebox', desc: 'Escolha uma natureza para alterar os efeitos de um Pokémon.' },
+          { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', desc: 'Escolha um atributo e maximize seu IV para 31.' },
           { key: 'parcelbox', name: 'Caixa da Parcel', desc: 'Encomenda do Professor Carvalho' }
         ]
       }
@@ -5196,7 +5652,7 @@
         silk_scarf: 0, silver_powder: 0, hard_stone: 0, sharp_beak: 0, poison_barb: 0,
         spell_tag: 0, dragon_fang: 0, never_melt_ice: 0, metal_coat: 0, black_glasses: 0,
         amulet_coin: 0, shell_bell: 0, macho_brace: 0,
-        rarecandy: 0, parcelbox: 0, ss_ticket: 0
+        rarecandy: 0, naturebox: 0, bottlecap: 0, parcelbox: 0, ss_ticket: 0
       };
       [...EXTRA_MEDICINE_ITEMS, ...EXTRA_BATTLE_ITEMS, ...(EXTRA_TM_ITEMS || [])].forEach(item => { if (defaults[item.key] === undefined) defaults[item.key] = 0; });
       Object.keys(HELD_ITEM_INFO).forEach(key => { if (defaults[key] === undefined) defaults[key] = 0; });
@@ -5376,12 +5832,16 @@
     function applySelfDamage(pokemon, damage) {
       const hpKey = Number.isFinite(pokemon?.currentHp) ? 'currentHp' : 'hp';
       const hp = pokemon?.[hpKey] || 0;
-      if (pokemon?.heldItem === 'focus_band' && hp > 1 && damage >= hp && Math.random() < 0.1) {
+      const shielded = pokemon === battle?.enemy && battle.isDailyBoss;
+      const absorbedByShield = shielded ? Math.min(battle.enemy.shieldHp || 0, damage) : 0;
+      const hpDamage = Math.max(0, damage - absorbedByShield);
+      if (pokemon?.heldItem === 'focus_band' && hp > 1 && hpDamage >= hp && Math.random() < 0.1) {
         pokemon[hpKey] = 1;
         if (pokemon === player?.poke) battle.playerHp = 1;
         return `${pokemon.name} resistiu ao dano com Focus Band!`;
       }
-      pokemon[hpKey] = Math.max(0, hp - damage);
+      if (pokemon === battle?.enemy) applyEnemyDamage(damage);
+      else pokemon[hpKey] = Math.max(0, hp - damage);
       if (pokemon === player?.poke) battle.playerHp = pokemon.hp;
       return '';
     }
@@ -5612,7 +6072,9 @@
       { key: 'waterstone', name: 'Pedra da Água', kind: 'evolution' },
       { key: 'thunderstone', name: 'Pedra do Trovão', kind: 'evolution' },
       { key: 'leafstone', name: 'Pedra da Folha', kind: 'evolution' },
-      { key: 'moonstone', name: 'Pedra da Lua', kind: 'evolution' }
+      { key: 'moonstone', name: 'Pedra da Lua', kind: 'evolution' },
+      { key: 'naturebox', name: 'Caixa de Nature', sprite: 'naturebox', kind: 'natureBox' },
+      { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', kind: 'ivMax' }
     ];
 
     const STONE_EVOLUTIONS = {
@@ -5657,6 +6119,8 @@
       if (item.kind === 'ppUp') return pokemon.hp > 0 && pokemon.moves.some(move => (move.ppUps || 0) < 3);
       if (item.kind === 'ppMax') return pokemon.hp > 0 && pokemon.moves.some(move => (move.ppUps || 0) < 3);
       if (item.kind === 'mint') return pokemon.hp > 0 && pokemon.nature !== item.nature && pokemon.natureMint !== item.nature;
+      if (item.kind === 'natureBox') return pokemon.hp > 0;
+      if (item.kind === 'ivMax') { ensurePokemonTraits(pokemon); return pokemon.hp > 0 && ['hp','attack','defense','specialAttack','specialDefense','speed'].some(stat => pokemon.ivs[stat] < 31); }
       if (item.kind === 'statusCure') return pokemon.hp > 0 && itemCuresStatus(item.key, pokemon);
       if (item.key === 'fullrestore' || item.kind === 'fullHeal') {
         return pokemon.hp > 0 && (pokemon.hp < pokemon.maxHp || Boolean(pokemon.status));
@@ -5919,6 +6383,17 @@
         showToast(`${pokemon.name} agora recebe os efeitos da natureza ${item.nature}.`);
         return;
       }
+      if (item.kind === 'natureBox') {
+        const root = document.getElementById('bagUseTarget');
+        root.innerHTML = `<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;"><div style="font-weight:700;margin-bottom:8px;">Escolha a nova natureza para ${escapeHTML(pokemon.name)}:</div><div style="display:flex;flex-wrap:wrap;gap:7px;">${NATURES.map(nature=>`<button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="applyNatureBox(${partyIndex},'${nature.name}')">${nature.name}${nature.up?` · +${nature.up}`:''}${nature.down?` / −${nature.down}`:''}</button>`).join('')}<button type="button" class="btn btn-secondary" onclick="cancelBagItemUse()">Cancelar</button></div></div>`;
+        return;
+      }
+      if (item.kind === 'ivMax') {
+        const labels={hp:'HP',attack:'Ataque',defense:'Defesa',specialAttack:'Ataque Especial',specialDefense:'Defesa Especial',speed:'Velocidade'};
+        const root=document.getElementById('bagUseTarget');
+        root.innerHTML=`<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;"><div style="font-weight:700;margin-bottom:8px;">Escolha o IV que a Bottle Cap vai maximizar para ${escapeHTML(pokemon.name)}:</div><div style="display:flex;flex-wrap:wrap;gap:8px;">${Object.entries(labels).filter(([stat])=>pokemon.ivs?.[stat]<31).map(([stat,label])=>`<button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="applyBottleCap(${partyIndex},'${stat}')">${label} · IV ${pokemon.ivs?.[stat]||0} → 31</button>`).join('')}<button type="button" class="btn btn-secondary" onclick="cancelBagItemUse()">Cancelar</button></div></div>`;
+        return;
+      }
       if (item.kind === 'level') {
         const expNeeded = Math.max(0, getExperienceForLevel(pokemon.level + 1, pokemon.growthRate) - pokemon.exp);
         const gainedLevels = awardPokemonExperience(pokemon, expNeeded);
@@ -5992,6 +6467,22 @@
           : item.kind === 'revive'
             ? `${pokemon.name} voltou com ${pokemon.hp} HP!`
             : `${item.name} usado em ${pokemon.name}!`);
+    }
+
+    function applyNatureBox(partyIndex,natureName) {
+      const pokemon=player?.party?.[partyIndex];
+      if(!pokemon||getItemQty('naturebox')<1||!NATURES.some(entry=>entry.name===natureName))return;
+      pokemon.natureMint=natureName; decItemQty('naturebox',1); cancelBagItemUse(); renderBag(); refreshPartyUI(); saveGame();
+      showToast(`${pokemon.name} agora recebe os efeitos da natureza ${natureName}.`);
+    }
+
+    function applyBottleCap(partyIndex,stat) {
+      const pokemon=player?.party?.[partyIndex];
+      if(!pokemon||getItemQty('bottlecap')<1||!['hp','attack','defense','specialAttack','specialDefense','speed'].includes(stat))return;
+      ensurePokemonTraits(pokemon); if(pokemon.ivs[stat]>=31)return;
+      const label={hp:'HP',attack:'Ataque',defense:'Defesa',specialAttack:'Ataque Especial',specialDefense:'Defesa Especial',speed:'Velocidade'}[stat];
+      pokemon.ivs[stat]=31; decItemQty('bottlecap',1); cancelBagItemUse(); renderBag(); refreshPartyUI(); saveGame();
+      showToast(`Bottle Cap usada: IV de ${label} de ${pokemon.name} agora é 31.`);
     }
 
     function useBagLeppaOnMove(partyIndex, moveName) {
@@ -7148,6 +7639,33 @@
       ]}
     ];
 
+    const DOJO_TRAINERS = [
+      {id:'dojo_yoshi',name:'Yoshi',className:'Lutador iniciante',sprite:'assets/dojo-blackbelt-gen9.png',icon:'??',moneyReward:250,team:[
+        {name:'Mankey',id:56,hp:32,level:17,moves:[{name:'Karate Chop',power:50,type:'Lutador'},{name:'Scratch',power:40,type:'Normal'}]},
+        {name:'Machop',id:66,hp:34,level:20,moves:[{name:'Low Kick',power:45,type:'Lutador'},{name:'Karate Chop',power:50,type:'Lutador'}]}
+      ]},
+      {id:'dojo_kenji',name:'Kenji',className:'Faixa branca',sprite:'assets/dojo-blackbelt-gen6.png',icon:'??',moneyReward:350,team:[
+        {name:'Primeape',id:57,hp:42,level:23,moves:[{name:'Low Kick',power:55,type:'Lutador'},{name:'Fury Swipes',power:45,type:'Normal'}]},
+        {name:'Machoke',id:67,hp:46,level:28,moves:[{name:'Brick Break',power:60,type:'Lutador'},{name:'Rock Tomb',power:50,type:'Pedra'}]}
+      ]},
+      {id:'dojo_mako',name:'Mako',className:'Faixa marrom',sprite:'assets/dojo-blackbelt-gen4.png',icon:'??',moneyReward:450,team:[
+        {name:'Machoke',id:67,hp:52,level:31,moves:[{name:'Brick Break',power:65,type:'Lutador'},{name:'Rock Throw',power:50,type:'Pedra'}]},
+        {name:'Hitmontop',id:237,hp:54,level:36,moves:[{name:'Triple Kick',power:60,type:'Lutador'},{name:'Mach Punch',power:45,type:'Lutador'}]}
+      ]},
+      {id:'dojo_ryu',name:'Ryu',className:'Mestre de combate',sprite:'assets/dojo-blackbelt-gen7.png',icon:'??',moneyReward:600,team:[
+        {name:'Mankey',id:56,hp:56,level:36,moves:[{name:'Karate Chop',power:55,type:'Lutador'},{name:'Thrash',power:60,type:'Normal'}]},
+        {name:'Machop',id:66,hp:59,level:38,moves:[{name:'Low Kick',power:60,type:'Lutador'},{name:'Rock Tomb',power:55,type:'Pedra'}]},
+        {name:'Primeape',id:57,hp:63,level:40,moves:[{name:'Cross Chop',power:65,type:'Lutador'},{name:'Thrash',power:65,type:'Normal'}]},
+        {name:'Machoke',id:67,hp:67,level:41,moves:[{name:'Brick Break',power:70,type:'Lutador'},{name:'Rock Slide',power:60,type:'Pedra'}]}
+      ]},
+      {id:'dojo_kiyo',name:'Chuck',className:'Mestre do Dojo',sprite:'assets/dojo-chuck.png',icon:'??',moneyReward:900,team:[
+        {name:'Hitmonchan',id:107,hp:68,level:41,moves:[{name:'Sky Uppercut',power:70,type:'Lutador'},{name:'Ice Punch',power:60,type:'Gelo'}]},
+        {name:'Hitmonlee',id:106,hp:70,level:44,moves:[{name:'High Jump Kick',power:75,type:'Lutador'},{name:'Blaze Kick',power:65,type:'Fogo'}]},
+        {name:'Hitmontop',id:237,hp:74,level:47,moves:[{name:'Triple Kick',power:70,type:'Lutador'},{name:'Rock Slide',power:60,type:'Pedra'}]},
+        {name:'Machamp',id:68,hp:80,level:50,moves:[{name:'Cross Chop',power:80,type:'Lutador'},{name:'Rock Slide',power:65,type:'Pedra'}]},
+        {name:'Annihilape',id:979,hp:84,level:54,moves:[{name:'Rage Fist',power:75,type:'Fantasma'},{name:'Close Combat',power:80,type:'Lutador'}]}
+      ]}
+    ];
     const SS_ANNE_TRAINERS = [
       {id:'anne_sailor_huey',name:'Huey',className:'Marinheiro',portrait:'sailor',moneyReward:180,team:[
         {name:'Horsea',id:116,hp:34,level:16,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Bubble Beam',power:60,type:'Agua'}]},
@@ -7298,7 +7816,7 @@
         {name:'Aerodactyl',id:142,hp:204,level:58,moves:[{name:'Rock Slide',power:75,type:'Pedra'},{name:'Wing Attack',power:60,type:'Voador'}]},
         {name:'Dragonite',id:149,hp:230,level:60,moves:[{name:'Outrage',power:120,type:'Dragao'},{name:'Wing Attack',power:60,type:'Voador'}]}
       ]},
-      {id:'champion_blue',name:'Blue',className:'CampeÃ£o de Kanto',portrait:'blue',moneyReward:20000,team:[
+      {id:'champion_blue',name:'Blue',className:'Campe\u00e3o de Kanto',portrait:'blue',moneyReward:20000,team:[
         {name:'Pidgeot',id:18,hp:225,level:61,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Alakazam',id:65,hp:212,level:59,moves:[{name:'Psychic',power:90,type:'Psiquico'},{name:'Shadow Ball',power:80,type:'Fantasma'}]},
         {name:'Rhydon',id:112,hp:244,level:59,moves:[{name:'Earthquake',power:100,type:'Terra'},{name:'Rock Slide',power:75,type:'Pedra'}]},
@@ -7311,15 +7829,16 @@
     function renderGyms() {
       const grid = document.getElementById('gymsGrid');
       if (!grid) return;
+      const adminMode = isAdminAccount();
       grid.innerHTML = GYMS.map((g, i) => {
         const done = player.badgesList.includes(g.badge);
-        const locked = i > 0 && player.badgesList.length < i;
+        const locked = !adminMode && i > 0 && player.badgesList.length < i;
         const levelCap = getGymLevelCap(g);
         const portrait = g.portrait
           ? `<img src="${g.portrait}" alt="${g.leader}" style="width:80px;height:80px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4));" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><span style="display:none;font-size:2.5rem;">${g.icon}</span>`
           : `<span style="font-size:2.5rem;">${g.icon}</span>`;
         return `
-        <div class="game-card" onclick="${locked ? `showToast('Derrote o ginásio anterior primeiro!','error')` : done ? `showToast('Insígnia ${g.badge} já conquistada!','error')` : `startGymBattle(${i})`}">
+        <div class="game-card" onclick="${adminMode ? `startGymBattle(${i})` : locked ? `showToast('Derrote o ginásio anterior primeiro!','error')` : done ? `showToast('Insígnia ${g.badge} já conquistada!','error')` : `startGymBattle(${i})`}">
           <div class="game-card-header" style="background:${g.color};opacity:${locked?0.5:1};display:flex;align-items:center;justify-content:center;height:110px;">
             ${portrait}
           </div>
@@ -7351,6 +7870,33 @@
       }).join('');
     }
 
+    function getDojoProgress() {
+      const defeated = Array.isArray(player.dojoDefeated) ? player.dojoDefeated : [];
+      let progress = 0;
+      while (progress < DOJO_TRAINERS.length && defeated.includes(DOJO_TRAINERS[progress].id)) progress++;
+      return progress;
+    }
+
+    function renderDojo() {
+      const grid = document.getElementById('dojoGrid');
+      if (!grid) return;
+      if (!Array.isArray(player.dojoDefeated)) player.dojoDefeated = [];
+      const progress = getDojoProgress();
+      document.getElementById('dojoProgress').textContent = `${progress}/${DOJO_TRAINERS.length}`;
+      grid.innerHTML = DOJO_TRAINERS.map((trainer, index) => {
+        const done = index < progress;
+        const unlocked = isAdminAccount() || index === progress;
+        const action = isAdminAccount() || (unlocked && !done)
+          ? `startDojoBattle('${trainer.id}')`
+          : `showToast('${done ? 'Este lutador j\u00e1 foi derrotado.' : 'Derrote o oponente anterior para liberar este lutador.'}','${done ? 'info' : 'error'}')`;
+        const status = isAdminAccount() ? 'Desafiar' : done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
+        return `<div class="game-card" role="button" tabindex="0" onclick="${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}" style="${unlocked ? '' : 'opacity:.62;'}">
+          <div class="game-card-header" style="background:linear-gradient(135deg,#6b3c20,#29170f);height:105px;overflow:hidden;">${trainer.sprite ? `<img src="${trainer.sprite}" alt="${escapeHTML(trainer.name)}" style="height:100%;max-width:100%;object-fit:contain;image-rendering:pixelated;" />` : `<span style="font-size:3rem;">${trainer.icon}</span>`}</div>
+          <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} &middot; ${escapeHTML(trainer.className)}</div><div class="game-card-desc">${trainer.team.length} Pok&eacute;mon &middot; n&iacute;veis ${trainer.team[0].level}-${trainer.team[trainer.team.length-1].level}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':unlocked?'status-available':'status-locked'}">${status}</span><span class="reward">${trainer.moneyReward.toLocaleString('pt-BR')} Pok&eacute;dollar</span></div></div>
+        </div>`;
+      }).join('');
+    }
+
     function getSSAnneProgress() {
       const defeated = Array.isArray(player.ssAnneDefeated) ? player.ssAnneDefeated : [];
       let progress = 0;
@@ -7366,9 +7912,9 @@
       document.getElementById('ssAnneProgress').textContent = `${progress}/${SS_ANNE_TRAINERS.length}`;
       grid.innerHTML = SS_ANNE_TRAINERS.map((trainer,index) => {
         const done = index < progress;
-        const unlocked = index === progress;
-        const action = unlocked ? `startSSAnneBattle('${trainer.id}')` : `showToast('${done ? 'Este treinador já foi derrotado.' : 'Derrote o oponente anterior para liberar este treinador.'}','${done ? 'info' : 'error'}')`;
-        const badge = done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
+        const unlocked = isAdminAccount() || index === progress;
+        const action = isAdminAccount() || (unlocked && !done) ? `startSSAnneBattle('${trainer.id}')` : `showToast('${done ? 'Este treinador já foi derrotado.' : 'Derrote o oponente anterior para liberar este treinador.'}','${done ? 'info' : 'error'}')`;
+        const badge = isAdminAccount() ? 'Desafiar' : done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
         return `<div class="game-card" role="button" tabindex="0" onclick="${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}" style="${unlocked?'':'opacity:.62;'}">
           <div class="game-card-header" style="background:linear-gradient(135deg,#1d4960,#102b3a);height:100px"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png" alt="${escapeHTML(trainer.name)}" style="width:82px;height:82px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:2.6rem">&#x1F6A2;</span></div>
           <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} &middot; ${escapeHTML(trainer.className)}</div><div class="game-card-desc">${trainer.team.length} Pok&eacute;mon &middot; n&iacute;veis ${trainer.team[0].level}-${trainer.team[trainer.team.length-1].level}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':unlocked?'status-available':'status-locked'}">${badge}</span><span class="reward">${trainer.moneyReward.toLocaleString('pt-BR')} Pok&eacute;dollar</span></div></div>
@@ -7391,9 +7937,9 @@
       document.getElementById('silphCoProgress').textContent = `${progress}/${SILPH_CO_TRAINERS.length}`;
       grid.innerHTML = SILPH_CO_TRAINERS.map((trainer, index) => {
         const done = index < progress;
-        const unlocked = index === progress;
-        const action = unlocked ? `startSilphCoBattle('${trainer.id}')` : `showToast('${done ? 'Este treinador já foi derrotado.' : 'Derrote o oponente anterior para liberar este treinador.'}','${done ? 'info' : 'error'}')`;
-        const status = done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
+        const unlocked = isAdminAccount() || index === progress;
+        const action = isAdminAccount() || (unlocked && !done) ? `startSilphCoBattle('${trainer.id}')` : `showToast('${done ? 'Este treinador já foi derrotado.' : 'Derrote o oponente anterior para liberar este treinador.'}','${done ? 'info' : 'error'}')`;
+        const status = isAdminAccount() ? 'Desafiar' : done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
         const isCustomPortrait = trainer.portrait.startsWith('assets/');
         const portraitSrc = isCustomPortrait ? trainer.portrait : `https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png`;
         const portraitScale = isCustomPortrait ? 'transform:scale(1.6);' : '';
@@ -7417,12 +7963,12 @@
       const card = document.getElementById('eliteFourHomeCard');
       const description = document.getElementById('eliteFourHomeDesc');
       if (!card || !description) return;
-      const unlocked = hasAllKantoBadges();
+      const unlocked = isAdminAccount() || hasAllKantoBadges();
       card.style.opacity = unlocked ? '1' : '0.62';
       card.setAttribute('aria-disabled', String(!unlocked));
       description.textContent = unlocked
-        ? 'Desafie Lorelei, Bruno, Agatha, Lance e o CampeÃ£o.'
-        : `InsÃ­gnias de Kanto: ${getKantoBadgeCount()}/8. Conquiste todas para entrar.`;
+        ? 'Desafie Lorelei, Bruno, Agatha, Lance e o Campe\u00e3o.'
+        : `Ins\u00edgnias de Kanto: ${getKantoBadgeCount()}/8. Conquiste todas para entrar.`;
     }
 
     function hasDefeatedSabrinaGym() {
@@ -7433,7 +7979,7 @@
       const card = document.getElementById('silphCoHomeCard');
       const description = document.getElementById('silphCoHomeDesc');
       if (!card || !description) return;
-      const unlocked = hasDefeatedSabrinaGym();
+      const unlocked = isAdminAccount() || hasDefeatedSabrinaGym();
       card.style.opacity = unlocked ? '1' : '0.62';
       card.setAttribute('aria-disabled', String(!unlocked));
       description.textContent = unlocked
@@ -7457,12 +8003,11 @@
       document.getElementById('eliteFourBadges').textContent = `${getKantoBadgeCount()}/8`;
       grid.innerHTML = ELITE_FOUR_TRAINERS.map((trainer,index) => {
         const done = index < progress;
-        const unlocked = index === progress;
-        const action = unlocked
+        const unlocked = isAdminAccount() || index === progress;
+        const action = isAdminAccount() || (unlocked && !done)
           ? `startEliteFourBattle('${trainer.id}')`
           : `showToast('${done ? 'Este desafiante jÃ¡ foi derrotado.' : 'Derrote o desafiante anterior para avanÃ§ar.'}','${done ? 'info' : 'error'}')`;
-        const badge = done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
-        const icon = ['&#x2744;','&#x1F94B;','&#x1F319;','&#x1F409;','&#x1F3C6;'][index];
+        const badge = isAdminAccount() ? 'Desafiar' : done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
         return `<div class="game-card" role="button" tabindex="0" onclick="${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}" style="${unlocked?'':'opacity:.62;'}">
           <div class="game-card-header" style="background:linear-gradient(135deg,#4a3522,#211728);height:110px"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png" alt="${escapeHTML(trainer.name)}" style="width:86px;height:86px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:2.8rem">${icon}</span></div>
           <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} &middot; ${escapeHTML(trainer.className)}</div><div class="game-card-desc">Equipe com ${trainer.team.length} Pok&eacute;mon &middot; n&iacute;veis ${trainer.team[0].level}-${trainer.team[trainer.team.length-1].level}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':unlocked?'status-available':'status-locked'}">${badge}</span><span class="reward">${trainer.moneyReward.toLocaleString('pt-BR')} Pok&eacute;dollar</span></div></div>
@@ -7496,6 +8041,7 @@
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Dinheiro</span><span style="font-weight:600;">₽ ${player.money.toLocaleString('pt-BR')}</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Poções</span><span style="font-weight:600;">${player.potions}</span></div>
       `;
+      renderWeeklyLoginRewards();
 
       document.getElementById('pokemonTeam').innerHTML = player.poke ? `
         <div class="game-card">
@@ -7698,8 +8244,8 @@
     function switchPanel(id) {
       if (id === 'item-catalog' && !isAdminAccount()) { showToast('Cat\u00e1logo de Itens dispon\u00edvel apenas para o administrador.', 'error'); id = 'home'; }
       if (id === 'admin' && !isAdminAccount()) { showToast('Acesso restrito ao administrador.', 'error'); id = 'home'; }
-      if (id === 'elite-four' && !hasAllKantoBadges()) { showToast(`Conquiste todas as 8 Ins\u00edgnias de Kanto para desafiar a Elite Four (${getKantoBadgeCount()}/8).`, 'error'); id = 'home'; }
-      if (id === 'silph-co' && !hasDefeatedSabrinaGym()) { showToast('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.', 'error'); id = 'home'; }
+      if (id === 'elite-four' && !isAdminAccount() && !hasAllKantoBadges()) { showToast(`Conquiste todas as 8 Ins\u00edgnias de Kanto para desafiar a Elite Four (${getKantoBadgeCount()}/8).`, 'error'); id = 'home'; }
+      if (id === 'silph-co' && !isAdminAccount() && !hasDefeatedSabrinaGym()) { showToast('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.', 'error'); id = 'home'; }
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       const panel = document.getElementById('panel-'+id);
       if (panel) panel.classList.add('active');
@@ -7720,6 +8266,8 @@
       if (id === 'social') socialRefresh();
       if (id === 'gyms') renderGyms();
       if (id === 'battle-tower') renderBattleTower();
+      if (id === 'dojo') renderDojo();
+      if (id === 'daily-boss') renderDailyBosses();
       if (id === 'ss-anne') renderSSAnne();
       if (id === 'silph-co') renderSilphCo();
       if (id === 'elite-four') renderEliteFour();
@@ -8141,8 +8689,8 @@
         <div class="battle-bg"></div><div class="battle-sky"></div><div class="battle-ground"></div>
         <div class="pvp-room-toolbar"><span>Sala <strong class="pvp-code" style="font-size:1rem">${escapeHTML(room.room_code)}</strong> · Turno ${turn}</span><span class="pvp-room-clock" id="pvpTurnClock">45s</span><button class="btn btn-secondary" onclick="pvpLeaveRoom()">Sair da batalha</button></div>
         <div class="battle-field">
-          <div class="battle-enemy"><div class="enemy-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.guest_name:room.host_name)}</div>${pvpBattleInfo(opponent,foeHp[foeActive],'enemy-info',null,null,foeStatus[foeActive])}</div><div class="sprite-stage enemy-stage ${foeFainted?'pvp-fainted-stage':''}" ${foeFainted?'aria-hidden="true"':''}>${foeFainted?'':'<div class="sprite-shadow"></div>'}${foeFainted?'':`<img class="enemy-sprite${opponent.id===812?' rillaboom-battle-sprite':''}" src="${SPRITE_ANIM_POKEMON(opponent)}" alt="${escapeHTML(opponent.name)}" onerror="this.onerror=null;this.src='${SPRITE_FRONT(opponent.id)}'" />`}</div></div>
-          <div class="battle-player"><div class="sprite-stage player-stage ${localFainted?'pvp-fainted-stage':''}" ${localFainted?'aria-hidden="true"':''}>${localFainted?'':'<div class="sprite-shadow"></div>'}${localFainted?'':`<img class="player-sprite${local.id===812?' rillaboom-battle-sprite':''}" src="${SPRITE_BACK_POKEMON(local)}" alt="${escapeHTML(local.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(local.id)}'" />`}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</div>${pvpBattleInfo(local,localHp[localActive],'player-info',localTeam,localHp,localStatus[localActive])}</div></div>
+          <div class="battle-enemy"><div class="enemy-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.guest_name:room.host_name)}</div>${pvpBattleInfo(opponent,foeHp[foeActive],'enemy-info',null,null,foeStatus[foeActive])}</div><div class="sprite-stage enemy-stage ${foeFainted?'pvp-fainted-stage':''}" ${foeFainted?'aria-hidden="true"':''}>${foeFainted?'':'<div class="sprite-shadow"></div>'}${foeFainted?'':`<img class="enemy-sprite${opponent.id===812?' rillaboom-battle-sprite':opponent.id===979?' annihilape-battle-sprite':''}" src="${SPRITE_ANIM_POKEMON(opponent)}" alt="${escapeHTML(opponent.name)}" onerror="this.onerror=null;this.src='${SPRITE_FRONT(opponent.id)}'" />`}</div></div>
+          <div class="battle-player"><div class="sprite-stage player-stage ${localFainted?'pvp-fainted-stage':''}" ${localFainted?'aria-hidden="true"':''}>${localFainted?'':'<div class="sprite-shadow"></div>'}${localFainted?'':`<img class="player-sprite${local.id===812?' rillaboom-battle-sprite':local.id===979?' annihilape-battle-sprite':''}" src="${SPRITE_BACK_POKEMON(local)}" alt="${escapeHTML(local.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(local.id)}'" />`}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</div>${pvpBattleInfo(local,localHp[localActive],'player-info',localTeam,localHp,localStatus[localActive])}</div></div>
         </div>
         <div class="battle-ui"><div class="battle-log" aria-live="polite" style="margin:0">${escapeHTML(latestLog)}</div><div class="pvp-turn-prompt">${myActionPending?'':activeHp<=0?'Seu Pokémon desmaiou. Escolha quem entrará na batalha.':pvpBattleMenu==='moves'?'Escolha um golpe.':pvpBattleMenu==='switch'?'Escolha um Pokémon para trocar.':'Escolha sua ação.'}</div>${actionMenu}</div>
       </div>`;
@@ -8581,10 +9129,12 @@
       document.getElementById('enemyHpText').textContent = `${wild.currentHp}/${wild.maxHp}`;
       document.getElementById('enemyHpBar').style.width = '100%';
       document.getElementById('enemyHpBar').className = 'hp-fill';
+      document.getElementById('dailyBossShieldWrap').hidden = !battle.isDailyBoss;
+      updateEnemyHpBar();
       const eSprite = document.getElementById('enemySprite');
       eSprite.src = SPRITE_ANIM_POKEMON(wild);
       eSprite.onerror = function(){ this.onerror=null; this.src=wild.shiny ? SPRITE_SHINY(wild.id) : SPRITE(wild.id); this.onerror=function(){this.src=SPRITE_FB(wild.id)}; };
-      eSprite.className = 'enemy-sprite' + (wild.id === 812 ? ' rillaboom-battle-sprite' : '');
+      eSprite.className = 'enemy-sprite' + (wild.id === 812 ? ' rillaboom-battle-sprite' : wild.id === 979 ? ' annihilape-battle-sprite' : '');
       eSprite.style.removeProperty('opacity');
 
       document.getElementById('playerPokeName').innerHTML = getPokemonDisplayNameHTML(player.poke);
@@ -8600,7 +9150,7 @@
       const pSprite = document.getElementById('playerSprite');
       pSprite.src = SPRITE_BACK_POKEMON(player.poke);
       pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_FB(player.poke.id); };
-      pSprite.className = 'player-sprite' + (player.poke.id === 812 ? ' rillaboom-battle-sprite' : '');
+      pSprite.className = 'player-sprite' + (player.poke.id === 812 ? ' rillaboom-battle-sprite' : player.poke.id === 979 ? ' annihilape-battle-sprite' : '');
       pSprite.style.removeProperty('opacity');
 
       document.getElementById('battleLog').textContent = `Um ${wild.name} selvagem apareceu!`;
@@ -8629,6 +9179,7 @@
       const bar = document.getElementById('playerHpBar');
       bar.style.width = pct + '%';
       bar.className = 'hp-fill' + (pct <= 25 ? ' red' : pct <= 50 ? ' yellow' : '');
+
       updatePlayerExperienceBar();
     }
     function renderPartyBalls() {
@@ -8659,6 +9210,16 @@
       const bar = document.getElementById('enemyHpBar');
       bar.style.width = pct + '%';
       bar.className = 'hp-fill' + (pct <= 25 ? ' red' : pct <= 50 ? ' yellow' : '');
+      const shieldWrap = document.getElementById('dailyBossShieldWrap');
+      const shieldBar = document.getElementById('dailyBossShieldBar');
+      const shieldText = document.getElementById('dailyBossShieldText');
+      if (shieldWrap && battle.isDailyBoss) {
+        const maxShield = Math.max(1, battle.enemy.maxShieldHp || 1);
+        const shieldHp = Math.max(0, battle.enemy.shieldHp || 0);
+        shieldWrap.hidden = false;
+        shieldBar.style.width = `${Math.min(100, shieldHp / maxShield * 100)}%`;
+        shieldText.textContent = `${Math.round(shieldHp).toLocaleString('pt-BR')}/${maxShield.toLocaleString('pt-BR')}`;
+      } else if (shieldWrap) shieldWrap.hidden = true;
     }
 
     function setLog(msg) { document.getElementById('battleLog').textContent = msg; }
@@ -8745,7 +9306,7 @@
       const el = document.getElementById('playerTypeBadge');
       if (el) el.innerHTML = types.map(t => `<span class="type-badge ${typeClass([t])}">${t}</span>`).join(' ');
       const pSprite = document.getElementById('playerSprite');
-      pSprite.className = 'player-sprite' + (p.id === 812 ? ' rillaboom-battle-sprite' : '');
+      pSprite.className = 'player-sprite' + (p.id === 812 ? ' rillaboom-battle-sprite' : p.id === 979 ? ' annihilape-battle-sprite' : '');
       pSprite.src = SPRITE_BACK_POKEMON(p);
       pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_POKEMON(p); };
       renderBattleStatusIndicators();
@@ -8860,7 +9421,8 @@
       setTimeout(() => {
         const sash = applyFocusSash(battle.enemy, battle.enemy.currentHp, dmg);
         dmg = sash.damage;
-        battle.enemy.currentHp = Math.max(0, battle.enemy.currentHp - dmg);
+        const bossDamage = applyEnemyDamage(dmg);
+        const shieldDamageMessage = bossDamage.shieldDamage ? `O escudo absorveu ${Math.round(bossDamage.shieldDamage)} de dano.` : '';
         let recoilMessage = '';
         if (dmg > 0 && player.poke.heldItem === 'life_orb' && player.poke.hp > 0) {
           const recoil = Math.max(1, Math.floor(player.poke.maxHp / 10));
@@ -8888,6 +9450,7 @@
           ? (move.power <= 0 ? `${player.poke.name} não causou dano.` : 'Não teve efeito...')
           : `Causou ${dmg} de dano!`;
         if (critical && dmg > 0) msg += ' Acerto crítico!';
+        if (shieldDamageMessage) msg += ` ${shieldDamageMessage}`;
         if (mult >= 2) msg += ' É super efetivo!';
         else if (mult > 0 && mult < 1) msg += ' Não é muito efetivo...';
         let abilityMessage = evaded ? `${battle.enemy.name} desviou do golpe!` : '';
@@ -8959,6 +9522,24 @@
 
     function enemyAttack() {
       if (!battle || battle.enemy.currentHp <= 0) return;
+      let dailyBossBuffMessage = '';
+      if (battle.isDailyBoss) {
+        battle.dailyBossTurnCount = (battle.dailyBossTurnCount || 0) + 1;
+        if (battle.dailyBossTurnCount % 2 === 0) {
+          const buffStats = ['attack','defense','specialAttack','specialDefense','speed','accuracy','evasion'];
+          const available = buffStats.filter(stat => stat === 'accuracy'
+            ? (battle.enemyAccuracyStage || 0) < 6
+            : (battle.enemyStatStages?.[stat] || 0) < 6);
+          if (available.length) {
+            const stat = available[Math.floor(Math.random() * available.length)];
+            const amount = Math.random() < 0.25 ? 2 : 1;
+            dailyBossBuffMessage = applyMoveStatChanges(battle.enemy, battle.enemy, {
+              power: 0, statChanges: [{target:'self',stat,stages:amount}]
+            });
+            if (dailyBossBuffMessage) dailyBossBuffMessage = `${battle.enemy.name} recebeu um buff aleatório! ${dailyBossBuffMessage}`;
+          }
+        }
+      }
       if (battle.enemy.teleportFlee) {
         battle.busy = true;
         setLog(`${battle.enemy.name} usou Teleport e fugiu!`);
@@ -8968,7 +9549,7 @@
       if (battle.quickClawSkip) {
         battle.quickClawSkip = false; battle.turn = 'player'; battle.busy = false;
         const endTurnHeldMessage = applyBattleHeldItemsAtTurnEnd();
-        setLog([`${player.poke.name} se moveu primeiro com Quick Claw!`, endTurnHeldMessage].filter(Boolean).join(' '));
+        setLog([`${player.poke.name} se moveu primeiro com Quick Claw!`, dailyBossBuffMessage, endTurnHeldMessage].filter(Boolean).join(' '));
         return;
       }
       const statusBlock = tryActDespiteStatus(battle.enemy);
@@ -8977,7 +9558,7 @@
         tickGuardSpecTurn();
         tickBattleScreens();
         if (endTurnHeldMessage) updateEnemyHpBar();
-        setLog([statusBlock, endTurnHeldMessage].filter(Boolean).join(' '));
+        setLog([statusBlock, dailyBossBuffMessage, endTurnHeldMessage].filter(Boolean).join(' '));
         if (battle.enemy.currentHp <= 0) {
           setTimeout(() => endBattle(true), 600);
         } else {
@@ -9037,7 +9618,9 @@
         let msg = dmg === 0
           ? (move.power <= 0 ? `${battle.enemy.name} não causou dano.` : 'Não teve efeito...')
           : `Causou ${dmg} de dano em ${player.poke.name}!`;
+        if (dailyBossBuffMessage) msg += ` ${dailyBossBuffMessage}`;
         if (critical && dmg > 0) msg += ' Acerto crítico!';
+        if (shieldDamageMessage) msg += ` ${shieldDamageMessage}`;
         if (mult >= 2) msg += ' É super efetivo!';
         else if (mult > 0 && mult < 1) msg += ' Não é muito efetivo...';
         let abilityMessage = evaded ? `${player.poke.name} desviou do golpe!` : '';
@@ -9150,7 +9733,7 @@
       const el = document.getElementById('playerTypeBadge');
       if (el) el.innerHTML = types.map(t => `<span class="type-badge ${typeClass([t])}">${t}</span>`).join(' ');
       const pSprite = document.getElementById('playerSprite');
-      pSprite.className = 'player-sprite' + (p.id === 812 ? ' rillaboom-battle-sprite' : '');
+      pSprite.className = 'player-sprite' + (p.id === 812 ? ' rillaboom-battle-sprite' : p.id === 979 ? ' annihilape-battle-sprite' : '');
       pSprite.src = SPRITE_BACK_POKEMON(p);
       pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_POKEMON(p); };
       renderBattleStatusIndicators();
@@ -9405,7 +9988,7 @@
 
     function endBattle(won, captured, capturedName) {
       battle.busy = true;
-      if (won && (battle.isGym || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour) && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
+      if (won && (battle.isGym || battle.isDojo || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour) && battle.enemy.currentHp <= 0 && !battle.experienceAwarded) {
         const shares = getBattleExperienceShares(getBattleExperience(battle.enemy, true), player.poke);
         battle.experienceShares = battle.experienceShares || new Map();
         for (const [pokemon, amount] of shares) {
@@ -9447,6 +10030,16 @@
         endSSAnneVictory();
         return;
       }
+      if (won && battle.isDojo && battle.enemy.currentHp <= 0) {
+        if (battle.dojoIndexPokemon < battle.dojoTeam.length - 1) {
+          result.classList.remove('show');
+          document.getElementById('battleMenu').style.display = 'grid';
+          setTimeout(nextDojoPokemon, 400);
+          return;
+        }
+        endDojoVictory();
+        return;
+      }
       if (won && battle.isSilphCo && battle.enemy.currentHp <= 0) {
         if (battle.silphIndexPokemon < battle.silphTeam.length - 1) {
           result.classList.remove('show');
@@ -9475,6 +10068,10 @@
           return;
         }
         endTowerVictory();
+        return;
+      }
+      if (won && battle.isDailyBoss && battle.enemy.currentHp <= 0) {
+        endDailyBossVictory();
         return;
       }
 
@@ -9627,7 +10224,7 @@
         .map(item => {
           const qty = getItemQty(item.key);
           if (qty <= 0) return '';
-          if (item.kind === 'ball' && (battle.isGym || battle.isTower || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour)) return '';
+          if (item.kind === 'ball' && (battle.isGym || battle.isTower || battle.isDojo || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour || battle.isDailyBoss)) return '';
           if (item.kind === 'ball' && battle.dungeon === 'Zona do Safari' && !['safari_ball', 'premier_ball', 'masterball'].includes(item.key)) return '';
           if (['battleBoost', 'direHit', 'guardSpec'].includes(item.kind)) {
             if (!player.poke || player.poke.hp <= 0) return '';
@@ -9709,7 +10306,7 @@
 
     async function tryCapture(ballKey) {
       if (!battle || battle.busy) return;
-      if (battle.isGym || battle.isTower || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour) {
+      if (battle.isGym || battle.isTower || battle.isDojo || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour || battle.isDailyBoss) {
         setLog(battle.isTower ? 'Não dá para capturar o Pokémon de um treinador!' : 'Não dá para capturar o Pokémon de um Líder de Ginásio!');
         backToMenu();
         return;
@@ -9798,6 +10395,67 @@
       });
     }
 
+    const DAILY_BOSSES = [
+      {id:'zapdos',name:'Zapdos',level:100,hp:5000,shield:2500,type:'Eletrico',sprite:'assets/daily-boss-zapdos.png',ivs:{defense:31,specialDefense:31},evs:{defense:252,specialDefense:252},money:20000,item:'rarecandy',itemName:'Doce Raro',itemCount:2,rewardText:'Grande quantidade de Pokédollar + 2 Doces Raros',moves:[{name:'Thunderbolt',power:90,type:'Eletrico'},{name:'Drill Peck',power:80,type:'Voador'},{name:'Ancient Power',power:60,type:'Pedra'},{name:'Agility',power:0,type:'Psiquico'}]},
+      {id:'moltres',name:'Moltres',level:100,hp:5000,shield:2500,type:'Fogo',sprite:'assets/daily-boss-moltres.png',ivs:{defense:31,specialDefense:31},evs:{defense:252,specialDefense:252},money:10000,item:'naturebox',itemName:'Caixa de Nature',itemCount:1,rewardText:'Pokédollar + 1 Caixa de Nature',moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Air Slash',power:75,type:'Voador'},{name:'Ancient Power',power:60,type:'Pedra'},{name:'Agility',power:0,type:'Psiquico'}]},
+      {id:'articuno',name:'Articuno',level:100,hp:5000,shield:2500,type:'Gelo',sprite:'assets/daily-boss-articuno.png',ivs:{defense:31,specialDefense:31},evs:{defense:252,specialDefense:252},money:0,item:'bottlecap',itemName:'Bottle Cap',itemCount:1,rewardText:'1 Bottle Cap (maximiza um IV à sua escolha)',moves:[{name:'Ice Beam',power:90,type:'Gelo'},{name:'Air Slash',power:75,type:'Voador'},{name:'Ancient Power',power:60,type:'Pedra'},{name:'Agility',power:0,type:'Psiquico'}]}
+    ];
+
+    function getDailyBossDateKey() {
+      const parts = new Intl.DateTimeFormat('en-CA', {timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+      const date = Object.fromEntries(parts.map(part => [part.type, part.value]));
+      return `${date.year}-${date.month}-${date.day}`;
+    }
+
+    function renderDailyBosses() {
+      const root = document.getElementById('dailyBossGrid');
+      if (!root || !player) return;
+      const today = getDailyBossDateKey();
+      const claims = player.dailyBossClaims && typeof player.dailyBossClaims === 'object' ? player.dailyBossClaims : {};
+      root.innerHTML = DAILY_BOSSES.map(boss => {
+        const defeated = claims[boss.id] === today;
+        return `<div class="game-card" role="button" tabindex="0" ${defeated?'aria-disabled="true"':''} onclick="startDailyBossBattle('${boss.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startDailyBossBattle('${boss.id}')}">
+          <div class="game-card-header" style="background:linear-gradient(135deg,#49301f,#171324);height:126px;overflow:hidden;"><img src="${boss.sprite}" alt="${boss.name}" style="width:250%;height:250%;max-width:none;flex:none;object-fit:contain;image-rendering:pixelated;" /></div>
+          <div class="game-card-body"><div class="game-card-title">${boss.name} · Nv. ${boss.level}</div><div class="game-card-desc">Recompensa: ${boss.rewardText}</div><div class="game-card-meta"><span class="status-tag ${defeated?'status-locked':'status-available'}">${defeated?'Derrotado hoje':'Desafiar'}</span></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    function startDailyBossBattle(bossId) {
+      const boss = DAILY_BOSSES.find(entry => entry.id === bossId);
+      if (!boss || battle?.busy) return;
+      if (player.dailyBossClaims?.[boss.id] === getDailyBossDateKey()) { showToast(`${boss.name} já foi derrotado hoje.`,'error'); return; }
+      const eligibleTeam = player.party.filter(pokemon => pokemon && pokemon.hp > 0);
+      if (!eligibleTeam.length) { showToast('Sua equipe precisa estar saudável para enfrentar um Boss Diário.','error'); return; }
+      if (!player.poke || player.poke.hp <= 0) player.poke = eligibleTeam[0];
+      const enemy = {name:boss.name,id:Number(boss.id==='zapdos'?145:boss.id==='moltres'?146:144),hp:boss.hp,maxHp:boss.hp,currentHp:boss.hp,shieldHp:boss.shield,maxShieldHp:boss.shield,level:boss.level,type:boss.type,typeClass:typeClass([boss.type]),ivs:{hp:0,attack:0,defense:boss.ivs.defense,specialAttack:0,specialDefense:boss.ivs.specialDefense,speed:0},evs:{hp:0,attack:0,defense:boss.evs.defense,specialAttack:0,specialDefense:boss.evs.specialDefense,speed:0},moves:boss.moves.map(move=>({...move,accuracy:100,pp:20,maxPp:20,category:move.power===0?'status':'special'}))};
+      battle = {isDailyBoss:true,dailyBoss:boss,enemy,playerHp:player.poke.hp,playerMaxHp:player.poke.maxHp,turn:'player',busy:false,playerStatStages:{},enemyStatStages:{},playerCritStage:0,playerAccuracyStage:0,guardSpecTurns:0,playerScreens:{},enemyScreens:{},playerHazards:[],enemyHazards:[]};
+      setupBattleUI(`${boss.name} apareceu para o desafio!`);
+      applyBattleBackground('gym');
+      showBattleIntro(player.poke.name,boss.name,'Boss Diário',() => { document.getElementById('battleOverlay').classList.add('active'); syncMuteButton(); SFX.unlock(); playBattleBgm(); });
+    }
+
+    function endDailyBossVictory() {
+      const boss = battle.dailyBoss;
+      player.poke.hp = Math.max(0,Math.min(player.poke.maxHp,battle.playerHp));
+      player.dailyBossClaims = player.dailyBossClaims && typeof player.dailyBossClaims === 'object' ? player.dailyBossClaims : {};
+      player.dailyBossClaims[boss.id] = getDailyBossDateKey();
+      player.money = (Number(player.money)||0) + boss.money;
+      ensureBagItems();
+      setItemQty(boss.item,getItemQty(boss.item)+boss.itemCount);
+      document.getElementById('battleMenu').style.display='none'; document.getElementById('movesMenu').style.display='none';
+      const bag=document.getElementById('bagMenu'); if(bag) bag.style.display='none';
+      document.getElementById('battleResult').classList.add('show');
+      document.getElementById('resultTitle').textContent=`🏆 ${boss.name} derrotado!`;
+      document.getElementById('resultDesc').textContent=`Você venceu o Boss Diário ${boss.name}.`;
+      const rows=[];
+      if(boss.money) rows.push(`<div class="reward-row reward-money"><span class="reward-label">Pokédollar</span><strong class="reward-value">+ ₱ ${boss.money.toLocaleString('pt-BR')}</strong></div>`);
+      rows.push(`<div class="reward-row"><span class="reward-label">${boss.itemName}</span><strong class="reward-value">+${boss.itemCount}</strong></div>`);
+      rows.push('<div class="reward-highlight">Este boss poderá ser desafiado novamente amanhã.</div>');
+      document.getElementById('resultRewards').innerHTML=rows.join('');
+      SFX.victory(); updateStatsUI(); renderBag(); renderDailyBosses(); saveGame();
+    }
+
     function startTowerBattle(trainerId) {
       const trainer = BATTLE_TOWER_TRAINERS.find(entry => entry.id === trainerId);
       if (!trainer || battle?.busy) return;
@@ -9827,11 +10485,101 @@
       });
     }
 
+    function startDojoBattle(trainerId) {
+      const index = DOJO_TRAINERS.findIndex(entry => entry.id === trainerId);
+      const trainer = DOJO_TRAINERS[index];
+      if (!trainer || battle?.busy) return;
+      if (!isAdminAccount() && index !== getDojoProgress()) {
+        showToast(index < getDojoProgress() ? 'Este lutador j\u00e1 foi derrotado.' : 'Derrote o oponente anterior para liberar este lutador.', 'error');
+        return;
+      }
+      const eligibleTeam = player.party.filter(pokemon => pokemon && pokemon.hp > 0);
+      if (!eligibleTeam.length) {
+        showToast('Sua equipe precisa estar saud\u00e1vel para entrar no Dojo Marcial.', 'error');
+        return;
+      }
+      if (!player.poke || player.poke.hp <= 0) player.poke = eligibleTeam[0];
+      battle = {
+        isDojo:true, dojoTrainer:trainer,
+        dojoTeam:trainer.team.map(pokemon => {
+          const scaledHp=getLevelScaledHp(pokemon.hp,pokemon.level);
+          return {...pokemon,hp:scaledHp,maxHp:scaledHp,currentHp:scaledHp};
+        }), dojoIndexPokemon:0, enemy:null,
+        playerHp:player.poke.hp,playerMaxHp:player.poke.maxHp,
+        turn:'player',busy:false,playerStatStages:{},enemyStatStages:{},playerCritStage:0,
+        playerAccuracyStage:0,guardSpecTurns:0,playerScreens:{},enemyScreens:{},playerHazards:[],enemyHazards:[]
+      };
+      battle.enemy=battle.dojoTeam[0];
+      setupBattleUI(`${trainer.className} ${trainer.name} te desafiou!`);
+      applyBattleBackground('gym');
+      showBattleIntro(player.poke.name,trainer.name,'Dojo Marcial',() => {
+        document.getElementById('battleOverlay').classList.add('active');
+        syncMuteButton(); SFX.unlock(); playBattleBgm();
+      });
+    }
+
+    function nextDojoPokemon() {
+      battle.dojoIndexPokemon++;
+      battle.enemy=battle.dojoTeam[battle.dojoIndexPokemon];
+      battle.experienceAwarded=false;
+      battle.busy=false;
+      battle.turn='player';
+      setupBattleUI(`${battle.dojoTrainer.name} enviou ${getPokemonDisplayName(battle.enemy)}!`);
+    }
+
+    function endDojoVictory() {
+      const trainer=battle.dojoTrainer;
+      const xp=battle.totalExperience||0;
+      const shares=battle.experienceShares||new Map([[player.poke,xp]]);
+      player.poke.hp=Math.max(0,Math.min(player.poke.maxHp,battle.playerHp));
+      const levelsGained=awardPokemonExperience(player.poke,shares.get(player.poke)||0);
+      let sharedLevels=0;
+      const shared=[];
+      for(const [pokemon,amount] of shares){
+        if(pokemon===player.poke||amount<=0) continue;
+        sharedLevels+=awardPokemonExperience(pokemon,amount);
+        shared.push(`${pokemon.name}: +${amount} XP`);
+      }
+      const money=Math.floor(trainer.moneyReward*(player.poke?.heldItem==='amulet_coin'?2:1));
+      player.money+=money;
+      if(!Array.isArray(player.dojoDefeated)) player.dojoDefeated=[];
+      if(!player.dojoDefeated.includes(trainer.id)) player.dojoDefeated.push(trainer.id);
+      if (trainer.id === 'dojo_kiyo' && !player.dojoRewardClaimed) {
+        syncDojoRewardMission();
+        renderMissions();
+        showToast('Nova miss\u00e3o: escolha Hitmonlee ou Hitmonchan como recompensa do Dojo.');
+      }
+      const evolvedReady=levelsGained>0&&canEvolve(player.poke);
+      updatePlayerExperienceBar();
+      if(levelsGained>0||sharedLevels>0) SFX.levelUp();
+      document.getElementById('battleMenu').style.display='none';
+      document.getElementById('movesMenu').style.display='none';
+      const bag=document.getElementById('bagMenu'); if(bag) bag.style.display='none';
+      document.getElementById('battleResult').classList.add('show');
+      document.getElementById('resultTitle').textContent='Vit\u00f3ria no Dojo Marcial!';
+      document.getElementById('resultDesc').textContent=`Voc\u00ea derrotou ${trainer.className} ${trainer.name} e ${trainer.team.length} Pok\u00e9mon!`;
+      const rows=[
+        `<div class="reward-row reward-money"><span class="reward-label">Pok\u00e9dollar</span><strong class="reward-value">+ \u20bd ${money.toLocaleString('pt-BR')}</strong></div>`,
+        `<div class="reward-row reward-xp"><span class="reward-label">Experi\u00eancia</span><strong class="reward-value">+ ${xp} XP</strong></div>`
+      ];
+      if(levelsGained) rows.push(`<div class="reward-highlight">${player.poke.name} subiu ${levelsGained} n\u00edvel(is), chegando ao Nv. ${player.poke.level}!</div>`);
+      const effortMessage=formatEffortGain(battle.totalEffort);
+      if(effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
+      if(shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
+      document.getElementById('resultRewards').innerHTML=rows.join('');
+      if(evolvedReady) battle._pendingEvo=player.poke;
+      updateStatsUI();
+      renderDojo();
+      SFX.victory();
+      onMissionEvent('battle_win','Dojo Marcial');
+      saveGame();
+    }
+
     function startSSAnneBattle(trainerId) {
       const index = SS_ANNE_TRAINERS.findIndex(entry => entry.id === trainerId);
       const trainer = SS_ANNE_TRAINERS[index];
       if (!trainer || battle?.busy) return;
-      if (index !== getSSAnneProgress()) {
+      if (!isAdminAccount() && index !== getSSAnneProgress()) {
         showToast(index < getSSAnneProgress() ? 'Este treinador já foi derrotado.' : 'Derrote o oponente anterior para liberar este treinador.', 'error');
         return;
       }
@@ -9912,11 +10660,11 @@
     }
 
     function startSilphCoBattle(trainerId) {
-      if (!hasDefeatedSabrinaGym()) { showToast('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.', 'error'); return; }
+      if (!isAdminAccount() && !hasDefeatedSabrinaGym()) { showToast('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.', 'error'); return; }
       const index = SILPH_CO_TRAINERS.findIndex(entry => entry.id === trainerId);
       const trainer = SILPH_CO_TRAINERS[index];
       if (!trainer || battle?.busy) return;
-      if (index !== getSilphCoProgress()) {
+      if (!isAdminAccount() && index !== getSilphCoProgress()) {
         showToast(index < getSilphCoProgress() ? 'Este treinador já foi derrotado.' : 'Derrote o oponente anterior para liberar este treinador.', 'error');
         return;
       }
@@ -9999,14 +10747,14 @@
     }
 
     function startEliteFourBattle(trainerId) {
-      if (!hasAllKantoBadges()) {
+      if (!isAdminAccount() && !hasAllKantoBadges()) {
         showToast(`Conquiste todas as 8 Ins\u00edgnias de Kanto para desafiar a Elite Four (${getKantoBadgeCount()}/8).`, 'error');
         return;
       }
       const index = ELITE_FOUR_TRAINERS.findIndex(entry => entry.id === trainerId);
       const trainer = ELITE_FOUR_TRAINERS[index];
       if (!trainer || battle?.busy) return;
-      if (index !== getEliteFourProgress()) {
+      if (!isAdminAccount() && index !== getEliteFourProgress()) {
         showToast(index < getEliteFourProgress() ? 'Este desafiante j\u00e1 foi derrotado.' : 'Derrote o desafiante anterior para avan\u00e7ar.', 'error');
         return;
       }
@@ -10117,26 +10865,26 @@
       const gym = GYMS[gymIndex];
       if (!gym) return;
       // Check if previous badges required (optional soft lock)
-      if (gymIndex > 0 && player.badgesList.length < gymIndex) {
+      if (!isAdminAccount() && gymIndex > 0 && player.badgesList.length < gymIndex) {
         showToast(`Derrote o ginásio anterior primeiro! (${player.badgesList.length}/${gymIndex})`, 'error');
         return;
       }
-      if (player.badgesList.includes(gym.badge)) {
+      if (!isAdminAccount() && player.badgesList.includes(gym.badge)) {
         showToast(`Você já conquistou a Insígnia ${gym.badge}!`, 'error');
         return;
       }
       const levelCap = getGymLevelCap(gym);
-      const overLevelPokemon = player.party.filter(pokemon => !isGymPokemonEligible(pokemon, gym));
+      const overLevelPokemon = isAdminAccount() ? [] : player.party.filter(pokemon => !isGymPokemonEligible(pokemon, gym));
       if (overLevelPokemon.length && !levelCapConfirmed) {
         showGymLevelCapNotice(gymIndex, gym, overLevelPokemon, levelCap);
         return;
       }
-      const eligibleTeam = player.party.filter(pokemon => pokemon.hp > 0 && isGymPokemonEligible(pokemon, gym));
+      const eligibleTeam = player.party.filter(pokemon => pokemon.hp > 0 && (isAdminAccount() || isGymPokemonEligible(pokemon, gym)));
       if (!eligibleTeam.length) {
         showToast(`Nenhum Pok\u00e9mon saud\u00e1vel est\u00e1 dentro do limite do gin\u00e1sio (Nv. ${levelCap}).`, 'error');
         return;
       }
-      if (player.poke.hp <= 0 || !isGymPokemonEligible(player.poke, gym)) {
+      if (player.poke.hp <= 0 || (!isAdminAccount() && !isGymPokemonEligible(player.poke, gym))) {
         player.poke = eligibleTeam[0];
       }
 
@@ -10172,6 +10920,7 @@
 
     function setupBattleUI(logMsg) {
       const e = battle.enemy;
+      document.getElementById('enemyInfoBox')?.classList.toggle('daily-boss-info', Boolean(battle.isDailyBoss));
       renderPartyBalls();
       if (normalizePokemonMoves(player.poke)) saveGame();
       normalizePokemonMoves(e);
@@ -10179,8 +10928,8 @@
       ensurePokemonGender(player.poke);
       ensurePokemonTraits(e);
       ensurePokemonTraits(player.poke);
-      document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : battle.isSSAnne ? ` (${escapeHTML(battle.ssAnneTrainer.name)})` : battle.isSilphCo ? ` (${escapeHTML(battle.silphCoTrainer.name)})` : battle.isEliteFour ? ` (${escapeHTML(battle.eliteTrainer.name)})` : '');
-      updateEnemyCaughtBadge(e.id, !battle.isGym && !battle.isTower && !battle.isSSAnne && !battle.isSilphCo && !battle.isEliteFour);
+      document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : battle.isDojo ? ` (${escapeHTML(battle.dojoTrainer.name)})` : battle.isSSAnne ? ` (${escapeHTML(battle.ssAnneTrainer.name)})` : battle.isSilphCo ? ` (${escapeHTML(battle.silphCoTrainer.name)})` : battle.isEliteFour ? ` (${escapeHTML(battle.eliteTrainer.name)})` : '');
+      updateEnemyCaughtBadge(e.id, !battle.isGym && !battle.isTower && !battle.isDojo && !battle.isSSAnne && !battle.isSilphCo && !battle.isEliteFour && !battle.isDailyBoss);
       document.getElementById('enemyLevel').textContent = `Nv. ${e.level}`;
       {
         const types = getTypes(e.id);
@@ -10192,10 +10941,12 @@
       document.getElementById('enemyHpText').textContent = `${e.currentHp}/${e.maxHp}`;
       document.getElementById('enemyHpBar').style.width = '100%';
       document.getElementById('enemyHpBar').className = 'hp-fill';
+      document.getElementById('dailyBossShieldWrap').hidden = !battle.isDailyBoss;
+      updateEnemyHpBar();
       const eSprite = document.getElementById('enemySprite');
       eSprite.src = SPRITE_ANIM_POKEMON(e);
       eSprite.onerror = function(){ this.onerror=null; this.src=e.shiny ? SPRITE_SHINY(e.id) : SPRITE(e.id); this.onerror=function(){this.src=SPRITE_FB(e.id)}; };
-      eSprite.className = 'enemy-sprite' + (e.id === 812 ? ' rillaboom-battle-sprite' : '');
+      eSprite.className = 'enemy-sprite' + (e.id === 812 ? ' rillaboom-battle-sprite' : e.id === 979 ? ' annihilape-battle-sprite' : '');
       eSprite.style.removeProperty('opacity');
 
       document.getElementById('playerPokeName').innerHTML = getPokemonDisplayNameHTML(player.poke);
@@ -10213,7 +10964,7 @@
       const pSprite = document.getElementById('playerSprite');
       pSprite.src = SPRITE_BACK_POKEMON(player.poke);
       pSprite.onerror = function(){ this.onerror=null; this.src=SPRITE_FB(player.poke.id); };
-      pSprite.className = 'player-sprite' + (player.poke.id === 812 ? ' rillaboom-battle-sprite' : '');
+      pSprite.className = 'player-sprite' + (player.poke.id === 812 ? ' rillaboom-battle-sprite' : player.poke.id === 979 ? ' annihilape-battle-sprite' : '');
       pSprite.style.removeProperty('opacity');
 
       document.getElementById('battleLog').textContent = logMsg || 'A batalha começou!';
@@ -10296,8 +11047,10 @@
       const evolvedReady = levelsGained > 0 && canEvolve(player.poke);
       updatePlayerExperienceBar();
       if (levelsGained > 0 || sharedLevelsGained > 0) SFX.levelUp();
-      player.badges++;
-      player.badgesList.push(gym.badge);
+      if (!player.badgesList.includes(gym.badge)) {
+        player.badges++;
+        player.badgesList.push(gym.badge);
+      }
       const gymMoneyReward = gym.reward * (player.poke?.heldItem === 'amulet_coin' ? 2 : 1);
       player.money += gymMoneyReward;
       // Heal party a bit
@@ -10420,17 +11173,28 @@
       renderSummaryHeldItem(idx);
       const moves = p.moves || [];
       document.getElementById('summaryMoves').innerHTML = moves.length
-        ? moves.map(m => `
+        ? moves.map((m, moveIndex) => `
           <div class="summary-move">
-            <span>${m.name}</span>
-            <span>
+            <span class="summary-move-main"><span>${escapeHTML(m.name)}</span><span>
               <span class="move-type" style="background:${(m.typeColor||'#a8a878')}33;color:${m.typeColor||'#a8a878'}">${m.type || 'Normal'}</span>
               <span class="move-category ${getMoveCategoryClass(m)}">${getMoveCategory(m)}</span>
               <span class="move-power"> PWR ${m.power || 0}</span>
+            </span></span>
+            <span class="summary-move-controls" aria-label="Alterar ordem dos golpes">
+              <button type="button" aria-label="Mover ${escapeHTML(m.name)} para cima" title="Mover para cima" onclick="event.stopPropagation();reorderPokemonMove(${idx},${moveIndex},-1)" ${moveIndex===0?'disabled':''}>↑</button>
+              <button type="button" aria-label="Mover ${escapeHTML(m.name)} para baixo" title="Mover para baixo" onclick="event.stopPropagation();reorderPokemonMove(${idx},${moveIndex},1)" ${moveIndex===moves.length-1?'disabled':''}>↓</button>
             </span>
           </div>`).join('')
         : '<div style="color:var(--text-muted);font-size:0.85rem;">Nenhum golpe conhecido</div>';
       document.getElementById('summaryOverlay').classList.add('active');
+    }
+    function reorderPokemonMove(pokemonIndex, moveIndex, direction) {
+      const pokemon = player?.party?.[pokemonIndex];
+      const targetIndex = moveIndex + direction;
+      if (!pokemon || !Array.isArray(pokemon.moves) || moveIndex < 0 || targetIndex < 0 || targetIndex >= pokemon.moves.length) return;
+      [pokemon.moves[moveIndex], pokemon.moves[targetIndex]] = [pokemon.moves[targetIndex], pokemon.moves[moveIndex]];
+      saveGame();
+      openSummary(pokemonIndex);
     }
     function closeSummary() {
       document.getElementById('summaryOverlay').classList.remove('active');
@@ -10779,6 +11543,7 @@
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Pokédex</span><span style="font-weight:600;">${caught} capturados</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Poções / Bolas</span><span style="font-weight:600;">${player.potions} / ${player.balls}</span></div>
       `;
+      renderWeeklyLoginRewards();
     }
     let socialTimer = null;
     let socialBusy = false;
@@ -11004,7 +11769,7 @@
       const panel=document.getElementById('socialChat');
       panel?.classList.add('open');
       document.getElementById('socialChatName').textContent=friend.trainer_name;
-      document.getElementById('socialChatPresence').textContent=socialIsOnline(friend)?'Online agora Â· mensagens visÃ­veis apenas para vocÃªs dois.':'Offline Â· a mensagem aparecerÃ¡ quando voltar.';
+      document.getElementById('socialChatPresence').textContent=socialIsOnline(friend)?'Online agora \u00b7 mensagens vis\u00edveis apenas para voc\u00eas dois.':'Offline \u00b7 a mensagem aparecer\u00e1 quando voltar.';
       document.getElementById('socialChatMessages').innerHTML='<div class="social-chat-empty">Carregando conversa...</div>';
       socialLoadChat();
       panel?.scrollIntoView({behavior:'smooth',block:'nearest'});
