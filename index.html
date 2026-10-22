@@ -152,14 +152,16 @@
     .social-subpanel h4 { display:flex; align-items:center; gap:8px; margin:0 0 12px; font-size:.96rem; }
     .social-subpanel h4 span { display:grid; place-items:center; min-width:25px; height:25px; padding:0 6px; border-radius:8px; background:#ffffff0c; color:var(--text-muted); font-size:.72rem; }
     .social-friend-row { padding:13px !important; border-radius:12px !important; background:var(--card) !important; }
-    .social-friend-actions { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
-    .social-friend-trade-picker { order:0; }
+    .social-friend-identity { min-width:0; overflow-wrap:anywhere; }
+    .social-friend-actions { display:flex; align-items:center; gap:7px; flex-wrap:nowrap; min-width:0; }
+    .social-friend-trade-picker { order:0; flex:0 1 260px; min-width:120px; }
     .social-friend-actions .social-trade-button { order:1; }
     .social-friend-actions .social-battle-button { order:2; }
     .social-friend-actions .social-chat-button { order:3; }
     .social-friend-actions select { max-width:180px; min-width:120px !important; }
-    .social-trade-picker { display:flex; align-items:center; gap:8px; min-width:0; }
-    .social-pokemon-options { display:flex; align-items:stretch; gap:7px; max-width:min(46vw,390px); overflow-x:auto; padding:3px 2px 7px; scrollbar-width:thin; }
+    .social-friend-trade-picker, .social-trade-picker { min-width:0; }
+    .social-trade-picker { display:flex; align-items:center; gap:8px; }
+    .social-pokemon-options { display:flex; align-items:stretch; gap:7px; min-width:0; max-width:min(32vw,260px); overflow-x:auto; padding:3px 2px 7px; scrollbar-width:thin; }
     .social-pokemon-option { display:flex; flex:0 0 76px; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:86px; padding:5px 4px; border:1px solid var(--border); border-radius:10px; color:var(--text); background:var(--input-bg); cursor:pointer; transition:transform .16s,border-color .16s,background .16s; }
     .social-pokemon-option:hover { transform:translateY(-2px); border-color:#8b5cf6; }
     .social-pokemon-option.selected { border-color:#a855f7; background:linear-gradient(145deg,#39265a,#1d293d); box-shadow:0 0 0 1px #a855f766; }
@@ -13125,7 +13127,7 @@
         const online=socialIsOnline(friend);
         const tradePicker=`<div class="social-friend-trade-picker">${player.party.length?socialPokemonPicker(`social-trade-${friend.user_id}`,'Pok\u00e9mon para oferecer'):'<small style="color:var(--text-muted);">Sem Pok\u00e9mon na equipe</small>'}</div>`;
         return `<div class="social-friend-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--input-bg);">
-          <div style="display:flex;align-items:center;gap:9px;"><span aria-label="${online?'Online':'Offline'}" title="${online?'Online':'Offline'}" style="width:10px;height:10px;border-radius:50%;background:${online?'#22c55e':'#64748b'};box-shadow:${online?'0 0 8px #22c55e':'none'}"></span><span><strong>${escapeHTML(friend.trainer_name)}</strong><small style="display:block;color:var(--text-muted);margin-top:2px;">${online?'Online agora':'Offline'}</small></span></div>
+          <div class="social-friend-identity" style="display:flex;align-items:center;gap:9px;"><span aria-label="${online?'Online':'Offline'}" title="${online?'Online':'Offline'}" style="width:10px;height:10px;border-radius:50%;background:${online?'#22c55e':'#64748b'};box-shadow:${online?'0 0 8px #22c55e':'none'}"></span><span><strong>${escapeHTML(friend.trainer_name)}</strong><small style="display:block;color:var(--text-muted);margin-top:2px;">${online?'Online agora':'Offline'}</small></span></div>
           <div class="social-friend-actions"><button type="button" class="btn btn-secondary social-chat-button" style="width:auto;margin:0;padding:8px 10px;" onclick="socialOpenChat('${friend.user_id}')">Conversar</button>${tradePicker}<button type="button" class="btn btn-secondary social-trade-button" style="width:auto;margin:0;padding:8px 10px;" onclick="socialSendTrade('${friend.user_id}')">Trocar</button><button type="button" class="btn social-battle-button" style="width:auto;margin:0;padding:8px 10px;" onclick="socialChallenge('${friend.user_id}')">Batalhar</button></div>
         </div>`;
       }).join('');
