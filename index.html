@@ -566,6 +566,13 @@
     .admin-promote-form { display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end; }
     .admin-promote-form .form-group { margin:0; }
     .admin-promote-note { margin-top:10px;color:var(--text-muted);font-size:.78rem;line-height:1.5; }
+    .admin-supporter-code-list { display:grid;gap:8px;margin-top:14px; }
+    .admin-supporter-code-row { display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.025); }
+    .admin-supporter-code-row > span { min-width:0; }
+    .admin-supporter-code-row strong { overflow-wrap:anywhere;font:800 .88rem ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em; }
+    .admin-supporter-code-row small { color:var(--text-muted);font-size:.72rem; }
+    .admin-supporter-code-row .btn { width:auto;min-height:38px;margin:0;padding:7px 10px;font-size:.72rem; }
+    .admin-supporter-code-row .admin-remove-button { width:auto;min-height:38px;margin:0;padding:7px 10px;font-size:.72rem; }
     @media (max-width: 760px) { .admin-panel-grid { grid-template-columns:1fr; } }
     @media (max-width: 520px) { .admin-panel-hero { align-items:flex-start;padding:17px; } .admin-access-tag { display:none; } .admin-panel-card { padding:17px; } }
     .game-card {
@@ -2129,6 +2136,15 @@
                 <button type="submit" class="btn admin-remove-button" id="adminRevokeAccountButton" style="width:auto;margin:0;padding:10px 14px;font-size:.82rem">Remover acesso</button>
               </form>
               <p class="admin-promote-note">O administrador principal e outras contas principais protegidas não podem ser removidos por esta opção.</p>
+            </section>
+            <section class="admin-panel-card" id="adminSupporterCodesCard" aria-labelledby="adminSupporterCodesTitle" style="margin-top:18px">
+              <div class="admin-step-heading"><span class="admin-step-number">04</span><div><h3 id="adminSupporterCodesTitle">Códigos de apoiador</h3><p>Crie códigos válidos para os pacotes de PokéCoins e desative os que não devem mais ser aceitos.</p></div></div>
+              <form class="admin-promote-form" id="adminSupporterCodeForm">
+                <div class="form-group"><label for="adminSupporterCodeInput">Novo código</label><input id="adminSupporterCodeInput" type="text" maxlength="24" minlength="2" pattern="[A-Za-z0-9]{2,24}" autocomplete="off" placeholder="Ex.: INFLUENCIADOR" required /></div>
+                <button type="submit" class="btn admin-grant-button" id="adminSupporterCodeButton" style="width:auto;margin:0">Criar código</button>
+              </form>
+              <p class="admin-promote-note">Use de 2 a 24 letras ou números. Os códigos existentes MARCO, TELA, SINGLE e GATO também serão cadastrados pela migração.</p>
+              <div id="adminSupporterCodesList" class="admin-supporter-code-list" aria-live="polite"><div class="admin-search-message">Carregando códigos...</div></div>
             </section>
           </div>
         </div>
@@ -7426,9 +7442,11 @@
       { coins: 100, supporterCoins: 150, price: 100 }, { coins: 150, supporterCoins: 225, price: 150 },
       { coins: 200, supporterCoins: 300, price: 200 }, { coins: 300, supporterCoins: 500, price: 300 }
     ];
+    let pokeCoinsSupporterCodeValidated = false;
     function renderPokeCoinsPackageCards() {
       const grid = document.getElementById('pokeCoinsPackGrid');
-      const bonusEnabled = Boolean(String(player?.pokeCoinsSupporterCode || '').trim());
+      if (!grid) return;
+      const bonusEnabled = pokeCoinsSupporterCodeValidated;
       grid.innerHTML = POKECOIN_PACKAGES.map((pack, index) => {
         const diamondCount = Math.min(6, Math.max(1, Math.ceil(pack.coins / 75)));
         const diamonds = Array.from({ length: diamondCount }, () => '<span class="poke-coins-diamond"></span>').join('');
@@ -7439,11 +7457,27 @@
         return `<button type="button" class="poke-coins-pack" data-pack-index="${index}" aria-pressed="false" aria-label="${totalCoins} PokéCoins${bonus ? `, inclui ${bonus} de bônus` : ''} por ${price}" onclick="selectPokeCoinsPackage(${index})"><span class="poke-coins-pack-amount">${totalCoins}</span>${bonusLabel}<span class="poke-coins-pack-diamonds" aria-hidden="true">${diamonds}</span><span class="poke-coins-pack-price">${price}</span></button>`;
       }).join('');
     }
-    function openPokeCoinsStore() {
+    async function openPokeCoinsStore() {
       const supporterInput = document.getElementById('pokeCoinsSupporterCode');
       const supporterStatus = document.getElementById('pokeCoinsSupporterStatus');
+      pokeCoinsSupporterCodeValidated = false;
       if (supporterInput) supporterInput.value = player?.pokeCoinsSupporterCode || '';
       if (supporterStatus) supporterStatus.textContent = supporterInput?.value ? `Código salvo: ${supporterInput.value}` : '';
+      const savedCode = String(player?.pokeCoinsSupporterCode || '').trim().toUpperCase();
+      if (savedCode && await ensureSupabaseClient()) {
+        try {
+          const {data,error}=await supabaseClient.rpc('poke_coins_validate_supporter_code',{p_code:savedCode});
+          if (error) throw error;
+          pokeCoinsSupporterCodeValidated = Boolean(data?.valid && data?.code===savedCode);
+          if (!pokeCoinsSupporterCodeValidated) {
+            player.pokeCoinsSupporterCode='';
+            saveGame();
+            if (supporterStatus) supporterStatus.textContent='Esse código foi desativado ou não é mais válido.';
+          }
+        } catch (error) {
+          if (supporterStatus) supporterStatus.textContent='Não foi possível validar o código. Aplique supporter-code-migration.sql no Supabase.';
+        }
+      }
       renderPokeCoinsPackageCards();
       document.getElementById('pokeCoinsStoreDialog').showModal();
     }
@@ -7456,15 +7490,49 @@
         button.setAttribute('aria-pressed', String(selected));
       });
     }
-    function applyPokeCoinsSupporterCode() {
+    async function applyPokeCoinsSupporterCode() {
       if (!player) return;
       const input = document.getElementById('pokeCoinsSupporterCode');
-      const code = String(input?.value || '').trim().slice(0, 24);
-      player.pokeCoinsSupporterCode = code;
+      const code = String(input?.value || '').trim().toUpperCase().slice(0, 24);
       const status = document.getElementById('pokeCoinsSupporterStatus');
-      if (status) status.textContent = code ? `Código ${code} aplicado: bônus especial nos pacotes.` : 'Código de apoiador removido.';
+      if (!code) {
+        player.pokeCoinsSupporterCode='';
+        pokeCoinsSupporterCodeValidated=false;
+        if (status) status.textContent='Código de apoiador removido.';
+        renderPokeCoinsPackageCards();
+        saveGame();
+        return;
+      }
+      if (!/^[A-Z0-9]{2,24}$/.test(code)) {
+        player.pokeCoinsSupporterCode='';
+        pokeCoinsSupporterCodeValidated=false;
+        if (status) status.textContent='Use um código válido com 2 a 24 letras ou números.';
+        renderPokeCoinsPackageCards();
+        saveGame();
+        return;
+      }
+      if (!await ensureSupabaseClient()) return;
+      try {
+        const {data,error}=await supabaseClient.rpc('poke_coins_validate_supporter_code',{p_code:code});
+        if (error) throw error;
+        pokeCoinsSupporterCodeValidated=Boolean(data?.valid && data?.code===code);
+        if (!pokeCoinsSupporterCodeValidated) {
+          player.pokeCoinsSupporterCode='';
+          if (status) status.textContent='Código inválido ou desativado.';
+          renderPokeCoinsPackageCards();
+          saveGame();
+          return;
+        }
+        player.pokeCoinsSupporterCode=code;
+        if (status) status.textContent=`Código ${code} validado: bônus especial nos pacotes.`;
+        saveGame();
+      } catch (error) {
+        pokeCoinsSupporterCodeValidated=false;
+        if (status) status.textContent=/poke_coins_validate_supporter_code|schema cache|could not find the function/i.test(error.message||'')
+          ? 'Aplique supporter-code-migration.sql no SQL Editor do Supabase e tente novamente.'
+          : 'Não foi possível validar o código. Tente novamente.';
+      }
       renderPokeCoinsPackageCards();
-      saveGame();
     }
     function marketItemUsesBattlePoints(item) {
       return ['tm', 'battleBoost', 'guardSpec', 'direHit'].includes(item?.kind) ||
@@ -8678,6 +8746,7 @@
     let adminPokemonCatalogRequest = null;
     let adminSelectedPokemon = null;
     let adminPokemonSearchVersion = 0;
+    let adminSupporterCodesVersion = 0;
     function isAdminAccount() {
       return Boolean(onlineUser?.id && currentUserIsAdmin);
     }
@@ -8706,6 +8775,10 @@
         event.preventDefault();
         adminRevokeAccount();
       };
+      document.getElementById('adminSupporterCodeForm').onsubmit = event => {
+        event.preventDefault();
+        adminCreateSupporterCode();
+      };
       const itemSelect = document.getElementById('adminGrantItem');
       if (!itemSelect.options.length) {
         const itemList = [...new Map([...BAG_FIELD_ITEMS, ...BATTLE_BAG_ITEMS, ...SHOP_ITEMS].filter(item => item.key).map(item => [item.key, item])).values()];
@@ -8716,6 +8789,58 @@
       document.getElementById('adminPokemonSearch').oninput = adminSearchPokemonCatalog;
       document.getElementById('adminGrantButton').disabled = !adminSelectedTrainer;
       adminUpdateGrantFields();
+      adminLoadSupporterCodes();
+    }
+    async function adminLoadSupporterCodes() {
+      const list=document.getElementById('adminSupporterCodesList');
+      if (!list||!isAdminAccount()||!supabaseClient) return;
+      const version=++adminSupporterCodesVersion;
+      list.innerHTML='<div class="admin-search-message">Carregando códigos...</div>';
+      try {
+        const {data,error}=await supabaseClient.rpc('admin_list_supporter_codes');
+        if (version!==adminSupporterCodesVersion) return;
+        if (error) throw error;
+        const codes=Array.isArray(data)?data:[];
+        list.innerHTML=codes.length?codes.map(entry=>`<div class="admin-supporter-code-row"><span><strong>${escapeHTML(entry.code)}</strong><br><small>${entry.is_active?'Ativo':'Desativado'}</small></span><button type="button" class="${entry.is_active?'admin-remove-button':'btn btn-secondary'}" onclick="adminSetSupporterCodeActive('${escapeHTML(entry.code)}',${!entry.is_active})">${entry.is_active?'Desativar':'Ativar'}</button></div>`).join(''):'<div class="admin-search-message">Nenhum código cadastrado.</div>';
+      } catch (error) {
+        if (version!==adminSupporterCodesVersion) return;
+        list.innerHTML=/admin_list_supporter_codes|schema cache|could not find the function/i.test(error.message||'')
+          ? '<div class="admin-search-message">Aplique supporter-code-migration.sql no SQL Editor do Supabase para gerenciar códigos.</div>'
+          : '<div class="admin-search-message">Não foi possível carregar os códigos de apoiador.</div>';
+      }
+    }
+    async function adminCreateSupporterCode() {
+      if (!isAdminAccount()||!supabaseClient) return;
+      const input=document.getElementById('adminSupporterCodeInput');
+      const button=document.getElementById('adminSupporterCodeButton');
+      const code=String(input?.value||'').trim().toUpperCase();
+      if (!/^[A-Z0-9]{2,24}$/.test(code)) { showToast('Use de 2 a 24 letras ou números.','error'); return; }
+      button.disabled=true;
+      button.textContent='Criando...';
+      try {
+        const {error}=await supabaseClient.rpc('admin_create_supporter_code',{p_code:code});
+        if (error) throw error;
+        input.value='';
+        showToast(`Código ${code} criado e ativado.`);
+        await adminLoadSupporterCodes();
+      } catch (error) {
+        const migrationMissing=/admin_create_supporter_code|schema cache|could not find the function/i.test(error.message||'');
+        showToast(migrationMissing?'Aplique supporter-code-migration.sql no SQL Editor do Supabase.':'Não foi possível criar o código: '+error.message,'error');
+      } finally {
+        button.disabled=false;
+        button.textContent='Criar código';
+      }
+    }
+    async function adminSetSupporterCodeActive(code,active) {
+      if (!isAdminAccount()||!supabaseClient||!/^[A-Z0-9]{2,24}$/.test(String(code||''))) return;
+      try {
+        const {error}=await supabaseClient.rpc('admin_set_supporter_code_active',{p_code:code,p_active:Boolean(active)});
+        if (error) throw error;
+        showToast(`Código ${code} ${active?'ativado':'desativado'}.`);
+        await adminLoadSupporterCodes();
+      } catch (error) {
+        showToast('Não foi possível atualizar o código: '+error.message,'error');
+      }
     }
     async function adminPromoteAccount() {
       if (!currentUserCanManageAdmins || !supabaseClient) return;

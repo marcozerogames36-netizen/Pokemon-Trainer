@@ -31,5 +31,17 @@ O jogo já passa a URL atual como destino dos fluxos de cadastro, login social e
 - A chave `sb_publishable_...` no HTML é uma chave pública de cliente; não coloque uma chave `sb_secret_...` ou `service_role` no navegador.
 - O arquivo `supabase-schema.sql` documenta a tabela e as políticas RLS. Ele não configura o banco automaticamente; aplique-o no SQL Editor do Supabase se ainda não tiver sido aplicado.
 - O chat entre amigos precisa da tabela e das políticas do arquivo `social-chat-migration.sql`. Em projetos que já usam o Supabase, execute esse arquivo no SQL Editor antes de publicar a versão com chat.
+- O gerenciamento de códigos de apoiador precisa da tabela e das funções do arquivo `supporter-code-migration.sql`. Execute `admin-panel-migration.sql` primeiro e depois essa migração no SQL Editor do Supabase. Ela cadastra MARCO, TELA, SINGLE e GATO e libera a criação e ativação de outros códigos pelo painel de administrador.
 - O PvP amistoso usa a tabela `pvp_rooms`, as funções RPC e o Realtime definidos em `supabase-schema.sql`. Para ativá-lo ou atualizar o relógio de 45 segundos por jogada, aplique novamente o arquivo completo no SQL Editor do Supabase após publicar a versão com PvP.
 - Após publicar, faça um save, atualize a página e confirme que o progresso voltou.
+
+## Testar localmente com uma conta do Supabase
+
+O `index.html` já contém a URL do projeto Supabase e a chave pública de cliente (`sb_publishable_...`), que pode ser usada no navegador. Não adicione uma chave `sb_secret_...` ou `service_role` ao HTML.
+
+1. Inicie o site por um servidor HTTP local, como a extensão Live Server do VS Code; não abra o arquivo diretamente como `file://`.
+2. No painel do Supabase, abra **Authentication → URL Configuration** e inclua o endereço local usado pelo Live Server em **Redirect URLs** (por exemplo, `http://127.0.0.1:5500/**`).
+3. Acesse o endereço local e entre com uma conta de teste já cadastrada no Supabase. O jogo carrega o save dessa conta.
+4. Para abrir o painel de administrador, use uma conta que já esteja em `public.game_admins`. Aplique `admin-panel-migration.sql` e depois `supporter-code-migration.sql` pelo **SQL Editor** se ainda não executou essas migrações.
+
+Não é necessário instalar `psql` para aplicar ou testar essas alterações: o SQL Editor do Supabase executa as migrações. A conta do banco que executa o SQL precisa ter permissão para criar tabelas e funções; a conta de jogo que valida códigos precisa estar autenticada.
