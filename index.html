@@ -511,6 +511,21 @@
       .pvp-room-controls input { flex:1 1 100%; width:100%; max-width:none; min-width:0; }
       .pvp-room-controls .btn { flex:1 1 auto; }
     }
+    @media (max-width:480px) {
+      .coop-boss-toolbar { flex-direction:column; align-items:stretch; gap:6px; }
+      .coop-boss-toolbar > span:first-child { align-self:flex-start; }
+      .coop-boss-toolbar-actions { width:100%; justify-content:space-between; gap:8px; }
+      .coop-boss-toolbar-actions > span { flex:1 1 auto; min-width:0; text-align:center; }
+      .coop-boss-arena .battle-field { min-height:500px; padding:102px 12px 8px; gap:8px; justify-content:flex-start; }
+      .coop-boss-arena .battle-enemy { display:flex; flex-direction:column; align-items:stretch; gap:0; padding:0; }
+      .coop-boss-arena .enemy-info.daily-boss-info { width:100%; padding:10px 12px; }
+      .coop-boss-arena .enemy-stage { width:100%; height:clamp(118px,34vw,146px); flex:0 0 auto; }
+      .coop-boss-arena .enemy-sprite { width:clamp(120px,34vw,145px); height:clamp(120px,34vw,145px); }
+      .coop-boss-arena .battle-player { min-height:140px; align-items:flex-end; justify-content:space-between; gap:6px; margin:8px 0 6px; padding:0 2%; }
+      .coop-boss-arena .player-stage { width:40%; flex:0 0 40%; justify-content:center; }
+      .coop-boss-arena .player-sprite { width:clamp(104px,29vw,132px); height:clamp(104px,29vw,132px); }
+      .coop-boss-arena .player-info { width:min(60%,240px); flex:1 1 auto; }
+    }
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
     .admin-panel-shell { max-width: 1120px; }
     .admin-panel-hero {
@@ -1799,7 +1814,9 @@
         padding-top: max(8px, env(safe-area-inset-top));
         padding-left: max(10px, env(safe-area-inset-left));
         padding-right: max(10px, env(safe-area-inset-right));
+        backdrop-filter: none;
       }
+      .message-notification-menu { position: fixed; top: calc(max(8px, env(safe-area-inset-top)) + 52px); right: max(10px, env(safe-area-inset-right)); left: auto; width: min(350px, calc(100vw - 20px)); max-width: calc(100vw - 20px); }
       .topbar-brand { min-width: 0; }
       .topbar-brand-name { overflow: hidden; text-overflow: ellipsis; }
       .topbar-profile .player-name { overflow: hidden; text-overflow: ellipsis; }
@@ -1851,6 +1868,9 @@
       #panel-home > .cards-grid > .game-card { display: grid; grid-template-columns: 100px minmax(0, 1fr); align-items: stretch; }
       #panel-home > .cards-grid > .game-card > .game-card-header { width: 100px; height: auto !important; min-height: 104px; padding: 8px !important; border-radius: 15px 0 0 15px; overflow: hidden; }
       #panel-home > .cards-grid > .game-card > .game-card-header img { width: auto !important; height: auto !important; max-width: 100% !important; max-height: 100% !important; }
+      #panel-home > .cards-grid > .game-card > .poke-coins-quick-header { flex-direction: column; gap: 0; }
+      #panel-home > .cards-grid > .game-card > .poke-coins-quick-header img { width: 58px !important; height: 58px !important; flex: 0 0 auto; }
+      #panel-home > .cards-grid > .game-card > .poke-coins-quick-header .poke-coins-quick-header-copy { display: none; }
       #panel-home > .cards-grid > .game-card > .game-card-body { min-width: 0; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; }
       #panel-home > .cards-grid .game-card-title, #panel-home > .cards-grid .game-card-desc { overflow-wrap: anywhere; }
       #panel-home > .cards-grid .game-card-desc { margin-bottom: 0; }
