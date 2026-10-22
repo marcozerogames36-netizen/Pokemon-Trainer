@@ -1844,6 +1844,10 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#55351c,#21111c);height:126px;overflow:hidden;"><img src="assets/daily-boss-legendary-birds.png" alt="Zapdos, Articuno e Moltres" style="width:220%;height:220%;max-width:none;flex:none;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">Boss Di&aacute;rio</div><div class="game-card-desc">Desafie Zapdos, Moltres e Articuno para ganhar recompensas especiais.</div></div>
             </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('coop-boss')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('coop-boss')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#38264d,#171226);font-size:3rem;">&#x1F30C;</div>
+              <div class="game-card-body"><div class="game-card-title">Big Boss: Mewtwo</div><div class="game-card-desc">Una até 5 treinadores contra um Mewtwo com HP compartilhado.</div></div>
+            </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('center')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('center')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#3b2533,#1d141b);"><img src="assets/pokemon-center.png" alt="" style="width:128px;height:98px;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">Centro Pokémon</div><div class="game-card-desc">Cuide da equipe e restaure HP, PP e status.</div></div>
@@ -1929,6 +1933,12 @@
           <h2 class="panel-title">⚔️ PvP Online</h2>
           <p class="panel-desc">Crie uma sala e compartilhe o código com outro treinador. Batalhas amistosas não alteram seu progresso, HP, PP ou itens.</p>
           <div id="pvpContent"></div>
+        </div>
+        <div class="panel" id="panel-coop-boss">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
+          <h2 class="panel-title">&#x1F30C; Big Boss: Mewtwo</h2>
+          <p class="panel-desc">Re&uacute;na at&eacute; 5 treinadores. O HP de Mewtwo &eacute; compartilhado e cada equipe age uma vez por rodada. Seu HP e PP permanentes n&atilde;o s&atilde;o alterados.</p>
+          <div id="coopBossContent"></div>
         </div>
 
         <div class="panel" id="panel-gyms">
@@ -8662,6 +8672,7 @@
       if (id === 'missions') renderMissions();
       if (id === 'pc') renderPC();
       if (id === 'pvp') renderPvpPanel();
+      if (id === 'coop-boss') renderCoopBossPanel();
       if (id === 'admin') renderAdminPanel();
       if (id === 'dungeons') {
         const dg = document.getElementById('dungeonsGrid');
@@ -9142,6 +9153,56 @@
       pvpStopTimer();
       pvpRoom = null;
       renderPvpPanel();
+    }
+
+    let coopBossRoom=null, coopBossChannel=null, coopBossBusy=false, coopBossMenu='main';
+    function renderCoopBossPanel() {
+      const root=document.getElementById('coopBossContent'); if(!root)return;
+      if(!player||!onlineUser||!supabaseClient){root.innerHTML='<div class="pvp-lobby-box">Entre em uma conta para participar do Big Boss.</div>';return;}
+      if(coopBossRoom){renderCoopBossRoom();return;}
+      if(!pvpSelectedIndices.size) player.party.slice(0,6).forEach((pokemon,index)=>{if(pokemon) pvpSelectedIndices.add(index);});
+      root.innerHTML=`<div class="pvp-lobby-box"><strong>Monte sua equipe</strong><div class="panel-desc" style="margin:4px 0 12px">Selecione de 1 a 6 Pokémon para a raid. A equipe entra com HP completo.</div>${pvpRenderTeamSelection()}<div class="pvp-room-controls"><button class="btn" style="width:auto;margin:0" onclick="coopBossCreate()">Criar sala</button><input id="coopBossCodeInput" type="text" maxlength="6" placeholder="Código da sala" aria-label="Código da raid" autocomplete="off"/><button class="btn btn-secondary" style="width:auto;margin:0" onclick="coopBossJoin()">Entrar na sala</button></div><p style="color:var(--text-muted);font-size:.8rem;margin:12px 0 0">O criador inicia a batalha quando os treinadores estiverem prontos. Máximo de 5 participantes.</p></div>`;
+    }
+    async function coopBossCreate(){
+      if(coopBossBusy)return; coopBossBusy=true;
+      try{const team=await pvpBuildTeamSnapshot(); if(!team.length)throw new Error('Selecione pelo menos um Pokémon.'); let room,error;
+        for(let i=0;i<4;i++){const res=await supabaseClient.rpc('coop_boss_create',{p_code:pvpMakeCode(),p_trainer:player.name,p_team:team});room=res.data;error=res.error;if(!error)break;if(!/duplicate|unique/i.test(error.message||'')||i===3)throw error;}
+        await coopBossAttach(room);showToast('Sala do Big Boss criada. Compartilhe o código com os outros treinadores.');
+      }catch(e){showToast('Não foi possível criar a sala: '+e.message,'error');}finally{coopBossBusy=false;}
+    }
+    async function coopBossJoin(){
+      if(coopBossBusy)return;const code=String(document.getElementById('coopBossCodeInput')?.value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);if(code.length!==6){showToast('Digite o código de 6 caracteres.','error');return;}coopBossBusy=true;
+      try{const team=await pvpBuildTeamSnapshot();if(!team.length)throw new Error('Selecione pelo menos um Pokémon.');const {data,error}=await supabaseClient.rpc('coop_boss_join',{p_code:code,p_trainer:player.name,p_team:team});if(error)throw error;await coopBossAttach(data);}
+      catch(e){showToast('Não foi possível entrar na raid: '+e.message,'error');}finally{coopBossBusy=false;}
+    }
+    async function coopBossAttach(room){
+      if(!room?.id)throw new Error('A sala retornou dados inválidos.');if(coopBossChannel)await supabaseClient.removeChannel(coopBossChannel);coopBossRoom=room;
+      coopBossChannel=supabaseClient.channel('coop-boss-'+room.id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'coop_boss_rooms',filter:'id=eq.'+room.id},payload=>{coopBossRoom=payload.new;renderCoopBossPanel();}).subscribe(status=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')showToast('A conexão da raid foi interrompida. Confira sua internet.','error');});renderCoopBossPanel();
+    }
+    function coopBossIsHost(){return coopBossRoom?.host_id===onlineUser?.id;}
+    async function coopBossStart(){if(!coopBossRoom||!coopBossIsHost()||coopBossBusy)return;coopBossBusy=true;try{const {data,error}=await supabaseClient.rpc('coop_boss_start',{p_code:coopBossRoom.room_code});if(error)throw error;coopBossRoom=data;renderCoopBossPanel();}catch(e){showToast('Não foi possível iniciar a raid: '+e.message,'error');}finally{coopBossBusy=false;}}
+    async function coopBossAct(action){if(!coopBossRoom||coopBossRoom.status!=='battle'||coopBossBusy||coopBossRoom.actions?.[onlineUser.id])return;coopBossBusy=true;try{const {data,error}=await supabaseClient.rpc('coop_boss_act',{p_code:coopBossRoom.room_code,p_action:action});if(error)throw error;coopBossRoom=data;coopBossMenu='main';renderCoopBossPanel();}catch(e){showToast('Não foi possível enviar a ação: '+e.message,'error');}finally{coopBossBusy=false;}}
+    async function coopBossClose(){if(coopBossChannel){await supabaseClient.removeChannel(coopBossChannel);coopBossChannel=null;}coopBossRoom=null;coopBossMenu='main';renderCoopBossPanel();}
+    function renderCoopBossRoom(){
+      const root=document.getElementById('coopBossContent'),room=coopBossRoom;if(!root||!room)return;
+      const members=Array.isArray(room.members)?room.members:[],me=members.find(m=>m.user_id===onlineUser.id),myState=room.battle?.participants?.[onlineUser.id];
+      if(room.status==='waiting'){
+        root.innerHTML=`<div class="pvp-lobby-box"><div>Sala <strong class="pvp-code">${escapeHTML(room.room_code)}</strong> · ${members.length}/5 treinadores</div><p style="color:var(--text-muted);margin:10px 0">Compartilhe o código para reunir sua equipe.</p><div style="display:grid;gap:8px;margin:12px 0">${members.map((m,i)=>`<div class="pvp-room-box" style="margin:0">${i===0?'👑 ':''}<strong>${escapeHTML(m.name)}</strong><span style="color:var(--text-muted)"> · ${m.team.length} Pokémon</span></div>`).join('')}</div>${coopBossIsHost()?`<button class="btn" style="width:auto" onclick="coopBossStart()">Iniciar raid</button>`:`<p>Aguardando o anfitrião iniciar…</p>`}<button class="btn btn-secondary" style="width:auto;margin-left:8px" onclick="coopBossClose()">Sair</button></div>`;return;
+      }
+      const hp=Math.max(0,Number(room.battle?.mewtwo_hp)||0),maxHp=Number(room.battle?.mewtwo_max_hp)||30000,percent=Math.max(0,Math.min(100,hp/maxHp*100));
+      if(room.status==='won'||room.status==='lost'||room.status==='cancelled'){
+        root.innerHTML=`<div class="pvp-lobby-box"><h3>${room.status==='won'?'Mewtwo foi derrotado!':room.status==='lost'?'A equipe foi derrotada':'Raid encerrada'}</h3><p>HP final de Mewtwo: ${hp.toLocaleString('pt-BR')} / ${maxHp.toLocaleString('pt-BR')}</p><button class="btn" style="width:auto" onclick="coopBossClose()">Voltar</button></div>`;return;
+      }
+      const membersHTML=members.map(m=>{const state=room.battle?.participants?.[m.user_id]||{},hps=state.hp||[],active=Number(state.active)||0;return `<div class="pvp-room-box" style="margin:0 0 8px"><strong>${escapeHTML(m.name)}${m.user_id===onlineUser.id?' (você)':''}</strong><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">${m.team.map((p,i)=>`<span style="font-size:.8rem;color:${Number(hps[i])>0?'var(--text)':'#ff6b6b'}">${i===active?'▶ ':''}${escapeHTML(p.name)} ${Math.max(0,Number(hps[i])||0)}/${p.maxHp}</span>`).join('')}</div></div>`;}).join('');
+      const myTeam=me?.team||[],active=Number(myState?.active)||0,activePokemon=myTeam[active],myHp=myState?.hp||[],myAction=Boolean(room.actions?.[onlineUser.id]);
+      const allFainted=myHp.every(value=>Number(value)<=0),activeFainted=Number(myHp[active])<=0;
+      if(activeFainted&&!allFainted)coopBossMenu='switch';
+      const damaging=(activePokemon?.moves||[]).map((move,index)=>({move,index})).filter(x=>Number(x.move.power)>0);
+      const moveBtns=damaging.map(({move,index})=>`<button class="move-btn" onclick="coopBossAct({type:'move',index:${index}})" ${myAction||Number(myHp[active])<=0?'disabled':''}><span>${escapeHTML(move.name)}</span><span class="move-power">${escapeHTML(move.type)} · PWR ${move.power}</span></button>`).join('');
+      const switchBtns=myTeam.map((p,i)=>`<button class="move-btn" onclick="coopBossAct({type:'switch',index:${i}})" ${myAction||i===active||Number(myHp[i])<=0?'disabled':''}><span>${escapeHTML(p.name)}</span><span class="move-power">HP ${Math.max(0,Number(myHp[i])||0)}/${p.maxHp}</span></button>`).join('');
+      const actions=allFainted&&!myAction?`<div class="battle-actions"><button class="move-btn" onclick="coopBossAct({type:'wait'})">Aguardar a equipe</button></div>`:myAction?`<div class="pvp-waiting-action">Ação enviada. Aguardando os outros treinadores (${Object.keys(room.actions||{}).length}/${members.length})…</div>`:coopBossMenu==='switch'?`<div class="battle-actions moves-view">${switchBtns}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:`<div class="battle-actions moves-view">${moveBtns}<button class="move-btn" onclick="coopBossAct({type:'struggle'})" ${myAction?'disabled':''}>Esforço · PWR 60</button><button class="move-btn" onclick="coopBossMenu='switch';renderCoopBossPanel()" ${myAction?'disabled':''}>Trocar Pokémon</button></div>`;
+      const logs=(room.battle?.log||[]).slice(-5).reverse().map(line=>`<div>${escapeHTML(line)}</div>`).join('');
+      root.innerHTML=`<div class="pvp-lobby-box"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">Sala <strong class="pvp-code">${escapeHTML(room.room_code)}</strong><strong>Rodada ${room.turn}</strong></div><div style="margin:14px 0;padding:16px;border:1px solid #8a55ff;border-radius:14px;background:linear-gradient(135deg,#241b37,#12101a)"><div style="display:flex;justify-content:space-between;gap:10px"><strong style="font-size:1.2rem">Mewtwo · Nv. 100</strong><strong>${hp.toLocaleString('pt-BR')} / ${maxHp.toLocaleString('pt-BR')} HP</strong></div><div class="hp-bar" style="height:18px;margin-top:10px"><div class="hp-fill" style="width:${percent}%;background:linear-gradient(90deg,#9333ea,#c084fc)"></div></div></div><h3>Treinadores (${members.length}/5)</h3>${membersHTML}<div class="pvp-room-box" style="margin-top:12px"><strong>Sua vez · ${escapeHTML(activePokemon?.name||'Pokémon')}</strong><div style="color:var(--text-muted);margin:5px 0 10px">HP ${Math.max(0,Number(myHp[active])||0)}/${activePokemon?.maxHp||0}</div>${actions}</div><div class="pvp-room-box" style="margin-top:12px;max-height:170px;overflow:auto">${logs}</div><button class="btn btn-secondary" style="width:auto;margin-top:12px" onclick="coopBossClose()">Sair da tela</button></div>`;
     }
     document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => switchPanel(i.dataset.panel)));
 
