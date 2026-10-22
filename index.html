@@ -1904,6 +1904,20 @@
       .summary-move-controls { margin-left: 4px; }
       .summary-move-controls button { width: 36px; height: 36px; }
       #battleOverlay { padding-bottom: env(safe-area-inset-bottom); }
+      #battleOverlay.viridian-battle .battle-bg {
+        background-size: auto 100% !important;
+        background-position: center center !important;
+      }
+      #battleOverlay.viridian-battle .battle-field {
+        max-width: none;
+        padding: max(58px, calc(env(safe-area-inset-top) + 48px)) 12px 8px;
+      }
+      #battleOverlay.viridian-battle .enemy-stage {
+        transform: translate(0, clamp(28px, 7vh, 58px));
+      }
+      #battleOverlay.viridian-battle .player-stage {
+        transform: translate(0, 0);
+      }
       .battle-ui { padding: 12px 12px calc(14px + env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; }
       .battle-log { min-height: 44px; margin-bottom: 10px; padding: 9px 10px; font-size: .82rem; }
       .battle-btn, .move-btn, .btn { min-height: 44px; }
