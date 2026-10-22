@@ -1914,7 +1914,21 @@
       #battleOverlay.viridian-battle .player-stage {
         transform: translate(0, 0);
       }
-      .battle-ui { padding: 12px 12px calc(14px + env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; }
+      #battleOverlay > .battle-ui {
+        padding: 0 12px calc(14px + env(safe-area-inset-bottom));
+        border-top: 0;
+        border-radius: 0 0 16px 16px;
+      }
+      #battleOverlay > .battle-ui > div:has(> #battleLog) {
+        left: 0;
+        right: 0;
+        bottom: calc(100% - 1px);
+        padding: 10px 12px 8px;
+        border-top: 3px solid var(--primary);
+        border-radius: 16px 16px 0 0;
+        background: var(--card);
+        box-sizing: border-box;
+      }
       .battle-log { min-height: 44px; margin-bottom: 10px; padding: 9px 10px; font-size: .82rem; }
       .battle-btn, .move-btn, .btn { min-height: 44px; }
       .move-btn { gap: 6px; flex-wrap: wrap; overflow-wrap: anywhere; }
