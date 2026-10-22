@@ -1,4 +1,4 @@
--- Cooperative Mewtwo raid. Run after supabase-schema.sql (uses its team/type validators).
+﻿-- Cooperative Mewtwo raid. Run after supabase-schema.sql (uses its team/type validators).
 create table if not exists public.coop_boss_rooms (
   id uuid primary key default gen_random_uuid(),
   room_code text not null unique check (room_code ~ '^[A-Z0-9]{6}$'),
@@ -51,7 +51,7 @@ returns jsonb language plpgsql security definer set search_path = '' as $$
 declare v_room public.coop_boss_rooms;
 begin
   if auth.uid() is null then raise exception 'Entre na sua conta para criar a raid.'; end if;
-  if p_code !~ '^[A-Z0-9]{6}$' or not public.pvp_valid_team(p_team) then raise exception 'Código ou equipe inválidos.'; end if;
+  if p_code !~ '^[A-Z0-9]{6}$' or not public.pvp_valid_team(p_team) then raise exception 'CÃ³digo ou equipe invÃ¡lidos.'; end if;
   insert into public.coop_boss_rooms(room_code,host_id,members)
   values(p_code,auth.uid(),jsonb_build_array(jsonb_build_object('user_id',auth.uid(),'name',left(coalesce(nullif(trim(p_trainer),''),'Treinador'),24),'team',p_team)))
   returning * into v_room;
@@ -63,12 +63,12 @@ returns jsonb language plpgsql security definer set search_path = '' as $$
 declare v_room public.coop_boss_rooms; v_member jsonb;
 begin
   if auth.uid() is null then raise exception 'Entre na sua conta para participar da raid.'; end if;
-  if not public.pvp_valid_team(p_team) then raise exception 'Equipe inválida.'; end if;
+  if not public.pvp_valid_team(p_team) then raise exception 'Equipe invÃ¡lida.'; end if;
   select * into v_room from public.coop_boss_rooms where room_code=upper(p_code) for update;
-  if not found then raise exception 'Sala indisponível ou já iniciada.'; end if;
+  if not found then raise exception 'Sala indisponÃ­vel ou jÃ¡ iniciada.'; end if;
   if exists(select 1 from jsonb_array_elements(v_room.members) as entry(member) where entry.member->>'user_id'=(select auth.uid())::text) then return to_jsonb(v_room); end if;
-  if v_room.status<>'waiting' or v_room.expires_at<now() then raise exception 'Sala indisponível ou já iniciada.'; end if;
-  if jsonb_array_length(v_room.members)>=5 then raise exception 'A raid já está cheia (máximo de 5 treinadores).'; end if;
+  if v_room.status<>'waiting' or v_room.expires_at<now() then raise exception 'Sala indisponÃ­vel ou jÃ¡ iniciada.'; end if;
+  if jsonb_array_length(v_room.members)>=5 then raise exception 'A raid jÃ¡ estÃ¡ cheia (mÃ¡ximo de 5 treinadores).'; end if;
   v_member:=jsonb_build_object('user_id',auth.uid(),'name',left(coalesce(nullif(trim(p_trainer),''),'Treinador'),24),'team',p_team);
   update public.coop_boss_rooms set members=members||jsonb_build_array(v_member),updated_at=now() where id=v_room.id returning * into v_room;
   return to_jsonb(v_room);
@@ -81,7 +81,7 @@ begin
   if auth.uid() is null then raise exception 'Entre na sua conta para iniciar a raid.'; end if;
   select * into v_room from public.coop_boss_rooms where room_code=upper(p_code) for update;
   if not found or v_room.host_id<>auth.uid() then raise exception 'Somente quem criou a sala pode iniciar.'; end if;
-  if v_room.status<>'waiting' or v_room.expires_at<=clock_timestamp() then raise exception 'Sala expirada ou raid indisponível.'; end if;
+  if v_room.status<>'waiting' or v_room.expires_at<=clock_timestamp() then raise exception 'Sala expirada ou raid indisponÃ­vel.'; end if;
   for v_member in select value from jsonb_array_elements(v_room.members) loop
     v_user:=v_member->>'user_id'; v_team:=v_member->'team';
     select coalesce(jsonb_agg((p.value->>'maxHp')::integer order by p.ordinality),'[]'::jsonb) into v_hps
@@ -89,7 +89,7 @@ begin
     select coalesce(jsonb_agg(coalesce((m.value->>'pp')::integer,(m.value->>'maxPp')::integer,10) order by p.ordinality,m.ordinality),'[]'::jsonb) into v_pp
       from jsonb_array_elements(v_team) with ordinality p(value,ordinality)
       cross join lateral jsonb_array_elements(coalesce(p.value->'moves','[]'::jsonb)) with ordinality m(value,ordinality);
-    v_states:=jsonb_set(v_states,array[v_user],jsonb_build_object('hp',v_hps,'pp',v_pp,'active',0,'stages','{}'::jsonb,'protect',false),true);
+    v_states:=jsonb_set(v_states,array[v_user],jsonb_build_object('hp',v_hps,'pp',v_pp,'active',0,'stages','{}'::jsonb,'protect',false,'protect_chain',0),true);
   end loop;
   update public.coop_boss_rooms set status='battle',turn=1,turn_deadline=clock_timestamp()+interval '90 seconds',actions='{}'::jsonb,
     battle=jsonb_build_object('mewtwo_hp',30000,'mewtwo_max_hp',30000,'participants',v_states,'mewtwo_stages','{}'::jsonb,'mewtwo_status',null,'mewtwo_sleep_turns',0,'log',jsonb_build_array('Mewtwo surgiu! A equipe precisa agir em conjunto.')),
@@ -109,13 +109,14 @@ declare
   v_item_key text; v_item_qty integer; v_save_player jsonb; v_item_hp integer; v_item_max_hp integer; v_item_heal integer; v_item_name text;
   v_stages jsonb; v_boss_stages jsonb; v_change jsonb; v_stat text; v_delta integer; v_old_stage integer; v_stage_mult numeric;
   v_effect jsonb; v_effect_status text; v_effect_chance numeric; v_boss_status text; v_boss_sleep integer; v_boss_confusion integer;
-  v_skip_boss_action boolean:=false; v_labels jsonb:='{"attack":"Ataque","defense":"Defesa","specialAttack":"Ataque Especial","specialDefense":"Defesa Especial","speed":"Velocidade","accuracy":"Precisao","evasion":"Evasao"}'::jsonb;
+  v_skip_boss_action boolean:=false; v_protect_streak integer; v_protect_success boolean;
+  v_labels jsonb:='{"attack":"Ataque","defense":"Defesa","specialAttack":"Ataque Especial","specialDefense":"Defesa Especial","speed":"Velocidade","accuracy":"Precisao","evasion":"Evasao"}'::jsonb;
 begin
   select * into v_room from public.coop_boss_rooms where room_code=upper(p_code) for update;
-  if not found or v_room.status<>'battle' then raise exception 'A raid não está em andamento.'; end if;
+  if not found or v_room.status<>'battle' then raise exception 'A raid nÃ£o estÃ¡ em andamento.'; end if;
   v_user:=auth.uid()::text;
   select value into v_member from jsonb_array_elements(v_room.members) where value->>'user_id'=v_user;
-  if v_member is null then raise exception 'Você não participa desta raid.'; end if;
+  if v_member is null then raise exception 'VocÃª nÃ£o participa desta raid.'; end if;
   v_actions:=v_room.actions;
   v_state:=v_room.battle->'participants'->v_user; v_team:=v_member->'team'; v_hp:=v_state->'hp'; v_active:=(v_state->>'active')::integer;
   if clock_timestamp()>=v_room.turn_deadline then
@@ -124,53 +125,53 @@ begin
       if not (v_actions ? v_user) then v_actions:=jsonb_set(v_actions,array[v_user],'{"type":"wait"}'::jsonb,true); end if;
     end loop;
   else
-  if v_actions ? v_user then raise exception 'Sua ação deste turno já foi enviada.'; end if;
-  if jsonb_typeof(p_action) is distinct from 'object' or coalesce(p_action->>'type','') not in ('move','switch','struggle','wait','item') then raise exception 'Ação inválida.'; end if;
+  if v_actions ? v_user then raise exception 'Sua aÃ§Ã£o deste turno jÃ¡ foi enviada.'; end if;
+  if jsonb_typeof(p_action) is distinct from 'object' or coalesce(p_action->>'type','') not in ('move','switch','struggle','wait','item') then raise exception 'AÃ§Ã£o invÃ¡lida.'; end if;
   if p_action->>'type'='wait' then
-    if exists(select 1 from jsonb_array_elements_text(v_hp) h where h.value::integer>0) and clock_timestamp()<v_room.turn_deadline then raise exception 'Só é possível aguardar sem Pokémon saudável ou após o tempo da rodada.'; end if;
+    if exists(select 1 from jsonb_array_elements_text(v_hp) h where h.value::integer>0) and clock_timestamp()<v_room.turn_deadline then raise exception 'SÃ³ Ã© possÃ­vel aguardar sem PokÃ©mon saudÃ¡vel ou apÃ³s o tempo da rodada.'; end if;
   elsif p_action->>'type'='switch' then
-    if coalesce(p_action->>'index','') !~ '^[0-5]$' then raise exception 'Pokémon inválido.'; end if;
+    if coalesce(p_action->>'index','') !~ '^[0-5]$' then raise exception 'PokÃ©mon invÃ¡lido.'; end if;
     v_idx:=(p_action->>'index')::integer;
-    if v_idx>=jsonb_array_length(v_team) or (v_hp->>v_idx)::integer<=0 then raise exception 'Escolha um Pokémon saudável.'; end if;
-    if v_idx=v_active and (v_hp->>v_active)::integer>0 then raise exception 'Esse Pokémon já está em campo.'; end if;
+    if v_idx>=jsonb_array_length(v_team) or (v_hp->>v_idx)::integer<=0 then raise exception 'Escolha um PokÃ©mon saudÃ¡vel.'; end if;
+    if v_idx=v_active and (v_hp->>v_active)::integer>0 then raise exception 'Esse PokÃ©mon jÃ¡ estÃ¡ em campo.'; end if;
   elsif p_action->>'type'='item' then
     v_item_key:=p_action->>'key';
-    if v_item_key is null or v_item_key not in ('potions','superpotion','hyperpotion','fullrestore','revive','maxrevive') then raise exception 'Esse item não pode ser usado na raid.'; end if;
-    if coalesce(p_action->>'index','') !~ '^[0-5]$' then raise exception 'Pokémon alvo inválido.'; end if;
+    if v_item_key is null or v_item_key not in ('potions','superpotion','hyperpotion','fullrestore','revive','maxrevive') then raise exception 'Esse item nÃ£o pode ser usado na raid.'; end if;
+    if coalesce(p_action->>'index','') !~ '^[0-5]$' then raise exception 'PokÃ©mon alvo invÃ¡lido.'; end if;
     v_idx:=(p_action->>'index')::integer;
-    if v_idx>=jsonb_array_length(v_team) then raise exception 'Pokémon alvo inválido.'; end if;
+    if v_idx>=jsonb_array_length(v_team) then raise exception 'PokÃ©mon alvo invÃ¡lido.'; end if;
     v_item_hp:=greatest(0,(v_hp->>v_idx)::integer);
     v_item_max_hp:=greatest(1,(v_team->v_idx->>'maxHp')::integer);
-    if v_item_key in ('revive','maxrevive') and v_item_hp>0 then raise exception 'Revive só pode ser usado em Pokémon desmaiados.'; end if;
-    if v_item_key not in ('revive','maxrevive') and (v_item_hp<=0 or v_item_hp>=v_item_max_hp) then raise exception 'Esse Pokémon não precisa de cura.'; end if;
+    if v_item_key in ('revive','maxrevive') and v_item_hp>0 then raise exception 'Revive sÃ³ pode ser usado em PokÃ©mon desmaiados.'; end if;
+    if v_item_key not in ('revive','maxrevive') and (v_item_hp<=0 or v_item_hp>=v_item_max_hp) then raise exception 'Esse PokÃ©mon nÃ£o precisa de cura.'; end if;
     select gs.player into v_save_player from public.game_saves gs where gs.user_id=auth.uid() for update;
-    if not found then raise exception 'Save do treinador não encontrado.'; end if;
+    if not found then raise exception 'Save do treinador nÃ£o encontrado.'; end if;
     v_item_qty:=case
       when jsonb_typeof(v_save_player->v_item_key)='number' then greatest(0,(v_save_player->>v_item_key)::integer)
       when jsonb_typeof(v_save_player->'items'->v_item_key)='number' then greatest(0,(v_save_player->'items'->>v_item_key)::integer)
       else 0 end;
-    if v_item_qty<1 then raise exception 'Você não possui esse item.'; end if;
+    if v_item_qty<1 then raise exception 'VocÃª nÃ£o possui esse item.'; end if;
     v_save_player:=jsonb_set(v_save_player,'{items}',case when jsonb_typeof(v_save_player->'items')='object' then v_save_player->'items' else '{}'::jsonb end,true);
     v_save_player:=jsonb_set(v_save_player,array['items',v_item_key],to_jsonb(v_item_qty-1),true);
     if jsonb_typeof(v_save_player->v_item_key)='number' then v_save_player:=jsonb_set(v_save_player,array[v_item_key],to_jsonb(v_item_qty-1),true); end if;
     update public.game_saves set player=v_save_player,updated_at=now() where user_id=auth.uid();
-  elsif (v_hp->>v_active)::integer<=0 then raise exception 'Escolha um Pokémon saudável para continuar.';
+  elsif (v_hp->>v_active)::integer<=0 then raise exception 'Escolha um PokÃ©mon saudÃ¡vel para continuar.';
   elsif p_action->>'type'='struggle' then
     if jsonb_typeof(v_state->'pp')='array' and exists(
       select 1 from jsonb_array_elements(coalesce(v_team->v_active->'moves','[]'::jsonb)) with ordinality m(value,ordinality)
       where coalesce((m.value->>'power')::integer,0)>0
         and coalesce(((v_state->'pp'->>(coalesce((select sum(jsonb_array_length(coalesce(p.value->'moves','[]'::jsonb))) from jsonb_array_elements(v_team) with ordinality p(value,ordinality) where p.ordinality<=v_active),0)+m.ordinality-1)))::integer,0)>0
-    ) then raise exception 'Ainda há golpes com PP. Use Esforço depois que todos acabarem.'; end if;
+    ) then raise exception 'Ainda hÃ¡ golpes com PP. Use EsforÃ§o depois que todos acabarem.'; end if;
   elsif p_action->>'type'='move' then
-    if coalesce(p_action->>'index','') !~ '^[0-3]$' then raise exception 'Golpe inválido.'; end if;
+    if coalesce(p_action->>'index','') !~ '^[0-3]$' then raise exception 'Golpe invÃ¡lido.'; end if;
     v_move_idx:=(p_action->>'index')::integer; v_move:=v_team->v_active->'moves'->v_move_idx;
-    if v_move is null then raise exception 'Golpe inválido.'; end if;
+    if v_move is null then raise exception 'Golpe invÃ¡lido.'; end if;
     v_pp:=v_state->'pp';
     if jsonb_typeof(v_pp)='array' then
       select coalesce(sum(jsonb_array_length(coalesce(p.value->'moves','[]'::jsonb))),0)::integer into v_pp_index
         from jsonb_array_elements(v_team) with ordinality p(value,ordinality) where p.ordinality<=v_active;
       v_pp_index:=v_pp_index+v_move_idx;
-      if coalesce((v_pp->>v_pp_index)::integer,0)<=0 then raise exception 'Esse golpe está sem PP.'; end if;
+      if coalesce((v_pp->>v_pp_index)::integer,0)<=0 then raise exception 'Esse golpe estÃ¡ sem PP.'; end if;
     end if;
   end if;
   v_actions:=jsonb_set(v_actions,array[v_user],p_action,true);
@@ -193,12 +194,14 @@ begin
   loop
     v_user:=v_member->>'user_id'; v_state:=v_states->v_user; v_team:=v_member->'team'; v_hp:=v_state->'hp'; v_active:=(v_state->>'active')::integer; v_action:=v_actions->v_user;
     if v_action->>'type'='wait' then
-      v_log:=v_log||jsonb_build_array((v_member->>'name')||' não conseguiu agir nesta rodada.');
+      v_state:=jsonb_set(v_state,'{protect_chain}','0'::jsonb,true);
+      v_log:=v_log||jsonb_build_array((v_member->>'name')||' nÃ£o conseguiu agir nesta rodada.');
     elsif v_action->>'type'='switch' then
       v_active:=(v_action->>'index')::integer;
-      v_state:=jsonb_set(v_state,'{stages}','{}'::jsonb,true); v_state:=jsonb_set(v_state,'{protect}','false'::jsonb,true);
+      v_state:=jsonb_set(v_state,'{stages}','{}'::jsonb,true); v_state:=jsonb_set(v_state,'{protect}','false'::jsonb,true); v_state:=jsonb_set(v_state,'{protect_chain}','0'::jsonb,true);
       v_log:=v_log||jsonb_build_array((v_member->>'name')||' trocou para '||(v_team->v_active->>'name')||'.');
     elsif v_action->>'type'='item' then
+      v_state:=jsonb_set(v_state,'{protect_chain}','0'::jsonb,true);
       v_item_key:=v_action->>'key'; v_idx:=(v_action->>'index')::integer;
       v_item_hp:=greatest(0,(v_hp->>v_idx)::integer); v_item_max_hp:=greatest(1,(v_team->v_idx->>'maxHp')::integer);
       v_item_heal:=case v_item_key
@@ -210,9 +213,9 @@ begin
         when 'maxrevive' then v_item_max_hp
         else 0 end;
       v_item_name:=case v_item_key
-        when 'potions' then 'Poção'
-        when 'superpotion' then 'Super Poção'
-        when 'hyperpotion' then 'Hiper Poção'
+        when 'potions' then 'PoÃ§Ã£o'
+        when 'superpotion' then 'Super PoÃ§Ã£o'
+        when 'hyperpotion' then 'Hiper PoÃ§Ã£o'
         when 'fullrestore' then 'Restaurar Tudo'
         when 'revive' then 'Revive'
         when 'maxrevive' then 'Max Revive'
@@ -225,11 +228,14 @@ begin
     elsif v_action->>'type'='struggle' and v_boss_hp>0 then
       v_damage:=least(60,v_boss_hp);
       v_boss_hp:=greatest(0,v_boss_hp-v_damage);
-      v_log:=v_log||jsonb_build_array((v_team->v_active->>'name')||' usou Esforço e causou '||v_damage||' de dano.');
+      v_log:=v_log||jsonb_build_array((v_team->v_active->>'name')||' usou EsforÃ§o e causou '||v_damage||' de dano.');
     elsif v_action->>'type'='move' and v_boss_hp<=0 then
-      v_log:=v_log||jsonb_build_array((v_team->v_active->>'name')||' não precisou atacar: Mewtwo já havia sido derrotado.');
+      v_log:=v_log||jsonb_build_array((v_team->v_active->>'name')||' nÃ£o precisou atacar: Mewtwo jÃ¡ havia sido derrotado.');
     else
       v_move_idx:=(v_action->>'index')::integer; v_move:=v_team->v_active->'moves'->v_move_idx;
+      if not (coalesce((v_move->>'protect')::boolean,false) or lower(coalesce(v_move->>'name','')) in ('protect','detect','endure','wide guard','quick guard','king''s shield','spiky shield','baneful bunker','obstruct','silk trap','burning bulwark')) then
+        v_state:=jsonb_set(v_state,'{protect_chain}','0'::jsonb,true);
+      end if;
       v_power:=greatest(0,coalesce((v_move->>'power')::integer,0));
       v_base:=((2*greatest(1,(v_team->v_active->>'level')::numeric)/5+2)*v_power/50)+2;
       v_physical:=coalesce(v_move->>'category','physical')='physical';
@@ -280,9 +286,12 @@ begin
           end if;
           if lower(coalesce(v_move->>'name',''))='rest' then v_state:=jsonb_set(v_state,'{status}','"sleep"'::jsonb,true); v_state:=jsonb_set(v_state,'{sleep_turns}','2'::jsonb,true); end if;
         end if;
-        if v_move->'protect'='true'::jsonb then
-          v_state:=jsonb_set(v_state,'{protect}','true'::jsonb,true);
-          v_log:=v_log||jsonb_build_array((v_team->v_active->>'name')||' se protegeu com '||(v_move->>'name')||'.');
+        if coalesce((v_move->>'protect')::boolean,false) or lower(coalesce(v_move->>'name','')) in ('protect','detect','endure','wide guard','quick guard','king''s shield','spiky shield','baneful bunker','obstruct','silk trap','burning bulwark') then
+          v_protect_streak:=greatest(0,least(6,coalesce((v_state->>'protect_chain')::integer,0)));
+          v_protect_success:=random()<power(1.0/3.0,v_protect_streak);
+          v_state:=jsonb_set(v_state,'{protect_chain}',to_jsonb(case when v_protect_success then least(6,v_protect_streak+1) else 0 end),true);
+          v_state:=jsonb_set(v_state,'{protect}',to_jsonb(v_protect_success),true);
+          v_log:=v_log||jsonb_build_array((v_team->v_active->>'name')||case when v_protect_success then ' se protegeu com ' else ' falhou ao usar ' end||(v_move->>'name')||'.');
         end if;
         if v_damage>0 and random()<greatest(0,least(1,coalesce((v_move->>'flinchChance')::numeric,0))) then v_skip_boss_action:=true; v_log:=v_log||jsonb_build_array('Mewtwo recuou com o golpe!'); end if;
         for v_change in select value from jsonb_array_elements(coalesce(v_move->'statChanges','[]'::jsonb)) loop
@@ -331,7 +340,9 @@ begin
         v_state:=jsonb_set(v_state,'{hp}',v_hp,true);
       end if;
       v_boss_hp:=greatest(0,v_boss_hp-v_damage);
-      v_log:=v_log||jsonb_build_array(case when v_missed then (v_team->v_active->>'name')||' errou '||(v_move->>'name')||'.' when v_power=0 then (v_team->v_active->>'name')||' usou '||(v_move->>'name')||'.' else (v_team->v_active->>'name')||' usou '||(v_move->>'name')||' e causou '||v_damage||' de dano.'||case when v_critical and v_damage>0 then ' Crítico!' else '' end||case when v_mult>=2 then ' Super efetivo!' when v_mult>0 and v_mult<1 then ' Pouco efetivo.' else '' end end);
+      if not (coalesce((v_move->>'protect')::boolean,false) or lower(coalesce(v_move->>'name','')) in ('protect','detect','endure','wide guard','quick guard','king''s shield','spiky shield','baneful bunker','obstruct','silk trap','burning bulwark')) then
+      v_log:=v_log||jsonb_build_array(case when v_missed then (v_team->v_active->>'name')||' errou '||(v_move->>'name')||'.' when v_power=0 then (v_team->v_active->>'name')||' usou '||(v_move->>'name')||'.' else (v_team->v_active->>'name')||' usou '||(v_move->>'name')||' e causou '||v_damage||' de dano.'||case when v_critical and v_damage>0 then ' CrÃ­tico!' else '' end||case when v_mult>=2 then ' Super efetivo!' when v_mult>0 and v_mult<1 then ' Pouco efetivo.' else '' end end);
+      end if;
     end if;
     v_state:=jsonb_set(v_state,'{active}',to_jsonb(v_active),true); v_states:=jsonb_set(v_states,array[v_user],v_state,true);
   end loop;
@@ -357,7 +368,7 @@ begin
     end if;
     if v_boss_confusion=0 then v_boss_status:=null; v_log:=v_log||jsonb_build_array('Mewtwo saiu da confusao.'); end if;
   end if;
-  -- Mewtwo retaliates against each trainer that still has a conscious Pokémon.
+  -- Mewtwo retaliates against each trainer that still has a conscious PokÃ©mon.
   if v_boss_hp>0 then
     for v_member in select value from jsonb_array_elements(v_room.members) loop
       v_user:=v_member->>'user_id'; v_state:=v_states->v_user; v_team:=v_member->'team'; v_hp:=v_state->'hp'; v_active:=(v_state->>'active')::integer;
@@ -391,7 +402,7 @@ begin
         else v_base:=((2*100/5+2)*90/50)+2; v_stage_mult:=coalesce((v_boss_stages->>'specialAttack')::integer,0); v_base:=v_base*case when v_stage_mult>=0 then (2+v_stage_mult)/2.0 else 2.0/(2-v_stage_mult) end; v_damage:=greatest(1,floor(v_base*1.5*v_mult*(0.85+random()*0.15)*0.925/v_defense*(case when v_critical then 1.5 else 1 end)*0.45)::integer); end if;
         v_hp:=jsonb_set(v_hp,array[v_active::text],to_jsonb(greatest(0,(v_hp->>v_active)::integer-v_damage)),false);
         v_state:=jsonb_set(v_state,'{hp}',v_hp,true); v_state:=jsonb_set(v_state,'{active}',to_jsonb(v_active),true); v_states:=jsonb_set(v_states,array[v_user],v_state,true);
-        v_log:=v_log||jsonb_build_array(case when v_damage=0 then 'Mewtwo não conseguiu causar dano à equipe de '||(v_member->>'name')||'.' else 'Mewtwo atingiu a equipe de '||(v_member->>'name')||' por '||v_damage||' de dano.'||case when v_critical then ' Crítico!' else '' end end);
+        v_log:=v_log||jsonb_build_array(case when v_damage=0 then 'Mewtwo nÃ£o conseguiu causar dano Ã  equipe de '||(v_member->>'name')||'.' else 'Mewtwo atingiu a equipe de '||(v_member->>'name')||' por '||v_damage||' de dano.'||case when v_critical then ' CrÃ­tico!' else '' end end);
       end if;
     end loop;
   end if;

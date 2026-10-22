@@ -59,7 +59,11 @@ update public.pvp_rooms r set battle = r.battle || jsonb_build_object(
   'hostStages', coalesce(r.battle->'hostStages',(select jsonb_agg(jsonb_build_object('attack',0,'defense',0,'specialAttack',0,'specialDefense',0,'speed',0,'accuracy',0,'evasion',0) order by p.ordinality) from jsonb_array_elements(r.host_team) with ordinality p(pokemon,ordinality))),
   'guestStages', coalesce(r.battle->'guestStages',(select jsonb_agg(jsonb_build_object('attack',0,'defense',0,'specialAttack',0,'specialDefense',0,'speed',0,'accuracy',0,'evasion',0) order by p.ordinality) from jsonb_array_elements(r.guest_team) with ordinality p(pokemon,ordinality))),
   'hostStatus', coalesce(r.battle->'hostStatus',(select jsonb_agg('null'::jsonb order by p.ordinality) from jsonb_array_elements(r.host_team) with ordinality p(pokemon,ordinality))),
-  'guestStatus', coalesce(r.battle->'guestStatus',(select jsonb_agg('null'::jsonb order by p.ordinality) from jsonb_array_elements(r.guest_team) with ordinality p(pokemon,ordinality)))
+  'guestStatus', coalesce(r.battle->'guestStatus',(select jsonb_agg('null'::jsonb order by p.ordinality) from jsonb_array_elements(r.guest_team) with ordinality p(pokemon,ordinality))),
+  'hostProtect', coalesce(r.battle->'hostProtect','false'::jsonb),
+  'guestProtect', coalesce(r.battle->'guestProtect','false'::jsonb),
+  'hostProtectChain', coalesce(r.battle->'hostProtectChain','0'::jsonb),
+  'guestProtectChain', coalesce(r.battle->'guestProtectChain','0'::jsonb)
 ) where r.status='battle';
 
 alter table public.pvp_rooms enable row level security;
@@ -238,7 +242,8 @@ begin
   if v_room.guest_team->0->>'ability'='Intimidate' then v_host_stages := jsonb_set(v_host_stages,'{0,attack}','-1'::jsonb,true); end if;
   v_battle := jsonb_build_object('hostActive',0,'guestActive',0,'hostHp',v_host_hp,'guestHp',v_guest_hp,
     'hostPp',v_host_pp,'guestPp',v_guest_pp,'hostStages',v_host_stages,'guestStages',v_guest_stages,
-    'hostStatus',v_host_status,'guestStatus',v_guest_status,
+    'hostStatus',v_host_status,'guestStatus',v_guest_status,'hostProtect',false,'guestProtect',false,
+    'hostProtectChain',0,'guestProtectChain',0,
     'log',jsonb_build_array('A batalha entre '||v_room.host_name||' e '||v_room.guest_name||' começou!'),
     'winner_user_id',null,'result','');
   update public.pvp_rooms set status='battle',battle=v_battle,turn=1,turn_deadline=clock_timestamp()+interval '45 seconds',updated_at=now()
@@ -355,6 +360,10 @@ declare
   v_status_name text;
   v_status_chance numeric;
   v_status_immune boolean;
+  v_is_protect boolean;
+  v_target_protected boolean;
+  v_protect_streak integer;
+  v_feint boolean;
   v_residual numeric;
   v_healing numeric;
   v_max_hp numeric;
@@ -439,10 +448,12 @@ begin
       if v_side='host' then
         v_state := jsonb_set(v_state,ARRAY['hostStages',v_host_active::text],jsonb_build_object('attack',0,'defense',0,'specialAttack',0,'specialDefense',0,'speed',0,'accuracy',0,'evasion',0),true);
         v_state := jsonb_set(v_state,ARRAY['hostStages',v_temp_index::text],jsonb_build_object('attack',0,'defense',0,'specialAttack',0,'specialDefense',0,'speed',0,'accuracy',0,'evasion',0),true);
+        v_state := jsonb_set(v_state,'{hostProtectChain}','0'::jsonb,true);
         v_host_active := v_temp_index;
       else
         v_state := jsonb_set(v_state,ARRAY['guestStages',v_guest_active::text],jsonb_build_object('attack',0,'defense',0,'specialAttack',0,'specialDefense',0,'speed',0,'accuracy',0,'evasion',0),true);
         v_state := jsonb_set(v_state,ARRAY['guestStages',v_temp_index::text],jsonb_build_object('attack',0,'defense',0,'specialAttack',0,'specialDefense',0,'speed',0,'accuracy',0,'evasion',0),true);
+        v_state := jsonb_set(v_state,'{guestProtectChain}','0'::jsonb,true);
         v_guest_active := v_temp_index;
       end if;
       v_logs := v_logs || jsonb_build_array(((case when v_side='host' then v_room.host_team else v_room.guest_team end)->v_temp_index->>'name') || ' entrou na batalha.');
@@ -488,6 +499,7 @@ begin
     v_major_status := v_state->(v_attacker_side||'Status')->v_attacker_index;
     v_status_name := v_major_status->>'status';
     if v_status_name='sleep' then
+      v_state := jsonb_set(v_state,ARRAY[v_attacker_side||'ProtectChain'],'0'::jsonb,true);
       if coalesce((v_major_status->>'turns')::integer,1)>1 then
         v_major_status := jsonb_set(v_major_status,'{turns}',to_jsonb((v_major_status->>'turns')::integer-1),true);
         v_state := jsonb_set(v_state,ARRAY[v_attacker_side||'Status',v_attacker_index::text],v_major_status,true);
@@ -498,9 +510,11 @@ begin
         v_logs := v_logs || jsonb_build_array((v_attacker->>'name')||' acordou!');
       end if;
     elsif v_status_name='freeze' then
+      v_state := jsonb_set(v_state,ARRAY[v_attacker_side||'ProtectChain'],'0'::jsonb,true);
       v_logs := v_logs || jsonb_build_array((v_attacker->>'name')||' esta congelado e nao conseguiu agir.');
       continue;
     elsif v_status_name='paralysis' and random()<.25 then
+      v_state := jsonb_set(v_state,ARRAY[v_attacker_side||'ProtectChain'],'0'::jsonb,true);
       v_logs := v_logs || jsonb_build_array((v_attacker->>'name')||' esta paralisado e nao conseguiu agir.');
       continue;
     end if;
@@ -516,6 +530,29 @@ begin
     v_move_name := coalesce(v_move->>'name','Golpe');
     v_move_type := coalesce(v_move->>'type','Normal');
     v_power := coalesce((v_move->>'power')::numeric,0);
+    v_is_protect := coalesce((v_move->>'protect')::boolean,false) or lower(v_move_name) in
+      ('protect','detect','endure','wide guard','quick guard','king''s shield','spiky shield','baneful bunker','obstruct','silk trap','burning bulwark');
+    if v_is_protect then
+      v_protect_streak := greatest(0,least(6,coalesce((v_state->>(v_attacker_side||'ProtectChain'))::integer,0)));
+      v_is_protect := random()<power(1.0/3.0,v_protect_streak);
+      v_state := jsonb_set(v_state,ARRAY[v_attacker_side||'ProtectChain'],to_jsonb(case when v_is_protect then least(6,v_protect_streak+1) else 0 end),true);
+      v_state := jsonb_set(v_state,ARRAY[v_attacker_side||'Protect'],to_jsonb(v_is_protect),true);
+      v_logs := v_logs || jsonb_build_array((v_attacker->>'name')||case when v_is_protect then ' se protegeu com ' else ' falhou ao usar ' end||v_move_name||'.');
+      continue;
+    else
+      v_state := jsonb_set(v_state,ARRAY[v_attacker_side||'ProtectChain'],'0'::jsonb,true);
+    end if;
+    v_target_protected := coalesce((v_state->>(v_defender_side||'Protect'))::boolean,false);
+    v_feint := lower(v_move_name)='feint';
+    if v_target_protected and lower(coalesce(v_move->>'target','')) not in ('user','user-or-ally','user-and-allies','users-and-allies','users-field','user-side','ally','allies','ally-side','ally-team','opponents-field','entire-field','field') then
+      if v_feint then
+        v_state := jsonb_set(v_state,ARRAY[v_defender_side||'Protect'],'false'::jsonb,true);
+        v_logs := v_logs || jsonb_build_array(v_move_name||' quebrou a proteção de '||(v_defender->>'name')||'!');
+      else
+        v_logs := v_logs || jsonb_build_array((v_defender->>'name')||' se protegeu e bloqueou '||v_move_name||'!');
+        continue;
+      end if;
+    end if;
     v_move_priority := coalesce((v_move->>'priority')::integer,0);
     v_accuracy := coalesce((v_move->>'accuracy')::numeric,100);
     v_accuracy_stage := coalesce((v_state->(v_attacker_side||'Stages')->v_attacker_index->>'accuracy')::numeric,0);
@@ -657,6 +694,8 @@ begin
     end if;
   end loop;
 
+  v_state := jsonb_set(v_state,'{hostProtect}','false'::jsonb,true);
+  v_state := jsonb_set(v_state,'{guestProtect}','false'::jsonb,true);
   v_state := jsonb_set(v_state,'{log}',v_logs,true);
   select exists(select 1 from jsonb_array_elements_text(v_state->'hostHp') h(value) where h.value::numeric>0) into v_host_alive;
   select exists(select 1 from jsonb_array_elements_text(v_state->'guestHp') h(value) where h.value::numeric>0) into v_guest_alive;

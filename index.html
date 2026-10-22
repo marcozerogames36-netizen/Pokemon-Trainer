@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pokémon Trainer — Dashboard</title>
+  <title>Poké Trainer — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -26,6 +26,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html {
       scroll-behavior: smooth;
+      touch-action: manipulation;
       scrollbar-color: var(--border) var(--card);
       scrollbar-width: thin;
     }
@@ -152,6 +153,10 @@
     .social-subpanel h4 span { display:grid; place-items:center; min-width:25px; height:25px; padding:0 6px; border-radius:8px; background:#ffffff0c; color:var(--text-muted); font-size:.72rem; }
     .social-friend-row { padding:13px !important; border-radius:12px !important; background:var(--card) !important; }
     .social-friend-actions { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+    .social-friend-trade-picker { order:0; }
+    .social-friend-actions .social-trade-button { order:1; }
+    .social-friend-actions .social-battle-button { order:2; }
+    .social-friend-actions .social-chat-button { order:3; }
     .social-friend-actions select { max-width:180px; min-width:120px !important; }
     .social-trade-picker { display:flex; align-items:center; gap:8px; min-width:0; }
     .social-pokemon-options { display:flex; align-items:stretch; gap:7px; max-width:min(46vw,390px); overflow-x:auto; padding:3px 2px 7px; scrollbar-width:thin; }
@@ -262,7 +267,8 @@
     .message-notification-item { display:block; width:100%; padding:12px 15px; border:0; border-bottom:1px solid var(--border); background:transparent; color:var(--text); text-align:left; font:inherit; cursor:pointer; }
     .message-notification-item:hover { background:rgba(124,58,237,.12); }
     .message-notification-item.unread { background:rgba(124,58,237,.08); }
-    .message-notification-item strong { display:flex; justify-content:space-between; gap:10px; font-size:.82rem; }
+    .message-notification-item.read { opacity:.78; }
+    .message-notification-item strong { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.82rem; }
     .message-notification-item small { color:var(--text-muted); font-size:.68rem; font-weight:400; white-space:nowrap; }
     .message-notification-preview { display:block; margin-top:5px; color:var(--text-muted); font-size:.8rem; overflow-wrap:anywhere; }
     .message-notification-empty { padding:18px 15px; color:var(--text-muted); font-size:.82rem; }
@@ -270,7 +276,20 @@
     .topbar-profile:hover, .topbar-profile.active { border-color: var(--primary); background: rgba(124,58,237,.12); }
     .topbar-profile:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
     .topbar-profile .player-info { flex: 1; min-width: 0; overflow: hidden; }
-    .topbar-profile .player-avatar { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg,#7c3aed,#ec4899); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex: 0 0 auto; }
+    .topbar-profile .player-avatar { width: 34px; height: 34px; overflow: hidden; border-radius: 10px; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex: 0 0 auto; }
+    .topbar-profile .player-avatar img { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+    .profile-trainer-avatar { width:72px; height:72px; flex:0 0 72px; display:grid; place-items:center; overflow:hidden; border:1px solid var(--border); border-radius:14px; background:var(--input-bg); }
+    .profile-trainer-avatar img { width:100%; height:100%; object-fit:contain; image-rendering:pixelated; }
+    .trainer-avatar-picker { padding-top:16px; margin-top:16px; border-top:1px solid var(--border); }
+    .trainer-avatar-picker h3 { margin:0 0 5px; font-size:.95rem; }
+    .trainer-avatar-picker p { margin:0 0 12px; color:var(--text-muted); font-size:.78rem; }
+    .trainer-avatar-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(76px,1fr)); gap:8px; }
+    .trainer-avatar-option { min-width:0; padding:7px 4px 6px; display:flex; flex-direction:column; align-items:center; gap:3px; border:1px solid var(--border); border-radius:10px; background:var(--input-bg); color:var(--text); font:inherit; cursor:pointer; }
+    .trainer-avatar-option:hover { border-color:var(--primary-hover); }
+    .trainer-avatar-option.selected { border-color:var(--primary); background:rgba(124,58,237,.14); box-shadow:0 0 0 1px var(--primary); }
+    .trainer-avatar-option img { width:48px; height:48px; object-fit:contain; image-rendering:pixelated; }
+    .trainer-avatar-option span { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.68rem; }
+    .trainer-avatar-save { margin-top:12px; }
     .topbar-profile .player-name { max-width: 112px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .84rem; font-weight: 700; }
     .topbar-profile .player-meta { margin-top: 1px; color: var(--text-muted); font-size: .68rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .topbar-logout { flex: 0 0 auto; width: auto; margin: 0; padding: 9px 12px; white-space: nowrap; }
@@ -1045,6 +1064,11 @@
     }
     .player-sprite.attack-anim {
       animation: playerAttack 0.45s ease;
+    }
+    .player-sprite.protect-glow, .enemy-sprite.protect-glow { animation: protectGlow 1s ease-in-out; }
+    @keyframes protectGlow {
+      0%, 100% { filter: drop-shadow(0 6px 12px rgba(0,0,0,.45)) brightness(1); }
+      35%, 70% { filter: drop-shadow(0 0 18px #a78bfa) drop-shadow(0 0 7px #fff) brightness(1.65); }
     }
     @keyframes enemyAttack {
       0% { transform: translate(0,0); }
@@ -1905,7 +1929,7 @@
     <div class="container">
       <div class="card">
         <div id="authScreen" class="screen active">
-          <div class="logo"><div class="logo-icon"><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pokébola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></div><h1>Pokémon Trainer</h1><p>Entre ou crie sua conta de treinador</p><p id="authStatus" role="status" style="margin-top:10px;">Conectando ao serviço online...</p></div>
+          <div class="logo"><div class="logo-icon"><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pokébola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></div><h1>Poké Trainer</h1><p>Entre ou crie sua conta de treinador</p><p id="authStatus" role="status" style="margin-top:10px;">Conectando ao serviço online...</p></div>
           <div class="tabs">
             <button type="button" class="tab active" data-tab="login">Entrar</button>
             <button type="button" class="tab" data-tab="register">Registrar</button>
@@ -2019,9 +2043,9 @@
     <div class="main">
       <header class="topbar">
         <div class="topbar-left">
-          <div class="topbar-brand" aria-label="Pok&#233;mon Trainer">
+          <div class="topbar-brand" aria-label="Pok&#233; Trainer">
             <span class="topbar-brand-mark"><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pok&#233;bola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></span>
-            <span class="topbar-brand-name">Pok&#233;mon Trainer</span>
+            <span class="topbar-brand-name">Pok&#233; Trainer</span>
           </div>
           <div class="location-badge">📍 Região atual: Kanto</div>
         </div>
@@ -2043,7 +2067,7 @@
             </div>
           </div>
           <button type="button" class="player-card topbar-profile" id="playerProfileLink" onclick="switchPanel('profile')" aria-label="Abrir perfil do treinador">
-            <div class="player-avatar" id="dashAvatar">&#9794;&#65039;</div>
+            <div class="player-avatar" id="dashAvatar" aria-label="Avatar do treinador"></div>
             <div class="player-info">
               <div class="player-name" id="dashName">Treinador</div>
               <div class="player-meta" id="dashMeta">Kanto</div>
@@ -3274,6 +3298,33 @@
       return effects[move.name] || null;
     }
 
+    function isProtectMove(move) {
+      const name = String(move?.name || '').trim().toLowerCase();
+      return Boolean(move?.protect || getStatusMoveEffect(move)?.status === 'protect' || ['protect','detect','endure','wide guard','quick guard',"king's shield",'spiky shield','baneful bunker','obstruct','silk trap','burning bulwark'].includes(name));
+    }
+
+    function moveTargetsProtectedPokemon(move) {
+      const target = String(move?.target || '').trim().toLowerCase();
+      return !['user','user-or-ally','user-and-allies','users-and-allies','users-field','user-side','ally','allies','ally-side','ally-team','opponents-field','entire-field','field'].includes(target);
+    }
+
+    function attemptProtect(side) {
+      if (!battle) return false;
+      const key = side === 'enemy' ? 'enemyProtectStreak' : 'playerProtectStreak';
+      const streak = Math.max(0, Math.min(6, Number(battle[key]) || 0));
+      const succeeded = Math.random() < Math.pow(1 / 3, streak);
+      battle[key] = succeeded ? Math.min(6, streak + 1) : 0;
+      return succeeded;
+    }
+
+    function playProtectGlow(sprite) {
+      if (!sprite) return;
+      sprite.classList.remove('attack-anim', 'protect-glow');
+      void sprite.offsetWidth;
+      sprite.classList.add('protect-glow');
+      setTimeout(() => sprite.classList.remove('protect-glow'), 1000);
+    }
+
     function canReceiveStatus(pokemon, status) {
       const hp = pokemon && Number.isFinite(pokemon.currentHp) ? pokemon.currentHp : pokemon && pokemon.hp;
       if (!pokemon || hp <= 0 || pokemon.status) return false;
@@ -3287,6 +3338,7 @@
     }
 
     function applyMoveStatus(attacker, defender, move) {
+      if (isProtectMove(move)) return '';
       if (defender?.heldItem === 'covert_cloak' && move?.power > 0 && move?.target !== 'user') return '';
       if (move?.name?.toLowerCase() === 'rest' && move.target === 'user' && attacker && attacker.hp > 0) {
         attacker.status = 'sleep'; attacker.sleepTurns = 2; attacker.hp = attacker.maxHp;
@@ -4751,7 +4803,7 @@
         ? `background:${d.color};padding:0;overflow:hidden;height:120px;`
         : `background:${d.color};display:flex;align-items:center;justify-content:center;height:110px;`;
       return `
-        <div class="game-card" onclick="startDungeonBattle('${d.name}')">
+        <div class="game-card" onclick="startDungeonBattle(${escapeHTML(JSON.stringify(d.name))})">
           <div class="game-card-header" style="${headerStyle}">${headerInner}</div>
           <div class="game-card-body">
             <div class="game-card-title">${d.name}</div>
@@ -5363,7 +5415,60 @@
       if (quickMissionCount) quickMissionCount.textContent = `${player.missionsDone} / ${MISSIONS.length}`;
     }
 
-    let selectedGender = null, selectedStarter = null, player = null;
+    let selectedGender = null, selectedStarter = null, player = null, pendingTrainerAvatar = null;
+    const TRAINER_AVATARS = [
+      { id: 'red', name: 'Red' }, { id: 'leaf-gen3', name: 'Leaf' },
+      { id: 'brock', name: 'Brock' }, { id: 'misty', name: 'Misty' },
+      { id: 'ltsurge', name: 'Lt. Surge' }, { id: 'erika', name: 'Erika' },
+      { id: 'koga', name: 'Koga' }, { id: 'sabrina', name: 'Sabrina' },
+      { id: 'blaine', name: 'Blaine' }, { id: 'giovanni', name: 'Giovanni' }
+    ];
+
+    function trainerAvatarConfig(includePending = true) {
+      const avatarId = includePending ? (pendingTrainerAvatar || player?.trainerAvatar) : player?.trainerAvatar;
+      const selected = TRAINER_AVATARS.find(avatar => avatar.id === avatarId);
+      if (selected) return selected;
+      return player?.gender === 'Masculino' ? TRAINER_AVATARS[0] : TRAINER_AVATARS[1];
+    }
+
+    function renderTrainerAvatarOptions() {
+      const selectedId = trainerAvatarConfig().id;
+      const savedId = trainerAvatarConfig(false).id;
+      return `<section class="trainer-avatar-picker" aria-labelledby="trainerAvatarHeading">
+        <h3 id="trainerAvatarHeading">Imagem de perfil</h3>
+        <p>Escolha um sprite de treinador Pokémon.</p>
+        <div class="trainer-avatar-grid">${TRAINER_AVATARS.map(avatar => `<button type="button" class="trainer-avatar-option ${avatar.id === selectedId ? 'selected' : ''}" aria-pressed="${avatar.id === selectedId}" aria-label="Usar sprite de ${escapeHTML(avatar.name)}" onclick="setTrainerAvatar('${avatar.id}')"><img src="https://play.pokemonshowdown.com/sprites/trainers/${avatar.id}.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'" /><span>${escapeHTML(avatar.name)}</span></button>`).join('')}</div>
+        <button type="button" class="btn trainer-avatar-save" onclick="saveTrainerAvatar()" ${selectedId === savedId ? 'disabled' : ''}>Salvar</button>
+      </section>`;
+    }
+
+    function setTrainerAvatar(avatarId) {
+      if (!player || !TRAINER_AVATARS.some(avatar => avatar.id === avatarId)) return;
+      pendingTrainerAvatar = avatarId;
+      refreshProfileUI();
+    }
+
+    function saveTrainerAvatar() {
+      if (!player || !pendingTrainerAvatar || !TRAINER_AVATARS.some(avatar => avatar.id === pendingTrainerAvatar)) return;
+      player.trainerAvatar = pendingTrainerAvatar;
+      pendingTrainerAvatar = null;
+      applyTrainerAvatar();
+      refreshProfileUI();
+      saveGame();
+      showToast('Imagem de perfil salva.');
+    }
+
+    function applyTrainerAvatar() {
+      if (!player) return;
+      const avatar = trainerAvatarConfig(false);
+      const container = document.getElementById('dashAvatar');
+      if (!container) return;
+      const image = document.createElement('img');
+      image.src = `https://play.pokemonshowdown.com/sprites/trainers/${avatar.id}.png`;
+      image.alt = `Sprite de ${avatar.name}`;
+      image.onerror = () => container.replaceChildren(document.createTextNode('\u{1F3A9}'));
+      container.replaceChildren(image);
+    }
     let battle = null; // current battle state
 
     function showToast(msg, type='success') {
@@ -8723,7 +8828,8 @@
       document.getElementById('dashboard').classList.add('active');
       document.getElementById('dashName').textContent = player.name;
       document.getElementById('dashMeta').textContent = `Origem: ${player.originRegion}`;
-      document.getElementById('dashAvatar').textContent = player.gender === 'Masculino' ? '♂️' : '♀️';
+      pendingTrainerAvatar = null;
+      applyTrainerAvatar();
       document.getElementById('adminHomeCard').style.display = isAdminAccount() ? '' : 'none';
       document.getElementById('itemCatalogHomeCard').style.display = isAdminAccount() ? '' : 'none';
       document.getElementById('welcomeName').textContent = player.name;
@@ -8732,17 +8838,19 @@
       updateStatsUI();
       socialStart();
 
+      const profilePokemon = player.party?.[0] || player.starter;
       document.getElementById('profileBox').innerHTML = `
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-          <img src="${SPRITE(player.starter.id)}" style="width:72px;height:72px;object-fit:contain;" onerror="this.src='${SPRITE_FB(player.starter.id)}'" />
+          <div class="profile-trainer-avatar"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainerAvatarConfig().id}.png" alt="Sprite de ${escapeHTML(trainerAvatarConfig().name)}" onerror="this.style.visibility='hidden'" /></div>
           <div><div style="font-size:1.2rem;font-weight:700;">${escapeHTML(player.name)}</div>
           <div style="color:var(--text-muted);font-size:0.85rem;">${escapeHTML(player.gender)} · Origem: ${escapeHTML(player.originRegion)}</div></div>
         </div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Localização</span><span style="font-weight:600;">Kanto</span></div>
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Inicial</span><span style="font-weight:600;">${escapeHTML(player.starter.name)}</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">1º Pokémon da equipe</span><span style="display:flex;align-items:center;gap:6px;font-weight:600;"><img src="${SPRITE(profilePokemon.id)}" alt="" style="width:28px;height:28px;object-fit:contain;image-rendering:pixelated;" onerror="this.src='${SPRITE_FB(profilePokemon.id)}'" />${escapeHTML(profilePokemon.name)}</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Nível</span><span style="font-weight:600;">${player.level}</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Dinheiro</span><span style="font-weight:600;">₽ ${player.money.toLocaleString('pt-BR')}</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Poções</span><span style="font-weight:600;">${player.potions}</span></div>
+        ${renderTrainerAvatarOptions()}
       `;
       renderWeeklyLoginRewards();
 
@@ -9166,7 +9274,7 @@
       if (id === 'item-catalog') renderItemCatalog();
       if (id === 'pokemon') refreshPartyUI();
       if (id === 'pokedex') renderPokedex();
-      if (id === 'profile') refreshProfileUI();
+      if (id === 'profile') { pendingTrainerAvatar = null; refreshProfileUI(); }
       if (id === 'social') socialRefresh();
       if (id === 'gyms') renderGyms();
       if (id === 'battle-tower') renderBattleTower();
@@ -9199,8 +9307,28 @@
     let pvpTimerInterval = null;
     let pvpLastTimeoutResolveAt = 0;
     const pvpClaimedRewardRooms = new Set();
+    const pvpProtectAnimationKeys = new Set();
     let pvpClaimingRewardRoom = null;
     const pvpBaseStatsCache = new Map();
+
+    function pvpAnimateProtectActions(room = pvpRoom) {
+      if (!room || room.status !== 'battle') return;
+      const mySide = pvpIsHost() ? 'host' : 'guest';
+      for (const side of ['host', 'guest']) {
+        const action = room[`${side}_action`];
+        if (action?.type !== 'move') continue;
+        const active = Number(room.battle?.[`${side}Active`]) || 0;
+        const pokemon = room[`${side}_team`]?.[active];
+        const move = pokemon?.moves?.[Number(action.index)];
+        if (!isProtectMove(move)) continue;
+        const key = `${room.id}:${room.turn}:${side}`;
+        if (pvpProtectAnimationKeys.has(key)) continue;
+        pvpProtectAnimationKeys.add(key);
+        setTimeout(() => pvpProtectAnimationKeys.delete(key), 2000);
+        const selector = side === mySide ? '.player-sprite' : '.enemy-sprite';
+        requestAnimationFrame(() => playProtectGlow(document.querySelector(`#pvpContent ${selector}`)));
+      }
+    }
 
     function pvpGetSelectedTeam() {
       if (!player || !(pvpSelectedIndices instanceof Set)) return [];
@@ -9244,10 +9372,10 @@
           name: String(move.name || 'Golpe'), type: getCurrentMoveType(move), category: move.category || (isPhysicalMove(move) ? 'physical' : 'special'),
           power: Math.max(0, Math.min(250, Math.floor(Number(move.power) || 0))),
           accuracy: move.accuracy !== null && move.accuracy !== undefined && Number.isFinite(Number(move.accuracy)) ? Math.max(1, Math.min(100, Number(move.accuracy))) : 100,
-          priority: Math.max(-7,Math.min(7,Math.floor(Number(move.priority ?? ({'quick attack':1,'mach punch':1,'extreme speed':1,'protect':3,'detect':3,'endure':3,'follow me':1,'helping hand':5,'counter':-5,'mirror coat':-5,'vital throw':-1,'focus punch':-3}[String(move.name||'').toLowerCase()] ?? 0))||0))),
+          priority: isProtectMove(move) ? (['wide guard','quick guard'].includes(String(move.name||'').trim().toLowerCase()) ? 3 : 4) : Math.max(-7,Math.min(7,Math.floor(Number(move.priority ?? ({'quick attack':1,'mach punch':1,'extreme speed':1,'follow me':2,'helping hand':5,'counter':-5,'mirror coat':-5,'vital throw':-1,'focus punch':-3}[String(move.name||'').toLowerCase()] ?? 0))||0))),
           target: String(move.target||''), healing: Math.max(0,Math.min(100,Number(move.healing)||0)), drain: Math.max(0,Math.min(100,Number(move.drain)||0)),
           recoil: Math.max(0,Math.min(100,Number(move.recoil)||0)), minHits: Math.max(1,Math.min(10,Math.floor(Number(move.minHits)||1))), maxHits: Math.max(1,Math.min(10,Math.floor(Number(move.maxHits)||1))), critRate: Math.max(0,Math.min(3,Math.floor(Number(move.critRate)||0))), flinchChance: Math.max(0,Math.min(1,Number(move.flinchChance)||0)),
-          statusEffect: (()=>{const effect=getStatusMoveEffect(move);return effect&&['burn','paralysis','poison','sleep','freeze','confusion'].includes(effect.status)?{status:effect.status,chance:Math.max(0,Math.min(1,Number(effect.chance)||0))}:move.protect?{status:'protect',chance:1}:null})(), protect:Boolean(move.protect),
+          statusEffect: (()=>{const effect=getStatusMoveEffect(move);return effect&&['burn','paralysis','poison','sleep','freeze','confusion'].includes(effect.status)?{status:effect.status,chance:Math.max(0,Math.min(1,Number(effect.chance)||0))}:isProtectMove(move)?{status:'protect',chance:1}:null})(), protect:isProtectMove(move),
           statChanges: Array.isArray(move.statChanges) ? move.statChanges.filter(change=>['self','target','attacker'].includes(change.target)&&['attack','defense','specialAttack','specialDefense','speed','accuracy','evasion'].includes(change.stat)).map(change=>({target:change.target,stat:change.stat,stages:Math.max(-6,Math.min(6,Number(change.stages)||0))})) : [],
           pp: Math.max(1, Math.floor(Number(move.maxPp) || Number(move.pp) || 10)),
           maxPp: Math.max(1, Math.floor(Number(move.maxPp) || Number(move.pp) || 10))
@@ -9601,6 +9729,7 @@
         </div>
         <div class="battle-ui"><div class="battle-log" aria-live="polite" style="margin:0">${escapeHTML(latestLog)}</div><div class="pvp-turn-prompt">${myActionPending?'':activeHp<=0?'Seu Pokémon desmaiou. Escolha quem entrará na batalha.':pvpBattleMenu==='moves'?'Escolha um golpe.':pvpBattleMenu==='switch'?'Escolha um Pokémon para trocar.':'Escolha sua ação.'}</div>${actionMenu}</div>
       </div>`;
+      pvpAnimateProtectActions(room);
       pvpTimerTick();
     }
 
@@ -9715,7 +9844,8 @@
       const me=(room.members||[]).find(member=>member.user_id===onlineUser?.id);
       const state=room.battle?.participants?.[onlineUser?.id],oldState=previous.battle?.participants?.[onlineUser?.id];
       const oldPokemon=me?.team?.[Number(oldState?.active)||0];
-      const playerAttacked=Boolean(oldPokemon&&newEvents.some(line=>line.startsWith(`${oldPokemon.name} usou `)||line.startsWith(`${oldPokemon.name} errou `)));
+      const playerProtected=Boolean(oldPokemon&&newEvents.some(line=>line.startsWith(`${oldPokemon.name} se protegeu com `)));
+      const playerAttacked=Boolean(oldPokemon&&!playerProtected&&newEvents.some(line=>line.startsWith(`${oldPokemon.name} usou `)||line.startsWith(`${oldPokemon.name} errou `)));
       const bossDamaged=newEvents.some(line=>/causou [1-9]\d* de dano\./.test(line));
       const bossAttackEvent=me&&newEvents.find(line=>line.startsWith(`Mewtwo atingiu a equipe de ${me.name} `));
       const bossAttacked=Boolean(bossAttackEvent&&/por [1-9]\d* de dano/.test(bossAttackEvent));
@@ -9743,7 +9873,8 @@
           if(stage){const number=document.createElement('div');number.className='dmg-float';number.textContent=`-${damage}`;number.style.left=left;number.style.top=top;stage.appendChild(number);setTimeout(()=>number.remove(),900);}
         }
       };
-      if(playerAttacked)requestAnimationFrame(()=>animate('.player-sprite'));
+      if(playerProtected)requestAnimationFrame(()=>playProtectGlow(document.querySelector('#coopBossContent .player-sprite')));
+      else if(playerAttacked)requestAnimationFrame(()=>animate('.player-sprite'));
       const dealtToBoss=newEvents.reduce((sum,line)=>sum+(Number(line.match(/causou (\d+) de dano\./)?.[1])||0),0);
       const bossHitDelay=playerAttacked?380:120;
       if(bossDamaged||bossHp!==Number(previous.battle?.mewtwo_hp))setTimeout(()=>requestAnimationFrame(()=>showHit('.enemy-sprite','.enemy-stage',dealtToBoss,'48%','18%','.enemy-info',bossHp,bossMaxHp)),bossHitDelay);
@@ -10361,6 +10492,7 @@
         return;
       }
       battle.busy = true;
+      battle.playerProtectStreak = 0;
       backToMenu();
       player.poke.hp = battle.playerHp;
       player.poke = p;
@@ -10419,6 +10551,7 @@
       normalizePokemonMoves(player.poke);
       const statusBlock = tryActDespiteStatus(player.poke);
       if (statusBlock) {
+        battle.playerProtectStreak = 0;
         battle.busy = true;
         backToMenu();
         battle.playerHp = player.poke.hp;
@@ -10466,8 +10599,27 @@
         move.pp -= 1;
         saveGame();
       }
-      const protectBlocked = Boolean(battle.enemyProtected && move.target !== 'user');
-      if (protectBlocked) battle.enemyProtected = false;
+      if (isProtectMove(move)) {
+        const protectedThisTurn = attemptProtect('player');
+        battle.playerProtected = protectedThisTurn;
+        battle.enemyProtected = false;
+        battle.busy = true;
+        backToMenu();
+        playProtectGlow(document.getElementById('playerSprite'));
+        setLog(protectedThisTurn
+          ? `${player.poke.name} usou ${move.name} e se protegeu!`
+          : `${player.poke.name} usou ${move.name}, mas a proteção falhou.`);
+        setTimeout(() => {
+          if (!battle) return;
+          battle.turn = 'enemy';
+          enemyAttack();
+        }, 450);
+        return;
+      }
+      battle.playerProtectStreak = 0;
+      const feintBreaksProtection = String(move.name || '').trim().toLowerCase() === 'feint';
+      const protectBlocked = Boolean(battle.enemyProtected && moveTargetsProtectedPokemon(move) && !feintBreaksProtection);
+      battle.enemyProtected = false;
       battle.busy = true;
       backToMenu();
       const moveType = normalizeBattleType(move.type || 'Normal');
@@ -10489,9 +10641,12 @@
       let dmg = dreamEaterBlocked ? 0 : rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(player.poke, moveType, physical) * (critical ? 1.5 : 1))) : 0;
 
       const pSprite = document.getElementById('playerSprite');
-      pSprite.classList.add('attack-anim');
-      SFX.attack();
-      setTimeout(() => pSprite.classList.remove('attack-anim'), 450);
+      if (isProtectMove(move)) playProtectGlow(pSprite);
+      else {
+        pSprite.classList.add('attack-anim');
+        SFX.attack();
+        setTimeout(() => pSprite.classList.remove('attack-anim'), 450);
+      }
 
       setLog(`${player.poke.name} usou ${move.name}!`);
       setTimeout(() => {
@@ -10513,9 +10668,12 @@
         }
         updateEnemyHpBar();
         const eSprite = document.getElementById('enemySprite');
-        eSprite.classList.add('hit');
-        setTimeout(() => eSprite.classList.remove('hit'), 350);
-        if (dmg === 0 && move.power > 0) SFX.miss();
+        if (!protectBlocked) {
+          eSprite.classList.add('hit');
+          setTimeout(() => eSprite.classList.remove('hit'), 350);
+        }
+        if (protectBlocked) SFX.miss();
+        else if (dmg === 0 && move.power > 0) SFX.miss();
         else if (mult >= 2) SFX.hitSuper();
         else if (mult > 0 && mult < 1) SFX.hitWeak();
         else SFX.hit();
@@ -10535,14 +10693,14 @@
         let abilityMessage = evaded ? `${battle.enemy.name} desviou do golpe!` : '';
         if (sash.message) abilityMessage = `${abilityMessage} ${sash.message}`.trim();
         if (recoilMessage) abilityMessage = `${abilityMessage} ${recoilMessage}`.trim();
-        if (immunity === 'Water Absorb' || immunity === 'Volt Absorb') {
+        if (!protectBlocked && (immunity === 'Water Absorb' || immunity === 'Volt Absorb')) {
           const healed = Math.min(battle.enemy.maxHp - battle.enemy.currentHp, Math.max(1, Math.floor(battle.enemy.maxHp / 4)));
           battle.enemy.currentHp += healed;
           abilityMessage = `${battle.enemy.name} recuperou ${healed} HP com ${immunity}!`;
-        } else if (immunity === 'Flash Fire') {
+        } else if (!protectBlocked && immunity === 'Flash Fire') {
           battle.enemy.flashFireActive = true;
           abilityMessage = `${battle.enemy.name} absorveu o fogo com Flash Fire!`;
-        } else if (immunity) abilityMessage = `${battle.enemy.name} evitou o golpe com ${immunity}!`;
+        } else if (!protectBlocked && immunity) abilityMessage = `${battle.enemy.name} evitou o golpe com ${immunity}!`;
         const abilityStatus = applyAbilityOnHit(player.poke, battle.enemy, dmg > 0);
         if (abilityStatus) abilityMessage = `${abilityMessage} ${abilityStatus}`.trim();
         const targetEffectBlocked = evaded || protectBlocked;
@@ -10550,7 +10708,7 @@
         const statChangeMessage = targetEffectBlocked ? '' : applyMoveStatChanges(player.poke, battle.enemy, move, dmg);
         const fieldMessage = targetEffectBlocked ? '' : applyBattleFieldMove(player.poke, move);
         const selfKnockoutMessage = targetEffectBlocked ? '' : applyMoveSelfKnockout(player.poke, battle.enemy, move);
-        const heldMessage = applyHeldItemTrigger(battle.enemy, mult >= 2);
+        const heldMessage = applyHeldItemTrigger(battle.enemy, mult >= 2 && !protectBlocked);
         const playerHeldMessage = applyHeldItemTrigger(player.poke);
         const shellBellMessage = applyShellBell(player.poke, dmg);
         const drainMessage = applyMoveDrain(player.poke, move, dmg);
@@ -10647,7 +10805,7 @@
 
       const supportMoves = moves.filter(move => {
         if (Number(move.power) > 0) return false;
-        if (move.protect) return !battle.enemyProtected;
+        if (isProtectMove(move)) return !battle.enemyProtected;
         const effect = getStatusMoveEffect(move);
         if (effect && canReceiveStatus(player.poke, effect.status)) return true;
         return (Array.isArray(move.statChanges) ? move.statChanges : []).some(change => {
@@ -10663,6 +10821,7 @@
 
     function enemyAttack() {
       if (!battle || battle.enemy.currentHp <= 0) return;
+      battle.enemyProtected = false;
       let dailyBossBuffMessage = '';
       if (battle.isDailyBoss) {
         battle.dailyBossTurnCount = (battle.dailyBossTurnCount || 0) + 1;
@@ -10689,12 +10848,15 @@
       }
       if (battle.quickClawSkip) {
         battle.quickClawSkip = false; battle.turn = 'player'; battle.busy = false;
+        battle.playerProtected = false;
         const endTurnHeldMessage = applyBattleHeldItemsAtTurnEnd();
         setLog([`${player.poke.name} se moveu primeiro com Quick Claw!`, dailyBossBuffMessage, endTurnHeldMessage].filter(Boolean).join(' '));
         return;
       }
       const statusBlock = tryActDespiteStatus(battle.enemy);
       if (statusBlock) {
+        battle.enemyProtectStreak = 0;
+        battle.playerProtected = false;
         const endTurnHeldMessage = applyBattleHeldItemsAtTurnEnd();
         tickGuardSpecTurn();
         tickBattleScreens();
@@ -10708,9 +10870,16 @@
         }
         return;
       }
-      const moves = (battle.enemy.moves || []).filter(move => move.power > 0 || move.statusEffect || move.statChanges || move.protect || getStatusMoveEffect(move)).filter(move => battle.enemy.heldItem !== 'assault_vest' || move.power > 0);
+      const moves = (battle.enemy.moves || []).filter(move => move.power > 0 || move.statusEffect || move.statChanges || isProtectMove(move) || getStatusMoveEffect(move)).filter(move => battle.enemy.heldItem !== 'assault_vest' || move.power > 0);
       const move = chooseBestEnemyMove(moves);
-      if (move.protect) battle.enemyProtected = true;
+      const enemyAttemptedProtect = isProtectMove(move);
+      const enemyUsedProtect = enemyAttemptedProtect && attemptProtect('enemy');
+      if (!enemyAttemptedProtect) battle.enemyProtectStreak = 0;
+      if (enemyUsedProtect) battle.enemyProtected = true;
+      const playerHadProtect = Boolean(battle.playerProtected);
+      const feintBypassesProtect = String(move?.name || '').trim().toLowerCase() === 'feint';
+      const protectionBlocked = playerHadProtect && !enemyAttemptedProtect && moveTargetsProtectedPokemon(move) && !feintBypassesProtect;
+      battle.playerProtected = false;
       const moveType = normalizeBattleType(move.type || 'Normal');
       const defTypes = getTypes(player.poke.id);
       const mult = typeMultiplier(moveType, defTypes);
@@ -10721,7 +10890,7 @@
       const burnMultiplier = battle.enemy.status === 'burn' && physical && battle.enemy.ability !== 'Guts' ? 0.5 : 1;
       const immunity = abilityTypeImmunity(player.poke, moveType);
       const evaded = isSelfTargetingStatusMove(move) ? false : doesMoveMiss(battle.enemy, player.poke, move);
-      const effectiveMult = immunity || evaded || dreamEaterBlocked ? 0 : mult;
+      const effectiveMult = immunity || evaded || dreamEaterBlocked || protectionBlocked ? 0 : mult;
       const critical = Math.random() < getCriticalHitChance((battle.enemyCritStage || 0) + (battle.enemy.heldItem === 'scope_lens' ? 1 : 0));
       const effectivePower = move.name === 'Rage Fist' ? Math.min(350, 50 + 50 * (battle.enemy.rageFistHits || 0)) : move.power;
       const rawDamage = calcDamage(battle.enemy.level || 5, player.poke.level, effectivePower, effectiveMult, hasStab) * (Number(battle.enemy.id) === 80 ? 0.7 : 1) * (move.name === 'Facade' && battle.enemy.status ? 2 : 1);
@@ -10731,12 +10900,29 @@
       let dmg = dreamEaterBlocked ? 0 : rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(battle.enemy, moveType, physical) * (critical ? 1.5 : 1))) : 0;
 
       const eSprite = document.getElementById('enemySprite');
-      eSprite.classList.add('attack-anim');
-      SFX.attack();
-      setTimeout(() => eSprite.classList.remove('attack-anim'), 450);
+      if (enemyUsedProtect) playProtectGlow(eSprite);
+      else {
+        eSprite.classList.add('attack-anim');
+        SFX.attack();
+        setTimeout(() => eSprite.classList.remove('attack-anim'), 450);
+      }
 
       setLog(`${battle.enemy.name} usou ${move.name}!`);
       setTimeout(() => {
+        if (enemyAttemptedProtect) {
+          const protectionMessage = enemyUsedProtect
+            ? `${battle.enemy.name} usou ${move.name} e se protegeu!`
+            : `${battle.enemy.name} usou ${move.name}, mas a proteção falhou.`;
+          const residualMessage = applyBattleHeldItemsAtTurnEnd();
+          tickBattleScreens();
+          updatePlayerHpBar();
+          updateEnemyHpBar();
+          setLog([protectionMessage, dailyBossBuffMessage, residualMessage].filter(Boolean).join(' '));
+          saveGame();
+          battle.turn = 'player';
+          battle.busy = false;
+          return;
+        }
         const sash = applyFocusSash(player.poke, battle.playerHp, dmg);
         dmg = sash.damage;
         battle.playerHp = Math.max(0, battle.playerHp - dmg);
@@ -10749,9 +10935,12 @@
         }
         updatePlayerHpBar();
         const pSprite = document.getElementById('playerSprite');
-        pSprite.classList.add('hit');
-        setTimeout(() => pSprite.classList.remove('hit'), 350);
-        if (dmg === 0 && move.power > 0) SFX.miss();
+        if (!protectionBlocked) {
+          pSprite.classList.add('hit');
+          setTimeout(() => pSprite.classList.remove('hit'), 350);
+        }
+        if (protectionBlocked) SFX.miss();
+        else if (dmg === 0 && move.power > 0) SFX.miss();
         else if (mult >= 2) SFX.hitSuper();
         else if (mult > 0 && mult < 1) SFX.hitWeak();
         else SFX.hit();
@@ -10762,7 +10951,8 @@
         let msg = dmg === 0
           ? (move.power <= 0 ? `${battle.enemy.name} não causou dano.` : 'Não teve efeito...')
           : `Causou ${dmg} de dano em ${player.poke.name}!`;
-        if (move.protect) msg = `${battle.enemy.name} usou Protect e se protegeu dos golpes deste turno.`;
+        if (protectionBlocked) msg = `${player.poke.name} se protegeu e bloqueou ${move.name}!`;
+        if (enemyUsedProtect) msg = `${battle.enemy.name} usou Protect e se protegeu dos golpes deste turno.`;
         if (dreamEaterBlocked) msg = `${move.name} falhou: o alvo precisa estar dormindo.`;
         if (dailyBossBuffMessage) msg += ` ${dailyBossBuffMessage}`;
         if (critical && dmg > 0) msg += ' Acerto crítico!';
@@ -10770,23 +10960,24 @@
         else if (!dreamEaterBlocked && mult > 0 && mult < 1) msg += ' Não é muito efetivo...';
         let abilityMessage = evaded ? `${player.poke.name} desviou do golpe!` : '';
         if (sash.message) abilityMessage = `${abilityMessage} ${sash.message}`.trim();
-        if (immunity === 'Water Absorb' || immunity === 'Volt Absorb') {
+        if (!protectionBlocked && (immunity === 'Water Absorb' || immunity === 'Volt Absorb')) {
           const healed = Math.min(player.poke.maxHp - battle.playerHp, Math.max(1, Math.floor(player.poke.maxHp / 4)));
           battle.playerHp += healed;
           player.poke.hp = battle.playerHp;
           abilityMessage = `${player.poke.name} recuperou ${healed} HP com ${immunity}!`;
-        } else if (immunity === 'Flash Fire') {
+        } else if (!protectionBlocked && immunity === 'Flash Fire') {
           player.poke.flashFireActive = true;
           abilityMessage = `${player.poke.name} absorveu o fogo com Flash Fire!`;
-        } else if (immunity) abilityMessage = `${player.poke.name} evitou o golpe com ${immunity}!`;
+        } else if (!protectionBlocked && immunity) abilityMessage = `${player.poke.name} evitou o golpe com ${immunity}!`;
         const abilityStatus = applyAbilityOnHit(battle.enemy, player.poke, dmg > 0);
         if (abilityStatus) abilityMessage = `${abilityMessage} ${abilityStatus}`.trim();
-        const statusMessage = evaded ? '' : applyMoveStatus(battle.enemy, player.poke, move);
-        const statChangeMessage = evaded ? '' : applyMoveStatChanges(battle.enemy, player.poke, move, dmg);
-        const fieldMessage = evaded ? '' : applyBattleFieldMove(battle.enemy, move);
-        const selfKnockoutMessage = evaded ? '' : applyMoveSelfKnockout(battle.enemy, player.poke, move);
+        const moveBlocked = evaded || protectionBlocked;
+        const statusMessage = moveBlocked ? '' : applyMoveStatus(battle.enemy, player.poke, move);
+        const statChangeMessage = moveBlocked ? '' : applyMoveStatChanges(battle.enemy, player.poke, move, dmg);
+        const fieldMessage = moveBlocked ? '' : applyBattleFieldMove(battle.enemy, move);
+        const selfKnockoutMessage = moveBlocked ? '' : applyMoveSelfKnockout(battle.enemy, player.poke, move);
         tickGuardSpecTurn();
-        const heldMessage = applyHeldItemTrigger(player.poke, mult >= 2);
+        const heldMessage = applyHeldItemTrigger(player.poke, mult >= 2 && !protectionBlocked);
         const enemyHeldMessage = applyHeldItemTrigger(battle.enemy);
         const shellBellMessage = applyShellBell(battle.enemy, dmg);
         const drainMessage = applyMoveDrain(battle.enemy, move, dmg);
@@ -10864,6 +11055,7 @@
       const p = player.party[idx];
       if (!p || p.hp <= 0 || p === player.poke || (battle.isGym && !isGymPokemonEligible(p))) return;
       battle.forceSwitch = false;
+      battle.playerProtectStreak = 0;
       backToMenu();
       player.poke = p;
       battle.playerStatStages = {};
@@ -10891,6 +11083,7 @@
 
     function useBattleBagItem(key) {
       if (!battle || battle.busy) return;
+      battle.playerProtectStreak = 0;
       ensureBagItems();
       const qty = getItemQty(key);
       const item = BATTLE_BAG_ITEMS.find(entry => entry.key === key);
@@ -12685,20 +12878,21 @@
       const active = player.party[0] || player.starter;
       box.innerHTML = `
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-          <img src="${SPRITE_POKEMON(active)}" style="width:72px;height:72px;object-fit:contain;background:transparent;" onerror="this.src='${SPRITE_FB(active.id)}'" />
+          <div class="profile-trainer-avatar"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainerAvatarConfig().id}.png" alt="Sprite de ${escapeHTML(trainerAvatarConfig().name)}" onerror="this.style.visibility='hidden'" /></div>
           <div>
             <div style="font-size:1.2rem;font-weight:700;">${escapeHTML(player.name)}</div>
             <div style="color:var(--text-muted);font-size:0.85rem;">${escapeHTML(player.gender)} · Origem: ${escapeHTML(player.originRegion)}</div>
           </div>
         </div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Localização</span><span style="font-weight:600;">Kanto</span></div>
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Inicial</span><span style="font-weight:600;">${escapeHTML(player.starter.name)}</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">1º Pokémon da equipe</span><span style="display:flex;align-items:center;gap:6px;font-weight:600;"><img src="${SPRITE(active.id)}" alt="" style="width:28px;height:28px;object-fit:contain;image-rendering:pixelated;" onerror="this.src='${SPRITE_FB(active.id)}'" />${escapeHTML(active.name)}</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Nível do Treinador</span><span style="font-weight:600;">${player.level}</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Dinheiro</span><span style="font-weight:600;">₽ ${player.money.toLocaleString('pt-BR')}</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Insígnias</span><span style="font-weight:600;">${player.badges}/8 (${badges})</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Equipe</span><span style="font-weight:600;">${partyCount} / 6</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Pokédex</span><span style="font-weight:600;">${caught} capturados</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:0.875rem;"><span style="color:var(--text-muted);">Poções / Bolas</span><span style="font-weight:600;">${player.potions} / ${player.balls}</span></div>
+        ${renderTrainerAvatarOptions()}
       `;
       renderWeeklyLoginRewards();
     }
@@ -12783,7 +12977,10 @@
         if (!initialized) {
           try { localStorage.setItem(initializedKey,'1'); } catch {}
         }
-        messages.forEach(message=>{ if (!readIds.has(message.id)) socialUnreadMessageIds.add(message.id); });
+        messages.forEach(message=>{
+          if (readIds.has(message.id)) socialUnreadMessageIds.delete(message.id);
+          else socialUnreadMessageIds.add(message.id);
+        });
         const pendingRequestKeys=new Set(requests.map(request=>`friend-request:${request.id}`));
         for (const key of socialUnreadMessageIds) {
           if (key.startsWith('friend-request:')&&!pendingRequestKeys.has(key)) socialUnreadMessageIds.delete(key);
@@ -12818,7 +13015,7 @@
         const preview=item.notificationType==='friend-request'?'Enviou um pedido de amizade.':String(item.body||'').trim();
         const sentAt=new Date(item.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
         const unread=socialUnreadMessageIds.has(item.readKey);
-        return `<button type="button" class="message-notification-item ${unread?'unread':''}" onclick="socialOpenNotification('${item.notificationType}','${item.id}')"><strong><span>${escapeHTML(sender)}${unread?' &middot; Nova':''}</span><small>${escapeHTML(sentAt)}</small></strong><span class="message-notification-preview">${escapeHTML(preview)}</span></button>`;
+        return `<button type="button" class="message-notification-item ${unread?'unread':'read'}" aria-label="${unread?'Não lida':'Lida'}: ${escapeHTML(sender)}" onclick="socialOpenNotification('${item.notificationType}','${item.id}')"><strong><span>${escapeHTML(sender)}</span><small>${unread?'Nova':'Lida'} · ${escapeHTML(sentAt)}</small></strong><span class="message-notification-preview">${escapeHTML(preview)}</span></button>`;
       }).join('');
     }
 
