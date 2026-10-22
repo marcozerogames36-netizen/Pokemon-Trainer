@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PokeThrower — Dashboard</title>
+  <title>Poké Trainer — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -152,16 +152,14 @@
     .social-subpanel h4 { display:flex; align-items:center; gap:8px; margin:0 0 12px; font-size:.96rem; }
     .social-subpanel h4 span { display:grid; place-items:center; min-width:25px; height:25px; padding:0 6px; border-radius:8px; background:#ffffff0c; color:var(--text-muted); font-size:.72rem; }
     .social-friend-row { padding:13px !important; border-radius:12px !important; background:var(--card) !important; }
-    .social-friend-identity { min-width:0; overflow-wrap:anywhere; }
-    .social-friend-actions { display:flex; align-items:center; gap:7px; flex-wrap:nowrap; min-width:0; }
-    .social-friend-trade-picker { order:0; flex:0 1 260px; min-width:120px; }
+    .social-friend-actions { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+    .social-friend-trade-picker { order:0; }
     .social-friend-actions .social-trade-button { order:1; }
     .social-friend-actions .social-battle-button { order:2; }
     .social-friend-actions .social-chat-button { order:3; }
     .social-friend-actions select { max-width:180px; min-width:120px !important; }
-    .social-friend-trade-picker, .social-trade-picker { min-width:0; }
-    .social-trade-picker { display:flex; align-items:center; gap:8px; }
-    .social-pokemon-options { display:flex; align-items:stretch; gap:7px; min-width:0; max-width:min(32vw,260px); overflow-x:auto; padding:3px 2px 7px; scrollbar-width:thin; }
+    .social-trade-picker { display:flex; align-items:center; gap:8px; min-width:0; }
+    .social-pokemon-options { display:flex; align-items:stretch; gap:7px; max-width:min(46vw,390px); overflow-x:auto; padding:3px 2px 7px; scrollbar-width:thin; }
     .social-pokemon-option { display:flex; flex:0 0 76px; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:86px; padding:5px 4px; border:1px solid var(--border); border-radius:10px; color:var(--text); background:var(--input-bg); cursor:pointer; transition:transform .16s,border-color .16s,background .16s; }
     .social-pokemon-option:hover { transform:translateY(-2px); border-color:#8b5cf6; }
     .social-pokemon-option.selected { border-color:#a855f7; background:linear-gradient(145deg,#39265a,#1d293d); box-shadow:0 0 0 1px #a855f766; }
@@ -859,8 +857,6 @@
     .enemy-stage .sprite-shadow { width: 100px; bottom: 10px; }
     .player-stage .sprite-shadow { width: 110px; bottom: 12px; }
     .enemy-sprite, .player-sprite { position: relative; z-index: 1; }
-    #battleOverlay.viridian-battle .enemy-stage { transform: translate(calc(clamp(62px, 5.6vw, 86px) + 50%), clamp(135px, 24vh, 220px)); transition: transform .25s ease; }
-    #battleOverlay.viridian-battle .player-stage { transform: translate(calc(clamp(-68px, -5vw, -48px) - 50% - 10px), calc(28px - 10%)); transition: transform .25s ease; }
 
     .player-info .poke-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
     .player-info .poke-level { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
@@ -892,23 +888,16 @@
     /* Battle UI bottom */
     .battle-ui {
       width: 100%; max-width: 700px; background: var(--card);
-      border-top: 3px solid var(--primary); border-radius: 20px;
+      border-top: 3px solid var(--primary); border-radius: 20px 20px 0 0;
       padding: 16px 20px 20px; z-index: 2;
-      margin-bottom: 14px; box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
     }
-    #battleOverlay > .battle-ui { position: relative; min-height: 170px; max-width: 640px; box-sizing: border-box; }
     .battle-log {
       background: var(--input-bg); border: 1px solid var(--border);
       border-radius: 10px; padding: 12px 14px; min-height: 52px;
       font-size: 0.9rem; line-height: 1.4; margin-bottom: 14px;
       color: var(--text); display: flex; align-items: center;
     }
-    #battleOverlay > .battle-ui > div:has(> #battleLog) {
-      position: absolute; z-index: 3; left: 12px; right: 12px; bottom: calc(100% + 12px);
-      justify-content: space-between !important; margin: 0 !important;
-    }
-    #battleOverlay #battleLog { flex: 0 1 74% !important; min-width: 0; }
-    #battleOverlay #btnMuteSfx { position: fixed; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); z-index: 120; }
     .battle-actions {
       display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
@@ -947,10 +936,6 @@
       box-shadow: 0 0 14px color-mix(in srgb, var(--move-color) 20%, transparent);
     }
     .move-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .battle-bag-pager { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .battle-bag-page-controls { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: .8rem; font-weight: 700; }
-    .battle-bag-page-btn { width: 42px; min-height: 42px; padding: 6px; justify-content: center; font-size: 1.15rem; }
-    .battle-bag-back { flex: 1; justify-content: center; }
     .move-type {
       font-size: 0.65rem; padding: 2px 6px; border-radius: 4px;
       font-weight: 700; text-transform: uppercase;
@@ -968,21 +953,7 @@
     .battle-result {
       display: none; text-align: center; padding: 20px;
     }
-    .battle-result.show {
-      display: block; position: fixed; z-index: 110; top: 50%; left: 50%;
-      width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 32px);
-      box-sizing: border-box; overflow-y: auto; padding: 22px;
-      transform: translate(-50%, -50%); background: rgba(20, 20, 28, 0.98);
-      border: 1px solid rgba(168, 85, 247, 0.5); border-radius: 18px;
-      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.7), 0 0 28px rgba(124, 58, 237, 0.18);
-    }
-    #battleOverlay > .battle-ui:has(> .battle-result.show) {
-      background: transparent; border-color: transparent; box-shadow: none;
-      pointer-events: none;
-    }
-    #battleOverlay > .battle-ui:has(> .battle-result.show) > :not(#battleResult) { visibility: hidden; }
-    #battleOverlay > .battle-ui:has(> .battle-result.show) #battleMenu { display: grid !important; }
-    #battleOverlay > .battle-ui > .battle-result.show { pointer-events: auto; }
+    .battle-result.show { display: block; }
     .battle-result h3 { font-size: 1.4rem; margin-bottom: 8px; }
     .battle-result p { color: var(--text-muted); margin-bottom: 16px; font-size: 0.9rem; }
     .battle-result .rewards {
@@ -1063,9 +1034,6 @@
       .toast { left: 16px; right: 16px; max-width: none; }
       .battle-actions { grid-template-columns: 1fr 1fr; gap: 8px; }
       .battle-btn, .move-btn { padding: 10px; font-size: 0.8rem; }
-    }
-    @media (max-width: 768px) {
-      #battleOverlay > .battle-ui { min-height: 170px; }
     }
 
     /* Type badges expanded */
@@ -1903,34 +1871,8 @@
       .summary-move { gap: 6px; padding: 8px; font-size: .78rem; }
       .summary-move-controls { margin-left: 4px; }
       .summary-move-controls button { width: 36px; height: 36px; }
-      #battleOverlay { padding-bottom: 0; }
-      #battleOverlay .battle-player { transform: translateY(-clamp(64px, 10vh, 90px)); }
-      #battleOverlay.viridian-battle .battle-field {
-        max-width: none;
-        padding: max(58px, calc(env(safe-area-inset-top) + 48px)) 12px 8px;
-      }
-      #battleOverlay.viridian-battle .enemy-stage {
-        transform: translate(0, clamp(28px, 7vh, 58px));
-      }
-      #battleOverlay.viridian-battle .player-stage {
-        transform: translate(0, 0);
-      }
-      #battleOverlay > .battle-ui {
-        padding: 0 12px calc(14px + env(safe-area-inset-bottom));
-        border-top: 0;
-        border-radius: 0 0 16px 16px;
-        margin-bottom: 0;
-      }
-      #battleOverlay > .battle-ui > div:has(> #battleLog) {
-        left: 0;
-        right: 0;
-        bottom: calc(100% - 1px);
-        padding: 10px 12px 8px;
-        border-top: 3px solid var(--primary);
-        border-radius: 16px 16px 0 0;
-        background: var(--card);
-        box-sizing: border-box;
-      }
+      #battleOverlay { padding-bottom: env(safe-area-inset-bottom); }
+      .battle-ui { padding: 12px 12px calc(14px + env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; }
       .battle-log { min-height: 44px; margin-bottom: 10px; padding: 9px 10px; font-size: .82rem; }
       .battle-btn, .move-btn, .btn { min-height: 44px; }
       .move-btn { gap: 6px; flex-wrap: wrap; overflow-wrap: anywhere; }
@@ -1987,7 +1929,7 @@
     <div class="container">
       <div class="card">
         <div id="authScreen" class="screen active">
-          <div class="logo"><div class="logo-icon"><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pokébola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></div><h1>PokeThrower</h1><p>Entre ou crie sua conta de treinador</p><p id="authStatus" role="status" style="margin-top:10px;">Conectando ao serviço online...</p></div>
+          <div class="logo"><div class="logo-icon"><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pokébola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></div><h1>Poké Trainer</h1><p>Entre ou crie sua conta de treinador</p><p id="authStatus" role="status" style="margin-top:10px;">Conectando ao serviço online...</p></div>
           <div class="tabs">
             <button type="button" class="tab active" data-tab="login">Entrar</button>
             <button type="button" class="tab" data-tab="register">Registrar</button>
@@ -2101,9 +2043,9 @@
     <div class="main">
       <header class="topbar">
         <div class="topbar-left">
-          <div class="topbar-brand" aria-label="PokeThrower">
+          <div class="topbar-brand" aria-label="Pok&#233; Trainer">
             <span class="topbar-brand-mark"><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pok&#233;bola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></span>
-            <span class="topbar-brand-name">PokeThrower</span>
+            <span class="topbar-brand-name">Pok&#233; Trainer</span>
           </div>
           <div class="location-badge">📍 Região atual: Kanto</div>
         </div>
@@ -10182,8 +10124,8 @@
     // ===== REGION BATTLE BACKGROUNDS =====
     const BATTLE_BACKGROUNDS = {
       'Floresta de Viridian': {
-        bg: 'linear-gradient(180deg,#1a2744 0%,#2a4a3a 45%,#1a3a2a 100%)',
-        ground: 'linear-gradient(180deg,transparent,rgba(0,0,0,0.35))'
+        bg: 'linear-gradient(180deg,#14301c 0%,#1e4a28 40%,#2d6a3a 70%,#1a4024 100%)',
+        ground: 'linear-gradient(180deg,transparent,rgba(20,60,30,0.5))'
       },
       'Mt. Moon': {
         bg: 'linear-gradient(180deg,#12121e 0%,#1e1e32 40%,#2a2a40 70%,#181828 100%)',
@@ -10235,10 +10177,8 @@
       const theme = BATTLE_BACKGROUNDS[key] || BATTLE_BACKGROUNDS.default;
       const bg = document.getElementById('battleBg');
       const ground = document.querySelector('.battle-ground');
-      const overlay = document.getElementById('battleOverlay');
       if (bg) bg.style.background = theme.bg;
       if (ground) ground.style.background = theme.ground;
-      if (overlay) overlay.classList.toggle('viridian-battle', key === 'Floresta de Viridian');
     }
 
     function showBattleIntro(playerLabel, enemyLabel, sub, thenFn) {
@@ -11612,33 +11552,23 @@
       }));
     }
 
-    let battleBagPage = 0;
-
     function renderBattleBagMenu() {
       ensureBagItems();
       const bag = document.getElementById('bagMenu');
       if (!bag) return;
-      const availableItems = BATTLE_BAG_ITEMS.filter(item => {
-        const qty = getItemQty(item.key);
-        if (qty <= 0) return false;
-        if (item.kind === 'ball' && (battle.isGym || battle.isTower || battle.isDojo || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour || battle.isDailyBoss)) return false;
-        if (item.kind === 'ball' && battle.dungeon === 'Zona do Safari' && !['safari_ball', 'premier_ball', 'masterball'].includes(item.key)) return false;
-        if (['battleBoost', 'direHit', 'guardSpec'].includes(item.kind)) {
-          if (!player.poke || player.poke.hp <= 0) return false;
-          if (item.kind === 'battleBoost' && item.stat === 'accuracy' && (battle.playerAccuracyStage || 0) >= 6) return false;
-          if (item.kind === 'battleBoost' && item.stat !== 'accuracy' && (battle.playerStatStages?.[item.stat] || 0) >= 6) return false;
-          if (item.kind === 'direHit' && (battle.playerCritStage || 0) >= 4) return false;
-          if (item.kind === 'guardSpec' && (battle.guardSpecTurns || 0) > 0) return false;
-        } else if (item.kind !== 'ball' && !player.party.some(pokemon => canUseItemOnPokemon(item, pokemon))) return false;
-        return true;
-      });
-      const pageSize = 4;
-      const pageCount = Math.max(1, Math.ceil(availableItems.length / pageSize));
-      battleBagPage = Math.max(0, Math.min(battleBagPage, pageCount - 1));
-      const entries = availableItems
-        .slice(battleBagPage * pageSize, (battleBagPage + 1) * pageSize)
+      const entries = BATTLE_BAG_ITEMS
         .map(item => {
           const qty = getItemQty(item.key);
+          if (qty <= 0) return '';
+          if (item.kind === 'ball' && (battle.isGym || battle.isTower || battle.isDojo || battle.isSSAnne || battle.isSilphCo || battle.isEliteFour || battle.isDailyBoss)) return '';
+          if (item.kind === 'ball' && battle.dungeon === 'Zona do Safari' && !['safari_ball', 'premier_ball', 'masterball'].includes(item.key)) return '';
+          if (['battleBoost', 'direHit', 'guardSpec'].includes(item.kind)) {
+            if (!player.poke || player.poke.hp <= 0) return '';
+            if (item.kind === 'battleBoost' && item.stat === 'accuracy' && (battle.playerAccuracyStage || 0) >= 6) return '';
+            if (item.kind === 'battleBoost' && item.stat !== 'accuracy' && (battle.playerStatStages?.[item.stat] || 0) >= 6) return '';
+            if (item.kind === 'direHit' && (battle.playerCritStage || 0) >= 4) return '';
+            if (item.kind === 'guardSpec' && (battle.guardSpecTurns || 0) > 0) return '';
+          } else if (item.kind !== 'ball' && !player.party.some(pokemon => canUseItemOnPokemon(item, pokemon))) return '';
           return `
             <button class="move-btn" onclick="useBattleBagItem('${item.key}')" style="display:flex;align-items:center;gap:8px;">
               ${itemIcon(item.sprite, 'item-icon-sm')}
@@ -11647,26 +11577,17 @@
             </button>
           `;
         })
+        .filter(Boolean)
         .join('');
-      bag.innerHTML = `
-        ${entries || '<div style="grid-column:1/-1;padding:10px 0;color:var(--text-muted);">Nenhum item dispon\u00edvel na mochila.</div>'}
-        <div class="battle-bag-pager">
-          <div class="battle-bag-page-controls">
-            ${pageCount > 1 ? `<button type="button" class="move-btn battle-bag-page-btn" aria-label="Pagina anterior da mochila" onclick="changeBattleBagPage(-1)" ${battleBagPage === 0 ? 'disabled' : ''}>&lsaquo;</button><span>${battleBagPage + 1}/${pageCount}</span><button type="button" class="move-btn battle-bag-page-btn" aria-label="Proxima pagina da mochila" onclick="changeBattleBagPage(1)" ${battleBagPage >= pageCount - 1 ? 'disabled' : ''}>&rsaquo;</button>` : ''}
-          </div>
-          <button type="button" class="move-btn battle-bag-back" onclick="backToMenu()">&larr; Voltar</button>
-        </div>
-      `;
-    }
 
-    function changeBattleBagPage(delta) {
-      battleBagPage += Math.sign(Number(delta) || 0);
-      renderBattleBagMenu();
+      bag.innerHTML = `
+        ${entries || '<div style="padding:10px 0;color:var(--text-muted);">Nenhum item disponível na mochila.</div>'}
+        <button class="move-btn" onclick="backToMenu()" style="grid-column:1/-1;text-align:center;justify-content:center;">← Voltar</button>
+      `;
     }
 
     function showBag() {
       if (battle.busy) return;
-      battleBagPage = 0;
       renderBattleBagMenu();
       document.getElementById('battleMenu').style.display = 'none';
       document.getElementById('movesMenu').style.display = 'none';
@@ -13204,7 +13125,7 @@
         const online=socialIsOnline(friend);
         const tradePicker=`<div class="social-friend-trade-picker">${player.party.length?socialPokemonPicker(`social-trade-${friend.user_id}`,'Pok\u00e9mon para oferecer'):'<small style="color:var(--text-muted);">Sem Pok\u00e9mon na equipe</small>'}</div>`;
         return `<div class="social-friend-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--input-bg);">
-          <div class="social-friend-identity" style="display:flex;align-items:center;gap:9px;"><span aria-label="${online?'Online':'Offline'}" title="${online?'Online':'Offline'}" style="width:10px;height:10px;border-radius:50%;background:${online?'#22c55e':'#64748b'};box-shadow:${online?'0 0 8px #22c55e':'none'}"></span><span><strong>${escapeHTML(friend.trainer_name)}</strong><small style="display:block;color:var(--text-muted);margin-top:2px;">${online?'Online agora':'Offline'}</small></span></div>
+          <div style="display:flex;align-items:center;gap:9px;"><span aria-label="${online?'Online':'Offline'}" title="${online?'Online':'Offline'}" style="width:10px;height:10px;border-radius:50%;background:${online?'#22c55e':'#64748b'};box-shadow:${online?'0 0 8px #22c55e':'none'}"></span><span><strong>${escapeHTML(friend.trainer_name)}</strong><small style="display:block;color:var(--text-muted);margin-top:2px;">${online?'Online agora':'Offline'}</small></span></div>
           <div class="social-friend-actions"><button type="button" class="btn btn-secondary social-chat-button" style="width:auto;margin:0;padding:8px 10px;" onclick="socialOpenChat('${friend.user_id}')">Conversar</button>${tradePicker}<button type="button" class="btn btn-secondary social-trade-button" style="width:auto;margin:0;padding:8px 10px;" onclick="socialSendTrade('${friend.user_id}')">Trocar</button><button type="button" class="btn social-battle-button" style="width:auto;margin:0;padding:8px 10px;" onclick="socialChallenge('${friend.user_id}')">Batalhar</button></div>
         </div>`;
       }).join('');
