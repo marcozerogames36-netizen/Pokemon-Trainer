@@ -11,6 +11,7 @@
   <script src="assets/pokemon-types.js"></script>
   <script src="assets/item-catalog.js"></script>
   <script src="assets/tm-moves.js"></script>
+  <script src="assets/tm-market-prices.js"></script>
   <style>
     :root {
       --bg: #0b0b0f; --card: #14141c; --border: #252532;
@@ -283,6 +284,15 @@
     .panel-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
     .panel-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
     .panel-back-button { width: auto !important; margin: 0 0 14px !important; padding: 7px 11px !important; font-size: .8rem !important; }
+    .nature-box-picker { padding:16px; border:1px solid var(--border); border-radius:16px; background:linear-gradient(145deg,#1a1622,#111018); }
+    .nature-mint-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:9px; margin-top:14px; }
+    .nature-mint-choice { display:flex; align-items:center; gap:9px; min-width:0; padding:9px; text-align:left; border:1px solid var(--border); border-radius:11px; background:var(--card); color:var(--text); cursor:pointer; }
+    .nature-mint-choice:hover,.nature-mint-choice:focus-visible { border-color:var(--primary); background:rgba(124,58,237,.13); outline:none; }
+    .nature-mint-choice img { width:32px; height:32px; flex:0 0 32px; object-fit:contain; image-rendering:pixelated; }
+    .nature-mint-choice strong,.nature-mint-choice small { display:block; }
+    .nature-mint-choice strong { font-size:.78rem; }
+    .nature-mint-choice small { margin-top:3px; color:var(--text-muted); font-size:.64rem; line-height:1.25; }
+    @media(max-width:480px) { .nature-mint-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     .pvp-team-select { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin:14px 0; }
     .pvp-select-card { display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--border); border-radius:12px; background:var(--card); cursor:pointer; }
     .pvp-select-card:has(input:checked) { border-color:var(--primary); background:rgba(124,58,237,.1); }
@@ -291,6 +301,80 @@
     .pvp-lobby-box, .pvp-room-box { max-width:900px; padding:18px; border:1px solid var(--border); border-radius:16px; background:var(--card); }
     .pvp-room-controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:16px; }
     .pvp-room-controls input { flex:1 1 320px; width:min(100%,380px); min-width:240px; height:42px; padding:8px 14px; text-align:center; letter-spacing:.14em; text-transform:uppercase; }
+    #coopBossContent .coop-lobby { width:min(100%,1180px); margin:18px auto 30px; overflow:hidden; border:1px solid rgba(167,139,250,.2); border-radius:24px; background:linear-gradient(145deg,#171521 0%,#111018 62%,#15111e 100%); box-shadow:0 24px 70px #0007,0 0 50px #7c3aed12; }
+    #coopBossContent .coop-lobby-hero { position:relative; display:flex; align-items:center; justify-content:space-between; min-height:240px; gap:24px; overflow:hidden; padding:30px clamp(22px,5vw,58px); border-bottom:1px solid #ffffff12; background:radial-gradient(ellipse at 78% 55%,#8b5cf633,transparent 34%),radial-gradient(ellipse at 25% 0%,#4c1d9535,transparent 48%),linear-gradient(105deg,#211532,#15121f 70%); }
+    #coopBossContent .coop-lobby-hero::after { content:''; position:absolute; inset:0; pointer-events:none; opacity:.18; background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px); background-size:34px 34px; mask-image:linear-gradient(90deg,black,transparent 82%); }
+    #coopBossContent .coop-lobby-copy { position:relative; z-index:1; max-width:680px; }
+    #coopBossContent .coop-lobby-kicker { display:inline-flex; align-items:center; gap:8px; color:#c4b5fd; font-size:.7rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+    #coopBossContent .coop-lobby-kicker::before { content:''; width:7px; height:7px; border-radius:50%; background:#a855f7; box-shadow:0 0 12px #a855f7; }
+    #coopBossContent .coop-lobby-hero h2 { margin:10px 0 7px; color:#fff; font-size:clamp(1.65rem,3vw,2.35rem); letter-spacing:-.035em; }
+    #coopBossContent .coop-lobby-hero p { max-width:610px; margin:0; color:#c4bfd0; font-size:.94rem; line-height:1.6; }
+    #coopBossContent .coop-lobby-perks { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+    #coopBossContent .coop-lobby-perks span { padding:7px 10px; border:1px solid #ffffff18; border-radius:999px; background:#0c0b1490; color:#e9e3f4; font-size:.74rem; font-weight:650; }
+    #coopBossContent .coop-lobby-boss { position:relative; z-index:1; display:grid; place-items:center; width:220px; min-width:170px; height:200px; }
+    #coopBossContent .coop-lobby-boss::before { content:''; position:absolute; width:170px; height:170px; border:1px solid #c084fc30; border-radius:50%; background:radial-gradient(circle,#a855f727,transparent 68%); box-shadow:0 0 50px #9333ea2b,inset 0 0 30px #9333ea22; }
+    #coopBossContent .coop-lobby-boss img { position:relative; width:210px; height:210px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 13px 18px #000b); animation:coopBossFloat 3.4s ease-in-out infinite; }
+    #coopBossContent .coop-lobby-boss span { position:absolute; right:0; bottom:4px; padding:6px 9px; border:1px solid #c084fc40; border-radius:999px; background:#171121; color:#ddd6fe; font-size:.68rem; font-weight:800; letter-spacing:.08em; }
+    @keyframes coopBossFloat { 0%,100% { transform:translateY(3px); } 50% { transform:translateY(-7px); } }
+    #coopBossContent .coop-lobby-body { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr); gap:18px; padding:22px; }
+    #coopBossContent .coop-lobby-section { min-width:0; padding:20px; border:1px solid #ffffff12; border-radius:17px; background:linear-gradient(145deg,#1a1823,#13121a); }
+    #coopBossContent .coop-lobby-section-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    #coopBossContent .coop-lobby-section h3 { margin:0; color:#f5f3ff; font-size:1rem; }
+    #coopBossContent .coop-lobby-section-head p { margin:5px 0 0; color:#9e9aab; font-size:.8rem; line-height:1.45; }
+    #coopBossContent .coop-team-count { flex:0 0 auto; padding:6px 9px; border:1px solid #a855f746; border-radius:999px; background:#7c3aed1c; color:#d8b4fe; font-size:.72rem; font-weight:800; }
+    #coopBossContent .pvp-team-select { grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:10px; margin:0; }
+    #coopBossContent .pvp-select-card { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; aspect-ratio:1; min-width:0; min-height:148px; padding:22px 10px 10px; border-color:#ffffff15; border-radius:15px; background:#0e0d14; text-align:center; transition:transform .16s,border-color .16s,background .16s,box-shadow .16s; }
+    #coopBossContent .pvp-select-card:hover { transform:translateY(-2px); border-color:#a78bfa70; }
+    #coopBossContent .pvp-select-card:has(input:checked) { border-color:#a855f7; background:linear-gradient(110deg,#7c3aed28,#211a30); box-shadow:inset 0 0 0 1px #a855f733,0 6px 18px #7c3aed14; }
+    #coopBossContent .pvp-select-card input { position:absolute; top:11px; left:11px; width:16px; height:16px; margin:0; accent-color:#a855f7; }
+    #coopBossContent .pvp-select-card img { width:68px; height:68px; image-rendering:pixelated; filter:drop-shadow(0 3px 5px #0009); }
+    #coopBossContent .pvp-select-card > span { min-width:0; text-align:center; }
+    #coopBossContent .pvp-select-card strong { color:#f5f3ff; font-size:.88rem; }
+    #coopBossContent .pvp-select-card small { display:inline-block; margin-top:3px; color:#aaa5b6; font-size:.74rem; }
+    #coopBossContent .coop-room-actions { display:grid; align-content:start; gap:12px; }
+    #coopBossContent .coop-room-action { padding:16px; border:1px solid #ffffff12; border-radius:14px; background:#0e0d14; }
+    #coopBossContent .coop-room-action h4 { margin:0 0 5px; color:#f5f3ff; font-size:.88rem; }
+    #coopBossContent .coop-room-action p { margin:0 0 12px; color:#9692a2; font-size:.76rem; line-height:1.45; }
+    #coopBossContent .coop-room-action .btn { width:100%!important; min-height:44px; margin:0!important; border-radius:11px; font-weight:750; }
+    #coopBossContent .coop-room-action.join { border-color:#ffffff18; }
+    #coopBossContent .coop-room-action input { width:100%; min-width:0; height:46px; margin:0 0 9px; border:1px solid #ffffff1c; border-radius:10px; outline:none; background:#17151f; color:#f5f3ff; text-align:center; font:800 .95rem ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.2em; text-transform:uppercase; transition:border-color .16s,box-shadow .16s; }
+    #coopBossContent .coop-room-action input::placeholder { color:#777181; font-size:.7rem; font-family:inherit; font-weight:600; letter-spacing:.13em; }
+    #coopBossContent .coop-room-action input:focus { border-color:#a855f7; box-shadow:0 0 0 3px #a855f729; }
+    #coopBossContent .coop-lobby-footnote { grid-column:1/-1; display:flex; align-items:center; gap:9px; margin:-4px 2px 0; color:#858191; font-size:.75rem; }
+    #coopBossContent .coop-lobby-footnote::before { content:'ℹ'; display:grid; place-items:center; width:17px; height:17px; flex:0 0 17px; border:1px solid #a78bfa50; border-radius:50%; color:#c4b5fd; font-size:.68rem; }
+    #coopBossContent .coop-waiting { width:min(100%,1180px); margin:18px auto 30px; overflow:hidden; border:1px solid rgba(167,139,250,.2); border-radius:24px; background:linear-gradient(145deg,#171521,#111018 65%,#15111e); box-shadow:0 24px 70px #0007,0 0 50px #7c3aed12; }
+    #coopBossContent .coop-waiting-hero { position:relative; display:flex; align-items:center; justify-content:space-between; min-height:210px; gap:20px; overflow:hidden; padding:26px clamp(20px,4vw,48px); border-bottom:1px solid #ffffff12; background:radial-gradient(ellipse at 80% 55%,#8b5cf633,transparent 35%),linear-gradient(105deg,#211532,#15121f 72%); }
+    #coopBossContent .coop-waiting-hero::after { content:''; position:absolute; inset:0; pointer-events:none; opacity:.16; background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px); background-size:34px 34px; mask-image:linear-gradient(90deg,black,transparent 82%); }
+    #coopBossContent .coop-waiting-copy { position:relative; z-index:1; max-width:680px; }
+    #coopBossContent .coop-waiting-kicker { color:#c4b5fd; font-size:.7rem; font-weight:800; letter-spacing:.15em; text-transform:uppercase; }
+    #coopBossContent .coop-waiting-hero h2 { margin:9px 0 6px; color:#fff; font-size:clamp(1.4rem,2.6vw,2rem); letter-spacing:-.03em; }
+    #coopBossContent .coop-waiting-hero p { margin:0; color:#c4bfd0; font-size:.9rem; line-height:1.5; }
+    #coopBossContent .coop-waiting-state { display:inline-flex; align-items:center; gap:8px; margin-top:15px; padding:7px 10px; border:1px solid #a855f740; border-radius:999px; background:#7c3aed1b; color:#e9d5ff; font-size:.72rem; font-weight:750; }
+    #coopBossContent .coop-waiting-state::before { content:''; width:7px; height:7px; border-radius:50%; background:#c084fc; box-shadow:0 0 10px #a855f7; animation:coopLobbyPulse 1.7s ease-in-out infinite; }
+    @keyframes coopLobbyPulse { 50% { opacity:.35; box-shadow:0 0 2px #a855f7; } }
+    #coopBossContent .coop-waiting-boss { position:relative; z-index:1; display:grid; place-items:center; width:185px; min-width:145px; height:175px; }
+    #coopBossContent .coop-waiting-boss::before { content:''; position:absolute; width:145px; height:145px; border:1px solid #c084fc30; border-radius:50%; background:radial-gradient(circle,#a855f727,transparent 68%); box-shadow:0 0 45px #9333ea2b; }
+    #coopBossContent .coop-waiting-boss img { position:relative; width:180px; height:180px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 12px 17px #000b); animation:coopBossFloat 3.4s ease-in-out infinite; }
+    #coopBossContent .coop-waiting-body { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr); gap:16px; padding:20px; }
+    #coopBossContent .coop-waiting-section { min-width:0; padding:18px; border:1px solid #ffffff12; border-radius:16px; background:linear-gradient(145deg,#1a1823,#13121a); }
+    #coopBossContent .coop-waiting-section-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+    #coopBossContent .coop-waiting-section h3 { margin:0; color:#f5f3ff; font-size:.96rem; }
+    #coopBossContent .coop-waiting-count { flex:0 0 auto; padding:6px 9px; border:1px solid #ffffff18; border-radius:999px; background:#0e0d14; color:#c4b5fd; font-size:.72rem; font-weight:800; }
+    #coopBossContent .coop-waiting-members { display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:10px; }
+    #coopBossContent .coop-waiting-member { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; aspect-ratio:1; min-width:0; min-height:148px; padding:18px 12px 12px; border:1px solid #ffffff12; border-radius:16px; background:#0e0d14; text-align:center; }
+    #coopBossContent .coop-waiting-member.host { border-color:#a855f750; background:linear-gradient(100deg,#7c3aed1c,#0e0d14 70%); }
+    #coopBossContent .coop-waiting-member img { width:68px; height:68px; flex:0 0 68px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 3px 7px #0009); }
+    #coopBossContent .coop-waiting-member-copy { width:100%; min-width:0; flex:0 0 auto; }
+    #coopBossContent .coop-waiting-member-copy strong { display:block; overflow:hidden; color:#f5f3ff; font-size:.9rem; text-overflow:ellipsis; white-space:nowrap; }
+    #coopBossContent .coop-waiting-member-copy span { display:block; margin-top:5px; color:#9e9aab; font-size:.72rem; line-height:1.35; }
+    #coopBossContent .coop-waiting-role { position:absolute; top:9px; right:9px; padding:4px 6px; border:1px solid #a855f73b; border-radius:999px; background:#171121; color:#d8b4fe; font-size:.57rem; font-weight:800; text-transform:uppercase; }
+    #coopBossContent .coop-waiting-room-code { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px; border:1px solid #a855f746; border-radius:14px; background:linear-gradient(120deg,#7c3aed20,#15121f); }
+    #coopBossContent .coop-waiting-room-code small { display:block; margin-bottom:5px; color:#aaa5b6; font-size:.66rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+    #coopBossContent .coop-waiting-room-code strong { color:#e9d5ff; font:800 clamp(1.1rem,3vw,1.55rem) ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.2em; }
+    #coopBossContent .coop-waiting-room-code button { flex:0 0 auto; min-height:38px; padding:7px 10px; border:1px solid #ffffff18; border-radius:9px; background:#17151f; color:#e9d5ff; cursor:pointer; font-size:.73rem; font-weight:750; }
+    #coopBossContent .coop-waiting-actions { display:grid; gap:9px; margin-top:12px; }
+    #coopBossContent .coop-waiting-actions .btn { width:100%!important; min-height:46px; margin:0!important; border-radius:11px; font-weight:750; }
+    #coopBossContent .coop-waiting-host-note { margin:0; color:#aaa5b6; font-size:.76rem; line-height:1.5; }
     .pvp-code { font-size:1.6rem; font-weight:800; letter-spacing:.18em; color:#c4b5fd; }
     .pvp-sides { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:16px 0; }
     .pvp-side-card { padding:14px; border:1px solid var(--border); border-radius:14px; background:var(--input-bg); min-width:0; }
@@ -304,6 +388,56 @@
     .pvp-action-disabled { opacity:.45; cursor:not-allowed; }
     .pvp-log { display:grid; gap:5px; margin:14px 0; padding:12px; max-height:170px; overflow:auto; border-radius:10px; background:#0d0d12; color:var(--text-muted); font-size:.85rem; }
     .pvp-arena { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; min-height:min(76vh,720px); overflow:hidden; border:1px solid var(--border); border-radius:18px; background:#0a1628; }
+    .coop-boss-arena { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; max-width:1500px; min-height:min(90vh,900px); overflow:hidden; border:1px solid rgba(168,85,247,.35); border-radius:20px; background:#160f25; box-shadow:0 18px 48px #0005; }
+    .coop-boss-arena .battle-bg { background:linear-gradient(180deg,#191327 0%,#382151 48%,#26143f 100%); }
+    .coop-boss-arena .battle-sky { background:radial-gradient(ellipse at 70% 22%,rgba(192,132,252,.24),transparent 52%),linear-gradient(180deg,rgba(255,255,255,.05),transparent); }
+    .coop-boss-arena .battle-ground { bottom:30%; height:28%; background:radial-gradient(ellipse at 50% 65%,rgba(147,51,234,.28),transparent 70%),linear-gradient(180deg,transparent,rgba(9,5,18,.6)); }
+    .coop-boss-arena .battle-field { width:100%; max-width:1440px; min-height:600px; padding:74px 30px 8px; }
+    .coop-boss-arena .battle-enemy { align-items:flex-start; gap:16px; }
+    .coop-boss-arena .enemy-info.daily-boss-info { width:min(460px,58vw); min-width:0; border-color:rgba(192,132,252,.45); }
+    .coop-boss-arena .coop-mewtwo-info .hp-label span:nth-child(2) { display:inline; }
+    .coop-boss-arena .enemy-sprite { width:250px; height:250px; filter:drop-shadow(0 12px 24px rgba(0,0,0,.62)); }
+    .coop-boss-arena .battle-player { align-items:flex-end; padding-right:22%; }
+    .coop-boss-arena .player-info { width:min(306px,46%); min-width:190px; padding:9px 11px; border-color:rgba(168,85,247,.4); box-shadow:0 10px 28px rgba(0,0,0,.45),0 0 16px rgba(168,85,247,.08); }
+    .coop-boss-arena .player-info .pvp-trainer-name { color:#c4b5fd; font-size:.72rem; }
+    .coop-boss-arena .player-info .hp-bar { height:13px; border-radius:8px; }
+    .coop-boss-arena .player-info .hp-fill { border-radius:8px; }
+    .coop-boss-arena .player-sprite { width:190px; height:190px; }
+    .coop-boss-arena .enemy-sprite.attack-anim { animation-duration:.65s; }
+    .coop-boss-arena .player-sprite.hit { animation:coopBossHit .72s ease-in-out; }
+    .coop-boss-arena .enemy-sprite.hit { animation:coopBossHit .72s ease-in-out; }
+    @keyframes coopBossHit {
+      0%,100% { opacity:1; transform:translateX(0); filter:drop-shadow(0 6px 12px rgba(0,0,0,.45)) brightness(1); }
+      16% { opacity:.3; transform:translateX(9px); filter:drop-shadow(0 0 12px #fff) brightness(2); }
+      32% { opacity:1; transform:translateX(-8px); filter:drop-shadow(0 6px 12px rgba(0,0,0,.45)) brightness(1); }
+      48% { opacity:.35; transform:translateX(7px); filter:drop-shadow(0 0 12px #f44) brightness(1.8); }
+      64% { opacity:1; transform:translateX(-5px); filter:drop-shadow(0 6px 12px rgba(0,0,0,.45)) brightness(1); }
+      80% { opacity:.45; transform:translateX(3px); filter:drop-shadow(0 0 10px #fff) brightness(1.7); }
+    }
+    .coop-boss-toolbar { position:absolute; z-index:3; top:12px; left:16px; right:16px; display:flex; align-items:center; justify-content:space-between; gap:10px; color:#ede9fe; font-size:.84rem; font-weight:700; }
+    .coop-boss-toolbar span { padding:7px 10px; border:1px solid #ffffff24; border-radius:999px; background:#100b1dbb; backdrop-filter:blur(6px); }
+    .coop-boss-toolbar .btn { width:auto; margin:0; padding:7px 11px; }
+    .coop-boss-toolbar-actions { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+    .coop-raid-roster { width:100%; display:grid; grid-template-columns:repeat(auto-fill,minmax(132px,150px)); justify-content:start; gap:8px; margin:0 0 12px; }
+    .coop-raid-member { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; width:100%; min-width:0; min-height:112px; padding:8px; border:1px solid rgba(148,163,184,.18); border-radius:13px; background:linear-gradient(135deg,rgba(25,23,36,.96),rgba(12,14,22,.88)); text-align:center; transition:border-color .18s,background .18s; }
+    .coop-raid-member.is-you { border-color:#a855f780; background:linear-gradient(135deg,rgba(88,28,135,.2),rgba(12,14,22,.92)); }
+    .coop-raid-member img { width:38px; height:38px; flex:0 0 38px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 2px 5px #0008); }
+    .coop-raid-member-copy { width:100%; min-width:0; }
+    .coop-raid-member-copy strong,.coop-raid-member-copy span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .coop-raid-member-copy strong { font-size:.8rem; }
+    .coop-raid-member-copy span { margin-top:3px; color:var(--text-muted); font-size:.7rem; }
+    .coop-raid-member-hp { height:5px; margin-top:5px; overflow:hidden; border-radius:6px; background:#292631; box-shadow:inset 0 1px 2px #0008; }
+    .coop-raid-member-hp i { display:block; height:100%; border-radius:inherit; background:#22c55e; }
+    .coop-effect-tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
+    .coop-effect-tag { padding:2px 6px; border:1px solid rgba(192,132,252,.25); border-radius:999px; background:rgba(147,51,234,.16); color:#ddd6fe; font-size:.62rem; font-weight:700; }
+    .coop-effect-tag.status { border-color:rgba(251,191,36,.28); background:rgba(245,158,11,.13); color:#fde68a; }
+    .coop-boss-arena .battle-ui { width:min(100%,1000px); padding:18px 20px 22px; border:1px solid rgba(168,85,247,.22); border-top:3px solid #9333ea; border-radius:22px 22px 0 0; background:linear-gradient(155deg,rgba(22,20,32,.98),rgba(15,14,22,.99)); box-shadow:0 -12px 36px rgba(5,2,12,.6); }
+    .coop-boss-arena .battle-log { min-height:54px; margin-bottom:0; padding:13px 16px; border-color:rgba(148,163,184,.2); border-radius:13px; background:linear-gradient(110deg,rgba(24,23,33,.96),rgba(13,13,19,.96)); font-weight:600; }
+    .coop-boss-arena .pvp-turn-prompt { display:flex; align-items:center; gap:8px; margin:12px 2px 8px; color:#c4b5fd; font-size:.82rem; font-weight:600; }
+    .coop-boss-arena .pvp-turn-prompt::before { content:''; width:7px; height:7px; flex:0 0 7px; border-radius:50%; background:#a855f7; box-shadow:0 0 10px #a855f7aa; }
+    .coop-boss-arena .battle-actions { gap:10px; }
+    .coop-boss-arena .battle-btn { min-height:54px; border-radius:14px; background:rgba(12,14,22,.78); font-size:.94rem; }
+    .coop-boss-arena .coop-main-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
     .pvp-arena .battle-bg { background:linear-gradient(180deg,#1a2744 0%,#2a4a3a 45%,#1a3a2a 100%); }
     .pvp-arena .battle-field { min-height:360px; }
     .pvp-arena .battle-ui { width:min(100%,700px); }
@@ -318,6 +452,53 @@
     .pvp-trainer-name { margin-bottom:4px; color:var(--text-muted); font-size:.68rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
     @media (max-width:560px) { .pvp-sides { grid-template-columns:1fr; } .pvp-lobby-box,.pvp-room-box { padding:13px; } }
     @media (max-width:700px) {
+      #coopBossContent .coop-lobby { margin:12px auto 20px; border-radius:18px; }
+      #coopBossContent .coop-lobby-hero { min-height:0; padding:23px 18px 16px; }
+      #coopBossContent .coop-lobby-hero p { max-width:100%; font-size:.84rem; }
+      #coopBossContent .coop-lobby-perks { gap:6px; margin-top:13px; }
+      #coopBossContent .coop-lobby-perks span { padding:6px 8px; font-size:.67rem; }
+      #coopBossContent .coop-lobby-boss { width:105px; min-width:85px; height:130px; margin-right:-10px; }
+      #coopBossContent .coop-lobby-boss::before { width:100px; height:100px; }
+      #coopBossContent .coop-lobby-boss img { width:125px; height:125px; }
+      #coopBossContent .coop-lobby-boss span { right:-5px; bottom:0; padding:4px 6px; font-size:.58rem; }
+      #coopBossContent .coop-lobby-body { grid-template-columns:1fr; gap:12px; padding:13px; }
+      #coopBossContent .coop-lobby-section { padding:14px; }
+      #coopBossContent .pvp-team-select { grid-template-columns:repeat(auto-fill,minmax(122px,1fr)); gap:8px; }
+      #coopBossContent .pvp-select-card { min-height:122px; gap:5px; padding:20px 7px 8px; border-radius:13px; }
+      #coopBossContent .pvp-select-card input { top:8px; left:8px; width:14px; height:14px; }
+      #coopBossContent .pvp-select-card img { width:54px; height:54px; }
+      #coopBossContent .pvp-select-card strong { font-size:.78rem; }
+      #coopBossContent .pvp-select-card small { font-size:.65rem; }
+      #coopBossContent .coop-lobby-footnote { grid-column:auto; line-height:1.4; }
+      #coopBossContent .coop-waiting { margin:12px auto 20px; border-radius:18px; }
+      #coopBossContent .coop-waiting-hero { min-height:0; padding:21px 16px 15px; }
+      #coopBossContent .coop-waiting-hero p { font-size:.82rem; }
+      #coopBossContent .coop-waiting-boss { width:95px; min-width:72px; height:120px; margin-right:-8px; }
+      #coopBossContent .coop-waiting-boss::before { width:90px; height:90px; }
+      #coopBossContent .coop-waiting-boss img { width:120px; height:120px; }
+      #coopBossContent .coop-waiting-body { grid-template-columns:1fr; gap:11px; padding:12px; }
+      #coopBossContent .coop-waiting-section { padding:13px; }
+      #coopBossContent .coop-waiting-members { grid-template-columns:repeat(auto-fill,minmax(122px,1fr)); gap:8px; }
+      #coopBossContent .coop-waiting-member { min-height:122px; padding:18px 9px 9px; border-radius:13px; }
+      #coopBossContent .coop-waiting-member img { width:56px; height:56px; flex-basis:56px; }
+      #coopBossContent .coop-waiting-member-copy strong { font-size:.82rem; }
+      #coopBossContent .coop-waiting-member-copy span { font-size:.67rem; }
+      .coop-boss-arena { min-height:calc(100dvh - 180px); }
+      .coop-boss-arena .battle-field { min-height:360px; padding:62px 12px 8px; }
+      .coop-boss-arena .battle-enemy { display:grid; grid-template-columns:minmax(0,1fr) clamp(132px,37vw,190px); align-items:start; gap:6px; padding:0 2%; }
+      .coop-boss-arena .enemy-info.daily-boss-info { justify-self:start; width:100%; max-width:none; padding:9px 10px; }
+      .coop-boss-arena .enemy-stage { width:clamp(132px,37vw,190px); justify-self:center; }
+      .coop-boss-arena .enemy-sprite { width:clamp(142px,40vw,208px); height:clamp(142px,40vw,208px); }
+      .coop-boss-arena .player-sprite { width:clamp(104px,29vw,154px); height:clamp(104px,29vw,154px); }
+      .coop-boss-arena .battle-player { gap:6px; padding:0 6% 0 4%; }
+      .coop-boss-arena .player-info { width:min(58%,230px); min-width:0; padding:8px 9px; }
+      .coop-boss-arena .battle-ui { padding:12px 12px calc(14px + env(safe-area-inset-bottom)); }
+      .coop-boss-arena .coop-main-actions { grid-template-columns:1fr 1fr; }
+      .coop-boss-arena .coop-main-actions .bag { grid-column:auto; }
+      .coop-boss-toolbar { top:8px; left:9px; right:9px; font-size:.75rem; }
+      .coop-boss-toolbar span { padding:6px 8px; }
+      .coop-raid-roster { display:flex; justify-content:flex-start; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin; }
+      .coop-raid-member { flex:0 0 138px; }
       .pvp-arena { min-height:calc(100vh - 180px); min-height:calc(100dvh - 180px); }
       .pvp-arena .battle-field { min-height:300px; padding:56px 12px 8px; }
       .pvp-arena .battle-enemy, .pvp-arena .battle-player { gap:6px; }
@@ -1326,6 +1507,7 @@
       image-rendering: crisp-edges;
       background: transparent !important;
     }
+    .bottle-cap-sprite { transform: scale(2.25); }
     .item-icon-fallback { display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; }
     .center-selection-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .center-selection-actions .btn { flex: 1 1 150px; min-height: 38px; padding: 8px 10px; font-size: 0.78rem; }
@@ -1364,6 +1546,41 @@
       border-radius: 18px; box-shadow: var(--shadow);
     }
     #shopQuantityDialog::backdrop { background: rgba(0,0,0,0.72); }
+    #pokeCoinsStoreDialog { width:min(820px,calc(100% - 24px)); max-width:none; max-height:min(90vh,900px); margin:auto; padding:0; overflow:auto; color:var(--text); background:#101827; border:3px solid #526b91; border-radius:16px; box-shadow:0 18px 70px rgba(0,0,0,.65); }
+    #pokeCoinsStoreDialog::backdrop { background:rgba(0,0,0,.78); }
+    .poke-coins-store { padding:clamp(14px,3vw,24px); }
+    .poke-coins-store-head { position:relative; display:flex; flex-wrap:nowrap; align-items:center; justify-content:space-between; gap:18px; padding:15px 17px; border:2px solid #829dc8; border-radius:12px; background:radial-gradient(ellipse at 8% 0%,rgba(81,147,235,.28),transparent 55%),linear-gradient(115deg,#203653,#111a2a 70%); box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 8px 22px rgba(0,0,0,.24); }
+    .poke-coins-store-heading { flex:1 1 auto; min-width:0; }
+    .poke-coins-store-kicker { display:block; margin-bottom:3px; color:#8ebfff; font-size:.65rem; font-weight:900; letter-spacing:.16em; }
+    .poke-coins-store-title { display:flex; align-items:center; gap:10px; margin:0; font-size:clamp(1.1rem,3vw,1.55rem); white-space:nowrap; text-shadow:0 2px 0 #0a1220; }
+    .poke-coins-store-title img { width:38px; height:38px; object-fit:contain; image-rendering:pixelated; }
+    .poke-coins-store-head > .btn { width:auto; flex:0 0 auto; margin:0; padding:9px 16px; }
+    .poke-coins-pack-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:18px 0; }
+    .poke-coins-pack { position:relative; min-width:0; min-height:142px; padding:12px 10px 10px; display:flex; flex-direction:column; justify-content:space-between; gap:9px; color:#edf5ff; cursor:pointer; text-align:center; border:2px solid #344b69; border-radius:8px; background:linear-gradient(145deg,#1e2d43,#101827 78%); box-shadow:inset 0 0 0 1px rgba(164,198,239,.12), 4px 5px 0 #080b11; transition:transform .14s,border-color .14s,filter .14s; }
+    .poke-coins-pack:hover { transform:translateY(-2px); filter:brightness(1.08); }
+    .poke-coins-pack.selected { border-color:#80e4ff; box-shadow:inset 0 0 0 1px rgba(164,198,239,.12),0 0 0 3px #22d3ee,4px 5px 0 #080b11; }
+    .poke-coins-pack-amount { position:absolute; top:5px; right:8px; color:#d8eaff; font-size:.9rem; font-weight:1000; text-shadow:0 1px #0a1220; }
+    .poke-coins-pack-bonus { position:absolute; top:5px; left:8px; color:#7df3bd; font-size:.68rem; font-weight:900; text-shadow:0 1px 3px #07120f; }
+    .poke-coins-pack-diamonds { min-height:62px; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:3px; }
+    .poke-coins-diamond { position:relative; width:23px; height:29px; clip-path:polygon(50% 0,100% 32%,74% 100%,26% 100%,0 32%); background:linear-gradient(130deg,#e7fdff 0 18%,#78efff 19% 48%,#20a9e5 49% 72%,#1672c6 73%); filter:drop-shadow(1px 2px 0 rgba(0,0,0,.48)); }
+    .poke-coins-diamond::after { content:""; position:absolute; inset:0; clip-path:polygon(50% 0,50% 100%,0 32%); background:rgba(255,255,255,.32); }
+    .poke-coins-pack-price { display:block; padding:7px 4px; color:#f3f7ff; background:#0b1220; border:1px solid #526b91; border-radius:5px; font-size:1rem; font-weight:900; }
+    .poke-coins-supporter { display:flex; align-items:end; flex-wrap:wrap; gap:8px; margin:14px 0 0; padding:12px; border:1px solid #405879; border-radius:10px; background:#151f30; }
+    .poke-coins-supporter-field { flex:1 1 220px; min-width:0; }
+    .poke-coins-supporter-field label { display:block; margin-bottom:6px; color:#c6d4e8; font-size:.78rem; font-weight:800; }
+    .poke-coins-supporter-field input { width:100%; min-height:40px; padding:9px 11px; border:1px solid #526b91; border-radius:7px; color:var(--text); background:#0d1522; font:inherit; }
+    .poke-coins-supporter-field input:focus-visible { outline:2px solid #72c8ff; outline-offset:1px; }
+    .poke-coins-supporter-status { flex-basis:100%; min-height:1em; color:#9fb0c9; font-size:.75rem; }
+    .poke-coins-quick-header { position:relative; display:flex; align-items:center; justify-content:center; gap:12px; overflow:hidden; background:radial-gradient(ellipse at 50% 0%,rgba(93,172,255,.4),transparent 63%),linear-gradient(145deg,#28456a,#111a2a)!important; }
+    .poke-coins-quick-header::after { content:""; position:absolute; inset:7px; border:1px solid rgba(185,218,255,.22); border-radius:9px; pointer-events:none; }
+    .poke-coins-quick-header img { position:relative; z-index:1; width:70px!important; height:70px!important; filter:drop-shadow(0 4px 12px rgba(55,177,255,.36)); }
+    .poke-coins-quick-header-copy { position:relative; z-index:1; color:#dcecff; }
+    .poke-coins-quick-header-copy strong,.poke-coins-quick-header-copy small { display:block; }
+    .poke-coins-quick-header-copy strong { font-size:.83rem; letter-spacing:.08em; }
+    .poke-coins-quick-header-copy small { margin-top:4px; color:#9fb8d7; font-size:.68rem; }
+    .poke-coins-store-note { margin:10px 0 0; color:#aebbd0; font-size:.8rem; line-height:1.45; }
+    @media(max-width:620px) { .poke-coins-pack-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .poke-coins-pack { min-height:128px; } }
+    @media(max-width:560px) { .poke-coins-store-head { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px 12px; } .poke-coins-store-heading { grid-column:1 / -1; } .poke-coins-store-title { font-size:1.08rem; } .poke-coins-store-head > .btn { justify-self:end; } }
     .shop-quantity-content { padding: 24px; }
     .shop-quantity-content h3 { font-size: 1.2rem; margin-bottom: 6px; }
     .shop-quantity-content p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 18px; }
@@ -1808,6 +2025,10 @@
           </div>
           <h3 style="font-size:1.1rem;margin-bottom:14px;">Acesso rápido</h3>
           <div class="cards-grid">
+            <button type="button" class="game-card" onclick="openPokeCoinsStore()" style="padding:0;text-align:left;color:inherit;">
+              <div class="game-card-header poke-coins-quick-header"><img src="assets/daily-pokecoin.svg" alt="" /><span class="poke-coins-quick-header-copy"><strong>POKÉCOINS</strong><small>Central de pacotes</small></span></div>
+              <div class="game-card-body"><div class="game-card-title">PokéCoins</div><div class="game-card-desc">Veja os pacotes de PokéCoins e escolha uma opção.</div></div>
+            </button>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('dungeons')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('dungeons')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#1e3a2f,#0f1f18);"><img src="assets/exploration-magnifier.png" alt="" style="width:84px;height:84px;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">Exploração</div><div class="game-card-desc">Explore Kanto e encontre Pokémon selvagens.</div></div>
@@ -1845,7 +2066,7 @@
               <div class="game-card-body"><div class="game-card-title">Boss Di&aacute;rio</div><div class="game-card-desc">Desafie Zapdos, Moltres e Articuno para ganhar recompensas especiais.</div></div>
             </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('coop-boss')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('coop-boss')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#38264d,#171226);font-size:3rem;">&#x1F30C;</div>
+              <div class="game-card-header" style="background:linear-gradient(135deg,#38264d,#171226);"><img src="https://img.pokemondb.net/sprites/black-white/anim/normal/mewtwo.gif" alt="Mewtwo" width="112" height="96" style="width:112px;height:96px;object-fit:contain;image-rendering:pixelated;" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png'"></div>
               <div class="game-card-body"><div class="game-card-title">Big Boss: Mewtwo</div><div class="game-card-desc">Una até 5 treinadores contra um Mewtwo com HP compartilhado.</div></div>
             </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('center')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('center')}">
@@ -2437,6 +2658,21 @@
     </div>
   </div>
 
+  <dialog id="pokeCoinsStoreDialog" aria-labelledby="pokeCoinsStoreTitle">
+    <div class="poke-coins-store">
+      <div class="poke-coins-store-head">
+        <div class="poke-coins-store-heading"><span class="poke-coins-store-kicker">CENTRAL DE RECARGAS</span><h2 class="poke-coins-store-title" id="pokeCoinsStoreTitle"><img src="assets/daily-pokecoin.svg" alt="" /> Pacotes de PokéCoins</h2></div>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('pokeCoinsStoreDialog').close()" aria-label="Fechar pacotes de PokéCoins">Fechar</button>
+      </div>
+      <div class="poke-coins-pack-grid" id="pokeCoinsPackGrid" aria-label="Pacotes disponíveis"></div>
+      <div class="poke-coins-supporter">
+        <div class="poke-coins-supporter-field"><label for="pokeCoinsSupporterCode">Código do influenciador favorito</label><input id="pokeCoinsSupporterCode" type="text" maxlength="24" placeholder="Digite o código de apoiador" autocomplete="off" /></div>
+        <button type="button" class="btn" onclick="applyPokeCoinsSupporterCode()">Aplicar código</button>
+        <span class="poke-coins-supporter-status" id="pokeCoinsSupporterStatus" aria-live="polite"></span>
+      </div>
+      <p class="poke-coins-store-note">Com um código de apoiador aplicado, cada pacote entrega a quantidade indicada com bônus. Selecione um pacote para destacar sua escolha. O checkout ainda não está conectado.</p>
+    </div>
+  </dialog>
   <dialog id="shopQuantityDialog" aria-labelledby="shopQuantityTitle">
     <form class="shop-quantity-content" id="shopQuantityForm">
       <h3 id="shopQuantityTitle">Comprar item</h3>
@@ -3304,6 +3540,11 @@
           target: data.target?.name || '',
           healing: Math.max(0,Number(data.meta?.healing)||0),
           drain: Math.max(0,Number(data.meta?.drain)||0),
+          recoil: Math.max(0,-(Number(data.meta?.drain)||0)),
+          minHits: Math.max(1,Number(data.meta?.min_hits)||1),
+          maxHits: Math.max(1,Number(data.meta?.max_hits)||1),
+          critRate: Math.max(0,Number(data.meta?.crit_rate)||0),
+          flinchChance: Math.max(0,Number(data.meta?.flinch_chance)||0)/100,
           pp: Number(data.pp) || 20,
           basePp: Number(data.pp) || 20,
           maxPp: Number(data.pp) || 20,
@@ -3320,10 +3561,10 @@
 
     async function hydrateGenerationNineMoveMetadata(pokemonList) {
       let changed = false;
-      const forceRefresh = player?.moveMetadataVersion !== 'pokemondb-gen3-move-types-v1';
+      const forceRefresh = player?.moveMetadataVersion !== 'raid-move-effects-v2';
       const targets = (pokemonList || []).filter(pokemon => Array.isArray(pokemon?.moves));
       await Promise.all(targets.flatMap(pokemon => pokemon.moves.map(async move => {
-        if (!forceRefresh && ['physical','special','status'].includes(move.category)) return;
+        if (!forceRefresh && move.raidEffectsVersion === 2 && ['physical','special','status'].includes(move.category)) return;
         const slug = getOriginalMoveName(move.name).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
           .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         if (!slug) return;
@@ -3332,10 +3573,14 @@
           if (!['physical','special','status'].includes(canonical.category)) return;
           move.category = canonical.category;
           move.type = canonical.type;
+          for (const key of ['power','accuracy','priority','target','healing','drain','recoil','minHits','maxHits','critRate','flinchChance','statusEffect','statChanges']) {
+            if (canonical[key] !== undefined) move[key] = canonical[key];
+          }
+          move.raidEffectsVersion = 2;
           changed = true;
         } catch (_) { /* Keeps the legacy fallback when a move is unavailable. */ }
       })));
-      if (player && forceRefresh) { player.moveMetadataVersion = 'pokemondb-gen3-move-types-v1'; changed = true; }
+      if (player && forceRefresh) { player.moveMetadataVersion = 'raid-move-effects-v2'; changed = true; }
       if (changed && player) saveGame();
     }
 
@@ -5631,8 +5876,10 @@
       rawst: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/rawst.png',
       cherri: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/cheri.png',
       rarecandy: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/rare-candy.png',
-      naturebox: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/adamant-mint.png',
-      bottlecap: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/bottle-cap.png'
+      naturebox: 'https://pokestop.io/img/item/apricorn-box-160x160.webp',
+      shiny_charm: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/shiny-charm.png',
+      bottlecap: 'assets/bottle-cap.png',
+      vip: 'assets/vip-emblem.png'
     };
     const ITEM_SPRITE_FB = {
       balls: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png',
@@ -5698,13 +5945,15 @@
       rawst: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rawst-berry.png',
       cherri: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/cheri-berry.png',
       rarecandy: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png',
-      naturebox: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/adamant-mint.png',
-      bottlecap: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/bottle-cap.png'
+      naturebox: 'assets/mint-box.svg',
+      shiny_charm: 'https://img.pokemondb.net/sprites/items/shiny-charm.png',
+      bottlecap: 'assets/bottle-cap.png',
+      vip: 'assets/vip-emblem.png'
     };
     function itemIcon(key, cls, fallbackIcon = '🎒') {
       const src = ITEM_SPRITE[key] || ITEM_SPRITE.balls;
       const fb = ITEM_SPRITE_FB[key] || ITEM_SPRITE_FB.balls;
-      const iconClass = cls || 'item-icon';
+      const iconClass = [cls || 'item-icon', key === 'bottlecap' ? 'bottle-cap-sprite' : ''].filter(Boolean).join(' ');
       return `<img class="${iconClass}" src="${src}" alt="" data-fallback-src="${fb}" data-fallback-icon="${escapeHTML(fallbackIcon)}" onerror="handleItemIconError(this)" />`;
     }
     function handleItemIconError(image) {
@@ -5816,7 +6065,9 @@
           { key: 'ss_ticket', name: 'S.S. TICKET', desc: 'Ingresso para embarcar no navio de luxo S.S. Anne, em Vermilion.' },
           { key: 'rarecandy', name: 'Doce Raro', sprite: 'rarecandy', desc: 'Sobe 1 nível' },
           { key: 'naturebox', name: 'Caixa de Nature', sprite: 'naturebox', desc: 'Escolha uma natureza para alterar os efeitos de um Pokémon.' },
+          { key: 'shiny_charm', name: 'Shiny Charm', sprite: 'shiny_charm', desc: 'Triplica a chance de encontrar um Pok\u00e9mon Shiny selvagem enquanto estiver na mochila.' },
           { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', desc: 'Escolha um atributo e maximize seu IV para 31.' },
+          { key: 'vip', name: 'VIP', sprite: 'vip', desc: 'Adiciona à sua conta todos os benefícios que o VIP proporciona.' },
           { key: 'parcelbox', name: 'Caixa da Parcel', desc: 'Encomenda do Professor Carvalho' }
         ]
       }
@@ -5885,7 +6136,7 @@
         silk_scarf: 0, silver_powder: 0, hard_stone: 0, sharp_beak: 0, poison_barb: 0,
         spell_tag: 0, dragon_fang: 0, never_melt_ice: 0, metal_coat: 0, black_glasses: 0,
         amulet_coin: 0, shell_bell: 0, macho_brace: 0,
-        rarecandy: 0, naturebox: 0, bottlecap: 0, parcelbox: 0, ss_ticket: 0
+        rarecandy: 0, naturebox: 0, shiny_charm: 0, bottlecap: 0, vip: 0, parcelbox: 0, ss_ticket: 0
       };
       [...EXTRA_MEDICINE_ITEMS, ...EXTRA_BATTLE_ITEMS, ...(EXTRA_TM_ITEMS || [])].forEach(item => { if (defaults[item.key] === undefined) defaults[item.key] = 0; });
       Object.keys(HELD_ITEM_INFO).forEach(key => { if (defaults[key] === undefined) defaults[key] = 0; });
@@ -5971,10 +6222,11 @@
       heavy_duty_boots: { name: 'Heavy-Duty Boots', desc: 'Protege contra perigos de entrada no campo.', type: '' },
       light_clay: { name: 'Light Clay', desc: 'Estende Reflect e Light Screen; esses golpes ainda nao existem no jogo.', type: '' },
       fairy_feather: { name: 'Fairy Feather', desc: 'Aumenta em 10% o dano de golpes do tipo Fada.', type: 'Fada' },
+      flame_orb: { name: 'Flame Orb', desc: 'Queima o portador durante a batalha.', type: '' },
       toxic_orb: { name: 'Toxic Orb', desc: 'Aplica envenenamento ao portador no fim do turno.', type: '' },
     };
 
-    const EXTRA_HELD_ITEM_KEYS = ['choice_band','choice_scarf','choice_specs','quick_claw','focus_band','scope_lens','white_herb','wise_glasses','muscle_band','life_orb','light_clay','rocky_helmet','assault_vest','heavy_duty_boots','covert_cloak','fairy_feather','toxic_orb'];
+    const EXTRA_HELD_ITEM_KEYS = ['choice_band','choice_scarf','choice_specs','quick_claw','focus_band','scope_lens','white_herb','wise_glasses','muscle_band','life_orb','light_clay','rocky_helmet','assault_vest','heavy_duty_boots','covert_cloak','fairy_feather','flame_orb','toxic_orb'];
     EXTRA_HELD_ITEM_KEYS.forEach(key => {
       const item = HELD_ITEM_INFO[key];
       const id = key.replace(/_/g, '-');
@@ -6515,6 +6767,10 @@
         renderStoneEvolutionTargets(key);
         return;
       }
+      if (item.kind === 'natureBox') {
+        renderNatureBoxMintPicker();
+        return;
+      }
       const targetRoot = document.getElementById('bagUseTarget');
       const targets = player.party
         .map((pokemon, index) => ({ pokemon, index }))
@@ -6718,9 +6974,33 @@
             : `${item.name} usado em ${pokemon.name}!`);
     }
 
+    function renderNatureBoxMintPicker() {
+      const root = document.getElementById('bagUseTarget');
+      if (!root || getItemQty('naturebox') <= 0) return;
+      root.innerHTML = `<section class="nature-box-picker"><strong>Mint Box</strong><div style="margin-top:4px;color:var(--text-muted);font-size:.82rem;">Escolha apenas uma Mint. Depois selecione o Pok\u00e9mon que vai receb\u00ea-la.</div><div class="nature-mint-grid">${NATURES.map(nature => {
+        const effect = nature.up ? `+${nature.up} · −${nature.down}` : 'Atributos equilibrados';
+        const mintKey = `${nature.name.toLowerCase()}_mint`;
+        return `<button type="button" class="nature-mint-choice" onclick="selectNatureBoxMint('${nature.name}')">${itemIcon(mintKey, '', '🌿')}<span><strong>${escapeHTML(nature.name)} Mint</strong><small>${escapeHTML(effect)}</small></span></button>`;
+      }).join('')}</div><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 0 0;" onclick="cancelBagItemUse()">Cancelar</button></section>`;
+      root.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function selectNatureBoxMint(natureName) {
+      const nature = NATURES.find(entry => entry.name === natureName);
+      const root = document.getElementById('bagUseTarget');
+      if (!player || battle || !nature || getItemQty('naturebox') <= 0 || !root) return;
+      const targets = player.party.map((pokemon, index) => ({ pokemon, index })).filter(({ pokemon }) => canUseItemOnPokemon({ kind: 'natureBox' }, pokemon));
+      if (!targets.length) {
+        showToast('Sua equipe n\u00e3o tem nenhum Pok\u00e9mon saud\u00e1vel para usar a Mint.', 'error');
+        renderNatureBoxMintPicker();
+        return;
+      }
+      root.innerHTML = `<section class="nature-box-picker"><strong>${escapeHTML(nature.name)} Mint selecionada</strong><div style="margin-top:4px;color:var(--text-muted);font-size:.82rem;">Escolha um Pok\u00e9mon para aplicar. A caixa ser\u00e1 consumida uma vez.</div><div class="nature-mint-grid">${targets.map(({ pokemon, index }) => `<button type="button" class="nature-mint-choice" onclick="applyNatureBox(${index},'${nature.name}')">${itemIcon('naturebox', '', '🎁')}<span><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${Math.max(0, Math.round(pokemon.hp))}/${pokemon.maxHp} HP</small></span></button>`).join('')}</div><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 0 0;" onclick="renderNatureBoxMintPicker()">Voltar às Mints</button><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 0 0 6px;" onclick="cancelBagItemUse()">Cancelar</button></section>`;
+    }
+
     function applyNatureBox(partyIndex,natureName) {
       const pokemon=player?.party?.[partyIndex];
-      if(!pokemon||getItemQty('naturebox')<1||!NATURES.some(entry=>entry.name===natureName))return;
+      if(!pokemon||pokemon.hp<=0||getItemQty('naturebox')<1||!NATURES.some(entry=>entry.name===natureName))return;
       pokemon.natureMint=natureName; decItemQty('naturebox',1); cancelBagItemUse(); renderBag(); refreshPartyUI(); saveGame();
       showToast(`${pokemon.name} agora recebe os efeitos da natureza ${natureName}.`);
     }
@@ -6775,7 +7055,7 @@
       { id: 'dive_ball', name: 'Dive Ball', icon: '🔵', sprite: 'dive_ball', desc: 'Acabamento azul inspirado no mergulho e na exploração marinha.', price: 1000, key: 'dive_ball' },
       { id: 'dusk_ball', name: 'Dusk Ball', icon: '🟣', sprite: 'dusk_ball', desc: 'Tons escuros e roxos que lembram o céu ao anoitecer.', price: 1000, key: 'dusk_ball' },
       { id: 'moon_ball', name: 'Moon Ball', icon: '🌙', sprite: 'moon_ball', desc: 'Design noturno com detalhes inspirados na lua.', price: 1000, key: 'moon_ball' },
-      { id: 'masterball', name: 'Master Ball', icon: '🟣', sprite: 'masterball', desc: 'Modelo raro e icônico com o grande símbolo “M”.', price: 50000, key: 'masterball' },
+      { id: 'masterball', name: 'Master Ball', icon: '🟣', sprite: 'masterball', desc: 'Modelo raro e icônico com o grande símbolo “M”.', price: 10, key: 'masterball' },
       { id: 'potions', name: 'Poção', icon: '🧪', sprite: 'potions', desc: 'Recupera 25 HP em batalha', price: 150, key: 'potions' },
       { id: 'superpotion', name: 'Super Poção', icon: '🧴', sprite: 'superpotion', desc: 'Recupera 50 HP', price: 350, key: 'superpotion' },
       { id: 'hyperpotion', name: 'Hiper Poção', icon: '🧪', sprite: 'hyperpotion', desc: 'Recupera 200 HP', price: 1200, key: 'hyperpotion' },
@@ -6799,8 +7079,12 @@
       { id: 'magnet', name: 'Magnet', icon: '🧲', sprite: 'magnet', desc: 'Fortalece golpes Eletricos em 10%', price: 980, key: 'magnet' },
       { id: 'twisted_spoon', name: 'Twisted Spoon', icon: '🥄', sprite: 'twisted_spoon', desc: 'Fortalece golpes Psiquicos em 10%', price: 980, key: 'twisted_spoon' },
       { id: 'black_belt', name: 'Black Belt', icon: '🥋', sprite: 'black_belt', desc: 'Fortalece golpes Lutadores em 10%', price: 980, key: 'black_belt' },
-      { id: 'exp_share', name: 'Exp. Share', icon: '\u{1F4D8}', sprite: 'exp_share', desc: 'Compartilha metade da experiencia com quem o segura', price: 5000, key: 'exp_share' },
-      { id: 'lucky_egg', name: 'Lucky Egg', icon: '\u{1F95A}', sprite: 'lucky_egg', desc: 'Aumenta em 50% a experiencia recebida pelo Pokemon que o segura', price: 10000, key: 'lucky_egg' },
+      { id: 'exp_share', name: 'Exp. Share', icon: '\u{1F4D8}', sprite: 'exp_share', desc: 'Compartilha metade da experiencia com quem o segura', price: 15, key: 'exp_share' },
+      { id: 'lucky_egg', name: 'Lucky Egg', icon: '\u{1F95A}', sprite: 'lucky_egg', desc: 'Aumenta em 50% a experiencia recebida pelo Pokemon que o segura', price: 5, key: 'lucky_egg' },
+      { id: 'naturebox', name: 'Mint Box', icon: '🎁', sprite: 'naturebox', desc: 'Escolha uma natureza para alterar os efeitos de um Pokémon.', price: 5, key: 'naturebox' },
+      { id: 'bottlecap', name: 'Bottle Cap', icon: '🧢', sprite: 'bottlecap', desc: 'Escolha um atributo e maximize seu IV para 31.', price: 10, key: 'bottlecap' },
+      { id: 'vip', name: 'VIP', icon: '👑', sprite: 'vip', desc: 'Adiciona à sua conta todos os benefícios que o VIP proporciona.', price: 50, key: 'vip' },
+      { id: 'shiny_charm', name: 'Shiny Charm', icon: '\u2728', sprite: 'shiny_charm', desc: 'Triplica a chance de encontrar um Pok\u00e9mon Shiny selvagem.', price: 20, key: 'shiny_charm' },
       { id: 'focus_sash', name: 'Focus Sash', icon: '🛡️', sprite: 'focus_sash', desc: 'Com HP cheio, sobrevive a um golpe fatal com 1 HP. Consome-se ao ativar.', price: 5000, key: 'focus_sash' },
       { id: 'silk_scarf', name: 'Silk Scarf', icon: '🧣', sprite: 'silk_scarf', desc: 'Fortalece golpes Normais em 10%', price: 980, key: 'silk_scarf' },
       { id: 'silver_powder', name: 'Silver Powder', icon: '✨', sprite: 'silver_powder', desc: 'Fortalece golpes Inseto em 10%', price: 980, key: 'silver_powder' },
@@ -6814,12 +7098,12 @@
       { id: 'black_glasses', name: 'Black Glasses', icon: '🕶️', sprite: 'black_glasses', desc: 'Fortalece golpes Sombrios em 10%', price: 980, key: 'black_glasses' },
       { id: 'amulet_coin', name: 'Amulet Coin', icon: '🪙', sprite: 'amulet_coin', desc: 'Dobra o dinheiro recebido em batalhas', price: 6000, key: 'amulet_coin' },
       { id: 'shell_bell', name: 'Shell Bell', icon: '🐚', sprite: 'shell_bell', desc: 'Recupera 1/8 do dano causado', price: 5000, key: 'shell_bell' },
-      { id: 'macho_brace', name: 'Macho Brace', icon: '🏋️', sprite: 'macho_brace', desc: 'Dobra os EVs recebidos e reduz a Velocidade pela metade', price: 6000, key: 'macho_brace' },
-      { id: 'moonstone', name: 'Pedra da Lua', icon: '🌙', sprite: 'moonstone', desc: 'Pedra de evolução', price: 2100, key: 'moonstone' },
-      { id: 'firestone', name: 'Pedra do Fogo', icon: '🔥', sprite: 'firestone', desc: 'Pedra de evolução', price: 2100, key: 'firestone' },
-      { id: 'waterstone', name: 'Pedra da Água', icon: '💧', sprite: 'waterstone', desc: 'Pedra de evolução', price: 2100, key: 'waterstone' },
-      { id: 'thunderstone', name: 'Pedra do Trovão', icon: '⚡', sprite: 'thunderstone', desc: 'Pedra de evolução', price: 2100, key: 'thunderstone' },
-      { id: 'leafstone', name: 'Pedra da Folha', icon: '🍃', sprite: 'leafstone', desc: 'Pedra de evolução', price: 2100, key: 'leafstone' }
+      { id: 'macho_brace', name: 'Macho Brace', icon: '🏋️', sprite: 'macho_brace', desc: 'Dobra os EVs recebidos e reduz a Velocidade pela metade', price: 10, key: 'macho_brace' },
+      { id: 'moonstone', name: 'Pedra da Lua', icon: '🌙', sprite: 'moonstone', desc: 'Pedra de evolução', price: 5000, key: 'moonstone' },
+      { id: 'firestone', name: 'Pedra do Fogo', icon: '🔥', sprite: 'firestone', desc: 'Pedra de evolução', price: 5000, key: 'firestone' },
+      { id: 'waterstone', name: 'Pedra da Água', icon: '💧', sprite: 'waterstone', desc: 'Pedra de evolução', price: 5000, key: 'waterstone' },
+      { id: 'thunderstone', name: 'Pedra do Trovão', icon: '⚡', sprite: 'thunderstone', desc: 'Pedra de evolução', price: 5000, key: 'thunderstone' },
+      { id: 'leafstone', name: 'Pedra da Folha', icon: '🍃', sprite: 'leafstone', desc: 'Pedra de evolução', price: 5000, key: 'leafstone' }
     ];
 
     EXTRA_HELD_ITEM_KEYS.forEach(key => {
@@ -6847,7 +7131,7 @@
       { id: 'carbos', key: 'carbos', name: 'Carbos', desc: 'Aumenta 10 EVs de Velocidade.', category: 'medicine', kind: 'ev', stat: 'speed', amount: 10, price: 9800 },
       { id: 'calcium', key: 'calcium', name: 'Calcium', desc: 'Aumenta 10 EVs de Ataque Especial.', category: 'medicine', kind: 'ev', stat: 'specialAttack', amount: 10, price: 9800 },
       { id: 'zinc', key: 'zinc', name: 'Zinc', desc: 'Aumenta 10 EVs de Defesa Especial.', category: 'medicine', kind: 'ev', stat: 'specialDefense', amount: 10, price: 9800 },
-      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy', desc: 'Sobe um nível.', category: 'medicine', kind: 'level', price: 1 },
+      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy 10x', desc: 'Sobe um nível.', category: 'medicine', kind: 'level', qty: 10, price: 15 },
       { id: 'exp-charm', key: 'exp_charm', name: 'Exp. Charm', desc: 'Consumível: aumenta em 50% a experiência recebida em batalhas por 1 hora.', category: 'medicine', kind: 'expCharm', price: 10 }
     ];
     const EXTRA_SPECIAL_ITEMS = [
@@ -6874,15 +7158,15 @@
       }
       BAG_FIELD_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount, stat: item.stat });
       if (!['ev', 'level', 'mint', 'tm', 'expCharm'].includes(item.kind)) BATTLE_BAG_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount });
-      if (!SHOP_ITEMS.some(entry => entry.key === item.key)) {
-        SHOP_ITEMS.push({ id: item.key, name: item.name, icon: item.kind === 'ev' ? '💊' : item.kind === 'level' ? '🍬' : '🧪', sprite: item.key, desc: item.desc, price: item.price, key: item.key, kind: item.kind });
+      if (!['mint'].includes(item.kind) && !SHOP_ITEMS.some(entry => entry.key === item.key)) {
+        SHOP_ITEMS.push({ id: item.key, name: item.name, icon: item.kind === 'ev' ? '💊' : item.kind === 'level' ? '🍬' : '🧪', sprite: item.key, desc: item.desc, price: item.price, key: item.key, kind: item.kind, qty: item.qty });
       }
     });
 
     BAG_CATEGORIES.push({ id: 'technical-machines', title: 'TMs', items: [] });
     const EXTRA_TM_ITEMS = (window.POKEMON_ITEM_CATALOG || []).filter(entry => /^tm\d+$/.test(entry.id) && window.POKEMON_TM_MOVES?.[entry.id]).map(entry => {
       const move = window.POKEMON_TM_MOVES[entry.id];
-      return { id: entry.id, key: entry.id, name: entry.name, desc: `Ensina ${move.name} a um Pokémon compatível.`, category: 'medicine', kind: 'tm', move, price: 1 };
+      return { id: entry.id, key: entry.id, name: entry.name, desc: `Ensina ${move.name} a um Pokémon compatível.`, category: 'medicine', kind: 'tm', move, price: window.POKEMON_TM_PRICES?.[entry.id] ?? 600 };
     });
     EXTRA_TM_ITEMS.forEach(item => {
       ITEM_SPRITE[item.key] = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.id}.png`;
@@ -7136,11 +7420,69 @@
     }
 
     const marketCategoryByKey = new Map(BAG_CATEGORIES.flatMap(category => category.items.map(entry => [entry.key, category.id])));
+    const POKECOIN_PACKAGES = [
+      { coins: 5, supporterCoins: 5, price: 5 }, { coins: 20, supporterCoins: 25, price: 20 },
+      { coins: 30, supporterCoins: 40, price: 30 }, { coins: 50, supporterCoins: 75, price: 50 },
+      { coins: 100, supporterCoins: 150, price: 100 }, { coins: 150, supporterCoins: 225, price: 150 },
+      { coins: 200, supporterCoins: 300, price: 200 }, { coins: 300, supporterCoins: 500, price: 300 }
+    ];
+    function renderPokeCoinsPackageCards() {
+      const grid = document.getElementById('pokeCoinsPackGrid');
+      const bonusEnabled = Boolean(String(player?.pokeCoinsSupporterCode || '').trim());
+      grid.innerHTML = POKECOIN_PACKAGES.map((pack, index) => {
+        const diamondCount = Math.min(6, Math.max(1, Math.ceil(pack.coins / 75)));
+        const diamonds = Array.from({ length: diamondCount }, () => '<span class="poke-coins-diamond"></span>').join('');
+        const price = pack.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const bonus = bonusEnabled ? pack.supporterCoins - pack.coins : 0;
+        const totalCoins = pack.coins + bonus;
+        const bonusLabel = bonus > 0 ? `<span class="poke-coins-pack-bonus">+${bonus} bônus</span>` : '';
+        return `<button type="button" class="poke-coins-pack" data-pack-index="${index}" aria-pressed="false" aria-label="${totalCoins} PokéCoins${bonus ? `, inclui ${bonus} de bônus` : ''} por ${price}" onclick="selectPokeCoinsPackage(${index})"><span class="poke-coins-pack-amount">${totalCoins}</span>${bonusLabel}<span class="poke-coins-pack-diamonds" aria-hidden="true">${diamonds}</span><span class="poke-coins-pack-price">${price}</span></button>`;
+      }).join('');
+    }
+    function openPokeCoinsStore() {
+      const supporterInput = document.getElementById('pokeCoinsSupporterCode');
+      const supporterStatus = document.getElementById('pokeCoinsSupporterStatus');
+      if (supporterInput) supporterInput.value = player?.pokeCoinsSupporterCode || '';
+      if (supporterStatus) supporterStatus.textContent = supporterInput?.value ? `Código salvo: ${supporterInput.value}` : '';
+      renderPokeCoinsPackageCards();
+      document.getElementById('pokeCoinsStoreDialog').showModal();
+    }
+    function selectPokeCoinsPackage(index) {
+      const pack = POKECOIN_PACKAGES[index];
+      if (!pack) return;
+      document.querySelectorAll('.poke-coins-pack').forEach((button, buttonIndex) => {
+        const selected = buttonIndex === index;
+        button.classList.toggle('selected', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      });
+    }
+    function applyPokeCoinsSupporterCode() {
+      if (!player) return;
+      const input = document.getElementById('pokeCoinsSupporterCode');
+      const code = String(input?.value || '').trim().slice(0, 24);
+      player.pokeCoinsSupporterCode = code;
+      const status = document.getElementById('pokeCoinsSupporterStatus');
+      if (status) status.textContent = code ? `Código ${code} aplicado: bônus especial nos pacotes.` : 'Código de apoiador removido.';
+      renderPokeCoinsPackageCards();
+      saveGame();
+    }
     function marketItemUsesBattlePoints(item) {
-      return ['tm', 'battleBoost', 'guardSpec', 'direHit'].includes(item?.kind);
+      return ['tm', 'battleBoost', 'guardSpec', 'direHit'].includes(item?.kind) ||
+        ['leftovers', 'charcoal', 'miracle_seed', 'mystic_water', 'magnet', 'twisted_spoon', 'black_belt', 'focus_sash',
+          'silk_scarf', 'silver_powder', 'hard_stone', 'sharp_beak', 'poison_barb', 'spell_tag', 'dragon_fang',
+          'never_melt_ice', 'metal_coat', 'black_glasses', 'amulet_coin', 'shell_bell', 'choice_band', 'choice_scarf',
+          'choice_specs', 'quick_claw', 'focus_band', 'scope_lens', 'white_herb', 'wise_glasses', 'muscle_band',
+          'life_orb', 'light_clay', 'rocky_helmet', 'assault_vest', 'heavy_duty_boots', 'covert_cloak',
+          'fairy_feather', 'flame_orb', 'toxic_orb'].includes(item?.key) ||
+        ['leftovers', 'charcoal', 'miracle_seed', 'mystic_water', 'magnet', 'twisted_spoon', 'black_belt', 'focus_sash',
+          'silk_scarf', 'silver_powder', 'hard_stone', 'sharp_beak', 'poison_barb', 'spell_tag', 'dragon_fang',
+          'never_melt_ice', 'metal_coat', 'black_glasses', 'amulet_coin', 'shell_bell', 'choice_band', 'choice_scarf',
+          'choice_specs', 'quick_claw', 'focus_band', 'scope_lens', 'white_herb', 'wise_glasses', 'muscle_band',
+          'life_orb', 'light_clay', 'rocky_helmet', 'assault_vest', 'heavy_duty_boots', 'covert_cloak',
+          'fairy_feather', 'flame_orb', 'toxic_orb'].includes(item?.id);
     }
     function marketItemUsesPokeCoins(item) {
-      return ['rarecandy', 'exp_charm'].includes(item?.key) || item?.id === 'rarecandy' || item?.id === 'rare-candy';
+      return ['rarecandy', 'exp_charm', 'masterball', 'lucky_egg', 'exp_share', 'macho_brace', 'shiny_charm', 'naturebox', 'bottlecap', 'vip'].includes(item?.key) || ['rarecandy', 'rare-candy', 'masterball', 'lucky_egg', 'exp_share', 'macho_brace', 'shiny_charm', 'naturebox', 'bottlecap', 'vip'].includes(item?.id);
     }
     function normalizeMarketText(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
@@ -7367,6 +7709,10 @@
       }
       const item = SHOP_ITEMS.find(i => i.id === itemId);
       if (!item || !player) return false;
+      if (item.key === 'shiny_charm' && getItemQty('shiny_charm') > 0) {
+        showToast('Você já possui o Shiny Charm.', 'error');
+        return false;
+      }
       if (quantity === undefined) {
         openShopQuantityDialog(item);
         return false;
@@ -8734,13 +9080,14 @@
         }));
         const calculatedStats = pvpCalculateStats(baseStats[pokemonIndex], pokemon, ivs, evs);
         const maxHp = calculatedStats.hp;
-        const moves = (pokemon.moves || []).filter(move => Number(move.power) > 0 || move.healing>0 || move.drain>0 || move.statChanges?.length || ['burn','paralysis','poison','sleep','freeze'].includes(move.statusEffect?.status)).slice(0,4).map(move => ({
+        const moves = (pokemon.moves || []).slice(0,4).map(move => ({
           name: String(move.name || 'Golpe'), type: getCurrentMoveType(move), category: move.category || (isPhysicalMove(move) ? 'physical' : 'special'),
           power: Math.max(0, Math.min(250, Math.floor(Number(move.power) || 0))),
           accuracy: move.accuracy !== null && move.accuracy !== undefined && Number.isFinite(Number(move.accuracy)) ? Math.max(1, Math.min(100, Number(move.accuracy))) : 100,
           priority: Math.max(-7,Math.min(7,Math.floor(Number(move.priority ?? ({'quick attack':1,'mach punch':1,'extreme speed':1,'protect':3,'detect':3,'endure':3,'follow me':1,'helping hand':5,'counter':-5,'mirror coat':-5,'vital throw':-1,'focus punch':-3}[String(move.name||'').toLowerCase()] ?? 0))||0))),
           target: String(move.target||''), healing: Math.max(0,Math.min(100,Number(move.healing)||0)), drain: Math.max(0,Math.min(100,Number(move.drain)||0)),
-          statusEffect: move.statusEffect && ['burn','paralysis','poison','sleep','freeze'].includes(move.statusEffect.status) ? {status:move.statusEffect.status,chance:Math.max(0,Math.min(1,Number(move.statusEffect.chance)||0))} : null,
+          recoil: Math.max(0,Math.min(100,Number(move.recoil)||0)), minHits: Math.max(1,Math.min(10,Math.floor(Number(move.minHits)||1))), maxHits: Math.max(1,Math.min(10,Math.floor(Number(move.maxHits)||1))), critRate: Math.max(0,Math.min(3,Math.floor(Number(move.critRate)||0))), flinchChance: Math.max(0,Math.min(1,Number(move.flinchChance)||0)),
+          statusEffect: (()=>{const effect=getStatusMoveEffect(move);return effect&&['burn','paralysis','poison','sleep','freeze','confusion'].includes(effect.status)?{status:effect.status,chance:Math.max(0,Math.min(1,Number(effect.chance)||0))}:move.protect?{status:'protect',chance:1}:null})(), protect:Boolean(move.protect),
           statChanges: Array.isArray(move.statChanges) ? move.statChanges.filter(change=>['self','target','attacker'].includes(change.target)&&['attack','defense','specialAttack','specialDefense','speed','accuracy','evasion'].includes(change.stat)).map(change=>({target:change.target,stat:change.stat,stages:Math.max(-6,Math.min(6,Number(change.stages)||0))})) : [],
           pp: Math.max(1, Math.floor(Number(move.maxPp) || Number(move.pp) || 10)),
           maxPp: Math.max(1, Math.floor(Number(move.maxPp) || Number(move.pp) || 10))
@@ -8751,7 +9098,7 @@
           types: getTypes(pokemon.id), stats: calculatedStats,
           hp: maxHp, ability: ABILITY_INFO[pokemon.ability] ? pokemon.ability : '',
           heldItem: String(pokemon.heldItem || ''),
-          nature: String(pokemon.nature || ''), ivs, evs, moves
+          nature: String(pokemon.natureMint || pokemon.nature || ''), ivs, evs, moves
         };
       });
     }
@@ -8779,7 +9126,7 @@
       }
       return `<div class="pvp-team-select">${player.party.map((pokemon,index)=>{
         const selected = pvpSelectedIndices.has(index);
-        const moves = (pokemon.moves || []).filter(move=>Number(move.power)>0 || move.healing>0 || move.drain>0 || move.statChanges?.length || ['burn','paralysis','poison','sleep','freeze'].includes(move.statusEffect?.status)).length;
+        const moves = (pokemon.moves || []).length;
         return `<label class="pvp-select-card"><input type="checkbox" ${selected?'checked':''} onchange="togglePvpPokemon(${index},this.checked)" />
           <img src="${SPRITE_POKEMON(pokemon)}" alt="" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'" />
           <span><strong>${escapeHTML(pokemon.name)}</strong><br><small>Nv. ${pokemon.level} · ${moves} golpes</small></span></label>`;
@@ -8794,7 +9141,8 @@
         if (pvpSelectedIndices.size <= 1) { showToast('Selecione pelo menos um Pokémon.', 'error'); renderPvpPanel(); return; }
         pvpSelectedIndices.delete(index);
       }
-      renderPvpPanel();
+      if (document.getElementById('coop-boss')?.classList.contains('active')) renderCoopBossPanel();
+      else renderPvpPanel();
     }
 
     function renderPvpPanel() {
@@ -9155,13 +9503,26 @@
       renderPvpPanel();
     }
 
-    let coopBossRoom=null, coopBossChannel=null, coopBossBusy=false, coopBossMenu='main';
+    let coopBossRoom=null, coopBossChannel=null, coopBossBusy=false, coopBossAnimating=false, coopBossAnimationKey='', coopBossMenu='main', coopBossSelectedItem='', coopBossDeadlineTimer=null, coopBossLastTimeoutTick=0;
     function renderCoopBossPanel() {
       const root=document.getElementById('coopBossContent'); if(!root)return;
       if(!player||!onlineUser||!supabaseClient){root.innerHTML='<div class="pvp-lobby-box">Entre em uma conta para participar do Big Boss.</div>';return;}
       if(coopBossRoom){renderCoopBossRoom();return;}
       if(!pvpSelectedIndices.size) player.party.slice(0,6).forEach((pokemon,index)=>{if(pokemon) pvpSelectedIndices.add(index);});
-      root.innerHTML=`<div class="pvp-lobby-box"><strong>Monte sua equipe</strong><div class="panel-desc" style="margin:4px 0 12px">Selecione de 1 a 6 Pokémon para a raid. A equipe entra com HP completo.</div>${pvpRenderTeamSelection()}<div class="pvp-room-controls"><button class="btn" style="width:auto;margin:0" onclick="coopBossCreate()">Criar sala</button><input id="coopBossCodeInput" type="text" maxlength="6" placeholder="Código da sala" aria-label="Código da raid" autocomplete="off"/><button class="btn btn-secondary" style="width:auto;margin:0" onclick="coopBossJoin()">Entrar na sala</button></div><p style="color:var(--text-muted);font-size:.8rem;margin:12px 0 0">O criador inicia a batalha quando os treinadores estiverem prontos. Máximo de 5 participantes.</p></div>`;
+      const boss={id:150,name:'Mewtwo',level:100,maxHp:30000};
+      const bossSprite=SPRITE_ANIM_POKEMON(boss),bossFallback=SPRITE(150);
+      const selectedCount=pvpSelectedIndices.size;
+      root.innerHTML=`<div class="coop-lobby">
+        <section class="coop-lobby-hero">
+          <div class="coop-lobby-copy"><span class="coop-lobby-kicker">Raid cooperativa · Kanto</span><h2>Encare Mewtwo em equipe</h2><p>Reúna até cinco treinadores para uma batalha coordenada. O dano é compartilhado e cada participante escolhe uma ação por rodada.</p><div class="coop-lobby-perks"><span>👥 Até 5 treinadores</span><span>💜 30.000 HP compartilhados</span><span>🎒 Itens e trocas liberados</span></div></div>
+          <div class="coop-lobby-boss"><img src="${bossSprite}" alt="Mewtwo" decoding="async" onerror="this.onerror=null;this.src='${bossFallback}'"><span>MEWTWO · NV. 100</span></div>
+        </section>
+        <div class="coop-lobby-body">
+          <section class="coop-lobby-section"><div class="coop-lobby-section-head"><div><h3>Monte sua equipe</h3><p>Escolha de 1 a 6 Pokémon. Eles entram na raid com HP e PP completos.</p></div><span class="coop-team-count">${selectedCount}/6</span></div>${pvpRenderTeamSelection()}</section>
+          <section class="coop-lobby-section"><div class="coop-lobby-section-head"><div><h3>Entre na batalha</h3><p>Crie uma sala ou informe o código de um grupo.</p></div></div><div class="coop-room-actions"><div class="coop-room-action"><h4>Organize uma raid</h4><p>Crie uma sala e compartilhe o código com seus aliados.</p><button class="btn" onclick="coopBossCreate()">＋ Criar sala</button></div><div class="coop-room-action join"><h4>Já tem um código?</h4><p>Digite o código de seis caracteres para entrar.</p><input id="coopBossCodeInput" type="text" maxlength="6" placeholder="CÓDIGO DA SALA" aria-label="Código da raid" autocomplete="off"><button class="btn btn-secondary" onclick="coopBossJoin()">Entrar na sala</button></div></div></section>
+          <p class="coop-lobby-footnote">Seu HP, PP e itens permanentes não são alterados pela raid. O anfitrião inicia quando o grupo estiver pronto.</p>
+        </div>
+      </div>`
     }
     async function coopBossCreate(){
       if(coopBossBusy)return; coopBossBusy=true;
@@ -9177,32 +9538,133 @@
     }
     async function coopBossAttach(room){
       if(!room?.id)throw new Error('A sala retornou dados inválidos.');if(coopBossChannel)await supabaseClient.removeChannel(coopBossChannel);coopBossRoom=room;
-      coopBossChannel=supabaseClient.channel('coop-boss-'+room.id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'coop_boss_rooms',filter:'id=eq.'+room.id},payload=>{coopBossRoom=payload.new;renderCoopBossPanel();}).subscribe(status=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')showToast('A conexão da raid foi interrompida. Confira sua internet.','error');});renderCoopBossPanel();
+      coopBossChannel=supabaseClient.channel('coop-boss-'+room.id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'coop_boss_rooms',filter:'id=eq.'+room.id},payload=>coopBossUpdateRoom(payload.new)).subscribe(status=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')showToast('A conexão da raid foi interrompida. Confira sua internet.','error');});renderCoopBossPanel();coopBossScheduleDeadline(room);
+    }
+    function coopBossUpdateRoom(room){
+      const previous=coopBossRoom;
+      const animationKey=`${room?.id}:${room?.turn}`;
+      if(coopBossAnimating&&animationKey===coopBossAnimationKey)return;
+      coopBossRoom=room;
+      coopBossScheduleDeadline(room);
+      const advanced=previous&&previous.status==='battle'&&['battle','won','lost'].includes(room.status)&&Number(room.turn)>Number(previous.turn);
+      if(!advanced){renderCoopBossPanel();return;}
+      const oldLog=previous.battle?.log||[],newLog=room.battle?.log||[];
+      let overlap=Math.min(oldLog.length,newLog.length);
+      while(overlap>0&&oldLog.slice(-overlap).join('\n')!==newLog.slice(0,overlap).join('\n'))overlap--;
+      const newEvents=newLog.slice(overlap);
+      const me=(room.members||[]).find(member=>member.user_id===onlineUser?.id);
+      const state=room.battle?.participants?.[onlineUser?.id],oldState=previous.battle?.participants?.[onlineUser?.id];
+      const oldPokemon=me?.team?.[Number(oldState?.active)||0];
+      const playerAttacked=Boolean(oldPokemon&&newEvents.some(line=>line.startsWith(`${oldPokemon.name} usou `)||line.startsWith(`${oldPokemon.name} errou `)));
+      const bossDamaged=newEvents.some(line=>/causou [1-9]\d* de dano\./.test(line));
+      const bossAttackEvent=me&&newEvents.find(line=>line.startsWith(`Mewtwo atingiu a equipe de ${me.name} `));
+      const bossAttacked=Boolean(bossAttackEvent&&/por [1-9]\d* de dano/.test(bossAttackEvent));
+      const slot=Number(state?.active)||0,localPokemon=me?.team?.[slot],localHp=Number(state?.hp?.[slot])||0;
+      const bossHp=Math.max(0,Number(room.battle?.mewtwo_hp)||0),bossMaxHp=Number(room.battle?.mewtwo_max_hp)||30000;
+      coopBossAnimating=true;coopBossAnimationKey=animationKey;
+      const syncHp=(selector,hp,maxHp)=>{
+        const info=document.querySelector(`#coopBossContent ${selector}`);if(!info)return;
+        const current=Math.max(0,Math.min(Number(maxHp)||1,Number(hp)||0)),maximum=Math.max(1,Number(maxHp)||1),percent=Math.round(current/maximum*100);
+        const label=info.querySelector('.hp-label span:nth-child(2)'),fill=info.querySelector('.hp-fill');
+        if(label)label.textContent=`${current}/${maximum}`;
+        if(fill){fill.style.width=`${percent}%`;fill.classList.toggle('yellow',percent<=50&&percent>20);fill.classList.toggle('red',percent<=20);}
+      };
+      const animate=selector=>{
+        const sprite=document.querySelector(`#coopBossContent ${selector}`);if(!sprite)return;
+        sprite.classList.remove('attack-anim');void sprite.offsetWidth;sprite.classList.add('attack-anim');
+        setTimeout(()=>sprite.classList.remove('attack-anim'),700);
+      };
+      const showHit=(selector,stageSelector,damage,left,top,hpSelector,hp,maxHp)=>{
+        const sprite=document.querySelector(`#coopBossContent ${selector}`);
+        if(sprite){sprite.classList.remove('hit');void sprite.offsetWidth;sprite.classList.add('hit');setTimeout(()=>sprite.classList.remove('hit'),800);}
+        syncHp(hpSelector,hp,maxHp);
+        if(damage>0){
+          SFX.hit();const stage=document.querySelector(`#coopBossContent ${stageSelector}`);
+          if(stage){const number=document.createElement('div');number.className='dmg-float';number.textContent=`-${damage}`;number.style.left=left;number.style.top=top;stage.appendChild(number);setTimeout(()=>number.remove(),900);}
+        }
+      };
+      if(playerAttacked)requestAnimationFrame(()=>animate('.player-sprite'));
+      const dealtToBoss=newEvents.reduce((sum,line)=>sum+(Number(line.match(/causou (\d+) de dano\./)?.[1])||0),0);
+      const bossHitDelay=playerAttacked?380:120;
+      if(bossDamaged||bossHp!==Number(previous.battle?.mewtwo_hp))setTimeout(()=>requestAnimationFrame(()=>showHit('.enemy-sprite','.enemy-stage',dealtToBoss,'48%','18%','.enemy-info',bossHp,bossMaxHp)),bossHitDelay);
+      const receivedByPlayer=Number(bossAttackEvent?.match(/por (\d+) de dano/)?.[1])||0;
+      let finishAfter=Math.max(playerAttacked?800:300,bossHitDelay+800);
+      if(bossAttacked){
+        const attackDelay=playerAttacked?1050:300;finishAfter=Math.max(finishAfter,attackDelay+850);
+        finishAfter=Math.max(finishAfter,attackDelay+1230);
+        setTimeout(()=>{requestAnimationFrame(()=>animate('.enemy-sprite'));setTimeout(()=>requestAnimationFrame(()=>showHit('.player-sprite','.player-stage',receivedByPlayer,'60%','20%','.player-info',localHp,localPokemon?.maxHp)),430);},attackDelay);
+      }
+      setTimeout(()=>{if(coopBossAnimationKey!==animationKey)return;coopBossAnimating=false;coopBossAnimationKey='';renderCoopBossPanel();},finishAfter);
     }
     function coopBossIsHost(){return coopBossRoom?.host_id===onlineUser?.id;}
+    async function coopBossCopyCode(){const code=coopBossRoom?.room_code;if(!code)return;try{await navigator.clipboard.writeText(code);showToast('Código da sala copiado!');}catch(_){showToast('Copie o código da sala: '+code);}}
     async function coopBossStart(){if(!coopBossRoom||!coopBossIsHost()||coopBossBusy)return;coopBossBusy=true;try{const {data,error}=await supabaseClient.rpc('coop_boss_start',{p_code:coopBossRoom.room_code});if(error)throw error;coopBossRoom=data;renderCoopBossPanel();}catch(e){showToast('Não foi possível iniciar a raid: '+e.message,'error');}finally{coopBossBusy=false;}}
-    async function coopBossAct(action){if(!coopBossRoom||coopBossRoom.status!=='battle'||coopBossBusy||coopBossRoom.actions?.[onlineUser.id])return;coopBossBusy=true;try{const {data,error}=await supabaseClient.rpc('coop_boss_act',{p_code:coopBossRoom.room_code,p_action:action});if(error)throw error;coopBossRoom=data;coopBossMenu='main';renderCoopBossPanel();}catch(e){showToast('Não foi possível enviar a ação: '+e.message,'error');}finally{coopBossBusy=false;}}
-    async function coopBossClose(){if(coopBossChannel){await supabaseClient.removeChannel(coopBossChannel);coopBossChannel=null;}coopBossRoom=null;coopBossMenu='main';renderCoopBossPanel();}
+    function coopBossScheduleDeadline(room=coopBossRoom){if(coopBossDeadlineTimer){clearTimeout(coopBossDeadlineTimer);coopBossDeadlineTimer=null;}if(!room||room.status!=='battle')return;const deadline=Date.parse(room.turn_deadline||'');if(!Number.isFinite(deadline))return;coopBossDeadlineTimer=setTimeout(()=>{coopBossDeadlineTimer=null;if(Date.now()-coopBossLastTimeoutTick<2500)return;coopBossLastTimeoutTick=Date.now();coopBossAct({type:'tick'},true);},Math.max(0,deadline-Date.now()+1200));}
+    async function coopBossAct(action,internal=false){if(!coopBossRoom||coopBossRoom.status!=='battle'||coopBossBusy||coopBossAnimating||(!internal&&coopBossRoom.actions?.[onlineUser.id]))return;coopBossBusy=true;try{const {data,error}=await supabaseClient.rpc('coop_boss_act',{p_code:coopBossRoom.room_code,p_action:action});if(error)throw error;if(action.type==='item'){decItemQty(action.key,1);saveGame();}if(!internal){coopBossMenu='main';coopBossSelectedItem='';}coopBossUpdateRoom(data);}catch(e){if(!internal)showToast('Não foi possível enviar a ação: '+e.message,'error');}finally{coopBossBusy=false;}}
+    async function coopBossClose(){coopBossAnimating=false;coopBossAnimationKey='';if(coopBossDeadlineTimer){clearTimeout(coopBossDeadlineTimer);coopBossDeadlineTimer=null;}if(coopBossChannel){await supabaseClient.removeChannel(coopBossChannel);coopBossChannel=null;}coopBossRoom=null;coopBossMenu='main';coopBossSelectedItem='';renderCoopBossPanel();}
     function renderCoopBossRoom(){
       const root=document.getElementById('coopBossContent'),room=coopBossRoom;if(!root||!room)return;
       const members=Array.isArray(room.members)?room.members:[],me=members.find(m=>m.user_id===onlineUser.id),myState=room.battle?.participants?.[onlineUser.id];
       if(room.status==='waiting'){
-        root.innerHTML=`<div class="pvp-lobby-box"><div>Sala <strong class="pvp-code">${escapeHTML(room.room_code)}</strong> · ${members.length}/5 treinadores</div><p style="color:var(--text-muted);margin:10px 0">Compartilhe o código para reunir sua equipe.</p><div style="display:grid;gap:8px;margin:12px 0">${members.map((m,i)=>`<div class="pvp-room-box" style="margin:0">${i===0?'👑 ':''}<strong>${escapeHTML(m.name)}</strong><span style="color:var(--text-muted)"> · ${m.team.length} Pokémon</span></div>`).join('')}</div>${coopBossIsHost()?`<button class="btn" style="width:auto" onclick="coopBossStart()">Iniciar raid</button>`:`<p>Aguardando o anfitrião iniciar…</p>`}<button class="btn btn-secondary" style="width:auto;margin-left:8px" onclick="coopBossClose()">Sair</button></div>`;return;
-      }
-      const hp=Math.max(0,Number(room.battle?.mewtwo_hp)||0),maxHp=Number(room.battle?.mewtwo_max_hp)||30000,percent=Math.max(0,Math.min(100,hp/maxHp*100));
+        const boss={id:150,name:'Mewtwo',level:100,maxHp:30000},bossSprite=SPRITE_ANIM_POKEMON(boss),bossFallback=SPRITE(150);
+        const memberCards=members.map((member,index)=>{const lead=member.team?.[0],isYou=member.user_id===onlineUser.id;return `<div class="coop-waiting-member ${index===0?'host':''}"><img src="${SPRITE_FRONT(lead?.id||150)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FB(lead?.id||150)}'"><div class="coop-waiting-member-copy"><strong>${escapeHTML(member.name)}${isYou?' (voc&ecirc;)':''}</strong><span>${member.team?.length||0} Pok&#233;mon preparados para a raid</span></div>${index===0?'<span class="coop-waiting-role">Anfitri&atilde;o</span>':''}</div>`}).join('');
+        root.innerHTML=`<div class="coop-waiting"><section class="coop-waiting-hero"><div class="coop-waiting-copy"><span class="coop-waiting-kicker">Lobby da raid · Kanto</span><h2>Reúna sua equipe</h2><p>Compartilhe o código da sala. Quando todos estiverem prontos, o anfitrião pode iniciar o confronto contra Mewtwo.</p><span class="coop-waiting-state">Aguardando treinadores</span></div><div class="coop-waiting-boss"><img src="${bossSprite}" alt="Mewtwo" decoding="async" onerror="this.onerror=null;this.src='${bossFallback}'"></div></section><div class="coop-waiting-body"><section class="coop-waiting-section"><div class="coop-waiting-section-head"><h3>Treinadores na sala</h3><span class="coop-waiting-count">${members.length} / 5</span></div><div class="coop-waiting-members">${memberCards}</div></section><section class="coop-waiting-section"><div class="coop-waiting-section-head"><h3>Código da sala</h3><span class="coop-waiting-count">6 caracteres</span></div><div class="coop-waiting-room-code"><div><small>Compartilhe para convidar</small><strong>${escapeHTML(room.room_code)}</strong></div><button type="button" onclick="coopBossCopyCode()">⧉ Copiar</button></div><div class="coop-waiting-actions">${coopBossIsHost()?`<button class="btn" onclick="coopBossStart()">⚔ Iniciar raid</button><p class="coop-waiting-host-note">Você é o anfitrião e pode iniciar a batalha quando quiser.</p>`:`<p class="coop-waiting-host-note">Aguardando o anfitrião iniciar a raid. Deixe esta tela aberta para entrar na batalha assim que começar.</p>`}<button class="btn btn-secondary" onclick="coopBossClose()">Sair da sala</button></div></section></div></div>`;
+        return;
+      }      const hp=Math.max(0,Number(room.battle?.mewtwo_hp)||0),maxHp=Number(room.battle?.mewtwo_max_hp)||30000,percent=Math.max(0,Math.min(100,hp/maxHp*100));
       if(room.status==='won'||room.status==='lost'||room.status==='cancelled'){
         root.innerHTML=`<div class="pvp-lobby-box"><h3>${room.status==='won'?'Mewtwo foi derrotado!':room.status==='lost'?'A equipe foi derrotada':'Raid encerrada'}</h3><p>HP final de Mewtwo: ${hp.toLocaleString('pt-BR')} / ${maxHp.toLocaleString('pt-BR')}</p><button class="btn" style="width:auto" onclick="coopBossClose()">Voltar</button></div>`;return;
       }
-      const membersHTML=members.map(m=>{const state=room.battle?.participants?.[m.user_id]||{},hps=state.hp||[],active=Number(state.active)||0;return `<div class="pvp-room-box" style="margin:0 0 8px"><strong>${escapeHTML(m.name)}${m.user_id===onlineUser.id?' (você)':''}</strong><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">${m.team.map((p,i)=>`<span style="font-size:.8rem;color:${Number(hps[i])>0?'var(--text)':'#ff6b6b'}">${i===active?'▶ ':''}${escapeHTML(p.name)} ${Math.max(0,Number(hps[i])||0)}/${p.maxHp}</span>`).join('')}</div></div>`;}).join('');
+      const rosterHTML=members.map(member=>{
+        const state=room.battle?.participants?.[member.user_id]||{},hps=state.hp||[],slot=Number(state.active)||0,activePokemon=member.team[slot]||member.team[0];
+        const currentHp=Math.max(0,Number(hps[slot])||0),maxHp=Math.max(1,Number(activePokemon?.maxHp)||1),width=Math.max(0,Math.min(100,currentHp/maxHp*100));
+        const isYou=member.user_id===onlineUser.id,submitted=Boolean(room.actions?.[member.user_id]);
+        return `<div class="coop-raid-member ${isYou?'is-you':''}" title="${escapeHTML(member.name)} · ${escapeHTML(activePokemon?.name||'Pokémon')}"><img src="${SPRITE_FRONT(activePokemon?.id||150)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FB(activePokemon?.id||150)}'"><div class="coop-raid-member-copy"><strong>${escapeHTML(member.name)}${isYou?' (você)':''}</strong><span>${escapeHTML(activePokemon?.name||'Pokémon')} · ${currentHp}/${maxHp} HP${submitted?' · Pronto':''}</span><div class="coop-raid-member-hp"><i style="width:${width}%"></i></div></div></div>`;
+      }).join('');
       const myTeam=me?.team||[],active=Number(myState?.active)||0,activePokemon=myTeam[active],myHp=myState?.hp||[],myAction=Boolean(room.actions?.[onlineUser.id]);
-      const allFainted=myHp.every(value=>Number(value)<=0),activeFainted=Number(myHp[active])<=0;
-      if(activeFainted&&!allFainted)coopBossMenu='switch';
-      const damaging=(activePokemon?.moves||[]).map((move,index)=>({move,index})).filter(x=>Number(x.move.power)>0);
-      const moveBtns=damaging.map(({move,index})=>`<button class="move-btn" onclick="coopBossAct({type:'move',index:${index}})" ${myAction||Number(myHp[active])<=0?'disabled':''}><span>${escapeHTML(move.name)}</span><span class="move-power">${escapeHTML(move.type)} · PWR ${move.power}</span></button>`).join('');
-      const switchBtns=myTeam.map((p,i)=>`<button class="move-btn" onclick="coopBossAct({type:'switch',index:${i}})" ${myAction||i===active||Number(myHp[i])<=0?'disabled':''}><span>${escapeHTML(p.name)}</span><span class="move-power">HP ${Math.max(0,Number(myHp[i])||0)}/${p.maxHp}</span></button>`).join('');
-      const actions=allFainted&&!myAction?`<div class="battle-actions"><button class="move-btn" onclick="coopBossAct({type:'wait'})">Aguardar a equipe</button></div>`:myAction?`<div class="pvp-waiting-action">Ação enviada. Aguardando os outros treinadores (${Object.keys(room.actions||{}).length}/${members.length})…</div>`:coopBossMenu==='switch'?`<div class="battle-actions moves-view">${switchBtns}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:`<div class="battle-actions moves-view">${moveBtns}<button class="move-btn" onclick="coopBossAct({type:'struggle'})" ${myAction?'disabled':''}>Esforço · PWR 60</button><button class="move-btn" onclick="coopBossMenu='switch';renderCoopBossPanel()" ${myAction?'disabled':''}>Trocar Pokémon</button></div>`;
-      const logs=(room.battle?.log||[]).slice(-5).reverse().map(line=>`<div>${escapeHTML(line)}</div>`).join('');
-      root.innerHTML=`<div class="pvp-lobby-box"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">Sala <strong class="pvp-code">${escapeHTML(room.room_code)}</strong><strong>Rodada ${room.turn}</strong></div><div style="margin:14px 0;padding:16px;border:1px solid #8a55ff;border-radius:14px;background:linear-gradient(135deg,#241b37,#12101a)"><div style="display:flex;justify-content:space-between;gap:10px"><strong style="font-size:1.2rem">Mewtwo · Nv. 100</strong><strong>${hp.toLocaleString('pt-BR')} / ${maxHp.toLocaleString('pt-BR')} HP</strong></div><div class="hp-bar" style="height:18px;margin-top:10px"><div class="hp-fill" style="width:${percent}%;background:linear-gradient(90deg,#9333ea,#c084fc)"></div></div></div><h3>Treinadores (${members.length}/5)</h3>${membersHTML}<div class="pvp-room-box" style="margin-top:12px"><strong>Sua vez · ${escapeHTML(activePokemon?.name||'Pokémon')}</strong><div style="color:var(--text-muted);margin:5px 0 10px">HP ${Math.max(0,Number(myHp[active])||0)}/${activePokemon?.maxHp||0}</div>${actions}</div><div class="pvp-room-box" style="margin-top:12px;max-height:170px;overflow:auto">${logs}</div><button class="btn btn-secondary" style="width:auto;margin-top:12px" onclick="coopBossClose()">Sair da tela</button></div>`;
+      const allFainted=myHp.every(value=>Number(value)<=0),activeFainted=Number(myHp[active])<=0,activeHp=Math.max(0,Number(myHp[active])||0);
+      if(activeFainted&&!allFainted&&!['bag','item_targets'].includes(coopBossMenu))coopBossMenu='switch';
+      const activeMoveOffset=myTeam.slice(0,active).reduce((total,pokemon)=>total+(pokemon.moves||[]).length,0),hasRaidPp=Array.isArray(myState?.pp),activePp=(activePokemon?.moves||[]).map((move,index)=>hasRaidPp?Math.max(0,Number(myState.pp[activeMoveOffset+index])||0):Math.max(1,Number(move.pp)||10));
+      const availableMoves=(activePokemon?.moves||[]).map((move,index)=>({move,index,pp:activePp[index]}));
+      const moveBtns=availableMoves.map(({move,index,pp})=>{
+        const damaging=Number(move.power)>0,disabled=myAction||activeHp<=0||pp<=0;
+        const detail=pp<=0?'Sem PP':damaging?`${escapeHTML(move.type)} · PWR ${move.power} · PP ${pp}`:'Suporte · PP '+pp;
+        return `<button class="move-btn" onclick="coopBossAct({type:'move',index:${index}})" ${disabled?'disabled':''}><span>${escapeHTML(move.name)}${pp<=0?' (sem PP)':''}</span><span class="move-power">${detail}</span></button>`;
+      }).join('');
+      const hasUsableDamage=availableMoves.some(({move,pp})=>Number(move.power)>0&&pp>0);
+      const switchBtns=myTeam.map((pokemon,index)=>`<button class="move-btn" onclick="coopBossAct({type:'switch',index:${index}})" ${myAction||index===active||Number(myHp[index])<=0?'disabled':''}><span>${escapeHTML(pokemon.name)}</span><span class="move-power">HP ${Math.max(0,Number(myHp[index])||0)}/${pokemon.maxHp}</span></button>`).join('');
+      const raidItemKeys=new Set(['potions','superpotion','hyperpotion','fullrestore','revive','maxrevive']);
+      if(coopBossMenu==='bag')ensureBagItems();
+      const raidItems=BATTLE_BAG_ITEMS.filter(item=>raidItemKeys.has(item.key)&&getItemQty(item.key)>0);
+      const bagButtons=raidItems.map(item=>`<button class="move-btn" onclick="coopBossSelectedItem='${item.key}';coopBossMenu='item_targets';renderCoopBossPanel()">${itemIcon(item.sprite||item.key,'item-icon-sm')}<span>${escapeHTML(item.name)}</span><span class="move-power">x${getItemQty(item.key)}</span></button>`).join('');
+      const selectedRaidItem=raidItems.find(item=>item.key===coopBossSelectedItem);
+      const itemTargets=selectedRaidItem?myTeam.map((pokemon,index)=>{
+        const currentHp=Math.max(0,Number(myHp[index])||0),maxPokemonHp=Math.max(1,Number(pokemon.maxHp)||1),isRevive=['revive','maxrevive'].includes(selectedRaidItem.key);
+        const canUse=isRevive?currentHp<=0:currentHp>0&&currentHp<maxPokemonHp;
+        if(!canUse)return '';
+        return `<button class="move-btn" onclick="coopBossAct({type:'item',key:'${selectedRaidItem.key}',index:${index}})"><span>${escapeHTML(pokemon.name)}</span><span class="move-power">HP ${currentHp}/${maxPokemonHp}</span></button>`;
+      }).join(''):'';
+      const waitingForTeam=allFainted&&!myAction&&!['bag','item_targets'].includes(coopBossMenu);
+      const actions=waitingForTeam?`<div class="pvp-waiting-action">Sua equipe caiu. Use um Revive ou aguarde os outros treinadores.</div><div class="battle-actions"><button class="battle-btn bag" onclick="coopBossMenu='bag';renderCoopBossPanel()">🎒 Mochila</button><button class="battle-btn" onclick="coopBossAct({type:'wait'})">Aguardar equipe</button></div>`:myAction?`<div class="pvp-waiting-action">Ação enviada · aguardando o grupo (${Object.keys(room.actions||{}).length}/${members.length})</div>`:coopBossMenu==='bag'?`<div class="battle-actions moves-view">${bagButtons||'<div class="pvp-waiting-action">Nenhum item de cura disponível.</div>'}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='item_targets'?`<div class="battle-actions moves-view">${itemTargets||'<div class="pvp-waiting-action">Nenhum Pokémon pode usar este item agora.</div>'}<button class="move-btn" onclick="coopBossMenu='bag';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='switch'?`<div class="battle-actions moves-view">${switchBtns}<button class="move-btn" onclick="coopBossMenu='bag';renderCoopBossPanel()">🎒 Mochila</button><button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='moves'?`<div class="battle-actions moves-view">${moveBtns}${hasUsableDamage?'':`<button class="move-btn" onclick="coopBossAct({type:'struggle'})">Esforço · PWR 60</button>`}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:`<div class="battle-actions coop-main-actions"><button class="battle-btn fight" onclick="coopBossMenu='moves';renderCoopBossPanel()">⚔️ Lutar</button><button class="battle-btn pokemon" onclick="coopBossMenu='switch';renderCoopBossPanel()">🔄 Pokémon</button><button class="battle-btn bag" onclick="coopBossMenu='bag';renderCoopBossPanel()">🎒 Mochila</button></div>`;
+      const boss={id:150,name:'Mewtwo',level:100,maxHp};
+      const enemySprite=SPRITE_ANIM_POKEMON(boss),enemyFallback=SPRITE(150);
+      const playerSprite=activePokemon?SPRITE_BACK_POKEMON(activePokemon):'';
+      const playerFallback=activePokemon?SPRITE_FB(activePokemon.id):'';
+      const playerFainted=activeHp<=0;
+      const stageLabels={attack:'Atk',defense:'Def',specialAttack:'Atq. Esp.',specialDefense:'Def. Esp.',speed:'Vel.',accuracy:'Precisão',evasion:'Evasão'};
+      const statusLabels={burn:'Queimado',paralysis:'Paralisado',poison:'Envenenado',sleep:'Dormindo',freeze:'Congelado',confusion:'Confuso'};
+      const effectTags=(stages,status)=>{
+        const tags=[];
+        if(statusLabels[status])tags.push(`<span class="coop-effect-tag status">${statusLabels[status]}</span>`);
+        Object.entries(stages||{}).forEach(([stat,value])=>{const level=Number(value)||0;if(level)tags.push(`<span class="coop-effect-tag">${stageLabels[stat]||stat} ${level>0?'+':''}${level}</span>`);});
+        return tags.length?`<div class="coop-effect-tags" aria-live="polite">${tags.join('')}</div>`:'';
+      };
+      const bossEffects=effectTags(room.battle?.mewtwo_stages,room.battle?.mewtwo_status);
+      const trainerEffects=effectTags(myState?.stages,'');
+      root.innerHTML=`<div class="coop-boss-arena"><div class="battle-bg"></div><div class="battle-sky"></div><div class="battle-ground"></div>
+        <div class="coop-boss-toolbar"><span>Rodada ${Number(room.turn)||1} · ${members.length}/5 treinadores</span><div class="coop-boss-toolbar-actions"><span>Sala <strong class="pvp-code" style="font-size:.95rem">${escapeHTML(room.room_code)}</strong></span><button class="btn btn-secondary" onclick="coopBossClose()">Sair</button></div></div>
+        <div class="battle-field"><div class="battle-enemy"><div class="enemy-info daily-boss-info coop-mewtwo-info"><div class="pvp-trainer-name">BIG BOSS · CHEFE DE RAID</div>${pvpBattleInfo(boss,hp,'enemy-info')}${bossEffects}</div><div class="sprite-stage enemy-stage"><div class="sprite-shadow"></div><img class="enemy-sprite" src="${enemySprite}" alt="Mewtwo" decoding="async" onerror="this.onerror=null;this.src='${enemyFallback}'" /></div></div>
+          <div class="battle-player"><div class="sprite-stage player-stage ${playerFainted?'pvp-fainted-stage':''}"><div class="sprite-shadow"></div>${activePokemon?`<img class="player-sprite${playerFainted?' faint':''}" src="${playerSprite}" alt="${escapeHTML(activePokemon.name)}" decoding="async" onerror="this.onerror=null;this.src='${playerFallback}'" />`:''}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(player.name)} · SUA EQUIPE</div>${activePokemon?pvpBattleInfo(activePokemon,activeHp,'player-info',myTeam,myHp):''}${trainerEffects}</div></div>
+        </div><div class="battle-ui"><div class="coop-raid-roster" aria-label="Treinadores da raid">${rosterHTML}</div><div class="pvp-turn-prompt">${myAction?'Ação registrada.':allFainted?'Sua equipe está sem Pokémon consciente.':coopBossMenu==='moves'?'Escolha um golpe.':coopBossMenu==='switch'||activeFainted?'Escolha quem entrará na batalha.':'Escolha sua ação para esta rodada.'}</div>${actions}</div></div>`;
     }
     document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => switchPanel(i.dataset.panel)));
 
@@ -9503,7 +9965,9 @@
         selected = encounters[Math.floor(Math.random() * encounters.length)];
       }
 
-      const wild = { ...selected, shiny: Math.random() < 1 / 8192 };
+      const shinyRolls = getItemQty('shiny_charm') > 0 ? 3 : 1;
+      const wild = { ...selected, shiny: Math.random() < shinyRolls / 8192 };
+      if (wild.shiny) wild.ivs = Object.fromEntries(['hp','attack','defense','specialAttack','specialDefense','speed'].map(stat => [stat, 25]));
       ensurePokemonGender(wild);
       if (wild.minLevel !== undefined && wild.maxLevel !== undefined) {
         wild.level = wild.minLevel + Math.floor(Math.random() * (wild.maxLevel - wild.minLevel + 1));
