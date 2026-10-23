@@ -49,6 +49,12 @@ Deno.serve(async (request) => {
     const adminClient = createClient(projectUrl, secretKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     })
+    const forceLogout = async () => {
+      const { error } = await adminClient
+        .from('account_session_controls')
+        .upsert({ user_id: targetUserId, force_logout_at: new Date().toISOString() }, { onConflict: 'user_id' })
+      if (error) throw new Error('A alteração foi aplicada, mas não foi possível sinalizar o encerramento das sessões: ' + error.message)
+    }
     const { data: targetAdmin, error: targetAdminError } = await adminClient
       .from('game_admins')
       .select('user_id')
@@ -60,8 +66,8 @@ Deno.serve(async (request) => {
     if (action === 'reset') {
       const { data, error } = await userClient.rpc('admin_reset_trainer_progress', { p_target: targetUserId })
       if (error) return json({ error: error.message || 'Não foi possível resetar o progresso.' }, 400)
-      const { error: signOutError } = await adminClient.auth.admin.signOut(targetUserId, 'global')
-      return json({ ok: true, action, trainerName: data?.trainer_name, sessionsRevoked: !signOutError })
+      await forceLogout()
+      return json({ ok: true, action, trainerName: data?.trainer_name, sessionsRevoked: true })
     }
 
     const { data: targetData, error: targetError } = await adminClient.auth.admin.getUserById(targetUserId)
@@ -70,7 +76,10 @@ Deno.serve(async (request) => {
     const isBanned = Number.isFinite(bannedUntil) && bannedUntil > Date.now()
 
     if (action === 'status') return json({ ok: true, isBanned, bannedUntil: isBanned ? targetData.user.banned_until : null })
-    if (action === 'ban' && isBanned) return json({ ok: true, action, isBanned: true, alreadyApplied: true })
+    if (action === 'ban' && isBanned) {
+      await forceLogout()
+      return json({ ok: true, action, isBanned: true, alreadyApplied: true, sessionsRevoked: true })
+    }
     if (action === 'unban' && !isBanned) return json({ ok: true, action, isBanned: false, alreadyApplied: true })
 
     const { error: updateError } = await adminClient.auth.admin.updateUserById(targetUserId, {
@@ -80,8 +89,8 @@ Deno.serve(async (request) => {
 
     let sessionsRevoked = false
     if (action === 'ban') {
-      const { error: signOutError } = await adminClient.auth.admin.signOut(targetUserId, 'global')
-      sessionsRevoked = !signOutError
+      await forceLogout()
+      sessionsRevoked = true
     }
     return json({ ok: true, action, isBanned: action === 'ban', sessionsRevoked })
   } catch (error) {

@@ -6192,6 +6192,73 @@
     let saveTimer = null;
     let saveChain = Promise.resolve();
     let passwordRecovery = false;
+    let accountLogoutMonitor = null;
+    let accountLogoutCheckBusy = false;
+    let accountLogoutInProgress = false;
+
+    function accountSessionLogoutStorageKey() {
+      if (!onlineUser || !supabaseClient) return null;
+      return supabaseClient.auth.getSession().then(({ data }) => {
+        const token = data?.session?.access_token || '';
+        const payload = token.split('.')[1];
+        if (!payload) return null;
+        try {
+          const claims = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+          return claims.session_id ? `pokemonTrainerForceLogout:${onlineUser.id}:${claims.session_id}` : null;
+        } catch (_) { return null; }
+      });
+    }
+
+    async function forceLogoutAfterAdminAction() {
+      if (!onlineUser || !supabaseClient || accountLogoutInProgress) return;
+      accountLogoutInProgress = true;
+      if (accountLogoutMonitor) clearInterval(accountLogoutMonitor);
+      accountLogoutMonitor = null;
+      try { await supabaseClient.auth.signOut({ scope: 'local' }); }
+      catch (error) { console.warn('[Auth] Falha ao limpar a sessão local:', error); }
+      onlineUser = null;
+      player = null;
+      document.getElementById('dashboard')?.classList.remove('active');
+      document.getElementById('authFlow').style.display = '';
+      showAuthScreen('authScreen');
+      showToast('Sua sessão foi encerrada porque sua conta foi banida ou teve o progresso resetado.', 'error');
+      accountLogoutInProgress = false;
+    }
+
+    async function checkAccountForceLogout() {
+      if (!onlineUser || !supabaseClient || accountLogoutCheckBusy) return;
+      accountLogoutCheckBusy = true;
+      try {
+        const key = await accountSessionLogoutStorageKey();
+        if (!key) return;
+        const { data, error } = await supabaseClient
+          .from('account_session_controls')
+          .select('force_logout_at')
+          .eq('user_id', onlineUser.id)
+          .maybeSingle();
+        if (error) throw error;
+        const marker = data?.force_logout_at || '';
+        let previousMarker = null;
+        try { previousMarker = sessionStorage.getItem(key); } catch (_) {}
+        if (previousMarker === null) {
+          try { sessionStorage.setItem(key, marker); } catch (_) {}
+        } else if (marker && marker !== previousMarker) {
+          await forceLogoutAfterAdminAction();
+        }
+      } catch (error) {
+        console.warn('[Auth] Não foi possível conferir o encerramento da sessão:', error);
+      } finally {
+        accountLogoutCheckBusy = false;
+      }
+    }
+
+    async function startAccountForceLogoutMonitor() {
+      if (accountLogoutMonitor) clearInterval(accountLogoutMonitor);
+      accountLogoutMonitor = null;
+      if (!onlineUser || !supabaseClient) return;
+      await checkAccountForceLogout();
+      accountLogoutMonitor = setInterval(checkAccountForceLogout, 5000);
+    }
 
     function isSupabaseConfigured() {
       return SUPABASE_URL.startsWith('https://') &&
@@ -6252,6 +6319,7 @@
     }
 
     async function enterAuthenticatedGame() {
+      await startAccountForceLogoutMonitor();
       await refreshAdminAccess();
       await beginAccountGame();
       if (document.getElementById('dashboard')?.classList.contains('active')) openDailyLoginRewardIfAvailable();
