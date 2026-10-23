@@ -1162,11 +1162,14 @@
     .reward-ev .reward-label { font-size: .74rem; line-height: 1.15; }
     .reward-ev .reward-value { color: #4ade80; }
     .reward-highlight { color: var(--success); font-weight: 700; padding: 3px 7px; }
-    .reward-level-up { display: flex; align-items: center; gap: 10px; padding: 7px; color: var(--success); }
-    .reward-level-up img { flex: 0 0 48px; width: 48px; height: 48px; object-fit: contain; image-rendering: pixelated; }
-    .reward-level-up-copy { display: grid; gap: 2px; text-align: left; }
-    .reward-level-up-copy strong { font-size: .9rem; }
-    .reward-level-up-copy span { color: var(--text-muted); font-size: .8rem; }
+    .reward-level-up { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 180px; padding: 7px; color: var(--success); }
+    .reward-level-up-main { grid-column: 1 / -1; grid-row: 1; display: grid; justify-items: center; align-content: start; padding-bottom: 42px; text-align: center; }
+    .reward-level-up-main strong { font-size: 1rem; }
+    .reward-level-up img { width: 120px; height: 120px; object-fit: contain; image-rendering: pixelated; }
+    .reward-level-up-copy { color: var(--text-muted); font-size: .9rem; }
+    .reward-level-ev { grid-column: 2; grid-row: 1; z-index: 1; align-self: end; display: grid; justify-items: end; gap: 2px; padding-bottom: 2px; }
+    .reward-level-ev .reward-label { font-size: .74rem; line-height: 1.15; }
+    .reward-level-ev .reward-value { color: #4ade80; }
     @keyframes battleResultFadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes battleResultPopIn { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
     @media (prefers-reduced-motion: reduce) {
@@ -1176,6 +1179,9 @@
       .battle-result .rewards { padding: 9px; }
       .reward-row { align-items: flex-start; flex-wrap: wrap; }
       .reward-value { overflow-wrap: anywhere; }
+      .reward-level-up { grid-template-columns: minmax(0, 1fr); }
+      .reward-level-up-main { grid-column: 1; grid-row: 1; padding-bottom: 8px; }
+      .reward-level-ev { grid-column: 1; grid-row: 2; justify-self: end; }
     }
 
     @media (max-width: 768px) {
@@ -4661,14 +4667,21 @@
     const SPRITE_BACK_POKEMON = pokemon => pokemon?.shiny ? SPRITE_BACK_SHINY(pokemon.id) : SPRITE_BACK(pokemon.id);
     const SPRITE_ANIM_POKEMON = pokemon => pokemon?.shiny ? SPRITE_ANIM_SHINY(pokemon.id) : SPRITE_ANIM(pokemon.id);
 
-    function renderLevelUpReward(pokemon, levelsGained) {
+    function renderEffortReward(effortText) {
+      return `<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortText}</strong></div>`;
+    }
+
+    function renderLevelUpReward(pokemon, levelsGained, effortText = '') {
       if (!pokemon || levelsGained <= 0) return '';
       const name = escapeHTML(pokemon.name || 'Pokémon');
       const sprite = pokemon.shiny ? SPRITE_SHINY(pokemon.id) : SPRITE_FB(pokemon.id);
       const levelText = levelsGained === 1
         ? `${name} chegou ao Nv. ${pokemon.level}.`
         : `${name} subiu ${levelsGained} níveis e chegou ao Nv. ${pokemon.level}.`;
-      return `<div class="reward-level-up"><img src="${sprite}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FRONT(pokemon.id)}'"><div class="reward-level-up-copy"><strong>Subiu de nível!</strong><span>${levelText}</span></div></div>`;
+      const effortReward = effortText
+        ? `<div class="reward-level-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortText}</strong></div>`
+        : '';
+      return `<div class="reward-level-up"><div class="reward-level-up-main"><strong>Subiu de nível!</strong><img src="${sprite}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FRONT(pokemon.id)}'"><span class="reward-level-up-copy">${levelText}</span></div>${effortReward}</div>`;
     }
 
     function showDamageNumber(target, amount, kind) {
@@ -12720,9 +12733,9 @@
           : `Você derrotou ${battle.enemy.name}!`;
         const rewardRows = [`<div class="reward-row reward-money"><span class="reward-label">Dinheiro</span><strong class="reward-value">+ ₽ ${money.toLocaleString('pt-BR')}</strong></div>`];
         if (xp) rewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`);
-        if (levelsGained) rewardRows.push(renderLevelUpReward(player.poke, levelsGained));
         const effortText = formatEffortGain(effort);
-        if (effortText) rewardRows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortText}</strong></div>`);
+        if (levelsGained) rewardRows.push(renderLevelUpReward(player.poke, levelsGained, effortText));
+        else if (effortText) rewardRows.push(renderEffortReward(effortText));
         if (sharedExperienceText.length) rewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${sharedExperienceText.join(' / ')}</strong></div>`);
         if (leveled && evolvedReady) rewardRows.push('<div class="reward-highlight">✨ Pokémon pronto para evoluir!</div>');
         if (captured) rewardRows.push(`<div class="reward-highlight">✓ ${capturedName} adicionado à equipe!</div>`);
@@ -13172,9 +13185,9 @@
         `<div class="reward-row reward-money"><span class="reward-label">Pok\u00e9dollar</span><strong class="reward-value">+ \u20bd ${money.toLocaleString('pt-BR')}</strong></div>`,
         `<div class="reward-row reward-xp"><span class="reward-label">Experi\u00eancia</span><strong class="reward-value">+ ${xp} XP</strong></div>`
       ];
-      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained));
       const effortMessage=formatEffortGain(battle.totalEffort);
-      if(effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
+      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained, effortMessage));
+      else if (effortMessage) rows.push(renderEffortReward(effortMessage));
       if(shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
       document.getElementById('resultRewards').innerHTML=rows.join('');
       if(evolvedReady) battle._pendingEvo=player.poke;
@@ -13263,8 +13276,8 @@
         `<div class="reward-row reward-money"><span class="reward-label">Pokédollar</span><strong class="reward-value">+ ₽ ${money.toLocaleString('pt-BR')}</strong></div>`,
         `<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`
       ];
-      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained));
-      if(effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
+      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained, effortMessage));
+      else if (effortMessage) rows.push(renderEffortReward(effortMessage));
       if(shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
       document.getElementById('resultRewards').innerHTML=rows.join('');
       if(evolvedReady) battle._pendingEvo=player.poke;
@@ -13351,8 +13364,8 @@
         `<div class="reward-row reward-money"><span class="reward-label">Pokédollar</span><strong class="reward-value">+ ₽ ${money.toLocaleString('pt-BR')}</strong></div>`,
         `<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`
       ];
-      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained));
-      if (effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
+      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained, effortMessage));
+      else if (effortMessage) rows.push(renderEffortReward(effortMessage));
       if (shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
       document.getElementById('resultRewards').innerHTML = rows.join('');
       if (evolvedReady) battle._pendingEvo = player.poke;
@@ -13441,8 +13454,8 @@
         `<div class="reward-row reward-money"><span class="reward-label">Pok\u00e9dollar</span><strong class="reward-value">+ \u20bd ${money.toLocaleString('pt-BR')}</strong></div>`,
         `<div class="reward-row reward-xp"><span class="reward-label">Experi\u00eancia</span><strong class="reward-value">+ ${xp} XP</strong></div>`
       ];
-      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained));
-      if(effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
+      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained, effortMessage));
+      else if (effortMessage) rows.push(renderEffortReward(effortMessage));
       if(shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
       document.getElementById('resultRewards').innerHTML=rows.join('');
       if(evolvedReady) battle._pendingEvo=player.poke;
@@ -13696,8 +13709,8 @@
         `<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`
       ];
       if (gymTmReward) gymRewardRows.push(`<div class="reward-row"><span class="reward-label">TM recebido</span><strong class="reward-value">${escapeHTML(gymTmReward.name)} · ${escapeHTML(gymTmReward.move.name)}</strong></div>`);
-      if (levelsGained) gymRewardRows.push(renderLevelUpReward(player.poke, levelsGained));
-      if (effortMessage) gymRewardRows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
+      if (levelsGained) gymRewardRows.push(renderLevelUpReward(player.poke, levelsGained, effortMessage));
+      else if (effortMessage) gymRewardRows.push(renderEffortReward(effortMessage));
       if (sharedExperienceText.length) gymRewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${sharedExperienceText.join(' / ')}</strong></div>`);
       gymRewardRows.push(`<div class="reward-row"><span class="reward-label">Insígnias conquistadas</span><strong class="reward-value">${player.badges}/8</strong></div>`);
       document.getElementById('resultRewards').innerHTML = gymRewardRows.join('');
