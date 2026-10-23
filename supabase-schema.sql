@@ -46,12 +46,23 @@ create table if not exists public.pvp_rooms (
   guest_action jsonb,
   turn integer not null default 0,
   turn_deadline timestamptz,
+  host_ready boolean not null default false,
+  guest_ready boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   expires_at timestamptz not null default (now() + interval '2 hours')
 );
 
 alter table public.pvp_rooms add column if not exists turn_deadline timestamptz;
+alter table public.pvp_rooms add column if not exists host_ready boolean not null default false;
+alter table public.pvp_rooms add column if not exists guest_ready boolean not null default false;
+update public.pvp_rooms set host_ready=true,guest_ready=true where status='battle';
+do $$ begin
+  if not exists(select 1 from pg_constraint where conname='pvp_battle_requires_both_ready') then
+    alter table public.pvp_rooms add constraint pvp_battle_requires_both_ready
+      check(status<>'battle' or (host_ready and guest_ready));
+  end if;
+end $$;
 update public.pvp_rooms set turn_deadline = now() + interval '45 seconds'
   where status = 'battle' and turn_deadline is null;
 -- Normalize open rooms that predate battle stages and status tracking.
@@ -199,11 +210,36 @@ begin
   end if;
   update public.pvp_rooms
     set guest_id = auth.uid(), guest_name = left(trim(coalesce(p_trainer, 'Treinador')), 24),
-        guest_team = p_team, status = 'ready', updated_at = now()
+        guest_team = p_team, guest_ready = false, status = 'ready', updated_at = now()
     where room_code = upper(p_code) and status = 'waiting' and guest_id is null
       and host_id <> auth.uid() and expires_at > now()
     returning * into v_room;
   if not found then raise exception 'Sala não encontrada, expirada ou já ocupada.'; end if;
+  return to_jsonb(v_room);
+end;
+$$;
+
+create or replace function public.pvp_confirm_ready(p_code text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare v_room public.pvp_rooms;
+begin
+  if auth.uid() is null then raise exception 'Entre na sua conta.'; end if;
+  select * into v_room from public.pvp_rooms where room_code=upper(p_code) for update;
+  if not found or (v_room.host_id is distinct from auth.uid() and v_room.guest_id is distinct from auth.uid()) then
+    raise exception 'Você não participa desta sala.';
+  end if;
+  if v_room.status<>'ready' or v_room.guest_id is null or v_room.expires_at<=now() then
+    raise exception 'A sala ainda não está pronta para confirmação.';
+  end if;
+  if v_room.host_id=auth.uid() then
+    update public.pvp_rooms set host_ready=true,updated_at=now() where id=v_room.id returning * into v_room;
+  else
+    update public.pvp_rooms set guest_ready=true,updated_at=now() where id=v_room.id returning * into v_room;
+  end if;
   return to_jsonb(v_room);
 end;
 $$;
@@ -738,6 +774,7 @@ $$;
 
 revoke execute on function public.pvp_create_room(text,text,jsonb) from public, anon;
 revoke execute on function public.pvp_join_room(text,text,jsonb) from public, anon;
+revoke execute on function public.pvp_confirm_ready(text) from public, anon;
 revoke execute on function public.pvp_type_multiplier(text,jsonb) from public, anon, authenticated;
 revoke execute on function public.pvp_valid_team(jsonb) from public, anon, authenticated;
 revoke execute on function public.pvp_start_room(text) from public, anon;
@@ -746,6 +783,7 @@ revoke execute on function public.pvp_resolve_turn(text) from public, anon;
 revoke execute on function public.pvp_leave_room(text) from public, anon;
 grant execute on function public.pvp_create_room(text,text,jsonb) to authenticated;
 grant execute on function public.pvp_join_room(text,text,jsonb) to authenticated;
+grant execute on function public.pvp_confirm_ready(text) to authenticated;
 grant execute on function public.pvp_start_room(text) to authenticated;
 grant execute on function public.pvp_submit_action(text,jsonb) to authenticated;
 grant execute on function public.pvp_resolve_turn(text) to authenticated;
@@ -764,7 +802,9 @@ $$;
 create table if not exists public.trainer_profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   trainer_name text not null check (char_length(trim(trainer_name)) between 1 and 24),
-  last_seen timestamptz not null default now()
+  last_seen timestamptz not null default now(),
+  active_pokemon_id integer,
+  active_pokemon_name text
 );
 create index if not exists trainer_profiles_name_idx on public.trainer_profiles(lower(trainer_name));
 create table if not exists public.trainer_friends (
@@ -787,19 +827,55 @@ alter table public.trainer_profiles enable row level security;
 alter table public.trainer_friends enable row level security;
 alter table public.social_requests enable row level security;
 revoke all on table public.trainer_profiles,public.trainer_friends,public.social_requests from public,anon,authenticated;
-grant select on table public.trainer_profiles,public.trainer_friends,public.social_requests to authenticated;
+grant select (user_id,trainer_name,last_seen) on table public.trainer_profiles to authenticated;
+grant select on table public.trainer_friends,public.social_requests to authenticated;
+grant insert (user_id,trainer_name,last_seen,active_pokemon_id,active_pokemon_name),
+  update (trainer_name,last_seen,active_pokemon_id,active_pokemon_name) on table public.trainer_profiles to authenticated;
 drop policy if exists "Authenticated trainers can see names" on public.trainer_profiles;
 create policy "Authenticated trainers can see names" on public.trainer_profiles for select to authenticated using(auth.uid() is not null);
+drop policy if exists "Create own trainer presence" on public.trainer_profiles;
+create policy "Create own trainer presence" on public.trainer_profiles for insert to authenticated with check((select auth.uid())=user_id);
+drop policy if exists "Update own trainer presence" on public.trainer_profiles;
+create policy "Update own trainer presence" on public.trainer_profiles for update to authenticated using((select auth.uid())=user_id) with check((select auth.uid())=user_id);
 drop policy if exists "Read own friend list" on public.trainer_friends;
 create policy "Read own friend list" on public.trainer_friends for select to authenticated using((select auth.uid())=user_id);
 drop policy if exists "Read own social requests" on public.social_requests;
 create policy "Read own social requests" on public.social_requests for select to authenticated using((select auth.uid())=sender_id or (select auth.uid())=receiver_id);
+
+create or replace function public.social_friend_pokemon(p_friend_ids uuid[])
+returns table(user_id uuid,active_pokemon_id integer,active_pokemon_name text)
+language plpgsql security definer set search_path='' as $$ begin
+  if auth.uid() is null then raise exception 'Entre na sua conta.'; end if;
+  return query
+  select profile.user_id,profile.active_pokemon_id,profile.active_pokemon_name
+  from public.trainer_profiles as profile
+  join public.trainer_friends as friendship
+    on friendship.user_id=auth.uid() and friendship.friend_id=profile.user_id
+  where profile.user_id=any(coalesce(p_friend_ids,'{}'::uuid[]));
+end; $$;
+revoke execute on function public.social_friend_pokemon(uuid[]) from public,anon;
+grant execute on function public.social_friend_pokemon(uuid[]) to authenticated;
 
 create or replace function public.social_presence(p_name text) returns void
 language plpgsql security definer set search_path='' as $$ begin
   if auth.uid() is null then raise exception 'Entre na sua conta.'; end if;
   insert into public.trainer_profiles(user_id,trainer_name,last_seen) values(auth.uid(),left(trim(coalesce(p_name,'Treinador')),24),now())
   on conflict(user_id) do update set trainer_name=excluded.trainer_name,last_seen=excluded.last_seen;
+end; $$;
+
+create or replace function public.social_presence_with_pokemon(p_name text,p_pokemon_id integer,p_pokemon_name text) returns void
+language plpgsql security definer set search_path='' as $$ declare v_name text; v_pokemon_id integer; v_pokemon_name text; begin
+  if auth.uid() is null then raise exception 'Entre na sua conta.'; end if;
+  v_name:=left(trim(coalesce(p_name,'Treinador')),24);
+  if v_name='' then v_name:='Treinador'; end if;
+  if p_pokemon_id between 1 and 2000 then
+    v_pokemon_id:=p_pokemon_id;
+    v_pokemon_name:=nullif(left(trim(coalesce(p_pokemon_name,'')),40),'');
+  end if;
+  insert into public.trainer_profiles(user_id,trainer_name,last_seen,active_pokemon_id,active_pokemon_name)
+    values(auth.uid(),v_name,now(),v_pokemon_id,v_pokemon_name)
+  on conflict(user_id) do update set trainer_name=excluded.trainer_name,last_seen=excluded.last_seen,
+    active_pokemon_id=excluded.active_pokemon_id,active_pokemon_name=excluded.active_pokemon_name;
 end; $$;
 
 create or replace function public.social_send_friend_request(p_target uuid) returns uuid
@@ -828,38 +904,148 @@ language plpgsql security definer set search_path='' as $$ declare v_req public.
   update public.social_requests set status='rejected',responded_at=now() where id=p_request;
 end; $$;
 create or replace function public.social_send_trade(p_target uuid,p_pokemon_id text) returns uuid
-language plpgsql security definer set search_path='' as $$ declare v_save jsonb; v_id uuid; v_pokemon_name text; begin
-  if auth.uid() is null or not exists(select 1 from public.trainer_friends where user_id=auth.uid() and friend_id=p_target) then raise exception 'Trocas só podem ser propostas a amigos.'; end if;
-  select player into v_save from public.game_saves where user_id=auth.uid();
-  select p.value->>'name' into v_pokemon_name from jsonb_array_elements(coalesce(v_save->'party','[]'::jsonb)) p(value) where p.value->>'tradeId'=p_pokemon_id limit 1;
-  if v_pokemon_name is null then raise exception 'Pokémon indisponível na equipe.'; end if;
-  if exists(select 1 from public.social_requests where kind='trade' and status='pending' and (payload->>'offered_id'=p_pokemon_id or payload->>'requested_id'=p_pokemon_id)) then raise exception 'Pokémon já reservado em outra troca.'; end if;
-  insert into public.social_requests(sender_id,receiver_id,kind,payload) values(auth.uid(),p_target,'trade',jsonb_build_object('offered_id',p_pokemon_id,'offered_name',v_pokemon_name)) returning id into v_id; return v_id;
-end; $$;
+language plpgsql security definer set search_path='' as $$
+declare v_save jsonb; v_id uuid; v_pokemon_name text;
+begin
+  if auth.uid() is null or not exists(
+    select 1 from public.trainer_friends
+    where user_id=auth.uid() and friend_id=p_target
+  ) then
+    raise exception 'Trocas só podem ser propostas a amigos.';
+  end if;
+  if nullif(trim(p_pokemon_id),'') is null then
+    raise exception 'Pokémon indisponível.';
+  end if;
+
+  select player into v_save
+  from public.game_saves where user_id=auth.uid() for update;
+  if not found then raise exception 'Salvamento não encontrado.'; end if;
+
+  select owned.value->>'name' into v_pokemon_name
+  from jsonb_array_elements(
+    case when jsonb_typeof(v_save->'party')='array' then v_save->'party' else '[]'::jsonb end
+  ) as owned(value)
+  where owned.value->>'tradeId'=p_pokemon_id
+  limit 1;
+
+  if v_pokemon_name is null then
+    select owned.slot->>'name' into v_pokemon_name
+    from jsonb_array_elements(
+      case when jsonb_typeof(v_save->'pc'->'boxes')='array' then v_save->'pc'->'boxes' else '[]'::jsonb end
+    ) with ordinality as box(value,box_index)
+    cross join lateral jsonb_array_elements(
+      case when jsonb_typeof(box.value)='array' then box.value else '[]'::jsonb end
+    ) with ordinality as owned(slot,slot_index)
+    where owned.slot->>'tradeId'=p_pokemon_id
+    limit 1;
+  end if;
+  if v_pokemon_name is null then
+    raise exception 'Pokémon indisponível na equipe ou no PC.';
+  end if;
+
+  if exists(
+    select 1 from public.social_requests
+    where kind='trade' and status='pending'
+      and (payload->>'offered_id'=p_pokemon_id or payload->>'requested_id'=p_pokemon_id)
+  ) then
+    raise exception 'Pokémon já reservado em outra troca.';
+  end if;
+
+  insert into public.social_requests(sender_id,receiver_id,kind,payload)
+  values(auth.uid(),p_target,'trade',jsonb_build_object('offered_id',p_pokemon_id,'offered_name',v_pokemon_name))
+  returning id into v_id;
+  return v_id;
+end;
+$$;
 
 create or replace function public.social_accept_trade(p_request uuid,p_pokemon_id text) returns jsonb
-language plpgsql security definer set search_path='' as $$ declare
-  v_req public.social_requests; v_sender jsonb; v_receiver jsonb; v_a jsonb; v_b jsonb; v_ai integer; v_bi integer; v_offered text;
+language plpgsql security definer set search_path='' as $$
+declare
+  v_req public.social_requests;
+  v_sender jsonb;
+  v_receiver jsonb;
+  v_a jsonb;
+  v_b jsonb;
+  v_sender_path text[];
+  v_receiver_path text[];
+  v_offered text;
 begin
   select * into v_req from public.social_requests where id=p_request for update;
-  if not found or v_req.receiver_id is distinct from auth.uid() or v_req.kind<>'trade' or v_req.status<>'pending' then raise exception 'Oferta indisponível.'; end if;
+  if not found or v_req.receiver_id is distinct from auth.uid()
+     or v_req.kind<>'trade' or v_req.status<>'pending' then
+    raise exception 'Oferta indisponível.';
+  end if;
+
   v_offered:=v_req.payload->>'offered_id';
-  if p_pokemon_id is null or p_pokemon_id=v_offered then raise exception 'Escolha outro Pokémon.'; end if;
-  perform 1 from public.game_saves where user_id in(v_req.sender_id,v_req.receiver_id) order by user_id for update;
+  if nullif(trim(p_pokemon_id),'') is null or p_pokemon_id=v_offered then
+    raise exception 'Escolha outro Pokémon.';
+  end if;
+
+  perform 1 from public.game_saves
+  where user_id in(v_req.sender_id,v_req.receiver_id)
+  order by user_id for update;
   select player into v_sender from public.game_saves where user_id=v_req.sender_id;
   select player into v_receiver from public.game_saves where user_id=v_req.receiver_id;
-  select (x.ordinality-1)::integer,x.value into v_ai,v_a from jsonb_array_elements(coalesce(v_sender->'party','[]'::jsonb)) with ordinality x(value,ordinality) where x.value->>'tradeId'=v_offered limit 1;
-  select (x.ordinality-1)::integer,x.value into v_bi,v_b from jsonb_array_elements(coalesce(v_receiver->'party','[]'::jsonb)) with ordinality x(value,ordinality) where x.value->>'tradeId'=p_pokemon_id limit 1;
-  if v_a is null or v_b is null then raise exception 'Um Pokémon não está mais disponível na equipe.'; end if;
-  v_sender:=jsonb_set(v_sender,array['party',v_ai::text],v_b,false);
-  v_receiver:=jsonb_set(v_receiver,array['party',v_bi::text],v_a,false);
-  if v_sender->'poke'->>'tradeId'=v_offered then v_sender:=jsonb_set(v_sender,'{poke}',v_b,false); end if;
-  if v_receiver->'poke'->>'tradeId'=p_pokemon_id then v_receiver:=jsonb_set(v_receiver,'{poke}',v_a,false); end if;
+  if v_sender is null or v_receiver is null then
+    raise exception 'Um dos salvamentos não foi encontrado.';
+  end if;
+
+  select array['party',(owned.ordinality-1)::text],owned.value
+    into v_sender_path,v_a
+  from jsonb_array_elements(
+    case when jsonb_typeof(v_sender->'party')='array' then v_sender->'party' else '[]'::jsonb end
+  ) with ordinality as owned(value,ordinality)
+  where owned.value->>'tradeId'=v_offered limit 1;
+  if v_a is null then
+    select array['pc','boxes',(box.ordinality-1)::text,(owned.ordinality-1)::text],owned.value
+      into v_sender_path,v_a
+    from jsonb_array_elements(
+      case when jsonb_typeof(v_sender->'pc'->'boxes')='array' then v_sender->'pc'->'boxes' else '[]'::jsonb end
+    ) with ordinality as box(value,ordinality)
+    cross join lateral jsonb_array_elements(
+      case when jsonb_typeof(box.value)='array' then box.value else '[]'::jsonb end
+    ) with ordinality as owned(value,ordinality)
+    where owned.value->>'tradeId'=v_offered limit 1;
+  end if;
+
+  select array['party',(owned.ordinality-1)::text],owned.value
+    into v_receiver_path,v_b
+  from jsonb_array_elements(
+    case when jsonb_typeof(v_receiver->'party')='array' then v_receiver->'party' else '[]'::jsonb end
+  ) with ordinality as owned(value,ordinality)
+  where owned.value->>'tradeId'=p_pokemon_id limit 1;
+  if v_b is null then
+    select array['pc','boxes',(box.ordinality-1)::text,(owned.ordinality-1)::text],owned.value
+      into v_receiver_path,v_b
+    from jsonb_array_elements(
+      case when jsonb_typeof(v_receiver->'pc'->'boxes')='array' then v_receiver->'pc'->'boxes' else '[]'::jsonb end
+    ) with ordinality as box(value,ordinality)
+    cross join lateral jsonb_array_elements(
+      case when jsonb_typeof(box.value)='array' then box.value else '[]'::jsonb end
+    ) with ordinality as owned(value,ordinality)
+    where owned.value->>'tradeId'=p_pokemon_id limit 1;
+  end if;
+  if v_a is null or v_b is null then
+    raise exception 'Um Pokémon não está mais disponível na equipe ou no PC.';
+  end if;
+
+  v_sender:=jsonb_set(v_sender,v_sender_path,v_b,false);
+  v_receiver:=jsonb_set(v_receiver,v_receiver_path,v_a,false);
+  if v_sender->'poke'->>'tradeId'=v_offered then
+    v_sender:=jsonb_set(v_sender,'{poke}',v_b,false);
+  end if;
+  if v_receiver->'poke'->>'tradeId'=p_pokemon_id then
+    v_receiver:=jsonb_set(v_receiver,'{poke}',v_a,false);
+  end if;
+
   update public.game_saves set player=v_sender,updated_at=now() where user_id=v_req.sender_id;
   update public.game_saves set player=v_receiver,updated_at=now() where user_id=v_req.receiver_id;
-  update public.social_requests set status='accepted',responded_at=now(),payload=payload||jsonb_build_object('requested_id',p_pokemon_id) where id=p_request;
+  update public.social_requests
+    set status='accepted',responded_at=now(),payload=payload||jsonb_build_object('requested_id',p_pokemon_id)
+    where id=p_request;
   return jsonb_build_object('player',v_receiver);
-end; $$;
+end;
+$$;
 
 create or replace function public.social_send_battle(p_target uuid,p_code text) returns uuid
 language plpgsql security definer set search_path='' as $$ declare v_id uuid; begin
@@ -877,6 +1063,7 @@ language plpgsql security definer set search_path='' as $$ declare v_req public.
 end; $$;
 
 revoke execute on function public.social_presence(text) from public,anon;
+revoke execute on function public.social_presence_with_pokemon(text,integer,text) from public,anon;
 revoke execute on function public.social_send_friend_request(uuid) from public,anon;
 revoke execute on function public.social_respond_friend(uuid,boolean) from public,anon;
 revoke execute on function public.social_decline_request(uuid) from public,anon;
@@ -885,6 +1072,7 @@ revoke execute on function public.social_accept_trade(uuid,text) from public,ano
 revoke execute on function public.social_send_battle(uuid,text) from public,anon;
 revoke execute on function public.social_accept_battle(uuid,text,jsonb) from public,anon;
 grant execute on function public.social_presence(text) to authenticated;
+grant execute on function public.social_presence_with_pokemon(text,integer,text) to authenticated;
 grant execute on function public.social_send_friend_request(uuid) to authenticated;
 grant execute on function public.social_respond_friend(uuid,boolean) to authenticated;
 grant execute on function public.social_decline_request(uuid) to authenticated;
@@ -1100,3 +1288,181 @@ create policy "Friends can send messages" on public.trainer_messages
     )
   );
 notify pgrst, 'reload schema';
+
+-- Ranked PvP seasons, matchmaking, and server-side rating settlement.
+alter table public.pvp_rooms
+  add column if not exists battle_mode text not null default 'friendly',
+  add column if not exists season_id text;
+do $$
+begin
+  if not exists(select 1 from pg_catalog.pg_constraint where conname='pvp_rooms_battle_mode_check') then
+    alter table public.pvp_rooms add constraint pvp_rooms_battle_mode_check check (battle_mode in ('friendly','ranked'));
+  end if;
+end $$;
+
+create table if not exists public.pvp_ranked_profiles (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  season_id text not null,
+  rating integer not null default 1000 check (rating >= 100),
+  wins integer not null default 0 check (wins >= 0),
+  losses integer not null default 0 check (losses >= 0),
+  best_rating integer not null default 1000 check (best_rating >= 100),
+  current_streak integer not null default 0,
+  updated_at timestamptz not null default now(),
+  primary key(user_id,season_id)
+);
+create table if not exists public.pvp_ranked_queue (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  season_id text not null,
+  rating integer not null default 1000,
+  team jsonb not null,
+  trainer_name text not null,
+  queue_status text not null default 'waiting' check(queue_status in ('waiting','matched')),
+  room_id uuid references public.pvp_rooms(id) on delete set null,
+  queued_at timestamptz not null default now()
+);
+create index if not exists pvp_ranked_queue_match_idx on public.pvp_ranked_queue(season_id,queue_status,rating,queued_at);
+alter table public.pvp_ranked_profiles enable row level security;
+alter table public.pvp_ranked_queue enable row level security;
+revoke all on public.pvp_ranked_profiles,public.pvp_ranked_queue from public,anon,authenticated;
+
+create or replace function public.pvp_ranked_get_profile()
+returns jsonb language plpgsql security definer set search_path=''
+as $$
+declare v_season text:=to_char(now() at time zone 'UTC','YYYY-MM'); v_profile public.pvp_ranked_profiles;
+begin
+  if auth.uid() is null then raise exception 'Entre na sua conta.'; end if;
+  insert into public.pvp_ranked_profiles(user_id,season_id) values(auth.uid(),v_season) on conflict do nothing;
+  select * into v_profile from public.pvp_ranked_profiles where user_id=auth.uid() and season_id=v_season;
+  return to_jsonb(v_profile);
+end $$;
+
+create or replace function public.pvp_ranked_enter_queue(p_team jsonb,p_trainer text)
+returns jsonb language plpgsql security definer set search_path=''
+as $$
+declare
+  v_user uuid:=auth.uid(); v_season text:=to_char(now() at time zone 'UTC','YYYY-MM');
+  v_rating integer; v_entry public.pvp_ranked_queue; v_opponent public.pvp_ranked_queue; v_room public.pvp_rooms; v_code text;
+begin
+  if v_user is null then raise exception 'Entre na sua conta.'; end if;
+  if not public.pvp_valid_team(p_team) then raise exception 'Escolha entre 1 e 6 Pokémon.'; end if;
+  perform pg_advisory_xact_lock(hashtextextended('pvp-ranked-'||v_season,0));
+  delete from public.pvp_ranked_queue where queue_status='waiting' and queued_at < now()-interval '10 minutes';
+  insert into public.pvp_ranked_profiles(user_id,season_id) values(v_user,v_season) on conflict do nothing;
+  select rating into v_rating from public.pvp_ranked_profiles where user_id=v_user and season_id=v_season;
+  select * into v_entry from public.pvp_ranked_queue where user_id=v_user for update;
+  if found and v_entry.queue_status='matched' and v_entry.room_id is not null then
+    select * into v_room from public.pvp_rooms where id=v_entry.room_id;
+    if found and v_room.status in ('ready','battle') then return jsonb_build_object('status','matched','room',to_jsonb(v_room)); end if;
+    delete from public.pvp_ranked_queue where user_id=v_user;
+  end if;
+  select * into v_opponent from public.pvp_ranked_queue q
+  where q.season_id=v_season and q.queue_status='waiting' and q.user_id<>v_user
+    and abs(q.rating-v_rating) <= least(600,200+floor(extract(epoch from (now()-q.queued_at))/15)::integer)
+  order by q.queued_at asc limit 1 for update;
+  if found then
+    loop
+      v_code:=upper(substr(md5(random()::text||clock_timestamp()::text),1,6));
+      exit when not exists(select 1 from public.pvp_rooms where room_code=v_code);
+    end loop;
+    insert into public.pvp_rooms(room_code,host_id,guest_id,host_name,guest_name,host_team,guest_team,status,host_ready,guest_ready,battle_mode,season_id)
+    values(v_code,v_user,v_opponent.user_id,left(trim(coalesce(p_trainer,'Treinador')),24),v_opponent.trainer_name,p_team,v_opponent.team,'ready',false,false,'ranked',v_season)
+    returning * into v_room;
+    update public.pvp_ranked_queue set queue_status='matched',room_id=v_room.id where user_id in (v_user,v_opponent.user_id);
+    return jsonb_build_object('status','matched','room',to_jsonb(v_room));
+  end if;
+  insert into public.pvp_ranked_queue(user_id,season_id,rating,team,trainer_name,queue_status,room_id,queued_at)
+  values(v_user,v_season,v_rating,p_team,left(trim(coalesce(p_trainer,'Treinador')),24),'waiting',null,now())
+  on conflict(user_id) do update set season_id=excluded.season_id,rating=excluded.rating,team=excluded.team,
+    trainer_name=excluded.trainer_name,queue_status='waiting',room_id=null,queued_at=now();
+  return jsonb_build_object('status','waiting','season_id',v_season,'rating',v_rating);
+end $$;
+
+create or replace function public.pvp_ranked_queue_status()
+returns jsonb language plpgsql security definer set search_path=''
+as $$
+declare v_entry public.pvp_ranked_queue; v_room public.pvp_rooms;
+begin
+  if auth.uid() is null then raise exception 'Entre na sua conta.'; end if;
+  select * into v_entry from public.pvp_ranked_queue where user_id=auth.uid();
+  if not found then return jsonb_build_object('status','idle'); end if;
+  if v_entry.queue_status='matched' and v_entry.room_id is not null then
+    select * into v_room from public.pvp_rooms where id=v_entry.room_id;
+    if found and v_room.status in ('ready','battle') then return jsonb_build_object('status','matched','room',to_jsonb(v_room)); end if;
+    delete from public.pvp_ranked_queue where user_id=auth.uid();
+    return jsonb_build_object('status','idle');
+  end if;
+  if v_entry.queued_at < now()-interval '10 minutes' then
+    delete from public.pvp_ranked_queue where user_id=auth.uid();
+    return jsonb_build_object('status','idle');
+  end if;
+  return jsonb_build_object('status','waiting','season_id',v_entry.season_id,'rating',v_entry.rating,'queued_at',v_entry.queued_at);
+end $$;
+
+create or replace function public.pvp_ranked_leave_queue()
+returns jsonb language plpgsql security definer set search_path=''
+as $$
+begin
+  if auth.uid() is null then raise exception 'Entre na sua conta.'; end if;
+  delete from public.pvp_ranked_queue where user_id=auth.uid() and queue_status='waiting';
+  return jsonb_build_object('status','idle');
+end $$;
+
+create or replace function public.pvp_ranked_settle(p_room_id uuid)
+returns jsonb language plpgsql security definer set search_path=''
+as $$
+declare
+  v_room public.pvp_rooms; v_winner uuid; v_loser uuid; v_winner_rating integer; v_loser_rating integer;
+  v_expected numeric; v_delta integer; v_host_change integer; v_guest_change integer; v_profile public.pvp_ranked_profiles;
+begin
+  if auth.uid() is null then raise exception 'Entre na sua conta.'; end if;
+  select * into v_room from public.pvp_rooms where id=p_room_id for update;
+  if not found or auth.uid() not in (v_room.host_id,v_room.guest_id) then raise exception 'Você não participa desta batalha.'; end if;
+  if v_room.battle_mode<>'ranked' or v_room.status<>'finished' then raise exception 'A batalha ranqueada ainda não terminou.'; end if;
+  if v_room.battle->>'ranked_settled'='true' then
+    select * into v_profile from public.pvp_ranked_profiles where user_id=auth.uid() and season_id=v_room.season_id;
+    return jsonb_build_object('rating',v_profile.rating,'rating_change',case when auth.uid()=v_room.host_id then coalesce((v_room.battle->>'ranked_host_change')::integer,0) else coalesce((v_room.battle->>'ranked_guest_change')::integer,0) end,'already_settled',true);
+  end if;
+  v_winner:=nullif(v_room.battle->>'winner_user_id','')::uuid;
+  if v_winner is null or v_winner not in (v_room.host_id,v_room.guest_id) or v_room.battle->>'result' not in ('normal','abandoned') then
+    raise exception 'O resultado desta batalha não pode alterar o rating.';
+  end if;
+  v_loser:=case when v_winner=v_room.host_id then v_room.guest_id else v_room.host_id end;
+  perform pg_advisory_xact_lock(hashtextextended('pvp-ranked-settle-'||v_room.season_id,0));
+  insert into public.pvp_ranked_profiles(user_id,season_id) values(v_winner,v_room.season_id),(v_loser,v_room.season_id) on conflict do nothing;
+  select rating into v_winner_rating from public.pvp_ranked_profiles where user_id=v_winner and season_id=v_room.season_id for update;
+  select rating into v_loser_rating from public.pvp_ranked_profiles where user_id=v_loser and season_id=v_room.season_id for update;
+  v_expected:=1/(1+power(10::numeric,(v_loser_rating-v_winner_rating)::numeric/400));
+  v_delta:=greatest(1,round(32*(1-v_expected))::integer);
+  if v_winner=v_room.host_id then
+    v_host_change:=v_delta; v_guest_change:=-least(v_delta,v_loser_rating-100);
+  else
+    v_guest_change:=v_delta; v_host_change:=-least(v_delta,v_loser_rating-100);
+  end if;
+  update public.pvp_ranked_profiles set rating=rating+v_host_change,wins=wins+case when user_id=v_winner then 1 else 0 end,
+    losses=losses+case when user_id=v_loser then 1 else 0 end,
+    current_streak=case when user_id=v_winner then current_streak+1 else 0 end,
+    best_rating=greatest(best_rating,rating+v_host_change),updated_at=now()
+    where user_id=v_room.host_id and season_id=v_room.season_id returning * into v_profile;
+  update public.pvp_ranked_profiles set rating=rating+v_guest_change,wins=wins+case when user_id=v_winner then 1 else 0 end,
+    losses=losses+case when user_id=v_loser then 1 else 0 end,
+    current_streak=case when user_id=v_winner then current_streak+1 else 0 end,
+    best_rating=greatest(best_rating,rating+v_guest_change),updated_at=now()
+    where user_id=v_room.guest_id and season_id=v_room.season_id;
+  update public.pvp_rooms set battle=battle||jsonb_build_object('ranked_settled',true,'ranked_host_change',v_host_change,'ranked_guest_change',v_guest_change),updated_at=now() where id=v_room.id;
+  if auth.uid()=v_room.host_id then return jsonb_build_object('rating',v_profile.rating,'rating_change',v_host_change,'season_id',v_room.season_id); end if;
+  select * into v_profile from public.pvp_ranked_profiles where user_id=auth.uid() and season_id=v_room.season_id;
+  return jsonb_build_object('rating',v_profile.rating,'rating_change',v_guest_change,'season_id',v_room.season_id);
+end $$;
+
+revoke execute on function public.pvp_ranked_get_profile() from public,anon;
+revoke execute on function public.pvp_ranked_enter_queue(jsonb,text) from public,anon;
+revoke execute on function public.pvp_ranked_queue_status() from public,anon;
+revoke execute on function public.pvp_ranked_leave_queue() from public,anon;
+revoke execute on function public.pvp_ranked_settle(uuid) from public,anon;
+grant execute on function public.pvp_ranked_get_profile() to authenticated;
+grant execute on function public.pvp_ranked_enter_queue(jsonb,text) to authenticated;
+grant execute on function public.pvp_ranked_queue_status() to authenticated;
+grant execute on function public.pvp_ranked_leave_queue() to authenticated;
+grant execute on function public.pvp_ranked_settle(uuid) to authenticated;
+notify pgrst,'reload schema';
