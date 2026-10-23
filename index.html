@@ -1272,9 +1272,14 @@
       animation: playerAttack 0.45s ease;
     }
     .player-sprite.protect-glow, .enemy-sprite.protect-glow { animation: protectGlow 1s ease-in-out; }
+    .player-sprite.stat-boost-glow, .enemy-sprite.stat-boost-glow { animation: statBoostGlow 1.05s ease-in-out; }
     @keyframes protectGlow {
       0%, 100% { filter: drop-shadow(0 6px 12px rgba(0,0,0,.45)) brightness(1); }
       35%, 70% { filter: drop-shadow(0 0 18px #a78bfa) drop-shadow(0 0 7px #fff) brightness(1.65); }
+    }
+    @keyframes statBoostGlow {
+      0%, 100% { filter: drop-shadow(0 6px 12px rgba(0,0,0,.45)) brightness(1); }
+      30%, 65% { filter: drop-shadow(0 0 22px #a78bfa) drop-shadow(0 0 10px #fff) brightness(1.75); }
     }
     @keyframes enemyAttack {
       0% { transform: translate(0,0); }
@@ -3760,6 +3765,15 @@
       return Boolean(move?.protect || getStatusMoveEffect(move)?.status === 'protect' || ['protect','detect','endure','wide guard','quick guard',"king's shield",'spiky shield','baneful bunker','obstruct','silk trap','burning bulwark'].includes(name));
     }
 
+    function isSelfStatBoostMove(move) {
+      if (!move || Number(move.power) > 0) return false;
+      const changes = Array.isArray(move.statChanges)
+        ? move.statChanges
+        : Object.entries(move.statChanges || {}).map(([stat, stages]) => ({ target: Number(stages) < 0 ? 'target' : 'self', stat, stages }));
+      return changes.some(change => ['self', 'attacker'].includes(String(change?.target || '').toLowerCase()) &&
+        Number(change?.stages ?? change?.amount ?? change?.change) > 0);
+    }
+
     function moveTargetsProtectedPokemon(move) {
       const target = String(move?.target || '').trim().toLowerCase();
       return !['user','user-or-ally','user-and-allies','users-and-allies','users-field','user-side','ally','allies','ally-side','ally-team','opponents-field','entire-field','field'].includes(target);
@@ -3776,10 +3790,18 @@
 
     function playProtectGlow(sprite) {
       if (!sprite) return;
-      sprite.classList.remove('attack-anim', 'protect-glow');
+      sprite.classList.remove('attack-anim', 'protect-glow', 'stat-boost-glow');
       void sprite.offsetWidth;
       sprite.classList.add('protect-glow');
       setTimeout(() => sprite.classList.remove('protect-glow'), 1000);
+    }
+
+    function playStatBoostGlow(sprite) {
+      if (!sprite) return;
+      sprite.classList.remove('attack-anim', 'protect-glow', 'stat-boost-glow');
+      void sprite.offsetWidth;
+      sprite.classList.add('stat-boost-glow');
+      setTimeout(() => sprite.classList.remove('stat-boost-glow'), 1050);
     }
 
     function canReceiveStatus(pokemon, status) {
@@ -11827,6 +11849,7 @@
       const pSprite = document.getElementById('playerSprite');
       const healingMove = isSelfHealingMove(move);
       if (isProtectMove(move)) playProtectGlow(pSprite);
+      else if (isSelfStatBoostMove(move)) playStatBoostGlow(pSprite);
       else if (!healingMove) {
         pSprite.classList.add('attack-anim');
         SFX.attack();
@@ -12194,6 +12217,7 @@
 
       const eSprite = document.getElementById('enemySprite');
       if (enemyUsedProtect) playProtectGlow(eSprite);
+      else if (isSelfStatBoostMove(move)) playStatBoostGlow(eSprite);
       else if (!enemyHealingMove) {
         eSprite.classList.add('attack-anim');
         SFX.attack();
