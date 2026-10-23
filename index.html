@@ -3179,10 +3179,6 @@
     const TYPE_NAME_BY_NORMALIZED = Object.fromEntries(Object.keys(TYPE_CHART).map(type => [
       type.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(), type
     ]));
-            <div class="game-card" id="adminProfileCard" role="button" tabindex="0" style="display:none" onclick="switchPanel('admin')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('admin')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#4a3515,#21190c);font-size:3rem;">&#128737;&#65039;</div>
-              <div class="game-card-body"><div class="game-card-title">Painel de administrador</div><div class="game-card-desc">Envie itens, Pok&#233;mon e moedas para treinadores.</div></div>
-            </div>
     const ENGLISH_TYPE_TO_GAME_TYPE = {
       normal:'Normal', fire:'Fogo', water:'Agua', grass:'Planta', electric:'Eletrico',
       ice:'Gelo', fighting:'Lutador', poison:'Veneno', ground:'Terra', flying:'Voador',
