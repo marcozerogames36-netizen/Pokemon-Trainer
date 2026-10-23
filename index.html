@@ -1119,16 +1119,35 @@
     .move-effectiveness.immune { color:#fca5a5; }
     .move-effectiveness.normal { color:var(--text-muted); }
 
-    .battle-result {
-      display: none; text-align: center; padding: 20px;
+    .battle-result-overlay {
+      display: none; position: fixed; inset: 0; z-index: 10;
+      align-items: center; justify-content: center; padding: 16px;
     }
-    .battle-result.show { display: block; }
-    .battle-result h3 { font-size: 1.4rem; margin-bottom: 8px; }
-    .battle-result p { color: var(--text-muted); margin-bottom: 16px; font-size: 0.9rem; }
+    .battle-result-overlay.show { display: flex; animation: battleResultFadeIn 0.2s ease-out both; }
+    .battle-result-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(5, 6, 12, 0.78); backdrop-filter: blur(4px);
+    }
+    .battle-result {
+      position: relative; z-index: 1; width: min(680px, 100%);
+      max-height: calc(100dvh - 32px); overflow-y: auto;
+      text-align: center; padding: 26px 24px 22px; background: linear-gradient(155deg, color-mix(in srgb, var(--card) 94%, var(--primary)), var(--card) 42%);
+      border: 1px solid color-mix(in srgb, var(--primary) 36%, var(--border)); border-radius: 20px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.58), 0 0 32px var(--primary-glow);
+      animation: battleResultPopIn 0.28s cubic-bezier(.2,.8,.2,1) both;
+    }
+    .battle-result::before {
+      content: ""; position: absolute; top: 0; left: 18%; right: 18%; height: 3px;
+      border-radius: 0 0 999px 999px; background: linear-gradient(90deg, transparent, var(--primary-hover), transparent);
+    }
+    .battle-result-kicker { display: block; margin-bottom: 6px; color: var(--primary-hover); font-size: .68rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .battle-result h3 { font-size: clamp(1.35rem, 4vw, 1.65rem); line-height: 1.2; margin-bottom: 7px; }
+    .battle-result p { color: var(--text-muted); margin-bottom: 18px; font-size: 0.92rem; }
     .battle-result .rewards {
       display: grid; gap: 8px; text-align: left;
       background: var(--input-bg); border: 1px solid var(--border);
-      border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 0.9rem;
+      border-radius: 14px; padding: 12px 14px; margin-bottom: 18px; font-size: 0.9rem;
+      box-shadow: inset 0 1px rgba(255,255,255,.025);
     }
     .reward-row {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -1139,8 +1158,20 @@
     .reward-value { color: var(--text); text-align: right; font-weight: 700; }
     .reward-money .reward-value { color: #fbbf24; }
     .reward-xp .reward-value { color: #60a5fa; }
+    .reward-ev { display: grid; grid-template-columns: 1fr; justify-items: end; gap: 2px; }
+    .reward-ev .reward-label { font-size: .74rem; line-height: 1.15; }
     .reward-ev .reward-value { color: #4ade80; }
     .reward-highlight { color: var(--success); font-weight: 700; padding: 3px 7px; }
+    .reward-level-up { display: flex; align-items: center; gap: 10px; padding: 7px; color: var(--success); }
+    .reward-level-up img { flex: 0 0 48px; width: 48px; height: 48px; object-fit: contain; image-rendering: pixelated; }
+    .reward-level-up-copy { display: grid; gap: 2px; text-align: left; }
+    .reward-level-up-copy strong { font-size: .9rem; }
+    .reward-level-up-copy span { color: var(--text-muted); font-size: .8rem; }
+    @keyframes battleResultFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes battleResultPopIn { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @media (prefers-reduced-motion: reduce) {
+      .battle-result-overlay.show, .battle-result { animation: none; }
+    }
     @media (max-width: 480px) {
       .battle-result .rewards { padding: 9px; }
       .reward-row { align-items: flex-start; flex-wrap: wrap; }
@@ -2156,7 +2187,8 @@
       .battle-log { min-height: 44px; margin-bottom: 10px; padding: 9px 10px; font-size: .82rem; }
       .battle-btn, .move-btn, .btn { min-height: 44px; }
       .move-btn { gap: 6px; flex-wrap: wrap; overflow-wrap: anywhere; }
-      .battle-result { max-height: 70dvh; overflow-y: auto; padding: 14px 10px; }
+      .battle-result-overlay { padding: 12px; }
+      .battle-result { max-height: calc(100dvh - 24px); padding: 22px 12px 14px; border-radius: 16px; }
       .pvp-arena { min-height: calc(100dvh - 150px); }
       .pvp-side-card, .pvp-lobby-box, .pvp-room-box { min-width: 0; }
       .pvp-code { font-size: clamp(1.1rem, 6vw, 1.5rem); overflow-wrap: anywhere; }
@@ -3067,11 +3099,15 @@
       <div class="battle-actions" id="bagMenu" style="display:none;"></div>
       <div class="battle-actions moves-view" id="movesMenu" style="display:none;"></div>
       <div class="battle-actions" id="switchMenu" style="display:none;"></div>
-      <div class="battle-result" id="battleResult">
-        <h3 id="resultTitle">Vitória!</h3>
-        <p id="resultDesc">Você derrotou o Pokémon selvagem!</p>
-        <div class="rewards" id="resultRewards"></div>
-        <button class="btn" onclick="closeBattle()" style="max-width:200px;margin:0 auto;">Continuar</button>
+      <div class="battle-result-overlay" id="battleResult">
+        <div class="battle-result-backdrop" aria-hidden="true"></div>
+        <section class="battle-result" role="dialog" aria-modal="true" aria-labelledby="resultTitle" aria-describedby="resultDesc">
+          <span class="battle-result-kicker">Resultado da batalha</span>
+          <h3 id="resultTitle">Vitória!</h3>
+          <p id="resultDesc">Você derrotou o Pokémon selvagem!</p>
+          <div class="rewards" id="resultRewards"></div>
+          <button class="btn" onclick="closeBattle()" style="max-width:200px;margin:0 auto;">Continuar</button>
+        </section>
       </div>
     </div>
   </div>
@@ -4624,6 +4660,16 @@
     const SPRITE_POKEMON = pokemon => pokemon?.shiny ? SPRITE_SHINY(pokemon.id) : SPRITE(pokemon.id);
     const SPRITE_BACK_POKEMON = pokemon => pokemon?.shiny ? SPRITE_BACK_SHINY(pokemon.id) : SPRITE_BACK(pokemon.id);
     const SPRITE_ANIM_POKEMON = pokemon => pokemon?.shiny ? SPRITE_ANIM_SHINY(pokemon.id) : SPRITE_ANIM(pokemon.id);
+
+    function renderLevelUpReward(pokemon, levelsGained) {
+      if (!pokemon || levelsGained <= 0) return '';
+      const name = escapeHTML(pokemon.name || 'Pokémon');
+      const sprite = pokemon.shiny ? SPRITE_SHINY(pokemon.id) : SPRITE_FB(pokemon.id);
+      const levelText = levelsGained === 1
+        ? `${name} chegou ao Nv. ${pokemon.level}.`
+        : `${name} subiu ${levelsGained} níveis e chegou ao Nv. ${pokemon.level}.`;
+      return `<div class="reward-level-up"><img src="${sprite}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FRONT(pokemon.id)}'"><div class="reward-level-up-copy"><strong>Subiu de nível!</strong><span>${levelText}</span></div></div>`;
+    }
 
     function showDamageNumber(target, amount, kind) {
       // target: 'enemy' or 'player'
@@ -11703,7 +11749,8 @@
         }
         battle.choiceMoveIndex = moveIdx;
       }
-      if (!battle.skipInitiativeOnce) {
+      const actionWasOrderedAfterEnemy = Boolean(battle.skipInitiativeOnce);
+      if (!actionWasOrderedAfterEnemy) {
         const enemyMoves = (battle.enemy.moves || []).filter(candidate => candidate.power > 0 || candidate.statusEffect || candidate.statChanges || isSelfHealingMove(candidate) || isProtectMove(candidate) || getStatusMoveEffect(candidate)).filter(candidate => battle.enemy.heldItem !== 'assault_vest' || candidate.power > 0);
         const enemyMove = chooseBestEnemyMove(enemyMoves);
         if (!battlePokemonActsFirst(player.poke, move, battle.enemy, enemyMove)) {
@@ -11885,6 +11932,9 @@
           } else {
             setTimeout(() => endBattle(false), 700);
           }
+        } else if (actionWasOrderedAfterEnemy) {
+          battle.turn = 'player';
+          battle.busy = false;
         } else {
           battle.turn = 'enemy';
           setTimeout(enemyAttack, 1000);
@@ -12670,7 +12720,7 @@
           : `Você derrotou ${battle.enemy.name}!`;
         const rewardRows = [`<div class="reward-row reward-money"><span class="reward-label">Dinheiro</span><strong class="reward-value">+ ₽ ${money.toLocaleString('pt-BR')}</strong></div>`];
         if (xp) rewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`);
-        if (leveled) rewardRows.push(`<div class="reward-highlight">⬆️ ${player.poke.name} ${levelsGained === 1 ? `subiu para o Nv. ${player.poke.level}` : `subiu ${levelsGained} níveis e chegou ao Nv. ${player.poke.level}`}!</div>`);
+        if (levelsGained) rewardRows.push(renderLevelUpReward(player.poke, levelsGained));
         const effortText = formatEffortGain(effort);
         if (effortText) rewardRows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortText}</strong></div>`);
         if (sharedExperienceText.length) rewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${sharedExperienceText.join(' / ')}</strong></div>`);
@@ -13122,7 +13172,7 @@
         `<div class="reward-row reward-money"><span class="reward-label">Pok\u00e9dollar</span><strong class="reward-value">+ \u20bd ${money.toLocaleString('pt-BR')}</strong></div>`,
         `<div class="reward-row reward-xp"><span class="reward-label">Experi\u00eancia</span><strong class="reward-value">+ ${xp} XP</strong></div>`
       ];
-      if(levelsGained) rows.push(`<div class="reward-highlight">${player.poke.name} subiu ${levelsGained} n\u00edvel(is), chegando ao Nv. ${player.poke.level}!</div>`);
+      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained));
       const effortMessage=formatEffortGain(battle.totalEffort);
       if(effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
       if(shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
@@ -13213,7 +13263,7 @@
         `<div class="reward-row reward-money"><span class="reward-label">Pokédollar</span><strong class="reward-value">+ ₽ ${money.toLocaleString('pt-BR')}</strong></div>`,
         `<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`
       ];
-      if(levelsGained) rows.push(`<div class="reward-highlight">${player.poke.name} subiu ${levelsGained} nível(is), chegando ao Nv. ${player.poke.level}!</div>`);
+      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained));
       if(effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
       if(shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
       document.getElementById('resultRewards').innerHTML=rows.join('');
@@ -13301,7 +13351,7 @@
         `<div class="reward-row reward-money"><span class="reward-label">Pokédollar</span><strong class="reward-value">+ ₽ ${money.toLocaleString('pt-BR')}</strong></div>`,
         `<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`
       ];
-      if (levelsGained) rows.push(`<div class="reward-highlight">${player.poke.name} subiu ${levelsGained} nível(is), chegando ao Nv. ${player.poke.level}!</div>`);
+      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained));
       if (effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
       if (shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
       document.getElementById('resultRewards').innerHTML = rows.join('');
@@ -13391,7 +13441,7 @@
         `<div class="reward-row reward-money"><span class="reward-label">Pok\u00e9dollar</span><strong class="reward-value">+ \u20bd ${money.toLocaleString('pt-BR')}</strong></div>`,
         `<div class="reward-row reward-xp"><span class="reward-label">Experi\u00eancia</span><strong class="reward-value">+ ${xp} XP</strong></div>`
       ];
-      if(levelsGained) rows.push(`<div class="reward-highlight">${player.poke.name} subiu ${levelsGained} n\u00edvel(is), chegando ao Nv. ${player.poke.level}!</div>`);
+      if (levelsGained) rows.push(renderLevelUpReward(player.poke, levelsGained));
       if(effortMessage) rows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
       if(shared.length) rows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${shared.join(' / ')}</strong></div>`);
       document.getElementById('resultRewards').innerHTML=rows.join('');
@@ -13646,7 +13696,7 @@
         `<div class="reward-row reward-xp"><span class="reward-label">Experiência</span><strong class="reward-value">+ ${xp} XP</strong></div>`
       ];
       if (gymTmReward) gymRewardRows.push(`<div class="reward-row"><span class="reward-label">TM recebido</span><strong class="reward-value">${escapeHTML(gymTmReward.name)} · ${escapeHTML(gymTmReward.move.name)}</strong></div>`);
-      if (levelsGained) gymRewardRows.push(`<div class="reward-highlight">⬆️ ${player.poke.name} ${levelsGained === 1 ? `subiu para o Nv. ${player.poke.level}` : `subiu ${levelsGained} níveis e chegou ao Nv. ${player.poke.level}`}!</div>`);
+      if (levelsGained) gymRewardRows.push(renderLevelUpReward(player.poke, levelsGained));
       if (effortMessage) gymRewardRows.push(`<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortMessage}</strong></div>`);
       if (sharedExperienceText.length) gymRewardRows.push(`<div class="reward-row reward-xp"><span class="reward-label">EXP compartilhada</span><strong class="reward-value">${sharedExperienceText.join(' / ')}</strong></div>`);
       gymRewardRows.push(`<div class="reward-row"><span class="reward-label">Insígnias conquistadas</span><strong class="reward-value">${player.badges}/8</strong></div>`);
