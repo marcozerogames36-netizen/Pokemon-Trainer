@@ -743,6 +743,9 @@
     }
 
     .battle-field {
+    .admin-account-actions { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+    .admin-account-actions .btn { width:auto;margin:0; }
+    .admin-account-status { margin:0 0 9px;color:var(--text-muted);font-size:.78rem; }
       position: relative; width: 100%; max-width: 780px; flex: 1;
       display: flex; flex-direction: column; justify-content: space-between;
       padding: 28px 24px 8px; z-index: 1;
@@ -2151,10 +2154,6 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#41234d,#1d1225);overflow:hidden;"><img src="assets/pvp-versus.png" alt="" style="width:230px;height:230px;max-width:none;flex:none;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">PvP Online</div><div class="game-card-desc">Desafie outro treinador por código de sala.</div></div>
             </div>
-            <div class="game-card" id="adminHomeCard" role="button" tabindex="0" style="display:none" onclick="switchPanel('admin')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('admin')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#4a3515,#21190c);font-size:3rem;">🛡️</div>
-              <div class="game-card-body"><div class="game-card-title">Painel de administrador</div><div class="game-card-desc">Envie itens, Pokémon e moedas para treinadores.</div></div>
-            </div>
           </div>
         </div>
         <div class="panel" id="panel-admin">
@@ -2822,6 +2821,10 @@
     const TYPE_NAME_BY_NORMALIZED = Object.fromEntries(Object.keys(TYPE_CHART).map(type => [
       type.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(), type
     ]));
+            <div class="game-card" id="adminProfileCard" role="button" tabindex="0" style="display:none" onclick="switchPanel('admin')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('admin')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#4a3515,#21190c);font-size:3rem;">&#128737;&#65039;</div>
+              <div class="game-card-body"><div class="game-card-title">Painel de administrador</div><div class="game-card-desc">Envie itens, Pok&#233;mon e moedas para treinadores.</div></div>
+            </div>
     const ENGLISH_TYPE_TO_GAME_TYPE = {
       normal:'Normal', fire:'Fogo', water:'Agua', grass:'Planta', electric:'Eletrico',
       ice:'Gelo', fighting:'Lutador', poison:'Veneno', ground:'Terra', flying:'Voador',
@@ -8830,7 +8833,7 @@
       document.getElementById('dashMeta').textContent = `Origem: ${player.originRegion}`;
       pendingTrainerAvatar = null;
       applyTrainerAvatar();
-      document.getElementById('adminHomeCard').style.display = isAdminAccount() ? '' : 'none';
+      document.getElementById('adminProfileCard').style.display = isAdminAccount() ? '' : 'none';
       document.getElementById('itemCatalogHomeCard').style.display = isAdminAccount() ? '' : 'none';
       document.getElementById('welcomeName').textContent = player.name;
       document.getElementById('welcomePoke').src = SPRITE(player.starter.id);
@@ -9862,6 +9865,81 @@
       const animate=selector=>{
         const sprite=document.querySelector(`#coopBossContent ${selector}`);if(!sprite)return;
         sprite.classList.remove('attack-anim');void sprite.offsetWidth;sprite.classList.add('attack-anim');
+      if (currentUserCanManageAdmins) {
+        const accountControls=document.createElement('section');
+        accountControls.className='admin-detail-section';
+        accountControls.innerHTML='<h4 class="admin-detail-heading">Acesso e progresso da conta</h4><p class="admin-account-status" id="adminAccountStatus">Consultando o estado da conta...</p><div class="admin-account-actions"><button type="button" class="admin-remove-button" id="adminBanAccountButton" disabled>Banir acesso</button><button type="button" class="btn btn-secondary" id="adminResetAccountButton">Resetar progresso</button></div><p class="admin-promote-note">O ban bloqueia novos logins e encerra as sessões. O reset apaga o save e permite criar uma nova aventura; a conta de login permanece.</p>';
+        content.append(accountControls);
+        document.getElementById('adminBanAccountButton')?.addEventListener('click',adminToggleSelectedAccountBan);
+        document.getElementById('adminResetAccountButton')?.addEventListener('click',adminResetSelectedAccountProgress);
+        void adminRefreshSelectedAccountStatus();
+      }
+    }
+    let adminSelectedAccountIsBanned = false;
+    async function adminInvokeAccountAction(action) {
+      if (!isAdminAccount() || !currentUserCanManageAdmins || !adminSelectedTrainer || !supabaseClient) throw new Error('Apenas o administrador principal pode gerenciar contas.');
+      const {data,error}=await supabaseClient.functions.invoke('admin-account-actions',{body:{action,targetUserId:adminSelectedTrainer.user_id}});
+      if (error) throw new Error(error.message||'Falha ao executar a ação administrativa.');
+      if (data?.error) throw new Error(data.error);
+      return data;
+    }
+    async function adminRefreshSelectedAccountStatus() {
+      const status=document.getElementById('adminAccountStatus');
+      const button=document.getElementById('adminBanAccountButton');
+      if (!status || !button || !adminSelectedTrainer) return;
+      button.disabled=true;
+      try {
+        const data=await adminInvokeAccountAction('status');
+        adminSelectedAccountIsBanned=Boolean(data.isBanned);
+        status.textContent=adminSelectedAccountIsBanned?'Acesso banido':'Acesso liberado';
+        status.style.color=adminSelectedAccountIsBanned?'#fca5a5':'#86efac';
+        button.textContent=adminSelectedAccountIsBanned?'Desbanir acesso':'Banir acesso';
+        button.className=adminSelectedAccountIsBanned?'btn btn-secondary':'admin-remove-button';
+        button.disabled=false;
+      } catch (error) {
+        status.textContent='Não foi possível consultar o banimento. Implante a função admin-account-actions.';
+        status.style.color='var(--text-muted)';
+        button.disabled=true;
+      }
+    }
+    async function adminToggleSelectedAccountBan() {
+      if (!adminSelectedTrainer) return;
+      const trainerName=adminSelectedTrainer.trainer_name;
+      const action=adminSelectedAccountIsBanned?'unban':'ban';
+      const confirmation=action==='ban'
+        ? `Banir a conta de ${trainerName}? O usuário não poderá entrar novamente até ser desbanido.`
+        : `Desbanir a conta de ${trainerName} e permitir novos logins?`;
+      if (!window.confirm(confirmation)) return;
+      const button=document.getElementById('adminBanAccountButton');
+      if (button) { button.disabled=true; button.textContent='Processando...'; }
+      try {
+        const result=await adminInvokeAccountAction(action);
+        adminSelectedAccountIsBanned=Boolean(result.isBanned);
+        showToast(action==='ban'?`Acesso de ${trainerName} banido.`:`Acesso de ${trainerName} liberado.`);
+        if (action==='ban'&&!result.sessionsRevoked) showToast('O ban foi aplicado, mas não foi possível encerrar todas as sessões existentes.','error');
+        await adminRefreshSelectedAccountStatus();
+      } catch (error) {
+        showToast('Não foi possível alterar o acesso: '+error.message,'error');
+        await adminRefreshSelectedAccountStatus();
+      }
+    }
+    async function adminResetSelectedAccountProgress() {
+      if (!adminSelectedTrainer || !window.confirm(`Apagar todo o progresso de ${adminSelectedTrainer.trainer_name}? Isso remove Pokémon, equipe, itens, moedas, insígnias e missões salvos. A conta de login permanece e a ação não pode ser desfeita.`)) return;
+      const trainerName=adminSelectedTrainer.trainer_name;
+      const button=document.getElementById('adminResetAccountButton');
+      if (button) { button.disabled=true; button.textContent='Resetando...'; }
+      try {
+        const result=await adminInvokeAccountAction('reset');
+        adminSelectedTrainer=null;
+        adminClearTrainerDetails();
+        const selectedNode=document.getElementById('adminSelectedTrainer');
+        if (selectedNode) selectedNode.innerHTML='<span class="admin-selected-avatar">✓</span><span>Progresso resetado. A conta poderá criar uma nova aventura.</span>';
+        showToast(`Progresso de ${result.trainerName||trainerName} resetado.`);
+        if (!result.sessionsRevoked) showToast('O progresso foi apagado, mas não foi possível encerrar todas as sessões existentes.','error');
+      } catch (error) {
+        showToast('Não foi possível resetar o progresso: '+error.message,'error');
+        if (button) { button.disabled=false; button.textContent='Resetar progresso'; }
+      }
         setTimeout(()=>sprite.classList.remove('attack-anim'),700);
       };
       const showHit=(selector,stageSelector,damage,left,top,hpSelector,hp,maxHp)=>{
