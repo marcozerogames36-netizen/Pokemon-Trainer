@@ -6196,17 +6196,19 @@
     let accountLogoutCheckBusy = false;
     let accountLogoutInProgress = false;
 
-    function accountSessionLogoutStorageKey() {
+    async function getAccountSessionAuthTime() {
       if (!onlineUser || !supabaseClient) return null;
-      return supabaseClient.auth.getSession().then(({ data }) => {
-        const token = data?.session?.access_token || '';
-        const payload = token.split('.')[1];
-        if (!payload) return null;
-        try {
-          const claims = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-          return claims.session_id ? `pokemonTrainerForceLogout:${onlineUser.id}:${claims.session_id}` : null;
-        } catch (_) { return null; }
-      });
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+      const token = data?.session?.access_token || '';
+      const payload = token.split('.')[1];
+      if (!payload) return null;
+      try {
+        const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+        const claims = JSON.parse(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')));
+        const timestamp = Number(claims.auth_time || claims.iat);
+        return Number.isFinite(timestamp) ? timestamp * 1000 : null;
+      } catch (_) { return null; }
     }
 
     async function forceLogoutAfterAdminAction() {
@@ -6229,20 +6231,16 @@
       if (!onlineUser || !supabaseClient || accountLogoutCheckBusy) return;
       accountLogoutCheckBusy = true;
       try {
-        const key = await accountSessionLogoutStorageKey();
-        if (!key) return;
+        const authTime = await getAccountSessionAuthTime();
+        if (!authTime) return;
         const { data, error } = await supabaseClient
           .from('account_session_controls')
           .select('force_logout_at')
           .eq('user_id', onlineUser.id)
           .maybeSingle();
         if (error) throw error;
-        const marker = data?.force_logout_at || '';
-        let previousMarker = null;
-        try { previousMarker = sessionStorage.getItem(key); } catch (_) {}
-        if (previousMarker === null) {
-          try { sessionStorage.setItem(key, marker); } catch (_) {}
-        } else if (marker && marker !== previousMarker) {
+        const markerTime = Date.parse(data?.force_logout_at || '');
+        if (Number.isFinite(markerTime) && markerTime > authTime + 1000) {
           await forceLogoutAfterAdminAction();
         }
       } catch (error) {
