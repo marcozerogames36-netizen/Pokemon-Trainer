@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Poké Trainer — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,7 +24,7 @@
       --shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
       --hp-green: #22c55e; --hp-yellow: #eab308; --hp-red: #ef4444;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
     html {
       scroll-behavior: smooth;
       touch-action: manipulation;
@@ -47,7 +47,29 @@
     }
 
     /* AUTH */
-    .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background:linear-gradient(rgba(12,10,18,.42),rgba(12,10,18,.58)),url('assets/login-charizard-bg.png') center/cover no-repeat; }
+    .auth-wrapper > .container > .card {
+      background:linear-gradient(145deg,rgba(68,31,36,.48),rgba(27,21,28,.48));
+      border-color:rgba(242,133,83,.48);
+      box-shadow:0 25px 65px rgba(34,12,16,.56),0 0 36px rgba(238,103,60,.12);
+      backdrop-filter:blur(7px);
+    }
+    .auth-wrapper > .container > .card::before { background:linear-gradient(90deg,#e64b3c,#f28b4e,#ffc45b,#3b9bc0); }
+    .auth-wrapper .logo-icon { position:relative; overflow:hidden; border-radius:50%; background:transparent; box-shadow:none; }
+    .auth-wrapper .logo-icon .trainer-logo-image { position:absolute; left:50%; top:50%; width:335%; height:335%; max-width:none; object-fit:contain; pointer-events:none; transform:translate(-50%,-50%); }
+    .auth-wrapper .tabs { background:rgba(35,22,29,.82); border-color:rgba(242,133,83,.24); }
+    .auth-wrapper .tab.active { background:linear-gradient(135deg,#df493d,#f17b3d 65%,#f5a943); box-shadow:0 4px 16px rgba(238,103,60,.25); }
+    .auth-wrapper .form-group label,.auth-wrapper .remember { color:#edc4ad; }
+    .auth-wrapper .form-group input,.auth-wrapper .form-group select { background:rgba(26,20,26,.86); border-color:rgba(242,133,83,.25); }
+    .auth-wrapper .form-group input:focus,.auth-wrapper .form-group select:focus { border-color:#f28b4e; box-shadow:0 0 0 3px rgba(242,139,78,.18); }
+    .auth-wrapper .remember input { accent-color:#f28b4e; }
+    .auth-wrapper .forgot { color:#ffb45e; }
+    .auth-wrapper .forgot:hover { color:#ffd08a; }
+    .auth-wrapper .btn:not(.btn-secondary) { background:linear-gradient(135deg,#df493d,#f17b3d 62%,#f5a943); box-shadow:0 4px 18px rgba(238,103,60,.26); }
+    .auth-wrapper .btn:not(.btn-secondary):hover { box-shadow:0 8px 24px rgba(238,103,60,.34); }
+    .auth-wrapper .btn-secondary { border-color:rgba(242,133,83,.28); color:#edc4ad; }
+    .auth-wrapper .btn-secondary:hover,.auth-wrapper .social-btn:hover { background:rgba(242,133,83,.1); border-color:rgba(242,133,83,.55); color:#fff1e7; }
+    .auth-wrapper .social-btn { background:rgba(26,20,26,.78); border-color:rgba(242,133,83,.25); }
     .container { width: 100%; max-width: 480px; }
     .card {
       background: var(--card); border: 1px solid var(--border); border-radius: 20px;
@@ -140,7 +162,7 @@
     }
     .social-btn:hover { background: #1a1a24; border-color: #3f3f4e; }
     .social-btn svg { width: 18px; height: 18px; }
-    .social-hub { max-width:1120px; margin-top:0; overflow:hidden; padding:0 !important; }
+    .social-hub { max-width:1120px; margin:0 auto; overflow:hidden; padding:0 !important; }
     .social-hero { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:22px 24px; background:linear-gradient(120deg,#302153,#172b48 70%,#123b46); border-bottom:1px solid var(--border); }
     .social-hero h3 { margin:0 0 5px; font-size:1.15rem; }
     .social-hero p { color:#d0d5e3; font-size:.86rem; margin:0; }
@@ -164,7 +186,7 @@
     .social-friend-active { justify-items:end; text-align:right; }
     .social-friend-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:center; gap:7px; }
     .social-friend-actions > button { width:auto !important; margin:0 !important; padding:8px 10px !important; white-space:nowrap; }
-    .social-trade-dialog { width:min(760px,calc(100vw - 28px)); max-width:none; max-height:min(88vh,760px); padding:0; overflow:hidden; border:1px solid rgba(168,85,247,.55); border-radius:18px; background:var(--card); color:var(--text); box-shadow:0 24px 80px #000b,0 0 32px #9333ea24; }
+    .social-trade-dialog { width:min(760px,calc(100vw - 28px)); max-width:none; max-height:min(88vh,760px); margin:auto; padding:0; overflow:hidden; border:1px solid rgba(168,85,247,.55); border-radius:18px; background:var(--card); color:var(--text); box-shadow:0 24px 80px #000b,0 0 32px #9333ea24; }
     .social-trade-dialog::backdrop { background:rgba(5,4,10,.78); backdrop-filter:blur(5px); }
     .social-trade-dialog-inner { display:flex; flex-direction:column; max-height:min(88vh,760px); padding:20px; }
     .social-trade-dialog-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
@@ -181,6 +203,35 @@
     .social-trade-option img { width:58px; height:56px; object-fit:contain; image-rendering:pixelated; }
     .social-trade-option strong { max-width:100%; overflow:hidden; font-size:.78rem; text-overflow:ellipsis; white-space:nowrap; }
     .social-trade-option small { color:var(--text-muted); font-size:.68rem; }
+    .evcap-dialog-kicker { display:block; margin-bottom:5px; color:#67e8f9; font-size:.65rem; font-weight:800; letter-spacing:.12em; }
+    .evcap-picker-banner { display:flex; align-items:center; gap:12px; margin:14px 0 4px; padding:12px 14px; border:1px solid rgba(34,211,238,.25); border-radius:14px; background:linear-gradient(110deg,rgba(34,211,238,.11),rgba(20,19,30,.92)); }
+    .evcap-picker-banner img { width:50px; height:50px; object-fit:contain; image-rendering:pixelated; }
+    .evcap-picker-banner strong { display:block; font-size:.9rem; }
+    .evcap-picker-banner small { display:block; margin-top:3px; color:var(--text-muted); line-height:1.4; }
+    .evcap-pokemon-option { min-height:142px; background:radial-gradient(ellipse at top,rgba(34,211,238,.09),transparent 72%),var(--input-bg); }
+    .evcap-pokemon-option img { width:76px; height:72px; }
+    .goldcap-picker-banner { display:flex; align-items:center; gap:12px; margin:14px 0 4px; padding:12px 14px; border:1px solid rgba(250,204,21,.25); border-radius:14px; background:linear-gradient(110deg,rgba(250,204,21,.11),rgba(20,19,30,.92)); }
+    .goldcap-picker-banner img { width:50px; height:50px; object-fit:contain; image-rendering:pixelated; }
+    .goldcap-picker-banner strong { display:block; font-size:.9rem; }
+    .goldcap-picker-banner small { display:block; margin-top:3px; color:var(--text-muted); line-height:1.4; }
+    .goldcap-pokemon-option { min-height:142px; background:radial-gradient(ellipse at top,rgba(250,204,21,.09),transparent 72%),var(--input-bg); }
+    .goldcap-pokemon-option img { width:76px; height:72px; }
+    .evcap-stat-dialog { width:min(700px,calc(100vw - 28px)); margin:auto; }
+    .evcap-stat-hero { display:flex; align-items:center; gap:13px; margin:14px 0 8px; padding:12px 14px; border:1px solid rgba(168,85,247,.22); border-radius:14px; background:linear-gradient(110deg,rgba(124,58,237,.15),rgba(20,19,30,.92)); }
+    .evcap-stat-hero img { width:64px; height:64px; object-fit:contain; image-rendering:pixelated; }
+    .evcap-stat-hero strong { display:block; font-size:.96rem; }
+    .evcap-stat-hero small { display:block; margin-top:3px; color:var(--text-muted); }
+    .evcap-stat-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; margin:12px 0 16px; }
+    .evcap-stat-card { display:flex; flex-direction:column; gap:9px; min-width:0; padding:12px; border:1px solid var(--border); border-radius:13px; background:linear-gradient(145deg,#17151f,#111018); color:var(--text); text-align:left; cursor:pointer; transition:border-color .16s,background .16s,transform .16s; }
+    .evcap-stat-card:hover { transform:translateY(-1px); border-color:#8b5cf6; }
+    .evcap-stat-card.selected { border-color:#a855f7; background:linear-gradient(145deg,#302044,#191627); box-shadow:0 0 0 1px #a855f766; }
+    .evcap-stat-card-top { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+    .evcap-stat-card strong { overflow:hidden; font-size:.82rem; text-overflow:ellipsis; white-space:nowrap; }
+    .evcap-stat-card small { color:#c4b5fd; font-size:.7rem; white-space:nowrap; }
+    .evcap-stat-track { height:6px; overflow:hidden; border-radius:99px; background:#ffffff12; }
+    .evcap-stat-track i { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#7c3aed,#c084fc); }
+    .evcap-stat-selection { margin-top:3px !important; color:#c4b5fd !important; font-size:.78rem !important; }
+    @media(max-width:540px) { .evcap-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; } .evcap-stat-card { padding:10px; } .evcap-stat-card strong { font-size:.76rem; } }
     .social-trade-empty { padding:24px 8px; color:var(--text-muted); text-align:center; }
     .social-trade-dialog-actions { display:flex; justify-content:flex-end; gap:8px; padding-top:12px; border-top:1px solid var(--border); }
     .social-trade-dialog-actions .btn { width:auto; margin:0; }
@@ -258,6 +309,13 @@
     .toast.show { transform: translateX(0); }
     .toast.success { border-left: 4px solid var(--success); }
     .toast.error { border-left: 4px solid var(--error); }
+    .welcome-popup-overlay { display:none; position:fixed; inset:0; z-index:400; padding:20px; background:rgba(5,7,16,.76); backdrop-filter:blur(7px); align-items:center; justify-content:center; }
+    .welcome-popup-overlay.active { display:flex; animation:fadeUp .2s ease both; }
+    .welcome-popup-card { width:min(440px,100%); padding:26px; text-align:center; background:radial-gradient(ellipse at top right,rgba(52,211,153,.16),transparent 60%),var(--card); border:1px solid rgba(52,211,153,.34); border-radius:20px; box-shadow:0 24px 80px rgba(0,0,0,.6); }
+    .welcome-popup-icon { width:56px; height:56px; display:grid; place-items:center; margin:0 auto 14px; border-radius:18px; background:rgba(52,211,153,.13); border:1px solid rgba(52,211,153,.26); font-size:1.8rem; }
+    .welcome-popup-card h2 { margin:0 0 8px; font-size:1.25rem; }
+    .welcome-popup-card p { margin:0 0 20px; color:var(--text-muted); line-height:1.5; }
+    .welcome-popup-card .btn { min-width:150px; }
 
     /* DASHBOARD */
     #dashboard { display: none; min-height: 100vh; }
@@ -271,8 +329,8 @@
     }
     .topbar-left { display: flex; align-items: center; gap: 18px; min-width: 0; }
     .topbar-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; white-space: nowrap; }
-    .topbar-brand-mark { width: 36px; height: 36px; padding: 3px; border-radius: 10px; background: linear-gradient(135deg,#7c3aed,#a78bfa); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
-    .topbar-brand-mark .pokeball-mark { width: 29px; height: 29px; }
+    .topbar-brand-mark { position:relative; width:36px; height:36px; padding:0; overflow:hidden; border-radius:50%; background:transparent; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+    .topbar-brand-mark .trainer-logo-image { position:absolute; left:50%; top:50%; width:325%; height:325%; max-width:none; object-fit:contain; pointer-events:none; transform:translate(-50%,-50%); }
     .topbar-brand-name { font-size: 1.05rem; font-weight: 750; letter-spacing: -.02em; }
     .topbar-actions { display: flex; align-items: center; gap: 12px; min-width: 0; }
     .message-notifications { position:relative; flex:0 0 auto; }
@@ -904,9 +962,6 @@
     }
 
     .battle-field {
-    .admin-account-actions { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
-    .admin-account-actions .btn { width:auto;margin:0; }
-    .admin-account-status { margin:0 0 9px;color:var(--text-muted);font-size:.78rem; }
       position: relative; width: 100%; max-width: 780px; flex: 1;
       display: flex; flex-direction: column; justify-content: space-between;
       padding: 28px 24px 8px; z-index: 1;
@@ -989,7 +1044,8 @@
     }
     .enemy-sprite.hit { animation: shake 0.3s ease; }
     .enemy-sprite.faint { animation: faintDown 0.6s ease forwards; }
-    .enemy-sprite.capturing { opacity: 0.35; }
+    .enemy-sprite.capturing { opacity: 0; transition: opacity .22s ease; }
+    .enemy-sprite.captured { opacity: 0 !important; visibility: hidden; }
     .enemy-sprite.rillaboom-battle-sprite, .enemy-sprite.annihilape-battle-sprite { width: 194px; height: 194px; }
 
     /* Player side — back sprites already face correct direction (no flip) */
@@ -1192,8 +1248,7 @@
       .topbar-actions { gap: 7px; }
       .topbar-profile { min-width: 0; max-width: min(142px, 34vw); padding: 5px 8px; gap: 7px; border-radius: 13px; }
       .topbar-brand { gap: 7px; }
-      .topbar-brand-mark { width: 32px; height: 32px; padding: 2px; }
-      .topbar-brand-mark .pokeball-mark { width: 27px; height: 27px; }
+      .topbar-brand-mark { width:32px; height:32px; }
       .topbar-brand-name { font-size: .9rem; }
       .topbar-profile .player-avatar { width: 30px; height: 30px; font-size: .95rem; }
       .topbar-profile .player-meta { display: block; margin-top: 2px; font-size: .61rem; line-height: 1.1; }
@@ -1342,39 +1397,58 @@
     /* Capture ball */
     .capture-ball {
       position: absolute;
-      width: 36px; height: 36px;
+      width: 46px; height: 46px;
       border-radius: 50%;
-      background: linear-gradient(180deg, #ef4444 50%, #fff 50%);
-      border: 2px solid #1a1a1a;
-      box-shadow: inset 0 0 0 2px #1a1a1a, 0 4px 12px rgba(0,0,0,0.5);
+      background: linear-gradient(to bottom, var(--ball-top, #ef4444) 0 43%, #15151b 43% 56%, var(--ball-bottom, #fff) 56% 100%);
+      border: 2px solid #101116;
+      box-shadow: inset -5px -5px 0 rgba(0,0,0,.16), inset 2px 2px 0 rgba(255,255,255,.28), 0 7px 16px rgba(0,0,0,.55), 0 0 0 0 var(--ball-glow, rgba(239,68,68,.4));
       z-index: 15;
-      animation: ballThrow 0.5s ease forwards;
+      transform-origin: center;
+      animation: ballThrow .68s cubic-bezier(.2,.78,.25,1) forwards;
     }
     .capture-ball::after {
       content: '';
       position: absolute;
       top: 50%; left: 50%;
-      width: 10px; height: 10px;
+      width: 13px; height: 13px;
       background: #fff;
-      border: 2px solid #1a1a1a;
+      border: 3px solid #15151b;
       border-radius: 50%;
       transform: translate(-50%, -50%);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.42), inset 0 -2px 0 rgba(0,0,0,.14);
+    }
+    .capture-ball::before {
+      content: ''; position: absolute; inset: -7px; border: 2px solid var(--ball-glow, rgba(239,68,68,.4));
+      border-radius: 50%; opacity: 0; transform: scale(.6); pointer-events: none;
     }
     @keyframes ballThrow {
-      0% { transform: translate(80px, 80px) scale(0.5); opacity: 0; }
-      50% { opacity: 1; }
-      100% { transform: translate(0, 0) scale(1); opacity: 1; }
+      0% { transform: translate(-130px, 155px) scale(.35) rotate(-240deg); opacity: 0; }
+      18% { opacity: 1; }
+      78% { transform: translate(-8px, 8px) scale(1.08) rotate(12deg); opacity: 1; }
+      100% { transform: translate(0, 0) scale(1) rotate(0); opacity: 1; }
     }
     @keyframes ballShake {
-      0%, 100% { transform: rotate(0); }
-      25% { transform: rotate(-20deg); }
-      75% { transform: rotate(20deg); }
+      0%, 100% { transform: translateX(0) rotate(0) scale(1); }
+      20% { transform: translateX(-7px) rotate(-18deg) scale(1.04); }
+      40% { transform: translateX(7px) rotate(18deg) scale(1.04); }
+      60% { transform: translateX(-5px) rotate(-12deg) scale(1.02); }
+      80% { transform: translateX(5px) rotate(12deg) scale(1.02); }
     }
     .capture-ball.caught {
-      animation: ballCatch 0.5s ease forwards;
+      animation: ballCatch .65s ease forwards;
+    }
+    .capture-ball.caught::before {
+      animation: ballCapturePulse .65s ease-out forwards;
     }
     @keyframes ballCatch {
-      to { transform: scale(0.8); filter: brightness(0.7); }
+      0% { transform: scale(1); filter: brightness(1); }
+      35% { transform: scale(1.18); filter: brightness(1.7); box-shadow: 0 0 26px 8px var(--ball-glow); }
+      100% { transform: scale(.92); filter: brightness(1.1); box-shadow: 0 0 12px 2px var(--ball-glow); }
+    }
+    @keyframes ballCapturePulse {
+      0% { opacity: 0; transform: scale(.55); }
+      35% { opacity: .9; }
+      100% { opacity: 0; transform: scale(1.55); }
     }
 
     /* Effectiveness text */
@@ -1586,7 +1660,20 @@
     .weekly-login-footer small { max-width:225px; color:var(--text-muted); font-size:.7rem; line-height:1.45; }
     .weekly-login-footer .btn { width:auto; margin:0; padding:9px 13px; font-size:.78rem; white-space:nowrap; }
     @media(max-width:850px) { .profile-overview-grid { grid-template-columns:minmax(0,1fr); max-width:none; } }
-    @media(max-width:480px) { .profile-overview-grid { grid-template-columns:minmax(0,1fr); } .weekly-login-panel { padding:17px 12px; } .weekly-login-heading { gap:9px; } .weekly-login-heading::after { padding:5px 7px; font-size:.58rem; } .weekly-login-days { gap:4px; } .weekly-login-days .daily-login-day { min-height:86px; padding:7px 1px 5px; } .weekly-login-days .daily-login-day-icons img { width:23px;height:23px; } .weekly-login-days .daily-login-day strong { min-height:24px; font-size:.56rem; } .weekly-login-day-label,.weekly-login-day-state { font-size:.52rem; } .weekly-login-footer { align-items:flex-start; flex-direction:column; } .weekly-login-footer .btn { width:100%; } }
+    @media(max-width:480px) {
+      .profile-overview-grid { grid-template-columns:minmax(0,1fr); }
+      .weekly-login-panel { padding:17px 12px; }
+      .weekly-login-heading { gap:9px; }
+      .weekly-login-heading::after { padding:5px 7px; font-size:.62rem; }
+      .weekly-login-days { display:flex; gap:7px; overflow-x:auto; padding:3px 2px 9px; scrollbar-width:thin; scroll-snap-type:x proximity; }
+      .weekly-login-days .daily-login-day { flex:0 0 66px; min-height:92px; padding:7px 3px 6px; scroll-snap-align:start; }
+      .weekly-login-days .daily-login-day-icons img { width:25px; height:25px; }
+      .weekly-login-days .daily-login-day strong { min-height:22px; font-size:.64rem; }
+      .weekly-login-day-label { font-size:.62rem; }
+      .weekly-login-day-state { font-size:.58rem; }
+      .weekly-login-footer { align-items:flex-start; flex-direction:column; }
+      .weekly-login-footer .btn { width:100%; }
+    }
     .gym-cap-card {
       width: min(460px, 100%); max-height: 88vh; overflow-y: auto; padding: 24px;
       color: var(--text); background: radial-gradient(ellipse at top right, rgba(239,68,68,.15), transparent 55%), var(--card);
@@ -1675,6 +1762,31 @@
       background: rgba(0, 0, 0, 0.82);
     }
     #oakIntroOverlay.active { display: flex; }
+    #parcelDeliveryOverlay {
+      display: none; position: fixed; inset: 0; z-index: 170;
+      align-items: center; justify-content: center; padding: 20px;
+      background: rgba(0, 0, 0, 0.84);
+    }
+    #parcelDeliveryOverlay.active { display: flex; }
+    #parcelDeliveryOverlay .oak-intro-card { border-color: rgba(34, 197, 94, 0.35); }
+    #parcelDeliveryOverlay .oak-intro-copy h2 { color: #86efac; }
+    #parcelDeliveryOverlay .oak-intro-text { min-height: 0; }
+    #parcelDeliveryOverlay .oak-intro-actions .btn { width: auto; margin: 0; }
+    #parcelAccessOverlay {
+      display: none; position: fixed; inset: 0; z-index: 180;
+      align-items: center; justify-content: center; padding: 20px;
+      background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(4px);
+    }
+    #parcelAccessOverlay.active { display: flex; }
+    .parcel-access-card {
+      width: min(460px, 100%); padding: 26px; text-align: center;
+      color: var(--text); background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; box-shadow: var(--shadow);
+    }
+    .parcel-access-icon { font-size: 2.4rem; margin-bottom: 8px; }
+    .parcel-access-card h2 { margin: 0 0 10px; font-size: 1.25rem; }
+    .parcel-access-card p { margin: 0 0 20px; color: var(--text-muted); line-height: 1.5; }
+    .parcel-access-card .btn { width: 100%; }
     .oak-intro-card {
       width: min(760px, 100%); display: grid; grid-template-columns: 210px 1fr;
       gap: 24px; align-items: center; padding: 28px;
@@ -1700,6 +1812,8 @@
       .oak-intro-card { grid-template-columns: 1fr; gap: 14px; padding: 20px; }
       .oak-intro-portrait { width: 120px; height: 140px; margin: 0 auto; }
       .oak-intro-text { min-height: 0; }
+      #parcelDeliveryOverlay .oak-intro-actions { flex-direction: column-reverse; }
+      #parcelDeliveryOverlay .oak-intro-actions .btn { width: 100%; }
     }
     #billIntroOverlay {
       display: none; position: fixed; inset: 0; z-index: 160;
@@ -1838,6 +1952,34 @@
     .daily-boss-dashboard { max-width:1120px; margin:18px auto 20px; }
 .ss-anne-dashboard { max-width:1120px; margin:18px auto 20px; }
 .kanto-gyms-dashboard { max-width:1120px; margin:18px auto 20px; }
+    .kanto-exploration-dashboard { max-width:1120px; margin:18px auto 20px; }
+    .kanto-exploration-hero { border-color:rgba(251,191,36,.2); background:radial-gradient(ellipse at 80% 40%,rgba(14,165,233,.22),transparent 38%),linear-gradient(115deg,#123247,#111a22 65%,#132b38); }
+    .kanto-exploration-hero .center-kicker { color:#fcd34d; }
+    .kanto-exploration-hero .center-hero-art { border-color:#fcd34d35; background:radial-gradient(circle,#38bdf81f,transparent 70%); }
+    .kanto-exploration-hero .center-hero-art img { width:145px; height:145px; }
+    @media (max-width:560px) { .kanto-exploration-hero .center-hero-art img { width:78px; height:78px; } }
+    .kanto-elite-dashboard { max-width:1120px; margin:18px auto 20px; }
+    .kanto-elite-hero { border-color:rgba(251,191,36,.2); background:radial-gradient(ellipse at 80% 40%,rgba(14,165,233,.22),transparent 38%),linear-gradient(115deg,#123247,#111a22 65%,#132b38); }
+    .kanto-elite-hero .center-kicker { color:#fcd34d; }
+    .kanto-elite-hero .center-hero-art { border-color:#fcd34d35; background:radial-gradient(circle,#38bdf81f,transparent 70%); }
+    .kanto-elite-hero .center-hero-art img { width:145px; height:145px; }
+    @media (max-width:560px) { .kanto-elite-hero .center-hero-art img { width:78px; height:78px; } }
+    .kanto-feature-dashboard { max-width:1120px; margin:18px auto 20px; }
+    .kanto-feature-hero { border-color:rgba(251,191,36,.2); background:radial-gradient(ellipse at 80% 40%,rgba(14,165,233,.22),transparent 38%),linear-gradient(115deg,#123247,#111a22 65%,#132b38); }
+    .kanto-feature-hero .center-kicker { color:#fcd34d; }
+    .kanto-feature-hero .center-hero-art { border-color:#fcd34d35; background:radial-gradient(circle,#38bdf81f,transparent 70%); }
+    .kanto-feature-hero .center-hero-art img { width:145px; height:145px; }
+    @media (max-width:560px) { .kanto-feature-hero .center-hero-art img { width:78px; height:78px; } }
+    .social-friendship-icon { width:82px; height:82px; object-fit:contain; filter:drop-shadow(0 8px 12px #0008); }
+    @media (max-width:560px) { .social-friendship-icon { width:54px; height:54px; } }
+    .progression-guide-banner .center-hero-art img { image-rendering:auto; }
+    .bag-journey-hero .center-kicker { color:#fcd34d; }
+    .bag-journey-hero .center-hero-art { border-color:#fcd34d35; background:radial-gradient(circle,#f59e0b1c,transparent 70%); }
+    .bag-journey-hero .center-hero-art img { width:132px; height:132px; image-rendering:auto; }
+    .trainer-profile-hero .center-kicker { color:#c4b5fd; }
+    .trainer-profile-hero .center-hero-art { border-color:#a78bfa45; background:radial-gradient(circle,#8b5cf61f,transparent 70%); }
+    .trainer-profile-hero .center-hero-art img { width:112px; height:138px; image-rendering:pixelated; }
+    @media (max-width:560px) { .bag-journey-hero .center-hero-art img { width:72px; height:72px; } .trainer-profile-hero .center-hero-art img { width:62px; height:72px; } }
     .kanto-gyms-hero { border-color:rgba(251,191,36,.2); background:radial-gradient(ellipse at 80% 40%,rgba(245,158,11,.2),transparent 38%),linear-gradient(115deg,#382b17,#17171b 65%,#292316); }
     .kanto-gyms-hero .center-kicker { color:#fcd34d; }
     .kanto-gyms-hero .center-hero-art { border-color:#fcd34d35; background:radial-gradient(circle,#fbbf241f,transparent 70%); }
@@ -2058,30 +2200,34 @@
     .pc-item-actions { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; }
     .pc-item-amount { width: 72px; min-width: 72px; padding: 7px 8px; margin: 0; }
     .pc-item-actions .btn { width: auto; margin: 0; padding: 7px 10px; font-size: .75rem; flex: 1; }
-    .bag-category { margin-bottom: 22px; }
-    .bag-cat-title {
-      font-size: 0.95rem; font-weight: 700; margin-bottom: 10px;
-      color: var(--text); padding-bottom: 6px; border-bottom: 1px solid var(--border);
-    }
-    .bag-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 10px;
-    }
-    .bag-item {
-      position: relative;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 8px;
-      text-align: center;
-      transition: border-color 0.15s, transform 0.15s;
-    }
     .bag-item:hover { border-color: var(--primary); transform: translateY(-2px); }
     .bag-item.empty { opacity: 0.4; }
-    .bag-item .item-icon { width: 40px; height: 40px; }
-    .bag-item-name { font-size: 0.72rem; font-weight: 600; margin-top: 6px; line-height: 1.2; }
-    .bag-item-qty { font-size: 0.75rem; color: var(--primary); font-weight: 700; margin-top: 4px; }
+    .bag-toolbar { display:flex; justify-content:space-between; align-items:stretch; gap:12px; margin:0 0 14px; }
+    .bag-inventory-summary { display:flex; align-items:center; gap:12px; min-width:190px; padding:11px 14px; border:1px solid rgba(168,85,247,.28); border-radius:13px; background:linear-gradient(135deg,rgba(124,58,237,.13),var(--card)); }
+    .bag-summary-icon { width:38px; height:38px; display:grid; place-items:center; flex:0 0 38px; border-radius:11px; background:rgba(124,58,237,.18); font-size:1.2rem; }
+    .bag-inventory-summary strong { color:var(--text); font-size:1rem; }
+    .bag-inventory-summary span { color:var(--text-muted); font-size:.78rem; }
+    .bag-inventory-summary small { display:block; margin-top:2px; color:var(--text-muted); font-size:.68rem; }
+    .bag-inventory-summary small b { color:#c4b5fd; }
+    .bag-search { display:flex; align-items:center; gap:9px; flex:1; max-width:360px; min-width:180px; padding:0 12px; border:1px solid var(--border); border-radius:12px; background:var(--input-bg); color:var(--text-muted); }
+    .bag-search input { width:100%; min-width:0; padding:11px 0; margin:0; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.85rem; box-shadow:none; }
+    .bag-search input:focus { box-shadow:none; }
+    .bag-category-filters { display:flex; gap:8px; overflow-x:auto; padding:2px 1px 10px; margin-bottom:10px; scrollbar-width:thin; }
+    .bag-filter-button { display:inline-flex; align-items:center; gap:7px; flex:0 0 auto; padding:8px 11px; border:1px solid var(--border); border-radius:999px; background:var(--card); color:var(--text-muted); font:inherit; font-size:.75rem; font-weight:600; cursor:pointer; transition:all .16s ease; }
+    .bag-filter-button:hover { border-color:rgba(168,85,247,.55); color:var(--text); }
+    .bag-filter-button.active { border-color:#8b5cf6; background:rgba(124,58,237,.2); color:#ddd6fe; box-shadow:0 0 0 1px rgba(124,58,237,.12); }
+    .bag-filter-count { min-width:19px; padding:2px 5px; border-radius:999px; background:rgba(255,255,255,.08); color:inherit; text-align:center; font-size:.64rem; }
+    .bag-category { margin-bottom: 22px; }
+    .bag-cat-title { display:flex; align-items:center; gap:9px; font-size:.9rem; font-weight:750; margin-bottom:11px; color:var(--text); }
+    .bag-cat-count { padding:3px 7px; border-radius:999px; background:rgba(255,255,255,.06); color:var(--text-muted); font-size:.65rem; font-weight:700; }
+    .bag-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(128px,1fr)); gap:11px; }
+    .bag-item { position:relative; min-height:146px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:13px 10px 11px; border:1px solid rgba(255,255,255,.09); border-radius:12px; background:linear-gradient(155deg,var(--card),rgba(18,16,25,.92)); text-align:center; transition:border-color .15s,transform .15s; }
+    .bag-item .item-icon { width:52px; height:52px; object-fit:contain; image-rendering:pixelated; }
+    .bag-item-name { max-width:100%; font-size:.76rem; font-weight:650; margin-top:6px; line-height:1.25; }
+    .bag-item-qty { margin-top:5px; padding:3px 8px; border-radius:999px; background:rgba(124,58,237,.14); color:#c4b5fd; font-size:.7rem; font-weight:750; }
+    .bag-use-button { width:100% !important; margin:9px 0 0 !important; padding:7px 8px !important; font-size:.72rem !important; }
+    .bag-empty-state { padding:22px 16px; border:1px dashed var(--border); border-radius:13px; color:var(--text-muted); text-align:center; font-size:.86rem; }
+    @media(max-width:560px) { .bag-toolbar { align-items:stretch; flex-direction:column; } .bag-inventory-summary { min-width:0; } .bag-search { max-width:none; min-width:0; } .bag-search input { font-size:16px; } .bag-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; } .bag-item { min-height:140px; padding:11px 8px; } .bag-item .item-icon { width:48px; height:48px; } .bag-filter-button { padding:7px 10px; } }
     .item-catalog-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
     .item-catalog-controls input, .item-catalog-controls select {
       flex: 1 1 220px; min-width: 0; padding: 11px 12px; color: var(--text);
@@ -2169,8 +2315,14 @@
     /* Mobile layout refinements */
     @media (max-width: 600px) {
       html, body { width: 100%; overflow-x: clip; }
-      #dashboard.active, .main { width: 100%; min-width: 0; }
+      #authFlow { min-height:100vh; min-height:100dvh; padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom)); }
+      #dashboard.active, .main { width: 100%; min-width: 0; min-height:100vh; min-height:100dvh; }
+      .content, .panel, .container, .card { min-width:0; }
       .content { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+      #authFlow input, #authFlow select, #authFlow textarea,
+      #dashboard input, #dashboard select, #dashboard textarea, dialog input, dialog select, dialog textarea { font-size:16px; }
+      .panel-title, .panel-desc, .game-card-title, .game-card-desc, .daily-mission-card p,
+      .admin-promote-note, .center-treatment-note { overflow-wrap:anywhere; }
       .topbar {
         padding-top: max(8px, env(safe-area-inset-top));
         padding-left: max(10px, env(safe-area-inset-left));
@@ -2178,6 +2330,8 @@
         backdrop-filter: none;
       }
       .message-notification-menu { position: fixed; top: calc(max(8px, env(safe-area-inset-top)) + 52px); right: max(10px, env(safe-area-inset-right)); left: auto; width: min(350px, calc(100vw - 20px)); max-width: calc(100vw - 20px); }
+      .toast { top:max(16px,env(safe-area-inset-top)); }
+      .welcome-popup-overlay { padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom)); }
       .topbar-brand { min-width: 0; }
       .topbar-brand-name { overflow: hidden; text-overflow: ellipsis; }
       .topbar-profile .player-name { overflow: hidden; text-overflow: ellipsis; }
@@ -2203,6 +2357,14 @@
       .pvp-arena { min-height: calc(100dvh - 150px); }
       .pvp-side-card, .pvp-lobby-box, .pvp-room-box { min-width: 0; }
       .pvp-code { font-size: clamp(1.1rem, 6vw, 1.5rem); overflow-wrap: anywhere; }
+      #shopQuantityDialog, #nicknameDialog, #moveLearnDialog, #pokeCoinsStoreDialog, .trainer-avatar-dialog, .social-trade-dialog {
+        max-height:calc(100dvh - max(24px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+        overscroll-behavior:contain;
+      }
+      #shopQuantityDialog, #nicknameDialog { overflow-y:auto; }
+      #pokeCoinsStoreDialog { max-height:calc(100dvh - 24px); }
+      .social-trade-dialog, .social-trade-dialog-inner { max-height:calc(100dvh - 24px); }
+      .trainer-avatar-dialog { max-height:calc(100dvh - 24px); }
     }
     @media (max-width: 380px) {
       .cards-grid { grid-template-columns: minmax(0, 1fr); }
@@ -2242,6 +2404,21 @@
       #panel-dungeons #dungeonsGrid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
       #panel-dungeons #dungeonsGrid .game-card-header { height: clamp(140px, 38vw, 170px) !important; }
     }
+    @media (max-width: 900px) and (max-height: 520px) and (orientation: landscape) {
+      #battleOverlay { justify-content:flex-start; overflow-y:auto; }
+      #battleOverlay .battle-field { flex:0 0 auto; min-height:220px; padding:10px 12px 4px; }
+      #battleOverlay .enemy-sprite { width:clamp(72px,18vh,96px); height:clamp(72px,18vh,96px); }
+      #battleOverlay .player-sprite { width:clamp(76px,19vh,104px); height:clamp(76px,19vh,104px); }
+      #battleOverlay .battle-enemy .enemy-info, #battleOverlay .battle-player .player-info { min-width:0; padding:6px 8px; }
+      #battleOverlay .battle-ui { flex:0 0 auto; padding:8px 10px calc(10px + env(safe-area-inset-bottom)); border-radius:14px 14px 0 0; }
+      #battleOverlay .battle-log { min-height:38px; margin-bottom:7px; padding:7px 9px; font-size:.78rem; }
+      #battleOverlay .battle-btn, #battleOverlay .move-btn { min-height:40px; padding:8px; }
+      .coop-boss-arena { min-height:560px; }
+      .coop-boss-arena .battle-field { min-height:340px; padding:58px 12px 6px; }
+      .coop-boss-arena .battle-ui { flex:0 0 auto; }
+      .pvp-arena { min-height:460px; }
+      .pvp-arena .battle-field { min-height:280px; padding:42px 10px 5px; }
+    }
 
   </style>
 </head>
@@ -2252,7 +2429,7 @@
     <div class="container">
       <div class="card">
         <div id="authScreen" class="screen active">
-          <div class="logo"><div class="logo-icon"><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pokébola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></div><h1>Poké Trainer</h1><p>Entre ou crie sua conta de treinador</p><p id="authStatus" role="status" style="margin-top:10px;">Conectando ao serviço online...</p></div>
+          <div class="logo"><div class="logo-icon"><img class="trainer-logo-image" src="assets/pokemon-trainer-logo.png" alt="Poké Trainer" /></div><h1>Poké Trainer</h1><p>Entre ou crie sua conta de treinador</p><p id="authStatus" role="status" style="margin-top:10px;">Conectando ao serviço online...</p></div>
           <div class="tabs">
             <button type="button" class="tab active" data-tab="login">Entrar</button>
             <button type="button" class="tab" data-tab="register">Registrar</button>
@@ -2324,7 +2501,7 @@
         </div>
 
         <div id="characterScreen" class="screen">
-          <div class="logo"><div class="logo-icon">🎮</div><h1>Crie seu Treinador</h1><p>Nome, sexo, região e seu Pokémon inicial</p></div>
+          <div class="logo"><div class="logo-icon"><img class="trainer-logo-image" src="assets/pokemon-trainer-logo.png" alt="Poké Trainer" /></div><h1>Crie seu Treinador</h1><p>Nome, sexo, região e seu Pokémon inicial</p></div>
           <form id="characterForm" novalidate>
             <div class="form-group"><label for="charName">Nome do personagem</label>
               <div class="input-wrapper"><input type="text" id="charName" placeholder="Ex: Ash, Misty, Red..." required maxlength="16" /></div>
@@ -2367,7 +2544,7 @@
       <header class="topbar">
         <div class="topbar-left">
           <div class="topbar-brand" aria-label="Pok&#233; Trainer">
-            <span class="topbar-brand-mark"><svg class="pokeball-mark" viewBox="0 0 64 64" role="img" aria-label="Pok&#233;bola"><circle cx="32" cy="32" r="29" fill="#f8fafc" stroke="#09090b" stroke-width="4"/><path d="M3 32a29 29 0 0 1 58 0Z" fill="#f5222d"/><path d="M3 32h58" fill="none" stroke="#09090b" stroke-width="6"/><circle cx="32" cy="32" r="10" fill="#f8fafc" stroke="#09090b" stroke-width="5"/><circle cx="32" cy="32" r="4" fill="#17121e"/></svg></span>
+            <span class="topbar-brand-mark"><img class="trainer-logo-image" src="assets/pokemon-trainer-logo.png" alt="Poké Trainer" /></span>
             <span class="topbar-brand-name">Pok&#233; Trainer</span>
           </div>
           <div class="location-badge">📍 Região atual: Kanto</div>
@@ -2532,14 +2709,17 @@
         </div>
         <div class="panel" id="panel-dungeons">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <h2 class="panel-title">Explora&ccedil;&atilde;o de Kanto</h2>
-          <p class="panel-desc">Clique em uma regi&atilde;o para enfrentar Pok&eacute;mon selvagens em batalha!</p>
+          <div class="center-dashboard kanto-exploration-dashboard">
+            <section class="center-hero kanto-exploration-hero">
+              <div class="center-hero-copy"><span class="center-kicker">Aventura em Kanto</span><h3>Explore a regi&atilde;o e descubra novos caminhos.</h3><p>Escolha uma rota para encontrar Pok&eacute;mon selvagens, desafiar treinadores e fortalecer sua equipe.</p></div>
+              <div class="center-hero-art"><img src="assets/exploration-magnifier.png" alt="Explora&ccedil;&atilde;o das rotas de Kanto" loading="lazy" /></div>
+            </section>
+          </div>
           <div class="cards-grid" id="dungeonsGrid"></div>
         </div>
         <div class="panel" id="panel-missions">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <h2 class="panel-title">📜 Missões de Kanto</h2>
-          <p class="panel-desc">Complete missões para ganhar experiência, dinheiro e itens.</p>
+          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero"><div class="center-hero-copy"><span class="center-kicker">Tarefas da jornada</span><h3>Complete miss&otilde;es e receba recompensas.</h3><p>Avance pela hist&oacute;ria de Kanto, cumpra desafios di&aacute;rios e acompanhe seu progresso.</p></div><div class="center-hero-art"><img src="assets/missions-tablet.png" alt="Miss&otilde;es do treinador" loading="lazy" /></div></section></div>
           <section class="daily-mission-section" aria-labelledby="dailyMissionHeading">
             <div class="daily-mission-heading"><h3 id="dailyMissionHeading">Missões diárias</h3><span class="daily-mission-timer" id="dailyMissionCountdown">Renovam à meia-noite</span></div>
             <div class="daily-mission-list" id="dailyMissionsList"></div>
@@ -2553,8 +2733,7 @@
 
         <div class="panel" id="panel-guide">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
-          <h2 class="panel-title">&#128214; Guia de Progress&atilde;o</h2>
-          <p class="panel-desc">Consulte os requisitos da jornada e veja o que pode fazer em seguida.</p>
+          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero progression-guide-banner"><div class="center-hero-copy"><span class="center-kicker">Sua jornada em Kanto</span><h3>Acompanhe sua progress&atilde;o passo a passo.</h3><p>Confira requisitos, veja o que j&aacute; concluiu e descubra qual desafio est&aacute; pronto para encarar.</p></div><div class="center-hero-art"><img src="assets/rocket-great.png" alt="Ilustra&ccedil;&atilde;o do Guia de Progress&atilde;o" loading="lazy" /></div></section></div>
           <div class="progression-guide">
             <section class="progression-guide-hero" aria-labelledby="progressionGuideNextTitle">
               <div><span class="progression-guide-kicker">Seu pr&oacute;ximo passo</span><h3 id="progressionGuideNextTitle">Carregando sua jornada...</h3><p id="progressionGuideNextText"></p></div>
@@ -2587,13 +2766,10 @@
 
         <div class="panel" id="panel-pvp">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <h2 class="panel-title">⚔️ PvP Online</h2>
           <div id="pvpContent"></div>
         </div>
         <div class="panel" id="panel-coop-boss">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
-          <h2 class="panel-title">&#x1F30C; Big Boss: Mewtwo</h2>
-          <p class="panel-desc">Re&uacute;na at&eacute; 5 treinadores. O HP de Mewtwo &eacute; compartilhado e cada equipe age uma vez por rodada. O dano e os desmaios da sua equipe ficam salvos.</p>
           <div id="coopBossContent"></div>
         </div>
 
@@ -2609,8 +2785,12 @@
         </div>
         <div class="panel" id="panel-elite-four">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
-          <h2 class="panel-title">&#x1F451; Elite Four de Kanto</h2>
-          <p class="panel-desc">Derrote os quatro membros da Elite Four e o Campe&atilde;o. Conquiste todas as 8 Ins&iacute;gnias de Kanto para entrar.</p>
+          <div class="center-dashboard kanto-elite-dashboard">
+            <section class="center-hero kanto-elite-hero">
+              <div class="center-hero-copy"><span class="center-kicker">Desafio da Liga Pok&eacute;mon</span><h3>Supere a Elite Four e conquiste o t&iacute;tulo de Campe&atilde;o.</h3><p>Enfrente os cinco grandes treinadores em sequ&ecirc;ncia. Re&uacute;na as oito Ins&iacute;gnias de Kanto para liberar o desafio.</p></div>
+              <div class="center-hero-art"><img src="assets/elite-four-card.png" alt="Elite Four de Kanto" loading="lazy" /></div>
+            </section>
+          </div>
           <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Desafiantes derrotados: <strong id="eliteFourProgress">0/5</strong> &middot; Ins&iacute;gnias: <strong id="eliteFourBadges">0/8</strong></div>
           <div class="cards-grid" id="eliteFourGrid"></div>
         </div>
@@ -2627,22 +2807,19 @@
         </div>
         <div class="panel" id="panel-silph-co">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
-          <h2 class="panel-title">&#127970; Silph C.O</h2>
-          <p class="panel-desc">Derrote os membros da Equipe Rocket em ordem para avan&ccedil;ar pelos andares e enfrentar Giovanni.</p>
+          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero"><div class="center-hero-copy"><span class="center-kicker">Invas&atilde;o da Equipe Rocket</span><h3>Retome o controle da Silph Co.</h3><p>Avance pelos andares, derrote os integrantes da Equipe Rocket em ordem e enfrente Giovanni.</p></div><div class="center-hero-art"><img src="assets/silph-co-building.png" alt="Pr&eacute;dio da Silph Co." loading="lazy" /></div></section></div>
           <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Treinadores derrotados: <strong id="silphCoProgress">0/20</strong></div>
           <div class="cards-grid" id="silphCoGrid"></div>
         </div>
         <div class="panel" id="panel-battle-tower">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <h2 class="panel-title">🏰 Torre de Batalha</h2>
-          <p class="panel-desc">Enfrente treinadores em batalhas com equipes completas. Cada treinador concede BP uma vez; você pode voltar para tentar novamente.</p>
+          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero"><div class="center-hero-copy"><span class="center-kicker">Desafio competitivo</span><h3>Teste sua equipe na Torre de Batalha.</h3><p>Enfrente treinadores com equipes completas. Cada vit&oacute;ria in&eacute;dita concede BP; voc&ecirc; pode voltar para novas batalhas.</p></div><div class="center-hero-art"><img src="assets/battle-tower-castle.png" alt="Torre de Batalha" loading="lazy" /></div></section></div>
           <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Recompensas coletadas: <strong id="towerProgress">0/20</strong> · BP: <strong id="towerBattlePoints">0</strong></div>
           <div class="cards-grid" id="battleTowerGrid"></div>
         </div>
         <div class="panel" id="panel-dojo">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
-          <h2 class="panel-title">&#129354; Dojo Marcial</h2>
-          <p class="panel-desc">Enfrente os lutadores do dojo em ordem. Cada treinador libera o pr&oacute;ximo desafio quando for derrotado.</p>
+          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero"><div class="center-hero-copy"><span class="center-kicker">Treinamento de luta</span><h3>Prove sua for&ccedil;a no Dojo Marcial.</h3><p>Enfrente os lutadores em ordem. Cada vit&oacute;ria libera o pr&oacute;ximo desafio.</p></div><div class="center-hero-art"><img src="assets/martial-dojo.png" alt="Dojo Marcial" loading="lazy" /></div></section></div>
           <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Lutadores derrotados: <strong id="dojoProgress">0/5</strong></div>
           <div class="cards-grid" id="dojoGrid"></div>
         </div>
@@ -2665,8 +2842,6 @@
         
         <div class="panel" id="panel-center">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
-          <h2 class="panel-title">&#127973; Centro Pok&eacute;mon</h2>
-          <p class="panel-desc">Recupere a sua equipe antes de voltar para a aventura.</p>
           <div class="center-dashboard">
             <section class="center-hero">
               <div class="center-hero-copy"><span class="center-kicker">Centro de recupera&ccedil;&atilde;o</span><h3>Um descanso e a equipe fica pronta de novo.</h3><p>Selecione os Pok&eacute;mon que precisam de cuidado. A cura restaura HP e PP e remove condi&ccedil;&otilde;es de status.</p></div>
@@ -2699,8 +2874,6 @@
         </div>
         <div class="panel" id="panel-market">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <h2 class="panel-title">&#127970; Pok&eacute; Market</h2>
-          <p class="panel-desc">Encontre os suprimentos certos para continuar sua jornada.</p>
           <div class="center-dashboard market-dashboard">
             <section class="center-hero market-hero">
               <div class="center-hero-copy"><span class="center-kicker">Suprimentos para sua jornada</span><h3>Tudo o que sua equipe precisa para seguir viagem.</h3><p>Compre itens de aventura e equipamentos para seus Pok&eacute;mon. Voc&ecirc; tamb&eacute;m pode vender o que n&atilde;o precisa mais.</p></div>
@@ -2741,8 +2914,12 @@
 
         <div class="panel" id="panel-bag">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
-          <h2 class="panel-title">🎒 Mochila</h2>
-          <p class="panel-desc">Todos os seus itens: Pokébolas, medicinas, pedras de evolução, berries e mais.</p>
+          <div class="center-dashboard bag-dashboard"><section class="center-hero kanto-feature-hero bag-journey-hero"><div class="center-hero-copy"><span class="center-kicker">Suprimentos da jornada</span><h3>Tudo pronto para sua pr&oacute;xima aventura.</h3><p>Consulte seus itens, use recursos e mantenha sua mochila organizada.</p></div><div class="center-hero-art"><img src="assets/trainer-backpack.png" alt="Mochila de treinador" loading="lazy" /></div></section></div>
+          <div class="bag-toolbar">
+            <div class="bag-inventory-summary"><span class="bag-summary-icon">&#127890;</span><div><strong id="bagOwnedTypes">0</strong><span> tipos de item</span><small><b id="bagTotalQuantity">0</b> unidades na mochila</small></div></div>
+            <label class="bag-search"><span aria-hidden="true">&#128269;</span><input id="bagSearchInput" type="search" placeholder="Buscar item..." autocomplete="off" oninput="renderBag()" /></label>
+          </div>
+          <div id="bagCategoryFilters" class="bag-category-filters" aria-label="Filtrar itens por categoria"></div>
           <p id="experienceBoostStatus" style="display:none;color:#4ade80;font-weight:700;margin:0 0 14px;"></p>
           <div id="bagCategories"></div>
           <div id="bagUseTarget" style="margin-top:16px;"></div>
@@ -2797,10 +2974,8 @@
 
         <div class="panel" id="panel-social">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
-          <h2 class="panel-title">Central de Amizade</h2>
-          <p class="panel-desc">Encontre treinadores, converse, troque Pok&eacute;mon e marque batalhas.</p>
+          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero"><div class="center-hero-copy"><span class="center-kicker">Conex&otilde;es de treinador</span><h3 id="socialHubTitle">Central de Amizade</h3><p>Encontre treinadores, converse, troque Pok&eacute;mon e marque batalhas.</p></div><div class="center-hero-art"><img class="social-friendship-icon" src="assets/friends-group.svg" alt="Ícone de amizade" loading="lazy" /></div></section></div>
           <section class="social-hub" aria-labelledby="socialHubTitle">
-            <header class="social-hero"><div><h3 id="socialHubTitle">Central de amizade</h3><p>Encontre treinadores, converse, troque Pokémon e marque batalhas.</p></div><span class="social-hero-icon" aria-hidden="true">&#128101;</span></header>
             <div class="social-content">
               <div class="social-subpanel">
                 <h4>Encontrar treinadores <span aria-hidden="true">&#128269;</span></h4>
@@ -2827,8 +3002,7 @@
         </div>
         <div class="panel" id="panel-profile">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <h2 class="panel-title">👤 Perfil do Treinador</h2>
-          <p class="panel-desc">Informações do seu personagem e acesso à equipe, mochila e registros.</p>
+          <div class="center-dashboard profile-dashboard"><section class="center-hero kanto-feature-hero trainer-profile-hero"><div class="center-hero-copy"><span class="center-kicker">Cart&atilde;o de treinador</span><h3>Acompanhe sua jornada e suas conquistas.</h3><p>Confira seu perfil, suas ins&iacute;gnias, equipe e progresso na Pok&eacute;dex.</p></div><div class="center-hero-art"><img id="profileHeroTrainer" src="assets/professor-oak.png" alt="Seu treinador" loading="lazy" /></div></section></div>
           <section id="trainerCard" class="trainer-card" aria-label="Cartão de Treinador"></section>
           <div class="profile-overview-grid">
           <div id="profileBox"></div>
@@ -2897,6 +3071,29 @@
           <button type="button" class="btn" id="oakIntroNextButton" onclick="advanceOakIntro()">Próximo</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div id="parcelDeliveryOverlay" role="dialog" aria-modal="true" aria-labelledby="parcelDeliveryTitle" aria-describedby="parcelDeliveryText">
+    <div class="oak-intro-card">
+      <img class="oak-intro-portrait" src="assets/professor-oak.png" alt="Professor Carvalho" />
+      <div class="oak-intro-copy">
+        <h2 id="parcelDeliveryTitle">Muito obrigado!</h2>
+        <div class="oak-intro-text" id="parcelDeliveryText">Obrigado por trazer minha encomenda, treinador! Como agradecimento, estou liberando sua Pok&#xE9;dex. Agora voc&#xEA; tamb&#xE9;m pode explorar as regi&#xF5;es de Kanto e conhecer novos Pok&#xE9;mon.</div>
+        <div class="oak-intro-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeParcelDeliveryThanks()">Continuar</button>
+          <button type="button" class="btn" onclick="closeParcelDeliveryThanks(true)">Abrir Pok&#xE9;dex</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="parcelAccessOverlay" role="dialog" aria-modal="true" aria-labelledby="parcelAccessTitle" aria-describedby="parcelAccessText">
+    <div class="parcel-access-card">
+      <div class="parcel-access-icon" aria-hidden="true">&#128275;</div>
+      <h2 id="parcelAccessTitle">Acesso bloqueado</h2>
+      <p id="parcelAccessText">Entregue a Caixa da Parcel ao Professor Carvalho para liberar a Pok&#xE9;dex e a Explora&#xE7;&#xE3;o de Kanto.</p>
+      <button type="button" class="btn" onclick="closeParcelAccessPopup()">Entendi</button>
     </div>
   </div>
 
@@ -3198,8 +3395,33 @@
     </div>
   </dialog>
   <div class="toast" id="toast"></div>
+  <div class="welcome-popup-overlay" id="welcomePopupOverlay" onclick="if(event.target===this)closeWelcomePopup()">
+    <section class="welcome-popup-card" role="dialog" aria-modal="true" aria-labelledby="welcomePopupTitle" aria-describedby="welcomePopupMessage">
+      <div class="welcome-popup-icon" aria-hidden="true">✓</div>
+      <h2 id="welcomePopupTitle">Progresso carregado!</h2>
+      <p id="welcomePopupMessage"></p>
+      <button type="button" class="btn" onclick="closeWelcomePopup()">Continuar</button>
+    </section>
+  </div>
 
   <script>
+
+    // Bloqueia zoom por toque duplo em navegadores móveis que ignoram touch-action.
+    let lastTouchTap = null;
+    document.addEventListener('touchend', event => {
+      if (event.touches.length || event.changedTouches.length !== 1) return;
+      const target = event.target;
+      if (target.closest?.('input, textarea, select, [contenteditable="true"]')) {
+        lastTouchTap = null;
+        return;
+      }
+      const touch = event.changedTouches[0];
+      const now = Date.now();
+      const isDoubleTap = lastTouchTap && now - lastTouchTap.time < 350
+        && Math.hypot(touch.clientX - lastTouchTap.x, touch.clientY - lastTouchTap.y) < 32;
+      lastTouchTap = { time: now, x: touch.clientX, y: touch.clientY };
+      if (isDoubleTap && event.cancelable) event.preventDefault();
+    }, { capture: true, passive: false });
 
     // ===== TIPOS E EFETIVIDADE =====
     const TYPE_CHART = {
@@ -4721,25 +4943,55 @@
       setTimeout(() => el.remove(), 900);
     }
 
-    function showCaptureBall(shakeCount, onDone) {
+    function showCaptureBall(shakeCount, onDone, ballKey = 'balls') {
       const container = document.querySelector('.battle-enemy');
       if (!container) { onDone && onDone(); return; }
       const ball = document.createElement('div');
       ball.className = 'capture-ball';
-      ball.style.left = '55%';
-      ball.style.top = '40%';
+      const ballColors = {
+        balls: ['#ef4444', '#f8fafc', 'rgba(239,68,68,.48)'],
+        greatball: ['#2563eb', '#f8fafc', 'rgba(59,130,246,.52)'],
+        ultraball: ['#facc15', '#20212a', 'rgba(250,204,21,.55)'],
+        safari_ball: ['#5b8c38', '#e6cf89', 'rgba(132,204,22,.5)'],
+        premier_ball: ['#f8fafc', '#f8fafc', 'rgba(248,250,252,.65)'],
+        nest_ball: ['#65a30d', '#facc15', 'rgba(132,204,22,.55)'],
+        net_ball: ['#0891b2', '#f8fafc', 'rgba(34,211,238,.55)'],
+        fast_ball: ['#ef4444', '#f8fafc', 'rgba(248,113,113,.55)'],
+        dive_ball: ['#38bdf8', '#1d4ed8', 'rgba(56,189,248,.6)'],
+        dusk_ball: ['#312e81', '#1e1b4b', 'rgba(139,92,246,.6)'],
+        moon_ball: ['#1e293b', '#e2e8f0', 'rgba(129,140,248,.58)'],
+        masterball: ['#a855f7', '#f472b6', 'rgba(192,132,252,.68)']
+      };
+      const colors = ballColors[ballKey] || ballColors.balls;
+      ball.style.setProperty('--ball-top', colors[0]);
+      ball.style.setProperty('--ball-bottom', colors[1]);
+      ball.style.setProperty('--ball-glow', colors[2]);
+      const enemySprite = document.getElementById('enemySprite');
+      const containerRect = container.getBoundingClientRect();
+      const spriteRect = enemySprite?.getBoundingClientRect();
+      if (spriteRect?.width && spriteRect?.height) {
+        ball.style.left = `${spriteRect.left - containerRect.left + spriteRect.width / 2 - 23}px`;
+        ball.style.top = `${spriteRect.top - containerRect.top + spriteRect.height / 2 - 23}px`;
+      } else {
+        ball.style.left = '55%';
+        ball.style.top = '40%';
+      }
       container.appendChild(ball);
 
-      setTimeout(() => {
-        SFX.captureShake();
-        const repetitions = Math.max(1, Math.floor(Number(shakeCount) || 1));
-        ball.style.animation = `ballShake 0.4s ease ${repetitions}`;
-        ball.addEventListener('animationend', event => {
-          if (event.animationName !== 'ballShake') return;
-          ball.style.animation = '';
-          onDone && onDone(ball);
-        });
-      }, 550);
+      ball.addEventListener('animationend', function onThrowEnd(event) {
+        if (event.animationName !== 'ballThrow') return;
+        ball.removeEventListener('animationend', onThrowEnd);
+        setTimeout(() => {
+          SFX.captureShake();
+          const repetitions = Math.max(1, Math.floor(Number(shakeCount) || 1));
+          ball.style.animation = `ballShake 0.42s cubic-bezier(.36,.07,.19,.97) ${repetitions}`;
+          ball.addEventListener('animationend', event => {
+            if (event.animationName !== 'ballShake') return;
+            ball.style.animation = '';
+            onDone && onDone(ball);
+          });
+        }, 140);
+      });
     }
 
 
@@ -5658,6 +5910,25 @@
       return 'available';
     }
 
+    function isParcelDelivered() {
+      return Boolean(player && (player.parcelDelivered === true ||
+        (player.parcelRewardClaimed === true && player.missions?.completed?.includes('parcel'))));
+    }
+
+    function parcelAccessMessage() {
+      return 'Entregue a Caixa da Parcel ao Professor Carvalho para liberar a Pok\u00e9dex e a Explora\u00e7\u00e3o de Kanto.';
+    }
+
+    function showParcelAccessPopup() {
+      const text = document.getElementById('parcelAccessText');
+      if (text) text.textContent = parcelAccessMessage();
+      document.getElementById('parcelAccessOverlay')?.classList.add('active');
+    }
+
+    function closeParcelAccessPopup() {
+      document.getElementById('parcelAccessOverlay')?.classList.remove('active');
+    }
+
     function getMissionProgress(m) {
       if (!player || !player.missions) return 0;
       if (m.type === 'gym') {
@@ -5939,7 +6210,7 @@
       if (id === 'oak_talk' && !player.oakIntroFinished) return false;
       if (id === 'help_bill' &&
           (player.billIntroStep !== 8 || !player.billTicketRewardClaimed || getItemQty('ss_ticket') < 1)) return false;
-      if (id === 'parcel' && (player.missions.progress.parcel < 1 || getItemQty('parcelbox') < 1)) return false;
+      if (id === 'parcel' && (!player.parcelDelivered || getItemQty('parcelbox') > 0 || player.missions.progress.parcel < 1)) return false;
       if (id === 'dojo_chuck_reward' && !player.dojoRewardClaimed) return false;
       // Must be unlocked
       if (m.unlock && !player.missions.completed.includes(m.unlock)) return false;
@@ -5970,6 +6241,35 @@
       renderMissions();
       if (typeof refreshProfileUI === 'function') refreshProfileUI();
       return true;
+    }
+
+    function deliverParcel() {
+      if (!player || getMissionState('parcel') !== 'active' || getItemQty('parcelbox') < 1) {
+        showToast('Pegue a Caixa da Parcel no Pok\u00e9 Market antes de entreg\u00e1-la.', 'error');
+        return false;
+      }
+      const previousDeliveryState = player.parcelDelivered === true;
+      setItemQty('parcelbox', 0);
+      player.parcelDelivered = true;
+      player.missions.progress.parcel = 1;
+      if (!tryCompleteMission('parcel')) {
+        player.parcelDelivered = previousDeliveryState;
+        setItemQty('parcelbox', 1);
+        renderBag();
+        showToast('N\u00e3o foi poss\u00edvel concluir a entrega. Tente novamente.', 'error');
+        return false;
+      }
+      refreshMarketUI();
+      renderBag();
+      updateStatsUI();
+      saveGame();
+      document.getElementById('parcelDeliveryOverlay')?.classList.add('active');
+      return true;
+    }
+
+    function closeParcelDeliveryThanks(openPokedex = false) {
+      document.getElementById('parcelDeliveryOverlay')?.classList.remove('active');
+      if (openPokedex) switchPanel('pokedex');
     }
 
     function onMissionEvent(type, detail) {
@@ -6156,7 +6456,7 @@
               ${st === 'available' ? `<button type="button" class="mission-accept-button" onclick="acceptMission('${m.id}')">Aceitar</button>` : ''}
               ${st === 'active' && m.id === 'dojo_chuck_reward' ? `<button type="button" class="mission-accept-button" onclick="openDojoRewardChoice()">Escolher Pok?mon</button>` : ''}
               ${st === 'active' && m.id === 'gym_brock' ? `<button type="button" class="mission-accept-button" onclick="openBrockIntro()">Falar com Brock</button>` : ''}
-              ${st === 'active' && m.type === 'talk' ? `<button type="button" class="mission-accept-button" onclick="${m.id === 'oak_talk' ? 'openOakIntro()' : m.id === 'help_bill' ? 'openBillIntro()' : m.id === 'parcel' ? "switchPanel('market')" : `tryCompleteMission('${m.id}')`}">${m.id === 'oak_talk' || m.id === 'help_bill' ? 'Continuar conversa' : m.id === 'parcel' ? 'Ir ao Market' : 'Concluir'}</button>` : ''}
+              ${st === 'active' && m.type === 'talk' ? `<button type="button" class="mission-accept-button" onclick="${m.id === 'oak_talk' ? 'openOakIntro()' : m.id === 'help_bill' ? 'openBillIntro()' : m.id === 'parcel' ? (getItemQty('parcelbox') > 0 ? 'deliverParcel()' : "switchPanel('market')") : `tryCompleteMission('${m.id}')`}">${m.id === 'oak_talk' || m.id === 'help_bill' ? 'Continuar conversa' : m.id === 'parcel' ? (getItemQty('parcelbox') > 0 ? 'Entregar' : 'Ir ao Market') : 'Concluir'}</button>` : ''}
             </div>
           </div>`;
       }).join('');
@@ -6233,6 +6533,15 @@
       const t = document.getElementById('toast');
       t.textContent = msg; t.className = `toast ${type} show`;
       clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    function showWelcomePopup(trainerName) {
+      const overlay = document.getElementById('welcomePopupOverlay');
+      document.getElementById('welcomePopupMessage').textContent = `Bem-vindo de volta, ${trainerName}!`;
+      overlay.classList.add('active');
+      overlay.querySelector('button')?.focus();
+    }
+    function closeWelcomePopup() {
+      document.getElementById('welcomePopupOverlay')?.classList.remove('active');
     }
     function showProgressionNotice(message) {
       const overlay = document.getElementById('progressionNoticeOverlay');
@@ -6882,6 +7191,8 @@
       naturebox: 'https://pokestop.io/img/item/apricorn-box-160x160.webp',
       shiny_charm: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/shiny-charm.png',
       bottlecap: 'assets/bottle-cap.png',
+      goldbottlecap: 'assets/gold-bottle-cap.png',
+      evcap: 'assets/ev-cap.png',
       vip: 'assets/vip-emblem.png'
     };
     const ITEM_SPRITE_FB = {
@@ -6951,12 +7262,14 @@
       naturebox: 'assets/mint-box.svg',
       shiny_charm: 'https://img.pokemondb.net/sprites/items/shiny-charm.png',
       bottlecap: 'assets/bottle-cap.png',
+      goldbottlecap: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/gold-bottle-cap.png',
+      evcap: 'assets/ev-cap.png',
       vip: 'assets/vip-emblem.png'
     };
     function itemIcon(key, cls, fallbackIcon = '🎒') {
       const src = ITEM_SPRITE[key] || ITEM_SPRITE.balls;
       const fb = ITEM_SPRITE_FB[key] || ITEM_SPRITE_FB.balls;
-      const iconClass = [cls || 'item-icon', key === 'bottlecap' ? 'bottle-cap-sprite' : ''].filter(Boolean).join(' ');
+      const iconClass = [cls || 'item-icon', ['bottlecap', 'goldbottlecap', 'evcap'].includes(key) ? 'bottle-cap-sprite' : ''].filter(Boolean).join(' ');
       return `<img class="${iconClass}" src="${src}" alt="" data-fallback-src="${fb}" data-fallback-icon="${escapeHTML(fallbackIcon)}" onerror="handleItemIconError(this)" />`;
     }
     function handleItemIconError(image) {
@@ -7069,7 +7382,9 @@
           { key: 'rarecandy', name: 'Doce Raro', sprite: 'rarecandy', desc: 'Sobe 1 nível' },
           { key: 'naturebox', name: 'Caixa de Nature', sprite: 'naturebox', desc: 'Escolha uma natureza para alterar os efeitos de um Pokémon.' },
           { key: 'shiny_charm', name: 'Shiny Charm', sprite: 'shiny_charm', desc: 'Triplica a chance de encontrar um Pok\u00e9mon Shiny selvagem enquanto estiver na mochila.' },
-          { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', desc: 'Escolha um atributo e maximize seu IV para 31.' },
+          { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', desc: 'Escolha um atributo para maximizar seu IV para 31.' },
+          { key: 'goldbottlecap', name: 'Gold Bottle Cap', sprite: 'goldbottlecap', desc: 'Maximiza os seis IVs do Pokémon para 31.' },
+          { key: 'evcap', name: 'EV Cap', sprite: 'evcap', desc: 'Redistribui os EVs atuais: define dois atributos em 252 e zera os demais.' },
           { key: 'vip', name: 'VIP', sprite: 'vip', desc: 'Adiciona à sua conta todos os benefícios que o VIP proporciona.' },
           { key: 'parcelbox', name: 'Caixa da Parcel', desc: 'Encomenda do Professor Carvalho' }
         ]
@@ -7139,7 +7454,7 @@
         silk_scarf: 0, silver_powder: 0, hard_stone: 0, sharp_beak: 0, poison_barb: 0,
         spell_tag: 0, dragon_fang: 0, never_melt_ice: 0, metal_coat: 0, black_glasses: 0,
         amulet_coin: 0, shell_bell: 0, macho_brace: 0,
-        rarecandy: 0, naturebox: 0, shiny_charm: 0, bottlecap: 0, vip: 0, parcelbox: 0, ss_ticket: 0
+        rarecandy: 0, naturebox: 0, shiny_charm: 0, bottlecap: 0, goldbottlecap: 0, evcap: 0, vip: 0, parcelbox: 0, ss_ticket: 0
       };
       [...EXTRA_MEDICINE_ITEMS, ...EXTRA_BATTLE_ITEMS, ...(EXTRA_TM_ITEMS || [])].forEach(item => { if (defaults[item.key] === undefined) defaults[item.key] = 0; });
       Object.keys(HELD_ITEM_INFO).forEach(key => { if (defaults[key] === undefined) defaults[key] = 0; });
@@ -7531,11 +7846,47 @@
       return `${pokemon.name} recuperou ${restored} HP com ${move.name}.`;
     }
 
+    let activeBagCategory = 'all';
+
+    function setBagCategory(category = 'all') {
+      activeBagCategory = category;
+      renderBag();
+    }
+
+    function clearBagFilters() {
+      activeBagCategory = 'all';
+      const searchInput = document.getElementById('bagSearchInput');
+      if (searchInput) searchInput.value = '';
+      renderBag();
+    }
+
     function renderBag() {
       if (!player) return;
       ensureBagItems();
       const root = document.getElementById('bagCategories');
       if (!root) return;
+      const searchTerm = normalizeMarketText(document.getElementById('bagSearchInput')?.value.trim() || '');
+      const categoryStats = BAG_CATEGORIES.map(cat => ({
+        category: cat,
+        items: cat.items.filter(item => getItemQty(item.key) > 0)
+      }));
+      const ownedTypes = categoryStats.reduce((total, stat) => total + stat.items.length, 0);
+      const totalQuantity = categoryStats.reduce((total, stat) => total + stat.items.reduce((sum, item) => sum + getItemQty(item.key), 0), 0);
+      const ownedTypesNode = document.getElementById('bagOwnedTypes');
+      const totalQuantityNode = document.getElementById('bagTotalQuantity');
+      if (ownedTypesNode) ownedTypesNode.textContent = ownedTypes.toLocaleString('pt-BR');
+      if (totalQuantityNode) totalQuantityNode.textContent = totalQuantity.toLocaleString('pt-BR');
+
+      const filters = document.getElementById('bagCategoryFilters');
+      if (filters) {
+        const availableCategories = categoryStats.filter(stat => stat.items.length > 0);
+        if (activeBagCategory !== 'all' && !availableCategories.some(stat => stat.category.id === activeBagCategory)) activeBagCategory = 'all';
+        filters.innerHTML = [
+          `<button type="button" class="bag-filter-button ${activeBagCategory === 'all' ? 'active' : ''}" aria-pressed="${activeBagCategory === 'all'}" onclick="setBagCategory('all')">Todos <span class="bag-filter-count">${ownedTypes}</span></button>`,
+          ...availableCategories.map(stat => `<button type="button" class="bag-filter-button ${activeBagCategory === stat.category.id ? 'active' : ''}" aria-pressed="${activeBagCategory === stat.category.id}" onclick="setBagCategory('${stat.category.id}')">${escapeHTML(stat.category.title)} <span class="bag-filter-count">${stat.items.length}</span></button>`)
+        ].join('');
+      }
+
       const boostStatus = document.getElementById('experienceBoostStatus');
       const boostRemaining = Number(player.experienceBoostExpiresAt) - Date.now();
       if (boostStatus) {
@@ -7544,10 +7895,11 @@
           ? `Exp. Charm ativo: +50% EXP nas batalhas · ${Math.ceil(boostRemaining / 60000)} min restantes.`
           : '';
       }
-      root.innerHTML = BAG_CATEGORIES.map(cat => {
-        const ownedItems = cat.items.filter(it => getItemQty(it.key) > 0);
-        if (!ownedItems.length) return '';
-        const cards = ownedItems.map(it => {
+      const ownedItems = categoryStats
+        .filter(stat => activeBagCategory === 'all' || stat.category.id === activeBagCategory)
+        .flatMap(stat => stat.items)
+        .filter(item => !searchTerm || normalizeMarketText(`${item.name} ${item.desc}`).includes(searchTerm));
+      const cards = ownedItems.map(it => {
           const qty = getItemQty(it.key);
           const usable = BAG_FIELD_ITEMS.some(item => item.key === it.key);
           return `<div class="bag-item item-tooltip-card"
@@ -7557,14 +7909,12 @@
               : itemIcon(it.sprite, 'item-icon')}
             <div class="bag-item-name">${it.name}</div>
             <div class="bag-item-qty">x${qty}</div>
-            ${usable ? `<button type="button" class="btn btn-secondary" style="width:auto;padding:5px 9px;margin:6px auto 0;font-size:0.72rem;" onclick="event.stopPropagation();chooseBagItemTarget('${it.key}')">Usar</button>` : ''}
+            ${usable ? `<button type="button" class="btn btn-secondary bag-use-button" onclick="event.stopPropagation();chooseBagItemTarget('${it.key}')">Usar</button>` : ''}
           </div>`;
         }).join('');
-        return `<div class="bag-category">
-          <h3 class="bag-cat-title">${cat.title}</h3>
-          <div class="bag-grid">${cards}</div>
-        </div>`;
-      }).join('');
+      root.innerHTML = cards
+        ? `<div class="bag-grid">${cards}</div>`
+        : `<div class="bag-empty-state">${searchTerm ? 'Nenhum item corresponde &agrave; busca ou categoria selecionada.' : 'Sua mochila est&aacute; vazia por enquanto.'}<br><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 0 0;padding:7px 12px;" onclick="clearBagFilters()">Limpar filtros</button></div>`;
     }
 
     const BAG_FIELD_ITEMS = [
@@ -7596,7 +7946,9 @@
       { key: 'leafstone', name: 'Pedra da Folha', kind: 'evolution' },
       { key: 'moonstone', name: 'Pedra da Lua', kind: 'evolution' },
       { key: 'naturebox', name: 'Caixa de Nature', sprite: 'naturebox', kind: 'natureBox' },
-      { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', kind: 'ivMax' }
+      { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', kind: 'ivMax' },
+      { key: 'goldbottlecap', name: 'Gold Bottle Cap', sprite: 'goldbottlecap', kind: 'ivMaxAll' },
+      { key: 'evcap', name: 'EV Cap', sprite: 'evcap', kind: 'evMax' }
     ];
 
     const STONE_EVOLUTIONS = {
@@ -7637,12 +7989,15 @@
         const total = Object.values(pokemon.evs).reduce((sum, value) => sum + value, 0);
         return pokemon.hp > 0 && total < EV_LIMIT_TOTAL && pokemon.evs[item.stat] < Math.min(EV_LIMIT_STAT, 100);
       }
+      if (item.kind === 'evMax') {
+        return pokemon.hp > 0;
+      }
       if (['pp', 'maxPp', 'allPp', 'allMaxPp'].includes(item.kind)) return pokemon.hp > 0 && pokemon.moves.some(move => move.pp < move.maxPp);
       if (item.kind === 'ppUp') return pokemon.hp > 0 && pokemon.moves.some(move => (move.ppUps || 0) < 3);
       if (item.kind === 'ppMax') return pokemon.hp > 0 && pokemon.moves.some(move => (move.ppUps || 0) < 3);
       if (item.kind === 'mint') return pokemon.hp > 0 && pokemon.nature !== item.nature && pokemon.natureMint !== item.nature;
       if (item.kind === 'natureBox') return pokemon.hp > 0;
-      if (item.kind === 'ivMax') { ensurePokemonTraits(pokemon); return pokemon.hp > 0 && ['hp','attack','defense','specialAttack','specialDefense','speed'].some(stat => pokemon.ivs[stat] < 31); }
+      if (item.kind === 'ivMax' || item.kind === 'ivMaxAll') { ensurePokemonTraits(pokemon); return pokemon.hp > 0 && ['hp','attack','defense','specialAttack','specialDefense','speed'].some(stat => pokemon.ivs[stat] < 31); }
       if (item.kind === 'statusCure') return pokemon.hp > 0 && itemCuresStatus(item.key, pokemon);
       if (item.key === 'fullrestore' || item.kind === 'fullHeal') {
         return pokemon.hp > 0 && (pokemon.hp < pokemon.maxHp || Boolean(pokemon.status));
@@ -7797,6 +8152,23 @@
         .map((pokemon, index) => ({ pokemon, index }))
         .filter(({ pokemon }) => canUseItemOnPokemon(item, pokemon));
 
+      if (item.kind === 'evMax') {
+        if (!targets.length) {
+          showToast('Nenhum Pokémon saudável da equipe tem EVs disponíveis para maximizar.', 'error');
+          return;
+        }
+        renderEVCapPokemonPicker(targets);
+        return;
+      }
+
+      if (item.kind === 'ivMaxAll') {
+        if (!targets.length) {
+          showToast('Nenhum Pokémon saudável da equipe precisa maximizar IVs.', 'error');
+          return;
+        }
+        renderGoldBottleCapPokemonPicker(targets);
+        return;
+      }
       if (!targets.length) {
         showToast(item.kind === 'revive' || item.kind === 'maxRevive'
           ? 'Nenhum Pokémon desmaiado pode receber Revive.'
@@ -7920,6 +8292,14 @@
         root.innerHTML=`<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;"><div style="font-weight:700;margin-bottom:8px;">Escolha o IV que a Bottle Cap vai maximizar para ${escapeHTML(pokemon.name)}:</div><div style="display:flex;flex-wrap:wrap;gap:8px;">${Object.entries(labels).filter(([stat])=>pokemon.ivs?.[stat]<31).map(([stat,label])=>`<button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="applyBottleCap(${partyIndex},'${stat}')">${label} · IV ${pokemon.ivs?.[stat]||0} → 31</button>`).join('')}<button type="button" class="btn btn-secondary" onclick="cancelBagItemUse()">Cancelar</button></div></div>`;
         return;
       }
+      if (item.kind === 'ivMaxAll') {
+        applyGoldBottleCap(partyIndex);
+        return;
+      }
+      if (item.kind === 'evMax') {
+        renderEVCapStatPicker(partyIndex);
+        return;
+      }
       if (item.kind === 'level') {
         const expNeeded = Math.max(0, getExperienceForLevel(pokemon.level + 1, pokemon.growthRate) - pokemon.exp);
         const gainedLevels = awardPokemonExperience(pokemon, expNeeded);
@@ -8035,6 +8415,136 @@
       showToast(`Bottle Cap usada: IV de ${label} de ${pokemon.name} agora é 31.`);
     }
 
+    function applyGoldBottleCap(partyIndex) {
+      const pokemon = player?.party?.[partyIndex];
+      const stats = ['hp','attack','defense','specialAttack','specialDefense','speed'];
+      if (!pokemon || pokemon.hp <= 0 || getItemQty('goldbottlecap') < 1) return;
+      ensurePokemonTraits(pokemon);
+      if (stats.every(stat => pokemon.ivs[stat] >= 31)) return;
+      stats.forEach(stat => { pokemon.ivs[stat] = 31; });
+      decItemQty('goldbottlecap', 1); cancelBagItemUse(); renderBag(); refreshPartyUI(); saveGame();
+      showToast(`Gold Bottle Cap usada: os seis IVs de ${pokemon.name} agora são 31.`);
+    }
+
+    function renderGoldBottleCapPokemonPicker(targets) {
+      let dialog = document.getElementById('goldBottleCapPokemonDialog');
+      if (!dialog) {
+        document.body.insertAdjacentHTML('beforeend', `<dialog id="goldBottleCapPokemonDialog" class="social-trade-dialog" aria-labelledby="goldBottleCapPokemonTitle"><div class="social-trade-dialog-inner"><header class="social-trade-dialog-header"><div><span class="evcap-dialog-kicker" style="color:#fde68a;">GOLD BOTTLE CAP · HIPERTREINO</span><h2 id="goldBottleCapPokemonTitle">Escolha um Pokémon</h2><p>Todos os seis IVs do Pokémon selecionado passarão para 31.</p></div><button type="button" class="social-trade-dialog-close" aria-label="Fechar" onclick="closeGoldBottleCapPokemonPicker()">&times;</button></header><div class="goldcap-picker-banner">${itemIcon('goldbottlecap', '', '✨')}<div><strong>IVs maximizados</strong><small>A Bottle Cap dourada define HP, Ataque, Defesa, Ataque Especial, Defesa Especial e Velocidade em 31.</small></div></div><div id="goldBottleCapPokemonList" class="social-trade-pokemon-list"></div><footer class="social-trade-dialog-actions"><button type="button" class="btn btn-secondary" onclick="closeGoldBottleCapPokemonPicker()">Cancelar</button></footer></div></dialog>`);
+        dialog = document.getElementById('goldBottleCapPokemonDialog');
+        dialog.addEventListener('click', event => { if (event.target === dialog) closeGoldBottleCapPokemonPicker(); });
+        dialog.addEventListener('cancel', () => cancelBagItemUse());
+      }
+      document.getElementById('goldBottleCapPokemonList').innerHTML = `<div class="social-trade-grid">${targets.map(({ pokemon, index }) => {
+        ensurePokemonTraits(pokemon);
+        const perfectIVs = ['hp','attack','defense','specialAttack','specialDefense','speed'].filter(stat => pokemon.ivs[stat] === 31).length;
+        return `<button type="button" class="social-trade-option goldcap-pokemon-option" onclick="selectGoldBottleCapPokemon(${index})"><img src="${SPRITE_FB(pokemon.id)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_POKEMON(pokemon)}'"><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${perfectIVs}/6 IVs no máximo</small></button>`;
+      }).join('')}</div>`;
+      dialog.showModal();
+    }
+
+    function selectGoldBottleCapPokemon(partyIndex) {
+      const dialog = document.getElementById('goldBottleCapPokemonDialog');
+      if (dialog?.open) dialog.close();
+      applyGoldBottleCap(partyIndex);
+    }
+
+    function closeGoldBottleCapPokemonPicker() {
+      const dialog = document.getElementById('goldBottleCapPokemonDialog');
+      if (dialog?.open) dialog.close();
+      cancelBagItemUse();
+    }
+
+    function renderEVCapPokemonPicker(targets) {
+      let dialog = document.getElementById('evCapPokemonDialog');
+      if (!dialog) {
+        document.body.insertAdjacentHTML('beforeend', `<dialog id="evCapPokemonDialog" class="social-trade-dialog" aria-labelledby="evCapPokemonTitle"><div class="social-trade-dialog-inner"><header class="social-trade-dialog-header"><div><span class="evcap-dialog-kicker">TREINAMENTO DE EVs</span><h2 id="evCapPokemonTitle">Escolha um Pokémon</h2><p>Selecione quem receberá EVs em dois atributos.</p></div><button type="button" class="social-trade-dialog-close" aria-label="Fechar" onclick="closeEVCapPokemonPicker()">&times;</button></header><div class="evcap-picker-banner">${itemIcon('evcap', '', '🧢')}<div><strong>Redistribuição de EVs</strong><small>O item redefine os EVs atuais: escolha dois atributos para receber 252 EVs cada.</small></div></div><div id="evCapPokemonList" class="social-trade-pokemon-list"></div><footer class="social-trade-dialog-actions"><button type="button" class="btn btn-secondary" onclick="closeEVCapPokemonPicker()">Cancelar</button></footer></div></dialog>`);
+        dialog = document.getElementById('evCapPokemonDialog');
+        dialog.addEventListener('click', event => { if (event.target === dialog) closeEVCapPokemonPicker(); });
+        dialog.addEventListener('cancel', () => cancelBagItemUse());
+      }
+      document.getElementById('evCapPokemonList').innerHTML = `<div class="social-trade-grid">${targets.map(({ pokemon, index }) => `<button type="button" class="social-trade-option evcap-pokemon-option" onclick="selectEVCapPokemon(${index})"><img src="${SPRITE_FB(pokemon.id)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_POKEMON(pokemon)}'"><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${Math.max(0, Math.round(pokemon.hp))}/${pokemon.maxHp} HP</small></button>`).join('')}</div>`;
+      dialog.showModal();
+    }
+
+    function selectEVCapPokemon(partyIndex) {
+      const dialog = document.getElementById('evCapPokemonDialog');
+      if (dialog?.open) dialog.close();
+      useBagItemOnPokemon('evcap', partyIndex);
+    }
+
+    function closeEVCapPokemonPicker() {
+      const dialog = document.getElementById('evCapPokemonDialog');
+      if (dialog?.open) dialog.close();
+      cancelBagItemUse();
+    }
+
+    function renderEVCapStatPicker(partyIndex) {
+      const pokemon = player?.party?.[partyIndex];
+      if (!pokemon) return;
+      ensurePokemonTraits(pokemon);
+      const stats = ['hp','attack','defense','specialAttack','specialDefense','speed'];
+      const labels = { hp: 'HP', attack: 'Ataque', defense: 'Defesa', specialAttack: 'Ataque Especial', specialDefense: 'Defesa Especial', speed: 'Velocidade' };
+      const total = Object.values(pokemon.evs).reduce((sum, value) => sum + value, 0);
+      const remainingAfterUse = EV_LIMIT_TOTAL - EV_LIMIT_STAT * 2;
+      let dialog = document.getElementById('evCapStatsDialog');
+      if (!dialog) {
+        document.body.insertAdjacentHTML('beforeend', `<dialog id="evCapStatsDialog" class="social-trade-dialog evcap-stat-dialog" aria-labelledby="evCapStatsTitle"><div class="social-trade-dialog-inner"><header class="social-trade-dialog-header"><div><span class="evcap-dialog-kicker">EV CAP · DISTRIBUIÇÃO</span><h2 id="evCapStatsTitle">Escolha dois atributos</h2><p>Os EVs atuais serão redistribuídos: os dois atributos escolhidos ficam com 252 EVs cada; os demais são zerados.</p></div><button type="button" class="social-trade-dialog-close" aria-label="Fechar" onclick="closeEVCapStatPicker()">&times;</button></header><div id="evCapStatsContent"></div><footer class="social-trade-dialog-actions"><button type="button" class="btn btn-secondary" onclick="closeEVCapStatPicker()">Cancelar</button><button type="button" class="btn" data-ev-cap-confirm disabled style="opacity:.55" onclick="confirmEVCapSelection()">Aplicar em dois atributos</button></footer></div></dialog>`);
+        dialog = document.getElementById('evCapStatsDialog');
+        dialog.addEventListener('click', event => { if (event.target === dialog) closeEVCapStatPicker(); });
+        dialog.addEventListener('cancel', () => cancelBagItemUse());
+      }
+      dialog.dataset.partyIndex = String(partyIndex);
+      dialog.dataset.evCapSelected = '[]';
+      document.getElementById('evCapStatsContent').innerHTML = `<div class="evcap-stat-hero"><img src="${SPRITE_FB(pokemon.id)}" alt="" onerror="this.onerror=null;this.src='${SPRITE_POKEMON(pokemon)}'"><div><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${total}/510 EVs atuais · ${remainingAfterUse} EVs ficarão livres após redistribuir</small></div></div><p id="evCapStatsSelectionStatus" class="evcap-stat-selection">Selecione dois atributos. A distribuição atual será substituída e ${remainingAfterUse} EVs ficarão livres.</p><div class="evcap-stat-grid">${stats.map(stat => `<button type="button" class="evcap-stat-card" data-ev-cap-stat="${stat}" aria-pressed="false" onclick="toggleEVCapStat(${partyIndex},'${stat}')"><span class="evcap-stat-card-top"><strong>${labels[stat]}</strong><small>${pokemon.evs[stat]} → 252</small></span><span class="evcap-stat-track"><i style="width:${Math.min(100, pokemon.evs[stat] / EV_LIMIT_STAT * 100)}%"></i></span></button>`).join('')}</div>`;
+      dialog.showModal();
+    }
+
+    function toggleEVCapStat(partyIndex, stat) {
+      const dialog = document.getElementById('evCapStatsDialog');
+      const pokemon = player?.party?.[partyIndex];
+      const validStats = ['hp','attack','defense','specialAttack','specialDefense','speed'];
+      if (!dialog || !pokemon || !validStats.includes(stat)) return;
+      const selected = JSON.parse(dialog.dataset.evCapSelected || '[]');
+      const next = selected.includes(stat) ? selected.filter(entry => entry !== stat) : selected.length < 2 ? [...selected, stat] : selected;
+      dialog.dataset.evCapSelected = JSON.stringify(next);
+      dialog.querySelectorAll('[data-ev-cap-stat]').forEach(button => {
+        const active = next.includes(button.dataset.evCapStat);
+        button.classList.toggle('selected', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      const status = dialog.querySelector('#evCapStatsSelectionStatus');
+      if (status) status.textContent = next.length === 2 ? '2 de 2 atributos selecionados · pronto para aplicar.' : `Selecione ${2 - next.length} atributo${next.length ? '' : 's'} para continuar.`;
+      const confirm = dialog.querySelector('[data-ev-cap-confirm]');
+      if (confirm) confirm.disabled = next.length !== 2;
+    }
+
+    function confirmEVCapSelection() {
+      const dialog = document.getElementById('evCapStatsDialog');
+      const selected = JSON.parse(dialog?.dataset.evCapSelected || '[]');
+      const partyIndex = Number(dialog?.dataset.partyIndex);
+      if (selected.length !== 2) return;
+      if (dialog?.open) dialog.close();
+      applyEVCap(partyIndex, selected);
+    }
+
+    function closeEVCapStatPicker() {
+      const dialog = document.getElementById('evCapStatsDialog');
+      if (dialog?.open) dialog.close();
+      cancelBagItemUse();
+    }
+
+    function applyEVCap(partyIndex, selectedStats) {
+      const pokemon = player?.party?.[partyIndex];
+      const validStats = ['hp','attack','defense','specialAttack','specialDefense','speed'];
+      if (!pokemon || pokemon.hp <= 0 || getItemQty('evcap') < 1 || !Array.isArray(selectedStats) || selectedStats.length !== 2 || new Set(selectedStats).size !== 2 || selectedStats.some(stat => !validStats.includes(stat))) return;
+      ensurePokemonTraits(pokemon);
+      pokemon.evs = Object.fromEntries(validStats.map(stat => [stat, 0]));
+      selectedStats.forEach(stat => { pokemon.evs[stat] = EV_LIMIT_STAT; });
+      const labels = { hp: 'HP', attack: 'Ataque', defense: 'Defesa', specialAttack: 'Ataque Especial', specialDefense: 'Defesa Especial', speed: 'Velocidade' };
+      decItemQty('evcap', 1); cancelBagItemUse(); renderBag(); refreshPartyUI(); saveGame();
+      showToast(`EV Cap redistribuiu os EVs: ${labels[selectedStats[0]]} e ${labels[selectedStats[1]]} agora têm 252 cada. Os demais foram zerados.`);
+    }
+
     function useBagPpItem(itemKey, partyIndex, moveName) {
       const pokemon = player && player.party[partyIndex];
       const move = pokemon && pokemon.moves.find(entry => entry.name === moveName);
@@ -8099,7 +8609,9 @@
       { id: 'exp_share', name: 'Exp. Share', icon: '\u{1F4D8}', sprite: 'exp_share', desc: 'Compartilha metade da experiencia com quem o segura', price: 15, key: 'exp_share' },
       { id: 'lucky_egg', name: 'Lucky Egg', icon: '\u{1F95A}', sprite: 'lucky_egg', desc: 'Aumenta em 50% a experiencia recebida pelo Pokemon que o segura', price: 5, key: 'lucky_egg' },
       { id: 'naturebox', name: 'Mint Box', icon: '🎁', sprite: 'naturebox', desc: 'Escolha uma natureza para alterar os efeitos de um Pokémon.', price: 5, key: 'naturebox' },
-      { id: 'bottlecap', name: 'Bottle Cap', icon: '🧢', sprite: 'bottlecap', desc: 'Escolha um atributo e maximize seu IV para 31.', price: 10, key: 'bottlecap' },
+      { id: 'bottlecap', name: 'Bottle Cap', icon: '🧢', sprite: 'bottlecap', desc: 'Escolha um atributo para maximizar seu IV para 31.', price: 10, key: 'bottlecap' },
+      { id: 'goldbottlecap', name: 'Gold Bottle Cap', icon: '✨', sprite: 'goldbottlecap', desc: 'Maximiza os seis IVs do Pokémon para 31.', price: 50, key: 'goldbottlecap' },
+      { id: 'evcap', name: 'EV Cap', icon: '🧢', sprite: 'evcap', desc: 'Redistribui os EVs atuais: define dois atributos em 252 e zera os demais.', price: 20, key: 'evcap' },
       { id: 'vip', name: 'VIP', icon: '👑', sprite: 'vip', desc: 'Adiciona à sua conta todos os benefícios que o VIP proporciona.', price: 50, key: 'vip' },
       { id: 'shiny_charm', name: 'Shiny Charm', icon: '\u2728', sprite: 'shiny_charm', desc: 'Triplica a chance de encontrar um Pok\u00e9mon Shiny selvagem.', price: 20, key: 'shiny_charm' },
       { id: 'focus_sash', name: 'Focus Sash', icon: '🛡️', sprite: 'focus_sash', desc: 'Com HP cheio, sobrevive a um golpe fatal com 1 HP. Consome-se ao ativar.', price: 5000, key: 'focus_sash' },
@@ -8551,7 +9063,7 @@
           'fairy_feather', 'flame_orb', 'toxic_orb'].includes(item?.id);
     }
     function marketItemUsesPokeCoins(item) {
-      return ['rarecandy', 'exp_charm', 'masterball', 'lucky_egg', 'exp_share', 'macho_brace', 'shiny_charm', 'naturebox', 'bottlecap', 'vip'].includes(item?.key) || ['rarecandy', 'rare-candy', 'masterball', 'lucky_egg', 'exp_share', 'macho_brace', 'shiny_charm', 'naturebox', 'bottlecap', 'vip'].includes(item?.id);
+      return ['rarecandy', 'exp_charm', 'masterball', 'lucky_egg', 'exp_share', 'macho_brace', 'shiny_charm', 'naturebox', 'bottlecap', 'goldbottlecap', 'evcap', 'vip'].includes(item?.key) || ['rarecandy', 'rare-candy', 'masterball', 'lucky_egg', 'exp_share', 'macho_brace', 'shiny_charm', 'naturebox', 'bottlecap', 'goldbottlecap', 'evcap', 'vip'].includes(item?.id);
     }
     function normalizeMarketText(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
@@ -8766,16 +9278,11 @@
         ensureBagItems();
         setItemQty('parcelbox', 1);
         player.missions.progress.parcel = 1;
-        const completed = tryCompleteMission('parcel');
-        if (!completed) {
-          setItemQty('parcelbox', 0);
-          player.missions.progress.parcel = 0;
-          showToast('Não foi possível concluir a missão. Tente novamente.', 'error');
-          return false;
-        }
         refreshMarketUI();
         renderBag();
-        showToast('Caixa da Parcel recebida! Missão concluída 🎉');
+        activeMissionTab = 'open';
+        switchPanel('missions');
+        showToast('Caixa da Parcel recebida. Volte \u00e0 miss\u00e3o para entreg\u00e1-la ao Professor Carvalho.');
         return true;
       }
       const item = SHOP_ITEMS.find(i => i.id === itemId);
@@ -9146,7 +9653,7 @@
       const saved = await loadGame();
       if (saved) {
         restorePlayer(saved);
-        showToast('Progresso online carregado. Bem-vindo de volta, ' + player.name);
+        showWelcomePopup(player.name);
         return;
       }
       if (await migrateLegacySaveIfRequested()) return;
@@ -10245,6 +10752,11 @@
       } finally { button.disabled = !adminSelectedTrainer; button.textContent = 'Enviar recurso'; }
     }
     function switchPanel(id) {
+      if (['pokedex', 'dungeons'].includes(id) && player && !isParcelDelivered()) {
+        showParcelAccessPopup();
+        activeMissionTab = 'open';
+        id = 'missions';
+      }
       if (id === 'item-catalog' && !isAdminAccount()) { showToast('Cat\u00e1logo de Itens dispon\u00edvel apenas para o administrador.', 'error'); id = 'home'; }
       if (id === 'admin' && !isAdminAccount()) { showToast('Acesso restrito ao administrador.', 'error'); id = 'home'; }
       if (id === 'elite-four' && !isAdminAccount() && !hasAllKantoBadges()) { showToast(`Conquiste todas as 8 Ins\u00edgnias de Kanto para desafiar a Elite Four (${getKantoBadgeCount()}/8).`, 'error'); id = 'home'; }
@@ -11442,6 +11954,12 @@
     let dungeonBattleStarting = false;
     async function startDungeonBattle(dungeonName) {
       if (dungeonBattleStarting || battle) return;
+      if (!isParcelDelivered()) {
+        showParcelAccessPopup();
+        activeMissionTab = 'open';
+        switchPanel('missions');
+        return;
+      }
       if (!player.poke) {
         showToast('Retire um Pokémon do PC antes de iniciar uma batalha.', 'error');
         return;
@@ -12971,6 +13489,7 @@
       showCaptureBall(didCapture ? 3 : 2, async (ball) => {
         if (didCapture) {
           if (ball) ball.classList.add('caught');
+          eSpr.classList.add('captured');
           SFX.captureSuccess();
           setLog(`Gotcha! ${getPokemonDisplayName(battle.enemy)} foi capturado!`);
           let caughtMoves;
@@ -13002,8 +13521,6 @@
           markPokedex(caught.id, true);
           onMissionEvent('capture', caught.id);
           setTimeout(() => {
-            eSpr.classList.remove('capturing');
-            eSpr.classList.add('faint');
             if (ball) ball.remove();
             askCaughtPokemonNickname(caught, namedPokemon => {
               if (player.party.length < 6) {
@@ -13030,7 +13547,7 @@
           battle.turn = 'enemy';
           setTimeout(enemyAttack, 900);
         }
-      });
+      }, selectedBall.key);
     }
 
     const DAILY_BOSSES = [
@@ -14154,6 +14671,7 @@
       const grid = document.getElementById('pokedexGrid');
       const prog = document.getElementById('pokedexProgress');
       if (!grid || !player) return;
+      if (!isParcelDelivered()) return;
       if (!player.pokedex) player.pokedex = { seen: {}, caught: {} };
       let caughtCount = 0, seenCount = 0;
       const cards = [];
@@ -14190,6 +14708,11 @@
       const badgeList = Array.isArray(player.badgesList) ? player.badgesList : [];
       const badgeSet = new Set(badgeList);
       const avatar = trainerAvatarConfig(false);
+      const profileHeroTrainer = document.getElementById('profileHeroTrainer');
+      if (profileHeroTrainer) {
+        profileHeroTrainer.src = `https://play.pokemonshowdown.com/sprites/trainers/${avatar.id}.png`;
+        profileHeroTrainer.onerror = () => { profileHeroTrainer.onerror = null; profileHeroTrainer.src = 'assets/professor-oak.png'; };
+      }
       const pokedex = player.pokedex || {};
       const isKantoId = key => Number.isInteger(Number(key)) && Number(key) >= 1 && Number(key) <= 151;
       const seenIds = new Set([
