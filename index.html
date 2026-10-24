@@ -2081,7 +2081,8 @@
     .center-healing-balls { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; min-height:38px; margin:20px 0; }
     .center-healing-ball { position:relative; width:30px; height:30px; overflow:hidden; border:2px solid #16151b; border-radius:50%; background:linear-gradient(to bottom,#fb4a55 0 46%,#211e26 46% 55%,#f5f4f2 55%); box-shadow:0 0 0 1px #ffffff30,0 4px 9px #0007; }
     .center-healing-ball::after { position:absolute; top:50%; left:50%; width:8px; height:8px; border:2px solid #211e26; border-radius:50%; background:#fff; content:''; transform:translate(-50%,-50%); }
-    .center-healing-dialog.is-healing .center-healing-ball { animation:center-healing-pulse .52s ease-in-out infinite alternate; transition:filter 35ms linear,box-shadow 35ms linear,transform 35ms linear; will-change:filter,transform; }
+    .center-healing-dialog.is-healing .center-healing-ball { transition:filter 35ms linear,box-shadow 35ms linear,transform 35ms linear; will-change:filter,transform; }
+    .center-healing-dialog.center-healing-css-fallback .center-healing-ball { animation:center-healing-pulse .52s ease-in-out infinite alternate; }
     @keyframes center-healing-pulse { from { filter:brightness(1.12); box-shadow:0 0 5px #4ade8055,0 4px 9px #0007; transform:scale(1); } to { filter:brightness(1.9); box-shadow:0 0 18px #4ade80c9,0 0 36px #22c55e66; transform:scale(1.09); } }
     .center-healing-actions { display:flex; justify-content:center; margin-top:18px; }
     .center-healing-actions .btn { width:auto; min-width:150px; margin:0; }
@@ -9023,6 +9024,7 @@
     let centerHealingAudioContext = null;
     let centerHealingSourceNode = null;
     let centerHealingPulseFrame = null;
+    let centerHealingTimelineFrame = null;
     let centerHealingFallbackTimer = null;
     function pokemonNeedsCenterTreatment(pokemon) {
       return Boolean(pokemon && (pokemon.hp < pokemon.maxHp || pokemon.status || (pokemon.moves || []).some(move => move.pp < move.maxPp)));
@@ -9157,9 +9159,21 @@
       };
       centerHealingPulseFrame = requestAnimationFrame(update);
     }
+    function startCenterHealingTimeline() {
+      if (centerHealingTimelineFrame) cancelAnimationFrame(centerHealingTimelineFrame);
+      const update = () => {
+        if (!centerHealingInProgress || !centerHealingAudio) { centerHealingTimelineFrame = null; return; }
+        const duration = centerHealingAudio.duration;
+        if (Number.isFinite(duration) && duration > 0 && duration - centerHealingAudio.currentTime <= 1.5) commitCenterHealing();
+        centerHealingTimelineFrame = requestAnimationFrame(update);
+      };
+      centerHealingTimelineFrame = requestAnimationFrame(update);
+    }
     function stopCenterHealingPulse() {
       if (centerHealingPulseFrame) cancelAnimationFrame(centerHealingPulseFrame);
       centerHealingPulseFrame = null;
+      if (centerHealingTimelineFrame) cancelAnimationFrame(centerHealingTimelineFrame);
+      centerHealingTimelineFrame = null;
       document.querySelectorAll('#centerHealingBalls .center-healing-ball').forEach(ball => {
         ball.style.removeProperty('filter');
         ball.style.removeProperty('box-shadow');
@@ -9217,17 +9231,22 @@
           centerHealingAudio.preload = 'auto';
           centerHealingAudio.loop = false;
           centerHealingAudio.volume = 0.55;
-          centerHealingAudio.addEventListener('timeupdate', () => {
-            const duration = centerHealingAudio.duration;
-            if (centerHealingInProgress && Number.isFinite(duration) && duration - centerHealingAudio.currentTime <= 1.0) commitCenterHealing();
-          });
           centerHealingAudio.addEventListener('ended', finishCenterHealingSequence);
         }
         centerHealingAudio.currentTime = 0;
         const hasAudioGraph = ensureCenterHealingAudioGraph();
-        dialog.classList.toggle('center-healing-css-fallback', !hasAudioGraph);
+        dialog.classList.remove('center-healing-css-fallback');
         centerHealingFallbackTimer = setTimeout(finishCenterHealingSequence, 5000);
-        centerHealingAudio.onplaying = hasAudioGraph ? startCenterHealingPulse : null;
+        centerHealingAudio.onplaying = async () => {
+          startCenterHealingTimeline();
+          if (hasAudioGraph && centerHealingAudioContext) {
+            try {
+              if (centerHealingAudioContext.state === 'suspended') await centerHealingAudioContext.resume();
+            } catch (_) {}
+          }
+          if (hasAudioGraph && centerHealingAudioContext?.state === 'running') startCenterHealingPulse();
+          else dialog.classList.add('center-healing-css-fallback');
+        };
         const playback = centerHealingAudio.play();
         if (playback && playback.catch) playback.catch(() => {
           clearTimeout(centerHealingFallbackTimer);
