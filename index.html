@@ -222,6 +222,12 @@
     .goldcap-picker-banner img { width:50px; height:50px; object-fit:contain; image-rendering:pixelated; }
     .goldcap-picker-banner strong { display:block; font-size:.9rem; }
     .goldcap-picker-banner small { display:block; margin-top:3px; color:var(--text-muted); line-height:1.4; }
+    .bag-target-picker-banner { display:flex; align-items:center; gap:12px; margin:14px 0 4px; padding:12px 14px; border:1px solid rgba(168,85,247,.28); border-radius:14px; background:linear-gradient(110deg,rgba(124,58,237,.14),rgba(20,19,30,.92)); }
+    .bag-target-picker-banner img { width:50px; height:50px; object-fit:contain; image-rendering:pixelated; }
+    .bag-target-picker-banner strong { display:block; font-size:.9rem; }
+    .bag-target-picker-banner small { display:block; margin-top:3px; color:var(--text-muted); line-height:1.4; }
+    .bag-target-pokemon-option { min-height:142px; background:radial-gradient(ellipse at top,rgba(124,58,237,.1),transparent 72%),var(--input-bg); }
+    .bag-target-pokemon-option img { width:76px; height:72px; }
     .goldcap-pokemon-option { min-height:142px; background:radial-gradient(ellipse at top,rgba(250,204,21,.09),transparent 72%),var(--input-bg); }
     .goldcap-pokemon-option img { width:76px; height:72px; }
     .evcap-stat-dialog { width:min(700px,calc(100vw - 28px)); margin:auto; }
@@ -271,6 +277,8 @@
       .social-trade-dialog-inner { padding:16px; }
       .social-trade-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
       .social-trade-option { min-height:102px; }
+      .social-trade-option.bag-target-pokemon-option { min-height:126px; }
+      .social-trade-option.bag-target-pokemon-option img { width:68px; height:64px; }
     }
     .footer { text-align: center; margin-top: 26px; font-size: 0.875rem; color: var(--text-muted); }
     .footer a { color: var(--primary-hover); text-decoration: none; font-weight: 600; margin-left: 4px; }
@@ -928,6 +936,21 @@
       transition: border-color 0.2s;
     }
     .mission-item:hover { border-color: #3a3a4a; }
+    .mission-details-dialog { width:min(480px,calc(100vw - 28px)); max-width:none; max-height:calc(100dvh - 32px); margin:auto; padding:0; overflow:auto; border:1px solid rgba(168,85,247,.55); border-radius:18px; background:var(--card); color:var(--text); box-shadow:0 24px 80px #000b,0 0 32px #9333ea24; }
+    .mission-details-dialog::backdrop { background:rgba(5,4,10,.78); backdrop-filter:blur(5px); }
+    .mission-details-inner { padding:20px; }
+    .mission-details-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .mission-details-heading { display:flex; align-items:center; gap:12px; min-width:0; }
+    .mission-details-icon { display:grid; place-items:center; width:48px; height:48px; flex:0 0 48px; border-radius:13px; font-size:1.55rem; }
+    .mission-details-kicker { display:block; margin-bottom:4px; color:#c4b5fd; font-size:.65rem; font-weight:800; letter-spacing:.1em; }
+    .mission-details-header h2 { margin:0; font-size:1.05rem; overflow-wrap:anywhere; }
+    .mission-details-status { display:block; margin-top:4px; color:var(--text-muted); font-size:.75rem; }
+    .mission-details-close { width:34px; height:34px; flex:0 0 34px; border:1px solid var(--border); border-radius:9px; background:var(--input-bg); color:var(--text-muted); font-size:1.2rem; cursor:pointer; }
+    .mission-details-description { margin:18px 0; color:#e4e4e7; font-size:.92rem; line-height:1.55; overflow-wrap:anywhere; }
+    .mission-details-meta { display:grid; gap:10px; }
+    .mission-details-meta > div { display:grid; gap:4px; padding:12px; border:1px solid var(--border); border-radius:11px; background:var(--input-bg); }
+    .mission-details-meta span { color:var(--text-muted); font-size:.72rem; }
+    .mission-details-meta strong { font-size:.86rem; line-height:1.45; overflow-wrap:anywhere; }
     .gym-card-title { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
     .gym-card-level-cap { color: var(--text-muted); font-size: .72rem; font-weight: 700; white-space: nowrap; }
     .mission-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
@@ -2047,6 +2070,23 @@
     .center-pokemon-status { display:inline-flex; margin-top:7px; padding:3px 7px; border:1px solid #ffffff12; border-radius:999px; background:#ffffff08; color:var(--text-muted); font-size:.64rem; font-weight:700; }
     .center-pokemon-status.fainted { border-color:#f8717138; background:#ef444416; color:#fca5a5; }
     .center-pokemon-status.needs-care { border-color:#fbbf2438; background:#f59e0b12; color:#fcd34d; }
+    .center-healing-dialog { width:min(460px,calc(100vw - 28px)); max-width:none; margin:auto; padding:0; overflow:hidden; border:1px solid rgba(74,222,128,.42); border-radius:20px; background:linear-gradient(155deg,#17251e,#111119 62%); color:var(--text); box-shadow:0 28px 90px #000c,0 0 40px #22c55e20; }
+    .center-healing-dialog::backdrop { background:rgba(5,4,10,.78); backdrop-filter:blur(5px); }
+    .center-healing-inner { padding:24px; text-align:center; }
+    .center-healing-kicker { color:#86efac; font-size:.68rem; font-weight:850; letter-spacing:.14em; text-transform:uppercase; }
+    .center-healing-nurse { position:relative; width:88px; height:88px; margin:12px auto; overflow:hidden; border:1px solid #4ade8055; border-radius:50%; background:#fff; box-shadow:0 0 24px #4ade8025; }
+    .center-healing-nurse img { position:absolute; top:0; left:0; width:100%; height:100%; max-width:none; object-fit:contain; transform:scale(3.1); image-rendering:auto; }
+    .center-healing-inner h2 { margin:8px 0 5px; font-size:1.2rem; }
+    .center-healing-message { min-height:42px; margin:0 auto; max-width:350px; color:var(--text-muted); font-size:.88rem; line-height:1.5; }
+    .center-healing-balls { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; min-height:38px; margin:20px 0; }
+    .center-healing-ball { position:relative; width:30px; height:30px; overflow:hidden; border:2px solid #16151b; border-radius:50%; background:linear-gradient(to bottom,#fb4a55 0 46%,#211e26 46% 55%,#f5f4f2 55%); box-shadow:0 0 0 1px #ffffff30,0 4px 9px #0007; }
+    .center-healing-ball::after { position:absolute; top:50%; left:50%; width:8px; height:8px; border:2px solid #211e26; border-radius:50%; background:#fff; content:''; transform:translate(-50%,-50%); }
+    .center-healing-dialog.is-healing .center-healing-ball { transition:filter 35ms linear,box-shadow 35ms linear,transform 35ms linear; will-change:filter,transform; }
+    .center-healing-dialog.center-healing-css-fallback .center-healing-ball { animation:center-healing-fallback .24s steps(1,end) infinite; }
+    @keyframes center-healing-fallback { 0%,45% { filter:brightness(1.9); box-shadow:0 0 18px #4ade80c9,0 0 36px #22c55e66; transform:scale(1.09); } 46%,100% { filter:brightness(1); box-shadow:0 0 0 1px #ffffff30,0 4px 9px #0007; transform:scale(1); } }
+    .center-healing-actions { display:flex; justify-content:center; margin-top:18px; }
+    .center-healing-actions .btn { width:auto; min-width:150px; margin:0; }
+    @media (prefers-reduced-motion:reduce) { .center-healing-dialog.is-healing .center-healing-ball { transition:none; filter:brightness(1.25); box-shadow:0 0 10px #4ade8070; } }
     .center-pokemon-status.healthy { border-color:#4ade8030; background:#22c55e10; color:#86efac; }
     .center-pokemon-moves { min-width:0; margin-top:3px; }
     .center-pokemon-moves summary { color:var(--text-muted); font-size:.66rem; cursor:pointer; }
@@ -2406,6 +2446,15 @@
       #panel-home > .cards-grid > .game-card > .game-card-body { min-width: 0; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; }
       #panel-home > .cards-grid .game-card-title, #panel-home > .cards-grid .game-card-desc { overflow-wrap: anywhere; }
       #panel-home > .cards-grid .game-card-desc { margin-bottom: 0; }
+      #marketGrid > .game-card { display:flex; flex-direction:column; min-width:0; overflow:hidden; }
+      #marketGrid > .game-card > .game-card-header { flex:0 0 88px; height:88px; }
+      #marketGrid > .game-card > .game-card-body { display:flex; flex:1; flex-direction:column; min-width:0; padding:12px; }
+      #marketGrid > .game-card .game-card-title { line-height:1.25; overflow-wrap:anywhere; }
+      #marketGrid > .game-card .game-card-desc { flex:1; margin-bottom:12px; line-height:1.4; }
+      #marketGrid > .game-card .game-card-meta { display:flex; flex-direction:column; align-items:stretch; gap:8px; margin-top:auto; }
+      #marketGrid > .game-card .game-card-meta .reward { display:flex; align-items:center; justify-content:space-between; gap:5px; min-width:0; white-space:nowrap; }
+      #marketGrid > .game-card .game-card-meta .reward > span:first-child { white-space:nowrap; }
+      #marketGrid > .game-card .shop-buy-button { width:100%; min-height:42px; }
       #panel-home > .cards-grid .quick-mission-title-row { align-items: flex-start; gap: 6px; }
       #panel-home > .cards-grid .quick-mission-title-row .game-card-title { flex: 1 1 auto; min-width: 0; }
       #panel-home > .cards-grid .quick-mission-progress { flex: 0 0 auto; gap: 4px; margin-left: 0; padding: 4px 6px; }
@@ -2599,25 +2648,33 @@
           </div>
           <h3 style="font-size:1.1rem;margin-bottom:14px;">Acesso rápido</h3>
           <div class="cards-grid">
-            <button type="button" class="game-card" onclick="openPokeCoinsStore()" style="padding:0;text-align:left;color:inherit;">
-              <div class="game-card-header poke-coins-quick-header"><img src="assets/daily-pokecoin.svg" alt="" /><span class="poke-coins-quick-header-copy"><strong>POKÉCOINS</strong><small>Central de pacotes</small></span></div>
-              <div class="game-card-body"><div class="game-card-title">PokéCoins</div><div class="game-card-desc">Veja os pacotes de PokéCoins e escolha uma opção.</div></div>
-            </button>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('dungeons')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('dungeons')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#1e3a2f,#0f1f18);"><img src="assets/exploration-magnifier.png" alt="" style="width:84px;height:84px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Exploração</div><div class="game-card-desc">Explore Kanto e encontre Pokémon selvagens.</div></div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('guide')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('guide')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#35265b,#171326);font-size:3rem;">&#128214;</div>
+              <div class="game-card-body"><div class="game-card-title">Guia de Progress&atilde;o</div><div class="game-card-desc">Veja os requisitos e descubra seu pr&oacute;ximo objetivo.</div></div>
             </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('missions')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('missions')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#2a1f3d,#15101f);"><img src="assets/missions-tablet.png" alt="" style="width:80px;height:88px;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="quick-mission-title-row"><div class="game-card-title">Missões</div><div class="quick-mission-progress"><strong id="quickMissionCount">0 / 0</strong><span>concluídas</span></div></div><div class="game-card-desc">Acompanhe objetivos e recompensas.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('guide')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('guide')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#35265b,#171326);font-size:3rem;">&#128214;</div>
-              <div class="game-card-body"><div class="game-card-title">Guia de Progress&atilde;o</div><div class="game-card-desc">Veja os requisitos e descubra seu pr&oacute;ximo objetivo.</div></div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('dungeons')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('dungeons')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#1e3a2f,#0f1f18);"><img src="assets/exploration-magnifier.png" alt="" style="width:84px;height:84px;object-fit:contain;image-rendering:pixelated;" /></div>
+              <div class="game-card-body"><div class="game-card-title">Exploração</div><div class="game-card-desc">Explore Kanto e encontre Pokémon selvagens.</div></div>
             </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('gyms')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('gyms')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#42351d,#201a10);"><img src="assets/gym-badges.png" alt="" style="width:154px;height:92px;object-fit:contain;" /></div>
               <div class="game-card-body"><div class="quick-mission-title-row"><div class="game-card-title">Ginásios</div><div class="quick-mission-progress"><strong id="quickGymCount">0 / 8</strong><span>insígnias</span></div></div><div class="game-card-desc">Desafie os líderes e conquiste insígnias.</div></div>
+            </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('center')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('center')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#3b2533,#1d141b);"><img src="assets/pokemon-center.png" alt="" style="width:128px;height:98px;object-fit:contain;image-rendering:pixelated;" /></div>
+              <div class="game-card-body"><div class="game-card-title">Centro Pokémon</div><div class="game-card-desc">Cuide da equipe e restaure HP, PP e status.</div></div>
+            </div>
+            <button type="button" class="game-card" onclick="openPokeCoinsStore()" style="padding:0;text-align:left;color:inherit;">
+              <div class="game-card-header poke-coins-quick-header"><img src="assets/daily-pokecoin.svg" alt="" /><span class="poke-coins-quick-header-copy"><strong>POKÉCOINS</strong><small>Central de pacotes</small></span></div>
+              <div class="game-card-body"><div class="game-card-title">PokéCoins</div><div class="game-card-desc">Veja os pacotes de PokéCoins e escolha uma opção.</div></div>
+            </button>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('market')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('market')}">
+              <div class="game-card-header" style="background:linear-gradient(135deg,#2b3c25,#141d11);"><img src="assets/poke-market.png" alt="Pok? Market" style="width:100px;height:98px;object-fit:contain;" /></div>
+              <div class="game-card-body"><div class="game-card-title">Poké Market</div><div class="game-card-desc">Compre itens para sua jornada.</div></div>
             </div>
             <div class="game-card" id="eliteFourHomeCard" role="button" tabindex="0" onclick="switchPanel('elite-four')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('elite-four')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#4a3522,#211728);height:126px;"><img src="assets/elite-four-card.png" alt="Elite Four de Kanto" style="width:100%;height:126px;object-fit:contain;image-rendering:pixelated;" /></div>
@@ -2647,14 +2704,6 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#38264d,#171226);"><img src="https://img.pokemondb.net/sprites/black-white/anim/normal/mewtwo.gif" alt="Mewtwo" width="112" height="96" style="width:112px;height:96px;object-fit:contain;image-rendering:pixelated;" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png'"></div>
               <div class="game-card-body"><div class="game-card-title">Big Boss: Mewtwo</div><div class="game-card-desc">Una até 5 treinadores contra um Mewtwo com HP compartilhado.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('center')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('center')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#3b2533,#1d141b);"><img src="assets/pokemon-center.png" alt="" style="width:128px;height:98px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Centro Pokémon</div><div class="game-card-desc">Cuide da equipe e restaure HP, PP e status.</div></div>
-            </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('market')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('market')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#2b3c25,#141d11);"><img src="assets/poke-market.png" alt="Pok? Market" style="width:100px;height:98px;object-fit:contain;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Poké Market</div><div class="game-card-desc">Compre itens para sua jornada.</div></div>
-            </div>
             <div class="game-card" id="itemCatalogHomeCard" role="button" tabindex="0" style="display:none" onclick="switchPanel('item-catalog')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('item-catalog')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#293949,#141d26);">🧰</div>
               <div class="game-card-body"><div class="game-card-title">Catálogo de Itens</div><div class="game-card-desc">Consulte itens, categorias e efeitos.</div></div>
@@ -2663,10 +2712,11 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#41234d,#1d1225);overflow:hidden;"><img src="assets/pvp-versus.png" alt="" style="width:230px;height:230px;max-width:none;flex:none;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">PvP Online</div><div class="game-card-desc">Desafie outro treinador por código de sala.</div></div>
             </div>
+
           </div>
         </div>
         <div class="panel" id="panel-admin">
-          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="returnFromPanel('admin')">← Voltar para Início</button>
           <div class="admin-panel-shell">
             <div class="admin-panel-hero">
               <div class="admin-panel-hero-copy"><div class="admin-panel-emblem" aria-hidden="true">🛡️</div><div><h2>Painel de administrador</h2><p>Gerencie recompensas e envie recursos diretamente para o save de um treinador.</p></div></div>
@@ -2843,8 +2893,7 @@
         </div>
         <div class="panel" id="panel-pokemon">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
-          <h2 class="panel-title">🎒 Meus Pokémon</h2>
-          <p class="panel-desc">Seu time atual.</p>
+          <div class="center-dashboard collection-dashboard"><section class="center-hero kanto-feature-hero collection-hero collection-pokemon-hero"><div class="center-hero-copy"><span class="center-kicker">Sua equipe</span><h3>Seus Pok&eacute;mon acompanham sua jornada.</h3><p>Consulte sua equipe, acompanhe os atributos e organize quem vai com voc&ecirc; para a pr&oacute;xima aventura.</p></div><div class="center-hero-art"><img src="assets/my-pokemon-ball.png" alt="Pok&eacute;bola da equipe" loading="lazy" /></div></section></div>
           <div class="cards-grid" id="pokemonTeam"></div>
         </div>
         
@@ -2879,6 +2928,16 @@
               </aside>
             </div>
           </div>
+          <dialog id="centerHealingDialog" class="center-healing-dialog" aria-labelledby="centerHealingTitle" aria-describedby="centerHealingMessage">
+            <div class="center-healing-inner">
+              <span class="center-healing-kicker">Centro Pok&eacute;mon</span>
+              <div class="center-healing-nurse" aria-hidden="true"><img src="assets/nurse-joy.png" alt="" /></div>
+              <h2 id="centerHealingTitle">Enfermeira Joy</h2>
+              <p id="centerHealingMessage" class="center-healing-message" aria-live="polite">Vamos cuidar dos seus Pok&eacute;mon. A recupera&ccedil;&atilde;o vai come&ccedil;ar!</p>
+              <div id="centerHealingBalls" class="center-healing-balls" aria-label="Pok&eacute;bolas em recupera&ccedil;&atilde;o"></div>
+              <div class="center-healing-actions"><button type="button" id="centerHealingContinue" class="btn" onclick="closeCenterHealingDialog()" disabled>Recuperando...</button></div>
+            </div>
+          </dialog>
         </div>
         <div class="panel" id="panel-market">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
@@ -2935,8 +2994,8 @@
 
         <div class="panel" id="panel-item-catalog">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <h2 class="panel-title">🧰 Catálogo de Itens</h2>
-          <p class="panel-desc">Consulte os itens Pokémon, suas categorias, efeitos e ícones.</p>
+          <h2 class="panel-title">Cat&aacute;logo de Itens</h2>
+          <p class="panel-desc">Consulte os itens Pok&eacute;mon, suas categorias, efeitos e &iacute;cones.</p>
           <div class="item-catalog-controls">
             <input id="itemCatalogSearch" type="search" placeholder="Buscar item ou efeito..." aria-label="Buscar itens" />
             <select id="itemCatalogCategory" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option></select>
@@ -2948,8 +3007,7 @@
 
         <div class="panel" id="panel-pc">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">&larr; Voltar para Perfil</button>
-          <h2 class="panel-title" style="display:flex;align-items:center;gap:10px;"><img src="assets/personal-pc.png" alt="" style="width:46px;height:46px;object-fit:contain;" />Meu PC</h2>
-          <p class="panel-desc">Guarde e retire Pok&eacute;mon e itens. Pok&eacute;mon capturados v&atilde;o para as boxes quando a equipe est&aacute; cheia.</p>
+          <div class="center-dashboard collection-dashboard"><section class="center-hero kanto-feature-hero collection-hero collection-pc-hero"><div class="center-hero-copy"><span class="center-kicker">Armazenamento do treinador</span><h3>Gerencie seus Pok&eacute;mon e itens.</h3><p>Guarde e retire recursos com facilidade. Pok&eacute;mon capturados v&atilde;o para as boxes quando a equipe est&aacute; cheia.</p></div><div class="center-hero-art"><img src="assets/personal-pc.png" alt="Computador pessoal do treinador" loading="lazy" /></div></section></div>
           <div role="tablist" aria-label="Conteudo do PC" style="display:flex;gap:8px;margin:0 0 18px;">
             <button type="button" id="pcTabPokemon" role="tab" aria-selected="true" class="btn" style="width:auto;margin:0;" onclick="switchPCStorageTab('pokemon')">Pok&eacute;mon</button>
             <button type="button" id="pcTabItems" role="tab" aria-selected="false" class="btn btn-secondary" style="width:auto;margin:0;" onclick="switchPCStorageTab('items')">Itens</button>
@@ -2975,13 +3033,12 @@
         </div>
         <div class="panel" id="panel-pokedex">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
-          <h2 class="panel-title">📖 Pokédex de Kanto</h2>
-          <p class="panel-desc">Registro de Pokémon vistos e capturados. <span id="pokedexProgress">0 / 151</span></p>
+          <div class="center-dashboard collection-dashboard"><section class="center-hero kanto-feature-hero collection-hero collection-pokedex-hero"><div class="center-hero-copy"><span class="center-kicker">Pesquisa de Kanto</span><h3>Complete sua Pok&eacute;dex.</h3><p>Consulte os Pok&eacute;mon vistos e capturados na regi&atilde;o. <span id="pokedexProgress">0 / 151</span> registrados.</p></div><div class="center-hero-art"><img src="assets/pokedex-device.png" alt="Pok&eacute;dex" loading="lazy" /></div></section></div>
           <div class="pokedex-grid" id="pokedexGrid"></div>
         </div>
 
         <div class="panel" id="panel-social">
-          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="returnFromPanel('social')">&#8592; Voltar para In&iacute;cio</button>
           <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero"><div class="center-hero-copy"><span class="center-kicker">Conex&otilde;es de treinador</span><h3 id="socialHubTitle">Central de Amizade</h3><p>Encontre treinadores, converse, troque Pok&eacute;mon e marque batalhas.</p></div><div class="center-hero-art"><img class="social-friendship-icon" src="assets/friends-group.svg" alt="Ícone de amizade" loading="lazy" /></div></section></div>
           <section class="social-hub" aria-labelledby="socialHubTitle">
             <div class="social-content">
@@ -3342,6 +3399,26 @@
     </div>
   </div>
 
+  <dialog id="missionDetailsDialog" class="mission-details-dialog" aria-labelledby="missionDetailsTitle">
+    <div class="mission-details-inner">
+      <div class="mission-details-header">
+        <div class="mission-details-heading">
+          <div class="mission-details-icon" id="missionDetailsIcon"></div>
+          <div>
+            <span class="mission-details-kicker">DETALHES DA MISSÃO</span>
+            <h2 id="missionDetailsTitle"></h2>
+            <span class="mission-details-status" id="missionDetailsStatus"></span>
+          </div>
+        </div>
+        <button type="button" class="mission-details-close" onclick="closeMissionDetails()" aria-label="Fechar detalhes da missão">×</button>
+      </div>
+      <p class="mission-details-description" id="missionDetailsDescription"></p>
+      <div class="mission-details-meta">
+        <div><span>Progresso</span><strong id="missionDetailsProgress"></strong></div>
+        <div><span>Recompensa</span><strong id="missionDetailsReward"></strong></div>
+      </div>
+    </div>
+  </dialog>
   <dialog id="pokeCoinsStoreDialog" aria-labelledby="pokeCoinsStoreTitle">
     <div class="poke-coins-store">
       <div class="poke-coins-store-head">
@@ -4723,7 +4800,10 @@
         learnMovesOnLevelUp(poke);
       }
       const gainedLevels = poke.level - oldLevel;
-      if (gainedLevels > 0) onMissionEvent('pokemon_level', gainedLevels);
+      if (gainedLevels > 0) {
+        onMissionEvent('pokemon_level', gainedLevels);
+        if (canEvolve(poke)) queueAutomaticEvolution(poke);
+      }
       return gainedLevels;
     }
 
@@ -5117,6 +5197,30 @@
     };
 
     let pendingEvolution = null;
+    const automaticEvolutionQueue = [];
+
+    function queueAutomaticEvolution(pokemon) {
+      if (!pokemon || !canEvolve(pokemon)) return;
+      if (battle) {
+        battle._pendingEvos = battle._pendingEvos || [];
+        if (!battle._pendingEvos.includes(pokemon)) battle._pendingEvos.push(pokemon);
+        return;
+      }
+      if (!automaticEvolutionQueue.includes(pokemon) && pendingEvolution?.poke !== pokemon) automaticEvolutionQueue.push(pokemon);
+      setTimeout(startNextAutomaticEvolution, 350);
+    }
+
+    function startNextAutomaticEvolution() {
+      if (battle || pendingEvolution || document.getElementById('evoOverlay')?.classList.contains('active')) return;
+      while (automaticEvolutionQueue.length) {
+        const pokemon = automaticEvolutionQueue.shift();
+        const evolution = canEvolve(pokemon);
+        if (evolution) {
+          startEvolution(pokemon, evolution);
+          return;
+        }
+      }
+    }
 
     function canEvolve(poke) {
       const evo = EVOLUTIONS[poke.id];
@@ -5196,9 +5300,11 @@
 
     function closeEvolution() {
       document.getElementById('evoOverlay').classList.remove('active');
+      const evolvedPokemon = pendingEvolution?.poke;
       const didEvolve = Boolean(pendingEvolution);
       pendingEvolution = null;
       if (didEvolve) onMissionEvent('evolution', 1);
+      if (evolvedPokemon && canEvolve(evolvedPokemon)) queueAutomaticEvolution(evolvedPokemon);
       refreshPartyUI();
       saveGame();
       // Update welcome sprite if needed
@@ -5210,6 +5316,7 @@
         }
       }
       processPendingLevelUpMoves();
+      setTimeout(startNextAutomaticEvolution, 350);
     }
 
     const STARTERS = {
@@ -5988,10 +6095,12 @@
       if (!player || getMissionState('oak_talk') !== 'active') return;
       if (!Number.isInteger(player.oakIntroStep)) player.oakIntroStep = 0;
       renderOakIntro();
+      playOakIntroBgm();
     }
 
     function closeOakIntro() {
       document.getElementById('oakIntroOverlay').classList.remove('active');
+      stopOakIntroBgm();
       if (player) renderMissions();
     }
 
@@ -6013,6 +6122,7 @@
         player.missions.progress.oak_talk = 1;
         if (tryCompleteMission('oak_talk')) {
           document.getElementById('oakIntroOverlay').classList.remove('active');
+          stopOakIntroBgm();
           return;
         }
         player.oakIntroFinished = false;
@@ -6452,7 +6562,7 @@
         }
         const opacity = st === 'locked' ? 'opacity:0.55;' : '';
         return `
-          <div class="mission-item" style="${opacity}">
+          <div class="mission-item" data-mission-id="${m.id}" style="${opacity}">
             <div class="mission-icon" style="background:${m.color};">${m.icon}</div>
             <div class="mission-info">
               <h4>${m.name}</h4>
@@ -6474,6 +6584,55 @@
       const quickMissionCount = document.getElementById('quickMissionCount');
       if (quickMissionCount) quickMissionCount.textContent = `${player.missionsDone} / ${MISSIONS.length}`;
     }
+
+    const missionDetailsStatusLabels = { available: 'Disponível', active: 'Em andamento', locked: 'Bloqueada', done: 'Concluída' };
+    function openMissionDetails(missionId) {
+      const mission = MISSIONS.find(item => item.id === missionId);
+      const dialog = document.getElementById('missionDetailsDialog');
+      if (!mission || !dialog || !player) return;
+      const state = getMissionState(missionId);
+      const progress = getMissionProgress(mission);
+      const target = missionTargetNum(mission);
+      let progressLabel = missionDetailsStatusLabels[state];
+      if (state === 'active' || state === 'done') {
+        if (mission.type === 'gym') progressLabel = state === 'done' ? 'Insígnia obtida' : 'Desafio pendente';
+        else if (mission.id === 'dojo_chuck_reward') progressLabel = player.dojoRewardChoice ? `Recompensa escolhida: ${player.dojoRewardChoice}` : 'Escolha pendente';
+        else if (mission.type === 'dungeon') progressLabel = progress >= 1 ? 'Concluído' : '0/1';
+        else progressLabel = `${Math.min(progress, target)}/${target}`;
+      }
+      document.getElementById('missionDetailsIcon').innerHTML = mission.icon;
+      document.getElementById('missionDetailsIcon').style.background = mission.color;
+      document.getElementById('missionDetailsTitle').textContent = mission.name;
+      document.getElementById('missionDetailsStatus').textContent = missionDetailsStatusLabels[state];
+      document.getElementById('missionDetailsDescription').textContent = mission.desc;
+      document.getElementById('missionDetailsProgress').textContent = progressLabel;
+      document.getElementById('missionDetailsReward').textContent = mission.id === 'dojo_chuck_reward'
+        ? 'Escolha 1: Hitmonlee ou Hitmonchan'
+        : `+${Number(mission.xp).toLocaleString('pt-BR')} XP · ₽ ${Number(mission.money).toLocaleString('pt-BR')}`;
+      if (!dialog.open) dialog.showModal();
+    }
+    function closeMissionDetails() {
+      const dialog = document.getElementById('missionDetailsDialog');
+      if (dialog?.open) dialog.close();
+    }
+    let lastMissionCardTap = { id: null, time: 0 };
+    document.addEventListener('pointerup', event => {
+      const target = event.target instanceof Element ? event.target : null;
+      const card = target?.closest('.mission-item');
+      if (!card || target.closest('button,a,input,select,textarea')) {
+        lastMissionCardTap = { id: null, time: 0 };
+        return;
+      }
+      const id = card.dataset.missionId;
+      if (!id) return;
+      const now = Date.now();
+      if (lastMissionCardTap.id === id && now - lastMissionCardTap.time <= 450) {
+        lastMissionCardTap = { id: null, time: 0 };
+        openMissionDetails(id);
+      } else {
+        lastMissionCardTap = { id, time: now };
+      }
+    });
 
     let selectedGender = null, selectedStarter = null, player = null, pendingTrainerAvatar = null;
     const TRAINER_AVATARS = [
@@ -7387,7 +7546,7 @@
         id: 'other', title: 'Outros',
         items: [
           { key: 'ss_ticket', name: 'S.S. TICKET', desc: 'Ingresso para embarcar no navio de luxo S.S. Anne, em Vermilion.' },
-          { key: 'rarecandy', name: 'Doce Raro', sprite: 'rarecandy', desc: 'Sobe 1 nível' },
+          { key: 'rarecandy', name: 'Rare Candy', sprite: 'rarecandy', desc: 'Unidade individual. Sobe 1 n?vel.' },
           { key: 'naturebox', name: 'Caixa de Nature', sprite: 'naturebox', desc: 'Escolha uma natureza para alterar os efeitos de um Pokémon.' },
           { key: 'shiny_charm', name: 'Shiny Charm', sprite: 'shiny_charm', desc: 'Triplica a chance de encontrar um Pok\u00e9mon Shiny selvagem enquanto estiver na mochila.' },
           { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', desc: 'Escolha um atributo para maximizar seu IV para 31.' },
@@ -8155,7 +8314,6 @@
         renderNatureBoxMintPicker();
         return;
       }
-      const targetRoot = document.getElementById('bagUseTarget');
       const targets = player.party
         .map((pokemon, index) => ({ pokemon, index }))
         .filter(({ pokemon }) => canUseItemOnPokemon(item, pokemon));
@@ -8187,27 +8345,34 @@
               : 'Nenhum Pokémon precisa recuperar HP ou cura de status.', 'error');
         return;
       }
-
-      targetRoot.innerHTML = `
-        <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;">
-          <div style="font-weight:600;margin-bottom:10px;">Escolha um Pokémon para usar ${item.name}:</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            ${targets.map(({ pokemon, index }) => `
-              <button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="useBagItemOnPokemon('${key}',${index})">
-                ${pokemon.name} · Nv. ${pokemon.level} · ${['pp', 'maxPp', 'allPp', 'allMaxPp', 'ppUp', 'ppMax'].includes(item.kind)
-                  ? `Golpes com PP baixo: ${pokemon.moves.filter(move => move.pp < move.maxPp).length}`
-                  : item.kind === 'statusCure'
-                    ? getPokemonStatusLabel(pokemon)
-                  : `HP ${Math.max(0, Math.round(pokemon.hp))}/${pokemon.maxHp}`}
-              </button>
-            `).join('')}
-            <button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="cancelBagItemUse()">Cancelar</button>
-          </div>
-        </div>
-      `;
-      targetRoot.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      renderBagPokemonTargetPicker(item, key, targets);
     }
 
+    function renderBagPokemonTargetPicker(item, itemKey, targets) {
+      let dialog = document.getElementById('bagPokemonTargetDialog');
+      if (!dialog) {
+        document.body.insertAdjacentHTML('beforeend', `<dialog id="bagPokemonTargetDialog" class="social-trade-dialog" aria-labelledby="bagPokemonTargetTitle"><div class="social-trade-dialog-inner"><header class="social-trade-dialog-header"><div><span class="evcap-dialog-kicker">USO DE ITEM · ${escapeHTML(item.name.toUpperCase())}</span><h2 id="bagPokemonTargetTitle">Escolha um Pokémon</h2><p id="bagPokemonTargetDescription"></p></div><button type="button" class="social-trade-dialog-close" aria-label="Fechar" onclick="closeBagPokemonTargetPicker()">&times;</button></header><div class="bag-target-picker-banner" id="bagPokemonTargetBanner"></div><div id="bagPokemonTargetList" class="social-trade-pokemon-list"></div><footer class="social-trade-dialog-actions"><button type="button" class="btn btn-secondary" onclick="closeBagPokemonTargetPicker()">Cancelar</button></footer></div></dialog>`);
+        dialog = document.getElementById('bagPokemonTargetDialog');
+        dialog.addEventListener('click', event => { if (event.target === dialog) closeBagPokemonTargetPicker(); });
+        dialog.addEventListener('cancel', () => cancelBagItemUse());
+      }
+      document.getElementById('bagPokemonTargetDescription').textContent = `${item.name}: ${item.desc || 'Selecione um Pokémon para receber este item.'}`;
+      document.getElementById('bagPokemonTargetBanner').innerHTML = `${itemIcon(item.sprite || item.key, '', item.icon || '🎒')}<div><strong>${escapeHTML(item.name)}</strong><small>${escapeHTML(item.desc || 'Escolha quem receberá o item.')}</small></div>`;
+      document.getElementById('bagPokemonTargetList').innerHTML = `<div class="social-trade-grid">${targets.map(({ pokemon, index }) => `<button type="button" class="social-trade-option bag-target-pokemon-option" onclick="selectBagPokemonTarget('${itemKey}',${index})"><img src="${SPRITE_FB(pokemon.id)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_POKEMON(pokemon)}'"><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${Math.max(0, Math.round(pokemon.hp))}/${pokemon.maxHp} HP</small></button>`).join('')}</div>`;
+      if (!dialog.open) dialog.showModal();
+    }
+
+    function selectBagPokemonTarget(itemKey, partyIndex) {
+      const dialog = document.getElementById('bagPokemonTargetDialog');
+      if (dialog?.open) dialog.close();
+      useBagItemOnPokemon(itemKey, partyIndex);
+    }
+
+    function closeBagPokemonTargetPicker() {
+      const dialog = document.getElementById('bagPokemonTargetDialog');
+      if (dialog?.open) dialog.close();
+      cancelBagItemUse();
+    }
     function renderStoneEvolutionTargets(stoneKey) {
       const stone = BAG_FIELD_ITEMS.find(item => item.key === stoneKey && item.kind === 'evolution');
       const targetRoot = document.getElementById('bagUseTarget');
@@ -8668,7 +8833,7 @@
       { id: 'carbos', key: 'carbos', name: 'Carbos', desc: 'Aumenta 10 EVs de Velocidade.', category: 'medicine', kind: 'ev', stat: 'speed', amount: 10, price: 9800 },
       { id: 'calcium', key: 'calcium', name: 'Calcium', desc: 'Aumenta 10 EVs de Ataque Especial.', category: 'medicine', kind: 'ev', stat: 'specialAttack', amount: 10, price: 9800 },
       { id: 'zinc', key: 'zinc', name: 'Zinc', desc: 'Aumenta 10 EVs de Defesa Especial.', category: 'medicine', kind: 'ev', stat: 'specialDefense', amount: 10, price: 9800 },
-      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy 10x', desc: 'Sobe um nível.', category: 'medicine', kind: 'level', qty: 10, price: 15 },
+      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy 10x', desc: 'Pacote com 10 unidades de Rare Candy. Cada uso consome 1 unidade e sobe 1 n?vel.', category: 'medicine', kind: 'level', qty: 10, price: 15 },
       { id: 'exp-charm', key: 'exp_charm', name: 'Exp. Charm', desc: 'Consumível: aumenta em 50% a experiência recebida em batalhas por 1 hora.', category: 'medicine', kind: 'expCharm', price: 10 }
     ];
     const EXTRA_SPECIAL_ITEMS = [
@@ -8693,7 +8858,7 @@
       if (catalogCategory && !BAG_CATEGORIES.some(category => category.items.some(entry => entry.key === item.key))) {
         catalogCategory.items.push({ key: item.key, name: item.name, sprite: item.key, desc: item.desc });
       }
-      BAG_FIELD_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount, stat: item.stat });
+      BAG_FIELD_ITEMS.push({ key: item.key, name: item.key === 'rarecandy' ? 'Rare Candy' : item.name, sprite: item.key, kind: item.kind, amount: item.amount, stat: item.stat });
       if (!['ev', 'level', 'mint', 'tm', 'expCharm'].includes(item.kind)) BATTLE_BAG_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount });
       if (!['mint'].includes(item.kind) && !SHOP_ITEMS.some(entry => entry.key === item.key)) {
         SHOP_ITEMS.push({ id: item.key, name: item.name, icon: item.kind === 'ev' ? '💊' : item.kind === 'level' ? '🍬' : '🧪', sprite: item.key, desc: item.desc, price: item.price, key: item.key, kind: item.kind, qty: item.qty });
@@ -8850,6 +9015,16 @@
 
     let centerSelectionOwner = null;
     let centerSelectedPokemon = new Set();
+    let centerHealingInProgress = false;
+    let centerHealingCommitted = false;
+    let centerHealingSucceeded = false;
+    let centerHealingPokemon = [];
+    let centerHealingAudio = null;
+    let centerHealingAnalyser = null;
+    let centerHealingAudioContext = null;
+    let centerHealingSourceNode = null;
+    let centerHealingPulseFrame = null;
+    let centerHealingFallbackTimer = null;
     function pokemonNeedsCenterTreatment(pokemon) {
       return Boolean(pokemon && (pokemon.hp < pokemon.maxHp || pokemon.status || (pokemon.moves || []).some(move => move.pp < move.maxPp)));
     }
@@ -8903,18 +9078,18 @@
         return '<label class="center-pokemon-card '+(checked?'selected':'')+'"><span class="center-pokemon-sprite-wrap"><img class="center-pokemon-sprite" src="'+SPRITE_POKEMON(pokemon)+'" alt="'+escapeHTML(pokemon.name)+'" loading="lazy" onerror="this.onerror=null;this.src=\''+SPRITE_FB(pokemon.id)+'\'" /></span><input class="center-pokemon-select" type="checkbox" '+(checked?'checked':'')+' '+disabled+' aria-label="Selecionar '+escapeHTML(pokemon.name)+' para curar" onchange="toggleCenterPokemonSelection('+index+', this.checked)" /><div class="center-pokemon-details"><span class="center-pokemon-title" title="'+getPokemonGenderLabel(pokemon)+'">'+getPokemonDisplayNameHTML(pokemon)+(pokemon===player.poke?' &#9733;':'')+'</span><span class="center-pokemon-meta">Nv. '+pokemon.level+' &middot; '+types+'</span><span class="center-pokemon-hp-row"><span>HP</span><strong>'+hp+'/'+maxHp+'</strong></span><span class="center-pokemon-hp-track" role="progressbar" aria-label="HP de '+escapeHTML(pokemon.name)+'" aria-valuemin="0" aria-valuemax="'+maxHp+'" aria-valuenow="'+hp+'"><i style="width:'+pct+'%;background:'+color+'"></i></span><span class="center-pokemon-status '+statusClass+'">'+escapeHTML(status)+'</span>'+moveDetails+'</div></label>';
       }).join(''):'<div class="center-empty-state"><strong>Nenhum Pok&eacute;mon na equipe</strong><span>Adicione um Pok&eacute;mon para usar o Centro.</span></div>';
     }
-    function treatPokemonAtCenter(pokemonList) {
-      if (!player || !Array.isArray(player.party) || !player.party.length) return;
+    function treatPokemonAtCenter(pokemonList, silentSuccess = false) {
+      if (!player || !Array.isArray(player.party) || !player.party.length) return false;
       const needingCare = pokemonList.filter(pokemonNeedsCenterTreatment);
       if (!needingCare.length) {
-        showToast('Os Pokémon selecionados já estão totalmente curados!', 'error');
-        return;
+        showToast('Os Pok\u00e9mon selecionados j\u00e1 est\u00e3o totalmente curados!', 'error');
+        return false;
       }
       const cost = getHealCost(needingCare);
       const useCenterCard = player.money < cost;
       if (useCenterCard && player.centerCards <= 0) {
-        showToast('Dinheiro insuficiente! Precisa de ₽ ' + cost, 'error');
-        return;
+        showToast('Dinheiro insuficiente! Precisa de \u20bd ' + cost, 'error');
+        return false;
       }
       if (useCenterCard) player.centerCards -= 1;
       else player.money -= cost;
@@ -8933,13 +9108,168 @@
       refreshCenterUI();
       refreshPartyUI();
       saveGame();
-      showToast(useCenterCard
-        ? `${needingCare.length} Pokémon curado(s) com um cartão gratuito. Restam ${player.centerCards}.`
-        : `${needingCare.length} Pokémon curado(s)! - ₽ ${cost.toLocaleString('pt-BR')}`);
+      if (!silentSuccess) showToast(useCenterCard
+        ? `${needingCare.length} Pok\u00e9mon curado(s) com um cart\u00e3o gratuito. Restam ${player.centerCards}.`
+        : `${needingCare.length} Pok\u00e9mon curado(s)! - \u20bd ${cost.toLocaleString('pt-BR')}`);
+      return true;
     }
+    function ensureCenterHealingAudioGraph() {
+      if (!centerHealingAudio || !window.AudioContext && !window.webkitAudioContext) return false;
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!centerHealingAudioContext) {
+          centerHealingAudioContext = new AudioContextClass();
+          centerHealingAnalyser = centerHealingAudioContext.createAnalyser();
+          centerHealingAnalyser.fftSize = 256;
+          centerHealingAnalyser.smoothingTimeConstant = 0;
+          centerHealingSourceNode = centerHealingAudioContext.createMediaElementSource(centerHealingAudio);
+          centerHealingSourceNode.connect(centerHealingAnalyser);
+          centerHealingAnalyser.connect(centerHealingAudioContext.destination);
+        }
+        if (centerHealingAudioContext.state === 'suspended') centerHealingAudioContext.resume();
+        return true;
+      } catch (error) {
+        console.warn('[Centro Pokémon] Não foi possível sincronizar o brilho com o áudio:', error);
+        return false;
+      }
+    }
+    function startCenterHealingPulse() {
+      if (!centerHealingAnalyser || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+      if (centerHealingPulseFrame) cancelAnimationFrame(centerHealingPulseFrame);
+      const samples = new Uint8Array(centerHealingAnalyser.fftSize);
+      let level = 0;
+      const update = () => {
+        if (!centerHealingInProgress) { stopCenterHealingPulse(); return; }
+        centerHealingAnalyser.getByteTimeDomainData(samples);
+        let sum = 0;
+        for (let i = 0; i < samples.length; i++) { const value = (samples[i] - 128) / 128; sum += value * value; }
+        const rms = Math.sqrt(sum / samples.length);
+        const target = Math.max(0, Math.min(1, (rms - 0.025) / 0.19));
+        level += (target - level) * (target > level ? 0.42 : 0.14);
+        const brightness = (1 + level * 0.85).toFixed(2);
+        const glow = Math.round(5 + level * 23);
+        const scale = (1 + level * 0.1).toFixed(3);
+        document.querySelectorAll('#centerHealingBalls .center-healing-ball').forEach(ball => {
+          ball.style.filter = `brightness(${brightness})`;
+          ball.style.boxShadow = `0 0 ${glow}px rgba(74,222,128,${(0.12 + level * 0.72).toFixed(2)}),0 4px 9px #0007`;
+          ball.style.transform = `scale(${scale})`;
+        });
+        centerHealingPulseFrame = requestAnimationFrame(update);
+      };
+      centerHealingPulseFrame = requestAnimationFrame(update);
+    }
+    function stopCenterHealingPulse() {
+      if (centerHealingPulseFrame) cancelAnimationFrame(centerHealingPulseFrame);
+      centerHealingPulseFrame = null;
+      document.querySelectorAll('#centerHealingBalls .center-healing-ball').forEach(ball => {
+        ball.style.removeProperty('filter');
+        ball.style.removeProperty('box-shadow');
+        ball.style.removeProperty('transform');
+      });
+    }
+    function commitCenterHealing() {
+      if (centerHealingCommitted) return centerHealingSucceeded;
+      centerHealingCommitted = true;
+      centerHealingSucceeded = treatPokemonAtCenter(centerHealingPokemon, true);
+      if (centerHealingSucceeded) {
+        document.getElementById('centerHealingMessage').textContent = 'Prontinho! Seus Pok\u00e9mon est\u00e3o totalmente recuperados. Volte sempre!';
+        const button = document.getElementById('centerHealingContinue');
+        button.textContent = 'Obrigado, Enfermeira Joy';
+        button.disabled = false;
+      }
+      return centerHealingSucceeded;
+    }
+    function finishCenterHealingSequence() {
+      if (!centerHealingInProgress) return;
+      clearTimeout(centerHealingFallbackTimer);
+      centerHealingFallbackTimer = null;
+      const success = commitCenterHealing();
+      centerHealingInProgress = false;
+      stopCenterHealingPulse();
+      if (centerHealingAudio) { centerHealingAudio.pause(); centerHealingAudio.currentTime = 0; }
+      centerHealingPokemon = [];
+      const dialog = document.getElementById('centerHealingDialog');
+      dialog?.classList.remove('is-healing', 'center-healing-css-fallback');
+      if (!success) { dialog?.close(); return; }
+      const button = document.getElementById('centerHealingContinue');
+      button.focus();
+    }
+    function startCenterHealingSequence(pokemonList) {
+      centerHealingInProgress = true;
+      centerHealingCommitted = false;
+      centerHealingSucceeded = false;
+      centerHealingPokemon = pokemonList.slice();
+      const dialog = document.getElementById('centerHealingDialog');
+      const balls = document.getElementById('centerHealingBalls');
+      const button = document.getElementById('centerHealingContinue');
+      document.getElementById('centerHealingMessage').textContent = 'Vamos cuidar dos seus Pok\u00e9mon. A recupera\u00e7\u00e3o vai come\u00e7ar!';
+      balls.innerHTML = pokemonList.map(() => '<span class="center-healing-ball" aria-hidden="true"></span>').join('');
+      dialog.classList.add('is-healing');
+      button.textContent = 'Recuperando...';
+      button.disabled = true;
+      dialog.showModal();
+      if (SFX && SFX.isMuted && SFX.isMuted()) {
+        centerHealingFallbackTimer = setTimeout(finishCenterHealingSequence, 1800);
+        return;
+      }
+      try {
+        if (!centerHealingAudio) {
+          centerHealingAudio = new Audio('assets/pokemon-healed.mp3');
+          centerHealingAudio.preload = 'auto';
+          centerHealingAudio.loop = false;
+          centerHealingAudio.volume = 0.55;
+          centerHealingAudio.addEventListener('timeupdate', () => {
+            const duration = centerHealingAudio.duration;
+            if (centerHealingInProgress && Number.isFinite(duration) && duration - centerHealingAudio.currentTime <= 1.0) commitCenterHealing();
+          });
+          centerHealingAudio.addEventListener('ended', finishCenterHealingSequence);
+        }
+        centerHealingAudio.currentTime = 0;
+        const hasAudioGraph = ensureCenterHealingAudioGraph();
+        dialog.classList.toggle('center-healing-css-fallback', !hasAudioGraph);
+        centerHealingFallbackTimer = setTimeout(finishCenterHealingSequence, 5000);
+        centerHealingAudio.onplaying = hasAudioGraph ? startCenterHealingPulse : null;
+        const playback = centerHealingAudio.play();
+        if (playback && playback.catch) playback.catch(() => {
+          clearTimeout(centerHealingFallbackTimer);
+          dialog.classList.add('center-healing-css-fallback');
+          centerHealingFallbackTimer = setTimeout(finishCenterHealingSequence, 1800);
+        });
+      } catch (error) {
+        clearTimeout(centerHealingFallbackTimer);
+        dialog.classList.add('center-healing-css-fallback');
+        centerHealingFallbackTimer = setTimeout(finishCenterHealingSequence, 1800);
+      }
+    }
+    function closeCenterHealingDialog() {
+      if (centerHealingInProgress) {
+        commitCenterHealing();
+        centerHealingInProgress = false;
+        clearTimeout(centerHealingFallbackTimer);
+        centerHealingFallbackTimer = null;
+        stopCenterHealingPulse();
+        if (centerHealingAudio) { centerHealingAudio.pause(); centerHealingAudio.currentTime = 0; }
+        centerHealingPokemon = [];
+        document.getElementById('centerHealingDialog')?.classList.remove('is-healing', 'center-healing-css-fallback');
+      }
+      document.getElementById('centerHealingDialog')?.close();
+    }
+    document.getElementById('centerHealingDialog').addEventListener('cancel', event => {
+      if (centerHealingInProgress) event.preventDefault();
+    });
     function healSelectedAtCenter() {
-      if (!player) return;
-      treatPokemonAtCenter(player.party.filter(pokemon => centerSelectedPokemon.has(pokemon)));
+      if (!player || centerHealingInProgress) return;
+      const selected = player.party.filter(pokemon => centerSelectedPokemon.has(pokemon) && pokemonNeedsCenterTreatment(pokemon));
+      if (!selected.length) {
+        treatPokemonAtCenter(selected);
+        return;
+      }
+      const cost = getHealCost(selected);
+      if (player.money < cost && player.centerCards <= 0) {
+        treatPokemonAtCenter(selected);
+        return;
+      }
+      startCenterHealingSequence(selected);
     }
     let activeMarketTab = 'buy';
 
@@ -10341,10 +10671,10 @@
         adminCreateSupporterCode();
       };
       const itemSelect = document.getElementById('adminGrantItem');
-      if (!itemSelect.options.length) {
-        const itemList = [...new Map([...BAG_FIELD_ITEMS, ...BATTLE_BAG_ITEMS, ...SHOP_ITEMS].filter(item => item.key).map(item => [item.key, item])).values()];
-        itemSelect.innerHTML = itemList.map(item => `<option value="${escapeHTML(item.key)}">${escapeHTML(item.name)}</option>`).join('');
-      }
+      const previousItemKey = itemSelect.value;
+      const itemList = getCurrentAdminItemList();
+      itemSelect.innerHTML = itemList.map(item => `<option value="${escapeHTML(item.key)}">${escapeHTML(item.name)}</option>`).join('');
+      if (itemList.some(item => item.key === previousItemKey)) itemSelect.value = previousItemKey;
       document.getElementById('adminTrainerSearch').oninput = adminSearchTrainers;
       document.getElementById('adminGrantType').onchange = adminUpdateGrantFields;
       document.getElementById('adminPokemonSearch').oninput = adminSearchPokemonCatalog;
@@ -10607,8 +10937,17 @@
       }
     }
     function adminGetItemLabel(key) {
-      const item=[...new Map([...BAG_FIELD_ITEMS,...BATTLE_BAG_ITEMS,...SHOP_ITEMS].filter(entry=>entry.key).map(entry=>[entry.key,entry])).values()].find(entry=>entry.key===key);
+      const item=getCurrentAdminItemList().find(entry=>entry.key===key);
       return item?.name||key;
+    }
+    function getCurrentAdminItemList() {
+      const items = new Map();
+      const add = item => {
+        if (item?.key && !items.has(item.key)) items.set(item.key, { key: item.key, name: item.name || item.key });
+      };
+      BAG_CATEGORIES.forEach(category => category.items?.forEach(add));
+      [...BAG_FIELD_ITEMS, ...BATTLE_BAG_ITEMS, ...SHOP_ITEMS].forEach(add);
+      return [...items.values()].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
     }
     async function adminPromptRemoveCurrency(field,label,balance) {
       const amount=Number(window.prompt(`Quantidade de ${label} para remover (m\u00e1ximo ${balance}):`,String(balance)));
@@ -10759,6 +11098,11 @@
         showToast('Falha ao enviar recurso: ' + error.message, 'error');
       } finally { button.disabled = !adminSelectedTrainer; button.textContent = 'Enviar recurso'; }
     }
+    const panelReturnTargets = { admin: 'home', social: 'home' };
+    function returnFromPanel(id) {
+      switchPanel(panelReturnTargets[id] || 'home');
+    }
+
     function switchPanel(id) {
       if (['pokedex', 'dungeons'].includes(id) && player && !isParcelDelivered()) {
         showParcelAccessPopup();
@@ -10773,6 +11117,12 @@
         if (blockReason) { showToast(blockReason, 'error'); id = 'home'; }
       }
       if (id === 'silph-co' && !GameRules.canAccessSilphCo(isAdminAccount(), hasDefeatedSabrinaGym())) { showToast('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.', 'error'); id = 'home'; }
+      const currentPanelId = document.querySelector('.panel.active')?.id.replace('panel-', '') || 'home';
+      if (['admin', 'social'].includes(id) && currentPanelId !== id) panelReturnTargets[id] = currentPanelId;
+      for (const panelId of ['admin', 'social']) {
+        const backButton = document.querySelector('#panel-' + panelId + ' .panel-back-button');
+        if (backButton) backButton.textContent = panelReturnTargets[panelId] === 'profile' ? '← Voltar para Perfil' : '← Voltar para Início';
+      }
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       const panel = document.getElementById('panel-'+id);
       if (panel) panel.classList.add('active');
@@ -10787,7 +11137,10 @@
       if (id === 'market') refreshMarketUI();
       if (id === 'bag') renderBag();
       if (id === 'item-catalog') renderItemCatalog();
-      if (id === 'pokemon') refreshPartyUI();
+      if (id === 'pokemon') {
+        refreshPartyUI();
+        player?.party?.forEach(queueAutomaticEvolution);
+      }
       if (id === 'pokedex') renderPokedex();
       if (id === 'profile') { pendingTrainerAvatar = null; refreshProfileUI(); }
       if (id === 'social') socialRefresh();
@@ -11733,8 +12086,11 @@
       const muted = SFX.toggleMute();
       const btn = document.getElementById('btnMuteSfx');
       if (btn) btn.textContent = muted ? '🔇' : '🔊';
-      if (muted) stopBattleBgm();
-      else if (document.getElementById('battleOverlay')?.classList.contains('active')) playBattleBgm(activeBattleBgmTrack);
+      if (muted) { stopBattleBgm(); stopOakIntroBgm(); }
+      else if (document.getElementById('battleOverlay')?.classList.contains('active')) {
+        if (activeBattleBgmTrack === 'wild-victory') playWildVictoryBgm();
+        else if (!['wild-victory-pending', 'silent'].includes(activeBattleBgmTrack)) playBattleBgm(activeBattleBgmTrack);
+      } else if (document.getElementById('oakIntroOverlay')?.classList.contains('active')) playOakIntroBgm();
       if (!muted) SFX.click();
     }
     function syncMuteButton() {
@@ -11745,7 +12101,13 @@
 
     // ===== BATTLE BGM =====
     const BATTLE_BGM_SRC = 'assets/wild-battle-trainer.mp3';
+    const WILD_VICTORY_BGM_SRC = 'assets/wild-victory.mp3';
+    const POKEMON_CAPTURE_SFX_SRC = 'assets/pokemon-capture.mp3';
+    const OAK_INTRO_BGM_SRC = 'assets/professor-oak.mp3';
     let battleBgm = null;
+    let wildVictoryBgm = null;
+    let pokemonCaptureSfx = null;
+    let oakIntroBgm = null;
     let battleBgmTimer = null;
     let battleBgmCtx = null;
     let activeBattleBgmTrack = 'procedural';
@@ -11771,6 +12133,73 @@
       } catch (e) {
         startProceduralBattleBgm();
       }
+    }
+    function playWildVictoryBgm() {
+      activeBattleBgmTrack = 'wild-victory';
+      try {
+        if (SFX && SFX.isMuted && SFX.isMuted()) return;
+        stopBattleBgm();
+        if (!wildVictoryBgm) {
+          wildVictoryBgm = new Audio(WILD_VICTORY_BGM_SRC);
+          wildVictoryBgm.loop = false;
+          wildVictoryBgm.preload = 'auto';
+          wildVictoryBgm.volume = 0.28;
+          wildVictoryBgm.addEventListener('ended', () => {
+            if (activeBattleBgmTrack === 'wild-victory') activeBattleBgmTrack = 'silent';
+          });
+        }
+        wildVictoryBgm.currentTime = 0;
+        const playback = wildVictoryBgm.play();
+        if (playback && playback.catch) playback.catch(() => {});
+      } catch (e) {}
+    }
+    function stopWildVictoryBgm() {
+      if (!wildVictoryBgm) return;
+      try {
+        wildVictoryBgm.pause();
+        wildVictoryBgm.currentTime = 0;
+      } catch (e) {}
+    }
+    function playPokemonCaptureSound() {
+      if (SFX && SFX.isMuted && SFX.isMuted()) return;
+      stopBattleBgm();
+      try {
+        if (!pokemonCaptureSfx) {
+          pokemonCaptureSfx = new Audio(POKEMON_CAPTURE_SFX_SRC);
+          pokemonCaptureSfx.loop = false;
+          pokemonCaptureSfx.preload = 'auto';
+          pokemonCaptureSfx.volume = 0.55;
+        }
+        pokemonCaptureSfx.currentTime = 0;
+        const playback = pokemonCaptureSfx.play();
+        if (playback && playback.catch) playback.catch(() => {});
+      } catch (e) {}
+    }
+    function stopPokemonCaptureSound() {
+      if (!pokemonCaptureSfx) return;
+      try {
+        pokemonCaptureSfx.pause();
+        pokemonCaptureSfx.currentTime = 0;
+      } catch (e) {}
+    }
+    function playOakIntroBgm() {
+      if (SFX && SFX.isMuted && SFX.isMuted()) return;
+      try {
+        stopBattleBgm();
+        if (!oakIntroBgm) {
+          oakIntroBgm = new Audio(OAK_INTRO_BGM_SRC);
+          oakIntroBgm.loop = true;
+          oakIntroBgm.preload = 'auto';
+          oakIntroBgm.volume = 0.28;
+        }
+        oakIntroBgm.currentTime = 0;
+        const playback = oakIntroBgm.play();
+        if (playback && playback.catch) playback.catch(() => {});
+      } catch (e) {}
+    }
+    function stopOakIntroBgm() {
+      if (!oakIntroBgm) return;
+      try { oakIntroBgm.pause(); oakIntroBgm.currentTime = 0; } catch (e) {}
     }
     function startProceduralBattleBgm() {
       try {
@@ -11813,8 +12242,10 @@
         }, 150);
       } catch (e) {}
     }
-    function stopBattleBgm() {
+    function stopBattleBgm(preserveCaptureSound = false) {
       try {
+        stopWildVictoryBgm();
+        if (!preserveCaptureSound) stopPokemonCaptureSound();
         if (battleBgm) {
           battleBgm.pause();
           battleBgm.currentTime = 0;
@@ -13197,7 +13628,16 @@
       const bag = document.getElementById('bagMenu');
       if (bag) bag.style.display = 'none';
       const result = document.getElementById('battleResult');
-      result.classList.add('show');
+      if (won && battle.dungeon) {
+        activeBattleBgmTrack = captured ? 'silent' : 'wild-victory-pending';
+        stopBattleBgm(Boolean(captured));
+        setTimeout(() => {
+          result.classList.add('show');
+          if (!captured) playWildVictoryBgm();
+        }, 350);
+      } else {
+        result.classList.add('show');
+      }
 
       // Gym: if won one pokemon, send next
       if (won && battle.isGym && battle.enemy.currentHp <= 0) {
@@ -13293,8 +13733,8 @@
         battle.playerMaxHp = player.poke.maxHp;
         updatePlayerExperienceBar();
         if (leveled) SFX.levelUp();
-        if (captured) SFX.captureSuccess();
-        else SFX.victory();
+        if (captured && !battle.dungeon) SFX.captureSuccess();
+        else if (!battle.dungeon) SFX.victory();
         document.getElementById('resultTitle').textContent = captured ? '🔴 Capturado!' : '🎉 Vitória!';
         document.getElementById('resultDesc').textContent = captured
           ? `${capturedName} agora faz parte da sua equipe!`
@@ -13441,6 +13881,7 @@
     }
 
     let pendingNicknameCapture = null;
+    let pendingCaptureNicknameAfterBattle = null;
 
     function askCaughtPokemonNickname(pokemon, onComplete) {
       pendingNicknameCapture = { pokemon, onComplete };
@@ -13516,7 +13957,7 @@
         if (didCapture) {
           if (ball) ball.classList.add('caught');
           eSpr.classList.add('captured');
-          SFX.captureSuccess();
+          playPokemonCaptureSound();
           setLog(`Gotcha! ${getPokemonDisplayName(battle.enemy)} foi capturado!`);
           let caughtMoves;
           try { caughtMoves = await getFireRedMovesForLevel(battle.enemy.id, battle.enemy.level); }
@@ -13548,22 +13989,21 @@
           onMissionEvent('capture', caught.id);
           setTimeout(() => {
             if (ball) ball.remove();
-            askCaughtPokemonNickname(caught, namedPokemon => {
-              if (player.party.length < 6) {
-                player.party.push(namedPokemon);
-                onMissionEvent('party_changed', player.party.length);
+            if (player.party.length < 6) {
+              player.party.push(caught);
+              onMissionEvent('party_changed', player.party.length);
+            } else {
+              const boxNum = depositToPC(caught);
+              if (boxNum >= 0) {
+                setLog(`Equipe cheia! ${caught.name} foi enviado para a Box ${boxNum + 1} do PC.`);
               } else {
-                const boxNum = depositToPC(namedPokemon);
-                if (boxNum >= 0) {
-                  setLog(`Equipe cheia! ${namedPokemon.name} foi enviado para a Box ${boxNum + 1} do PC.`);
-                } else {
-                  setLog(`PC lotado! ${namedPokemon.name} não pôde ser guardado.`);
-                }
+                setLog(`PC lotado! ${caught.name} não pôde ser guardado.`);
               }
-              renderPartyBalls();
-              saveGame();
-              endBattle(true, true, namedPokemon.name);
-            });
+            }
+            pendingCaptureNicknameAfterBattle = caught;
+            renderPartyBalls();
+            saveGame();
+            endBattle(true, true, caught.name);
           }, 600);
         } else {
           if (ball) ball.remove();
@@ -14290,9 +14730,20 @@
     }
 
     function closeBattle() {
+      if (pendingCaptureNicknameAfterBattle) {
+        const capturedPokemon = pendingCaptureNicknameAfterBattle;
+        pendingCaptureNicknameAfterBattle = null;
+        document.getElementById('battleResult').classList.remove('show');
+        askCaughtPokemonNickname(capturedPokemon, () => {
+          refreshPartyUI();
+          saveGame();
+          closeBattle();
+        });
+        return;
+      }
       stopBattleBgm();
       const wasDefeated = Boolean(battle && battle.defeatHandled);
-      const pendingEvo = battle && battle._pendingEvo;
+      const pendingEvos = [...new Set([...(battle?._pendingEvos || []), ...(battle?._pendingEvo ? [battle._pendingEvo] : [])])];
       // Garantir que o HP da batalha ficou salvo no Pokémon
       if (battle && !battle.defeatHandled && player && player.poke && typeof battle.playerHp === 'number') {
         player.poke.hp = Math.max(0, Math.min(player.poke.maxHp, battle.playerHp));
@@ -14303,9 +14754,8 @@
       refreshPartyUI();
       if (wasDefeated) switchPanel('center');
       saveGame();
-      if (pendingEvo && canEvolve(pendingEvo)) {
-        setTimeout(() => startEvolution(pendingEvo), 450);
-      }
+      pendingEvos.forEach(queueAutomaticEvolution);
+      setTimeout(startNextAutomaticEvolution, 450);
     }
 
     function refreshPartyUI() {
@@ -14322,12 +14772,11 @@
           </div>
           <div class="game-card-body">
             <div class="game-card-title" title="${getPokemonGenderLabel(p)}">${getPokemonDisplayNameHTML(p)}${p === player.poke ? ' ★' : ''}${canEvolve(p) ? ' ✨' : ''}</div>
-            <div class="game-card-desc">Nv. ${p.level} · HP ${Math.round(p.hp)}/${p.maxHp}${p.status ? ` · ${getPokemonStatusLabel(p)}` : ''}${canEvolve(p) ? ' · Pode evoluir!' : ''}</div>
+            <div class="game-card-desc">Nv. ${p.level} · HP ${Math.round(p.hp)}/${p.maxHp}${p.status ? ` · ${getPokemonStatusLabel(p)}` : ''}${canEvolve(p) ? ' · Evolução automática' : ''}</div>
             <div style="font-size:0.72rem;color:var(--text-muted);margin:4px 0 8px;">${p.level >= MAX_POKEMON_LEVEL ? 'EXP Máxima' : `EXP ${getPokemonExperienceProgress(p).current.toLocaleString('pt-BR')} / ${getPokemonExperienceProgress(p).required.toLocaleString('pt-BR')}`}</div>
             <span class="type-badge ${p.typeClass || 'type-planta'}">${p.type || '—'}</span>
             <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
               <button class="btn btn-secondary" style="padding:6px 10px;font-size:0.75rem;margin:0;" onclick="event.stopPropagation();switchActivePokemon(${idx})">Ativar</button>
-              ${canEvolve(p) ? `<button class="btn" style="padding:6px 10px;font-size:0.75rem;margin:0;" onclick="event.stopPropagation();startEvolution(player.party[${idx}])">Evoluir</button>` : ''}
             </div>
           </div>
         </div>`).join('');
