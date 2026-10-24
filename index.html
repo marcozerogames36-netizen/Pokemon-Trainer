@@ -828,6 +828,9 @@
       transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; cursor: pointer;
     }
     .game-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.35); border-color: #3a3a4a; }
+    .game-card.dungeon-locked { opacity:.68; cursor:not-allowed; }
+    .game-card.dungeon-locked:hover { transform:none; box-shadow:none; border-color:var(--border); }
+    .dungeon-lock-reason { margin-top:8px; color:var(--text-muted); font-size:.78rem; }
     .game-card-header { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; border-radius: 15px 15px 0 0; }
     .item-tooltip-card::after {
       content: attr(data-item-tooltip); position: absolute; z-index: 20;
@@ -5679,9 +5682,30 @@
       return Math.round(range.min + (range.max - range.min) * progress);
     }
 
+    const DUNGEON_REQUIRED_BADGES = {
+      mt_moon: 'Rocha', route4: 'Rocha',
+      route24: 'Cascata',
+      diglett_cave: 'Trovão', rock_tunnel: 'Trovão', power: 'Trovão', tower: 'Trovão',
+      industrial_sewer: 'Arco-Íris',
+      safari: 'Alma',
+      cerulean: 'Pântano',
+      seafoam: 'Vulcão', mansion: 'Vulcão', cinnabar_volcano: 'Vulcão',
+      victory: 'Terra'
+    };
+
+    function getDungeonAccessReason(dungeon) {
+      if (!dungeon || dungeon.mapKey === 'viridian' || isAdminAccount()) return '';
+      const requiredBadge = DUNGEON_REQUIRED_BADGES[dungeon.mapKey];
+      if (!requiredBadge || player?.badgesList?.includes(requiredBadge)) return '';
+      const gym = GYMS.find(entry => entry.badge === requiredBadge);
+      return 'Derrote ' + (gym?.leader || 'o líder do ginásio') + ' e conquiste a Insígnia ' + requiredBadge + ' para liberar ' + dungeon.name + '.';
+    }
+
     function dungeonCardHTML(d) {
       const dc = {easy:'diff-easy',medium:'diff-medium',hard:'diff-hard',extreme:'diff-extreme'};
       const dl = {easy:'Fácil',medium:'Médio',hard:'Difícil',extreme:'Extremo'};
+      const accessReason = getDungeonAccessReason(d);
+      const locked = Boolean(accessReason);
       let headerInner;
       const mapSrc = d.mapKey && typeof DUNGEON_MAPS !== 'undefined' ? DUNGEON_MAPS[d.mapKey] : null;
       if (mapSrc) {
@@ -5695,15 +5719,16 @@
         ? `background:${d.color};padding:0;overflow:hidden;height:120px;`
         : `background:${d.color};display:flex;align-items:center;justify-content:center;height:110px;`;
       return `
-        <div class="game-card" onclick="startDungeonBattle(${escapeHTML(JSON.stringify(d.name))})">
+        <div class="game-card${locked ? ' dungeon-locked' : ''}"${locked ? ' aria-disabled="true"' : ''} onclick="startDungeonBattle(${escapeHTML(JSON.stringify(d.name))})">
           <div class="game-card-header" style="${headerStyle}">${headerInner}</div>
           <div class="game-card-body">
             <div class="game-card-title">${d.name}</div>
             <div class="game-card-desc">${d.desc}</div>
             <div class="game-card-meta">
-              <span class="difficulty ${dc[d.difficulty]}">${dl[d.difficulty]}</span>
-              <span class="reward">₽ ${DUNGEON_MONEY_REWARDS[d.mapKey].min}–${DUNGEON_MONEY_REWARDS[d.mapKey].max} por vitória</span>
+              <span class="difficulty ${dc[d.difficulty]}">${locked ? 'Bloqueado' : dl[d.difficulty]}</span>
+              <span class="reward">${locked ? `Requer Insígnia ${escapeHTML(DUNGEON_REQUIRED_BADGES[d.mapKey])}` : `₽ ${DUNGEON_MONEY_REWARDS[d.mapKey].min}–${DUNGEON_MONEY_REWARDS[d.mapKey].max} por vitória`}</span>
             </div>
+            ${locked ? `<div class="game-card-desc dungeon-lock-reason">${escapeHTML(accessReason)}</div>` : ''}
           </div>
         </div>`;
     }
@@ -12431,6 +12456,12 @@
         showParcelAccessPopup();
         activeMissionTab = 'open';
         switchPanel('missions');
+        return;
+      }
+      const selectedDungeon = DUNGEONS.find(area => area.name === dungeonName);
+      const accessReason = getDungeonAccessReason(selectedDungeon);
+      if (accessReason) {
+        showToast(accessReason, 'error');
         return;
       }
       if (!player.poke) {
