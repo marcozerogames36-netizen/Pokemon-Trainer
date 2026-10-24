@@ -2081,9 +2081,8 @@
     .center-healing-balls { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; min-height:38px; margin:20px 0; }
     .center-healing-ball { position:relative; width:30px; height:30px; overflow:hidden; border:2px solid #16151b; border-radius:50%; background:linear-gradient(to bottom,#fb4a55 0 46%,#211e26 46% 55%,#f5f4f2 55%); box-shadow:0 0 0 1px #ffffff30,0 4px 9px #0007; }
     .center-healing-ball::after { position:absolute; top:50%; left:50%; width:8px; height:8px; border:2px solid #211e26; border-radius:50%; background:#fff; content:''; transform:translate(-50%,-50%); }
-    .center-healing-dialog.is-healing .center-healing-ball { transition:filter 35ms linear,box-shadow 35ms linear,transform 35ms linear; will-change:filter,transform; }
-    .center-healing-dialog.center-healing-css-fallback .center-healing-ball { animation:center-healing-fallback .24s steps(1,end) infinite; }
-    @keyframes center-healing-fallback { 0%,45% { filter:brightness(1.9); box-shadow:0 0 18px #4ade80c9,0 0 36px #22c55e66; transform:scale(1.09); } 46%,100% { filter:brightness(1); box-shadow:0 0 0 1px #ffffff30,0 4px 9px #0007; transform:scale(1); } }
+    .center-healing-dialog.is-healing .center-healing-ball { animation:center-healing-pulse .52s ease-in-out infinite alternate; transition:filter 35ms linear,box-shadow 35ms linear,transform 35ms linear; will-change:filter,transform; }
+    @keyframes center-healing-pulse { from { filter:brightness(1.12); box-shadow:0 0 5px #4ade8055,0 4px 9px #0007; transform:scale(1); } to { filter:brightness(1.9); box-shadow:0 0 18px #4ade80c9,0 0 36px #22c55e66; transform:scale(1.09); } }
     .center-healing-actions { display:flex; justify-content:center; margin-top:18px; }
     .center-healing-actions .btn { width:auto; min-width:150px; margin:0; }
     @media (prefers-reduced-motion:reduce) { .center-healing-dialog.is-healing .center-healing-ball { transition:none; filter:brightness(1.25); box-shadow:0 0 10px #4ade8070; } }
@@ -14743,7 +14742,11 @@
       }
       stopBattleBgm();
       const wasDefeated = Boolean(battle && battle.defeatHandled);
-      const pendingEvos = [...new Set([...(battle?._pendingEvos || []), ...(battle?._pendingEvo ? [battle._pendingEvo] : [])])];
+      const pendingEvos = [...new Set([
+        ...(battle?._pendingEvos || []),
+        ...(battle?._pendingEvo ? [battle._pendingEvo] : []),
+        ...(player?.party || []).filter(pokemon => canEvolve(pokemon))
+      ])];
       // Garantir que o HP da batalha ficou salvo no Pokémon
       if (battle && !battle.defeatHandled && player && player.poke && typeof battle.playerHp === 'number') {
         player.poke.hp = Math.max(0, Math.min(player.poke.maxHp, battle.playerHp));
