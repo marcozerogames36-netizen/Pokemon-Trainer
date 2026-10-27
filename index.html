@@ -197,6 +197,45 @@
     .social-trade-dialog { width:min(760px,calc(100vw - 28px)); max-width:none; max-height:min(88vh,760px); margin:auto; padding:0; overflow:hidden; border:1px solid rgba(168,85,247,.55); border-radius:18px; background:var(--card); color:var(--text); box-shadow:0 24px 80px #000b,0 0 32px #9333ea24; }
     .social-trade-dialog::backdrop { background:rgba(5,4,10,.78); backdrop-filter:blur(5px); }
     .social-trade-dialog-inner { display:flex; flex-direction:column; max-height:min(88vh,760px); padding:20px; }
+    .flamebox-dialog { width:min(610px,calc(100vw - 24px)); max-width:none; max-height:calc(100dvh - 24px); margin:auto; padding:0; overflow:hidden; border:1px solid rgba(249,115,22,.58); border-radius:20px; background:radial-gradient(ellipse at 50% 0%,rgba(249,115,22,.16),transparent 54%),var(--card); color:var(--text); box-shadow:0 24px 80px #000c,0 0 42px #f973161c; }
+    .flamebox-dialog::backdrop { background:rgba(5,4,10,.82); backdrop-filter:blur(7px); }
+    .flamebox-inner { display:flex; flex-direction:column; gap:16px; max-height:calc(100dvh - 24px); overflow:auto; padding:clamp(17px,4vw,26px); }
+    .flamebox-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+    .flamebox-kicker { color:#fb923c; font-size:.7rem; font-weight:900; letter-spacing:.13em; }
+    .flamebox-heading h2 { margin:4px 0; font-size:1.35rem; }
+    .flamebox-heading p,.flamebox-status { margin:0; color:var(--text-muted); font-size:.88rem; line-height:1.5; }
+    .flamebox-close { width:38px; height:38px; flex:0 0 38px; border:1px solid var(--border); border-radius:11px; background:transparent; color:var(--text-muted); font-size:1.2rem; cursor:pointer; }
+    .flamebox-odds { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
+    .flamebox-odds span { padding:9px 6px; border:1px solid var(--border); border-radius:10px; background:#ffffff05; color:var(--text-muted); text-align:center; font-size:.7rem; }
+    .flamebox-odds strong { display:block; margin-top:3px; color:var(--text); font-size:.85rem; }
+    .flamebox-reel-window { position:relative; height:126px; overflow:hidden; border:1px solid rgba(249,115,22,.27); border-radius:15px; background:linear-gradient(90deg,#111018,#211611 50%,#111018); }
+    .flamebox-reel-window::before { position:absolute; z-index:2; inset:0 auto 0 50%; width:86px; transform:translateX(-50%); border:1px solid #fb923c88; border-radius:12px; background:#fb923c10; content:""; pointer-events:none; }
+    .flamebox-reel-track { display:flex; align-items:center; gap:8px; width:max-content; height:100%; padding:0 8px; transform:translateX(0); }
+    .flamebox-reel-track.spinning { transition:transform 9s cubic-bezier(.08,.68,.08,1); }
+    .flamebox-reel-tile { display:grid; flex:0 0 80px; place-items:center; width:80px; height:96px; border:1px solid #ffffff12; border-radius:12px; background:#14131a; }
+    .flamebox-reel-tile img { width:68px; height:68px; object-fit:contain; image-rendering:pixelated; }
+    .flamebox-reel-tile.winner { border-color:#fb923c; background:#fb923c20; box-shadow:0 0 22px #f9731640; }
+    .flamebox-winner { display:flex; align-items:center; gap:14px; padding:12px 14px; border:1px solid #fb923c44; border-radius:14px; background:linear-gradient(110deg,#f9731618,#251b19); }
+    .flamebox-winner[hidden] { display:none; }
+    .flamebox-winner img { width:78px; height:78px; object-fit:contain; image-rendering:pixelated; }
+    .flamebox-winner strong,.flamebox-winner small { display:block; }
+    .flamebox-winner small { margin-top:5px; color:var(--text-muted); }
+    .flamebox-prize-dialog { width:min(450px,calc(100vw - 24px)); text-align:center; }
+    .flamebox-prize-dialog .flamebox-inner { align-items:center; gap:12px; text-align:center; }
+    .flamebox-prize-scene { position:relative; display:grid; place-items:center; width:100%; min-height:190px; overflow:hidden; border:1px solid #fb923c35; border-radius:18px; background:radial-gradient(circle,rgba(251,146,60,.2),rgba(34,21,23,.65) 58%,transparent 76%); }
+    .flamebox-prize-sprite { position:relative; z-index:1; width:164px; height:164px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 0 18px #fb923c88); animation:flameboxPrizeReveal .75s cubic-bezier(.18,.85,.28,1.35) both,flameboxPrizeGlow 1.8s ease-in-out .75s infinite alternate; }
+    .flamebox-confetti { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+    .flamebox-confetti i { position:absolute; top:-16px; left:var(--x); width:8px; height:13px; border-radius:2px; background:var(--color); opacity:0; }
+    .flamebox-confetti.is-celebrating i { animation:flameboxConfetti 2.8s ease-in var(--delay) 1 both; }
+    .flamebox-confetti i:nth-child(3n) { width:7px; height:7px; border-radius:50%; }
+    .flamebox-prize-rarity { padding:5px 10px; border:1px solid #fb923c55; border-radius:999px; background:#fb923c16; color:#fdba74; font-size:.75rem; font-weight:800; }
+    .flamebox-prize-name { margin:0; font-size:1.5rem; }
+    .flamebox-prize-destination { margin:0; color:var(--text-muted); font-size:.9rem; }
+    @keyframes flameboxPrizeReveal { from { transform:scale(.25) rotate(-18deg); opacity:0; } to { transform:scale(1) rotate(0); opacity:1; } }
+    @keyframes flameboxPrizeGlow { from { filter:drop-shadow(0 0 12px #fb923c66); } to { filter:drop-shadow(0 0 30px #fb923cdd); } }
+    @keyframes flameboxConfetti { 0% { transform:translate3d(0,-8px,0) rotate(0); opacity:0; } 12% { opacity:1; } 100% { transform:translate3d(18px,220px,0) rotate(520deg); opacity:0; } }
+    @media(prefers-reduced-motion:reduce) { .flamebox-prize-sprite,.flamebox-confetti i { animation:none; } }
+    @media(max-width:480px) { .flamebox-odds { grid-template-columns:repeat(2,minmax(0,1fr)); } .flamebox-reel-window { height:112px; } }
     .social-trade-dialog-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
     .social-trade-dialog-header h2 { margin:0; font-size:1.15rem; }
     .social-trade-dialog-header p { margin:5px 0 0; color:var(--text-muted); font-size:.86rem; }
@@ -2874,7 +2913,7 @@
         </div>
         <div class="panel" id="panel-battle-tower">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero"><div class="center-hero-copy"><span class="center-kicker">Desafio competitivo</span><h3>Teste sua equipe na Torre de Batalha.</h3><p>Enfrente treinadores com equipes completas. Cada vit&oacute;ria in&eacute;dita concede BP; voc&ecirc; pode voltar para novas batalhas.</p></div><div class="center-hero-art"><img src="assets/battle-tower-castle.png" alt="Torre de Batalha" loading="lazy" /></div></section></div>
+          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero"><div class="center-hero-copy"><span class="center-kicker">Desafio competitivo</span><h3>Teste sua equipe na Torre de Batalha.</h3><p>Vit&oacute;rias in&eacute;ditas d&atilde;o a recompensa completa; revanches tamb&eacute;m rendem BP, em menor quantidade.</p></div><div class="center-hero-art"><img src="assets/battle-tower-castle.png" alt="Torre de Batalha" loading="lazy" /></div></section></div>
           <div class="stat-pill" style="display:inline-flex;margin:0 0 18px">Recompensas coletadas: <strong id="towerProgress">0/20</strong> · BP: <strong id="towerBattlePoints">0</strong></div>
           <div class="cards-grid" id="battleTowerGrid"></div>
         </div>
@@ -7385,6 +7424,7 @@
       bottlecap: 'assets/bottle-cap.png',
       goldbottlecap: 'assets/gold-bottle-cap.png',
       evcap: 'assets/ev-cap.png',
+      flamebox: 'assets/flame-box.svg',
       vip: 'assets/vip-emblem.png'
     };
     const ITEM_SPRITE_FB = {
@@ -7456,6 +7496,7 @@
       bottlecap: 'assets/bottle-cap.png',
       goldbottlecap: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/gold-bottle-cap.png',
       evcap: 'assets/ev-cap.png',
+      flamebox: 'assets/flame-box.svg',
       vip: 'assets/vip-emblem.png'
     };
     function itemIcon(key, cls, fallbackIcon = '🎒') {
@@ -7577,6 +7618,7 @@
           { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', desc: 'Escolha um atributo para maximizar seu IV para 31.' },
           { key: 'goldbottlecap', name: 'Gold Bottle Cap', sprite: 'goldbottlecap', desc: 'Maximiza os seis IVs do Pokémon para 31.' },
           { key: 'evcap', name: 'EV Cap', sprite: 'evcap', desc: 'Redistribui os EVs atuais: define dois atributos em 252 e zera os demais.' },
+          { key: 'flamebox', name: 'Flame Box', sprite: 'flamebox', desc: 'Abra para receber um Pokémon aleatório de qualquer geração. Pokémon lendários e míticos não podem sair.' },
           { key: 'vip', name: 'VIP', sprite: 'vip', desc: 'Adiciona à sua conta todos os benefícios que o VIP proporciona.' },
           { key: 'parcelbox', name: 'Caixa da Parcel', desc: 'Encomenda do Professor Carvalho' }
         ]
@@ -7646,7 +7688,7 @@
         silk_scarf: 0, silver_powder: 0, hard_stone: 0, sharp_beak: 0, poison_barb: 0,
         spell_tag: 0, dragon_fang: 0, never_melt_ice: 0, metal_coat: 0, black_glasses: 0,
         amulet_coin: 0, shell_bell: 0, macho_brace: 0,
-        rarecandy: 0, naturebox: 0, shiny_charm: 0, bottlecap: 0, goldbottlecap: 0, evcap: 0, vip: 0, parcelbox: 0, ss_ticket: 0
+        rarecandy: 0, naturebox: 0, shiny_charm: 0, bottlecap: 0, goldbottlecap: 0, evcap: 0, flamebox: 0, vip: 0, parcelbox: 0, ss_ticket: 0
       };
       [...EXTRA_MEDICINE_ITEMS, ...EXTRA_BATTLE_ITEMS, ...(EXTRA_TM_ITEMS || [])].forEach(item => { if (defaults[item.key] === undefined) defaults[item.key] = 0; });
       Object.keys(HELD_ITEM_INFO).forEach(key => { if (defaults[key] === undefined) defaults[key] = 0; });
@@ -8140,7 +8182,8 @@
       { key: 'naturebox', name: 'Caixa de Nature', sprite: 'naturebox', kind: 'natureBox' },
       { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', kind: 'ivMax' },
       { key: 'goldbottlecap', name: 'Gold Bottle Cap', sprite: 'goldbottlecap', kind: 'ivMaxAll' },
-      { key: 'evcap', name: 'EV Cap', sprite: 'evcap', kind: 'evMax' }
+      { key: 'evcap', name: 'EV Cap', sprite: 'evcap', kind: 'evMax' },
+      { key: 'flamebox', name: 'Flame Box', sprite: 'flamebox', kind: 'flameBox' }
     ];
 
     const STONE_EVOLUTIONS = {
@@ -8327,6 +8370,10 @@
         useExperienceCharm();
         return;
       }
+      if (item.kind === 'flameBox') {
+        openFlameBox();
+        return;
+      }
       if (item.kind === 'tm') {
         renderTechnicalMachineTargets(key, false);
         return;
@@ -8371,6 +8418,156 @@
         return;
       }
       renderBagPokemonTargetPicker(item, key, targets);
+    }
+
+    const FLAME_BOX_ODDS = [
+      { id: 'common', label: 'Comum', chance: 55, minCaptureRate: 180 },
+      { id: 'uncommon', label: 'Incomum', chance: 28, minCaptureRate: 100, maxCaptureRate: 179 },
+      { id: 'rare', label: 'Rara', chance: 13, minCaptureRate: 45, maxCaptureRate: 99 },
+      { id: 'very-rare', label: 'Muito rara', chance: 4, maxCaptureRate: 44 }
+    ];
+    let flameBoxSpeciesCatalogPromise = null;
+    let flameBoxOpening = false;
+
+    function parseCsvLine(line) {
+      const fields = [];
+      let value = '';
+      let quoted = false;
+      for (let index = 0; index < line.length; index++) {
+        const char = line[index];
+        if (char === '"') {
+          if (quoted && line[index + 1] === '"') { value += '"'; index++; }
+          else quoted = !quoted;
+        } else if (char === ',' && !quoted) {
+          fields.push(value); value = '';
+        } else value += char;
+      }
+      fields.push(value);
+      return fields;
+    }
+
+    async function getFlameBoxSpeciesCatalog() {
+      if (!flameBoxSpeciesCatalogPromise) {
+        flameBoxSpeciesCatalogPromise = (async () => {
+          const response = await fetch('https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_species.csv', { cache: 'force-cache' });
+          if (!response.ok) throw new Error('O catálogo de Pokémon não respondeu. Tente abrir a Flame Box novamente.');
+          const rows = (await response.text()).split(/\r?\n/).filter(Boolean);
+          if (rows.length < 2) throw new Error('Não foi possível carregar a lista de Pokémon da Flame Box.');
+          const header = parseCsvLine(rows[0]);
+          const columns = { id: header.indexOf('id'), name: header.indexOf('identifier'), captureRate: header.indexOf('capture_rate'), legendary: header.indexOf('is_legendary'), mythical: header.indexOf('is_mythical') };
+          if (Object.values(columns).some(index => index < 0)) throw new Error('O catálogo de Pokémon está em um formato inesperado.');
+          const species = rows.slice(1).map(row => {
+            const fields = parseCsvLine(row);
+            return { id: Number(fields[columns.id]), name: fields[columns.name], captureRate: Number(fields[columns.captureRate]), legendary: fields[columns.legendary] === '1', mythical: fields[columns.mythical] === '1' };
+          }).filter(entry => Number.isInteger(entry.id) && entry.id > 0 && entry.name && entry.captureRate > 0 && !entry.legendary && !entry.mythical);
+          if (!species.length) throw new Error('Nenhum Pokémon elegível foi encontrado para a Flame Box.');
+          return species;
+        })().catch(error => { flameBoxSpeciesCatalogPromise = null; throw error; });
+      }
+      return flameBoxSpeciesCatalogPromise;
+    }
+
+    function selectFlameBoxPokemon(species) {
+      const tiers = FLAME_BOX_ODDS.map(tier => ({ ...tier, members: species.filter(entry => entry.captureRate >= (tier.minCaptureRate || 0) && entry.captureRate <= (tier.maxCaptureRate || 255)) })).filter(tier => tier.members.length);
+      const availableChance = tiers.reduce((sum, tier) => sum + tier.chance, 0);
+      let roll = Math.random() * availableChance;
+      const tier = tiers.find(entry => (roll -= entry.chance) < 0) || tiers[tiers.length - 1];
+      const pokemon = tier.members[Math.floor(Math.random() * tier.members.length)];
+      return { ...pokemon, rarity: tier };
+    }
+
+    function ensureFlameBoxDialog() {
+      let dialog = document.getElementById('flameBoxDialog');
+      if (dialog) return dialog;
+      document.body.insertAdjacentHTML('beforeend', `<dialog id="flameBoxDialog" class="flamebox-dialog" aria-labelledby="flameBoxTitle"><div class="flamebox-inner"><header class="flamebox-heading"><div><span class="flamebox-kicker">CAIXA ESPECIAL · TODAS AS GERAÇÕES</span><h2 id="flameBoxTitle">Flame Box</h2><p>Pokémon lendários e míticos não podem ser sorteados.</p></div><button type="button" class="flamebox-close" aria-label="Fechar" onclick="closeFlameBox()">&times;</button></header><div class="flamebox-odds" aria-label="Chances por raridade">${FLAME_BOX_ODDS.map(tier => `<span>${tier.label}<strong>${tier.chance}%</strong></span>`).join('')}</div><div class="flamebox-reel-window" aria-label="Roleta de Pokémon"><div class="flamebox-reel-track" id="flameBoxReel"></div></div><p class="flamebox-status" id="flameBoxStatus" aria-live="polite">Preparando a abertura...</p></div></dialog>`);
+      dialog = document.getElementById('flameBoxDialog');
+      dialog.addEventListener('cancel', event => { if (flameBoxOpening) event.preventDefault(); });
+      dialog.addEventListener('click', event => { if (event.target === dialog && !flameBoxOpening) closeFlameBox(); });
+      const confetti = Array.from({ length: 28 }, (_, index) => `<i style="--x:${(index * 37 + 9) % 96}%;--delay:${((index * 13) % 24) / 10}s;--color:${['#fb923c','#facc15','#4ade80','#60a5fa','#e879f9'][index % 5]}"></i>`).join('');
+      document.body.insertAdjacentHTML('beforeend', `<dialog id="flameBoxPrizeDialog" class="flamebox-dialog flamebox-prize-dialog" aria-labelledby="flameBoxPrizeTitle"><div class="flamebox-inner"><span class="flamebox-kicker">PRÊMIO DA FLAME BOX</span><h2 id="flameBoxPrizeTitle">Pokémon conquistado!</h2><div class="flamebox-prize-scene"><div class="flamebox-confetti" id="flameBoxConfetti" aria-hidden="true">${confetti}</div><img id="flameBoxPrizeSprite" class="flamebox-prize-sprite" src="" alt="" /></div><span class="flamebox-prize-rarity" id="flameBoxPrizeRarity"></span><h3 class="flamebox-prize-name" id="flameBoxPrizeName"></h3><p class="flamebox-prize-destination" id="flameBoxPrizeDestination"></p><button type="button" class="btn" onclick="closeFlameBox()">Continuar</button></div></dialog>`);
+      return dialog;
+    }
+
+    function closeFlameBox() {
+      if (flameBoxOpening) return;
+      document.getElementById('flameBoxDialog')?.close();
+      document.getElementById('flameBoxPrizeDialog')?.close();
+    }
+
+    async function openFlameBox() {
+      if (!player || battle || flameBoxOpening || getItemQty('flamebox') < 1) return;
+      ensurePC();
+      if (player.party.length >= 6 && !player.pc.boxes.some(box => box.some(slot => !slot))) {
+        showToast('Sua equipe e o PC estão cheios. Libere um espaço antes de abrir a Flame Box.', 'error');
+        return;
+      }
+      const dialog = ensureFlameBoxDialog();
+      const status = document.getElementById('flameBoxStatus');
+      const reel = document.getElementById('flameBoxReel');
+      const closeButton = dialog.querySelector('.flamebox-close');
+      flameBoxOpening = true;
+      closeButton.hidden = true;
+      status.textContent = 'Preparando a lista de Pokémon de todas as gerações...';
+      reel.classList.remove('spinning');
+      reel.style.transform = 'translateX(0)';
+      if (!dialog.open) dialog.showModal();
+      try {
+        const catalog = await getFlameBoxSpeciesCatalog();
+        const selected = selectFlameBoxPokemon(catalog);
+        status.textContent = 'A Flame Box está se abrindo...';
+        const pokemon = await adminBuildPokemonFromCatalog({ id: selected.id, name: selected.name }, 10);
+        const targetIndex = 42;
+        const reelEntries = Array.from({ length: targetIndex + 9 }, () => catalog[Math.floor(Math.random() * catalog.length)]);
+        reelEntries[targetIndex] = selected;
+        reel.innerHTML = reelEntries.map((entry, index) => `<span class="flamebox-reel-tile${index === targetIndex ? ' winner' : ''}"><img src="${SPRITE_FB(entry.id)}" alt="${escapeHTML(entry.name)}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FRONT(entry.id)}'"></span>`).join('');
+        reel.style.transform = 'translateX(0)';
+        void reel.offsetWidth;
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const offset = dialog.querySelector('.flamebox-reel-window').clientWidth / 2 - (8 + targetIndex * 88 + 40);
+        reel.classList.add('spinning');
+        reel.style.transform = `translateX(${offset}px)`;
+        await new Promise(resolve => setTimeout(resolve, 9150));
+
+        let destination;
+        if (player.party.length < 6) {
+          player.party.push(pokemon);
+          if (!player.poke || player.poke.hp <= 0) player.poke = pokemon;
+          destination = 'sua equipe';
+          onMissionEvent('party_changed', player.party.length);
+        } else {
+          const boxIndex = depositToPC(pokemon);
+          if (boxIndex < 0) throw new Error('Não foi possível guardar o Pokémon. A Flame Box não foi consumida.');
+          destination = `Box ${boxIndex + 1} do PC`;
+        }
+        markPokedex(pokemon.id, true);
+        onMissionEvent('capture', pokemon.id);
+        decItemQty('flamebox', 1);
+        renderBag();
+        refreshPartyUI();
+        renderPC();
+        updateStatsUI();
+        saveGame();
+        status.textContent = `${FLAME_BOX_ODDS.find(tier => tier.id === selected.rarity.id)?.label || 'Pokémon'} encontrado!`;
+        const prizeDialog = document.getElementById('flameBoxPrizeDialog');
+        const prizeSprite = document.getElementById('flameBoxPrizeSprite');
+        prizeSprite.src = SPRITE_FB(pokemon.id);
+        prizeSprite.alt = pokemon.name;
+        prizeSprite.onerror = () => { prizeSprite.onerror = null; prizeSprite.src = SPRITE_FRONT(pokemon.id); };
+        document.getElementById('flameBoxPrizeRarity').textContent = FLAME_BOX_ODDS.find(tier => tier.id === selected.rarity.id)?.label || 'Pokémon';
+        document.getElementById('flameBoxPrizeName').textContent = pokemon.name;
+        document.getElementById('flameBoxPrizeDestination').textContent = `Nv. ${pokemon.level} · Adicionado à ${destination}.`;
+        const confetti = document.getElementById('flameBoxConfetti');
+        confetti.classList.remove('is-celebrating');
+        void confetti.offsetWidth;
+        confetti.classList.add('is-celebrating');
+        dialog.close();
+        prizeDialog.showModal();
+      } catch (error) {
+        status.textContent = error.message || 'Não foi possível abrir a Flame Box. Tente novamente.';
+        closeButton.hidden = false;
+      } finally {
+        flameBoxOpening = false;
+      }
     }
 
     function renderBagPokemonTargetPicker(item, itemKey, targets) {
@@ -8810,6 +9007,7 @@
       { id: 'bottlecap', name: 'Bottle Cap', icon: '🧢', sprite: 'bottlecap', desc: 'Escolha um atributo para maximizar seu IV para 31.', price: 10, key: 'bottlecap' },
       { id: 'goldbottlecap', name: 'Gold Bottle Cap', icon: '✨', sprite: 'goldbottlecap', desc: 'Maximiza os seis IVs do Pokémon para 31.', price: 50, key: 'goldbottlecap' },
       { id: 'evcap', name: 'EV Cap', icon: '🧢', sprite: 'evcap', desc: 'Redistribui os EVs atuais: define dois atributos em 252 e zera os demais.', price: 20, key: 'evcap' },
+      { id: 'flamebox', name: 'Flame Box', icon: '🔥', sprite: 'flamebox', desc: 'Abra para receber um Pokémon aleatório de qualquer geração, exceto lendários e míticos. Chances: 55% comum, 28% incomum, 13% rara e 4% muito rara.', price: 500, key: 'flamebox', kind: 'flameBox' },
       { id: 'vip', name: 'VIP', icon: '👑', sprite: 'vip', desc: 'Adiciona à sua conta todos os benefícios que o VIP proporciona.', price: 50, key: 'vip' },
       { id: 'shiny_charm', name: 'Shiny Charm', icon: '\u2728', sprite: 'shiny_charm', desc: 'Triplica a chance de encontrar um Pok\u00e9mon Shiny selvagem.', price: 20, key: 'shiny_charm' },
       { id: 'focus_sash', name: 'Focus Sash', icon: '🛡️', sprite: 'focus_sash', desc: 'Com HP cheio, sobrevive a um golpe fatal com 1 HP. Consome-se ao ativar.', price: 5000, key: 'focus_sash' },
@@ -9429,7 +9627,7 @@
       renderPokeCoinsPackageCards();
     }
     function marketItemUsesBattlePoints(item) {
-      return ['tm', 'battleBoost', 'guardSpec', 'direHit'].includes(item?.kind) ||
+      return ['tm', 'battleBoost', 'guardSpec', 'direHit', 'flameBox'].includes(item?.kind) ||
         ['leftovers', 'charcoal', 'miracle_seed', 'mystic_water', 'magnet', 'twisted_spoon', 'black_belt', 'focus_sash',
           'silk_scarf', 'silver_powder', 'hard_stone', 'sharp_beak', 'poison_barb', 'spell_tag', 'dragon_fang',
           'never_melt_ice', 'metal_coat', 'black_glasses', 'amulet_coin', 'shell_bell', 'choice_band', 'choice_scarf',
@@ -10045,7 +10243,7 @@
     }
 
     const BATTLE_TOWER_TRAINERS = [
-      { id:'joey', name:'Joey', className:'Jovem Treinador', portrait:'youngster', reward:2, team:[
+      { id:'joey', name:'Joey', className:'Jovem Treinador', portrait:'youngster', reward:20, team:[
         {name:'Rattata',id:19,hp:22,level:8,moves:[{name:'Quick Attack',power:40,type:'Normal'},{name:'Bite',power:35,type:'Sombrio'}]},
         {name:'Pidgey',id:16,hp:24,level:9,moves:[{name:'Gust',power:40,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Bulbasaur',id:1,hp:65,level:10,moves:[{name:'Bulbasaur Strike',power:70,type:'Planta'},{name:'Bulbasaur Wave',power:85,type:'Veneno'}]},
@@ -10053,7 +10251,7 @@
         {name:'Squirtle',id:7,hp:71,level:12,moves:[{name:'Squirtle Strike',power:70,type:'Agua'},{name:'Squirtle Wave',power:85,type:'Normal'}]},
         {name:'Butterfree',id:12,hp:74,level:13,moves:[{name:'Butterfree Strike',power:70,type:'Inseto'},{name:'Butterfree Wave',power:85,type:'Voador'}]}
       ]},
-      { id:'maya', name:'Maya', className:'Treinadora', portrait:'lass', reward:3, team:[
+      { id:'maya', name:'Maya', className:'Treinadora', portrait:'lass', reward:30, team:[
         {name:'Jigglypuff',id:39,hp:30,level:12,moves:[{name:'Pound',power:40,type:'Normal'},{name:'Sing',power:0,type:'Normal'}]},
         {name:'Clefairy',id:35,hp:30,level:13,moves:[{name:'Pound',power:40,type:'Normal'},{name:'Magical Leaf',power:45,type:'Planta'}]},
         {name:'Butterfree',id:12,hp:77,level:14,moves:[{name:'Butterfree Strike',power:70,type:'Inseto'},{name:'Butterfree Wave',power:85,type:'Voador'}]},
@@ -10061,7 +10259,7 @@
         {name:'Nidoqueen',id:31,hp:83,level:16,moves:[{name:'Nidoqueen Strike',power:70,type:'Veneno'},{name:'Nidoqueen Wave',power:85,type:'Terra'}]},
         {name:'Nidoking',id:34,hp:86,level:17,moves:[{name:'Nidoking Strike',power:70,type:'Veneno'},{name:'Nidoking Wave',power:85,type:'Terra'}]}
       ]},
-      { id:'oliver', name:'Oliver', className:'Montanhista', portrait:'hiker', reward:3, team:[
+      { id:'oliver', name:'Oliver', className:'Montanhista', portrait:'hiker', reward:40, team:[
         {name:'Geodude',id:74,hp:28,level:17,moves:[{name:'Rock Throw',power:50,type:'Pedra'},{name:'Tackle',power:35,type:'Normal'}]},
         {name:'Onix',id:95,hp:40,level:18,moves:[{name:'Rock Throw',power:50,type:'Pedra'},{name:'Bind',power:30,type:'Normal'}]},
         {name:'Nidoking',id:34,hp:92,level:19,moves:[{name:'Nidoking Strike',power:70,type:'Veneno'},{name:'Nidoking Wave',power:85,type:'Terra'}]},
@@ -10069,7 +10267,7 @@
         {name:'Poliwrath',id:62,hp:98,level:21,moves:[{name:'Poliwrath Strike',power:70,type:'Agua'},{name:'Poliwrath Wave',power:85,type:'Lutador'}]},
         {name:'Alakazam',id:65,hp:101,level:22,moves:[{name:'Alakazam Strike',power:70,type:'Psiquico'},{name:'Alakazam Wave',power:85,type:'Normal'}]}
       ]},
-      { id:'marina', name:'Marina', className:'Marinheira', portrait:'sailor', reward:4, team:[
+      { id:'marina', name:'Marina', className:'Marinheira', portrait:'sailor', reward:50, team:[
         {name:'Shellder',id:90,hp:25,level:21,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Ice Shard',power:40,type:'Gelo'}]},
         {name:'Psyduck',id:54,hp:30,level:22,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}]},
         {name:'Staryu',id:120,hp:30,level:23,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Swift',power:45,type:'Normal'}]},
@@ -10077,7 +10275,7 @@
         {name:'Victreebel',id:71,hp:110,level:25,moves:[{name:'Victreebel Strike',power:70,type:'Planta'},{name:'Victreebel Wave',power:85,type:'Veneno'}]},
         {name:'Golem',id:76,hp:113,level:26,moves:[{name:'Golem Strike',power:70,type:'Pedra'},{name:'Golem Wave',power:85,type:'Terra'}]}
       ]},
-      { id:'lia', name:'Lia', className:'Treinadora Vet', portrait:'backpackerf', reward:5, team:[
+      { id:'lia', name:'Lia', className:'Treinadora Vet', portrait:'backpackerf', reward:60, team:[
         {name:'Growlithe',id:58,hp:32,level:27,moves:[{name:'Ember',power:40,type:'Fogo'},{name:'Bite',power:35,type:'Sombrio'}]},
         {name:'Pikachu',id:25,hp:28,level:28,moves:[{name:'Thunder Shock',power:40,type:'Eletrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Kadabra',id:64,hp:32,level:29,moves:[{name:'Confusion',power:50,type:'Psiquico'},{name:'Psybeam',power:55,type:'Psiquico'}]},
@@ -10085,7 +10283,7 @@
         {name:'Slowbro',id:80,hp:128,level:31,moves:[{name:'Slowbro Strike',power:70,type:'Agua'},{name:'Slowbro Wave',power:85,type:'Psiquico'}]},
         {name:'Farfetchd',id:83,hp:131,level:32,moves:[{name:'Farfetchd Strike',power:70,type:'Normal'},{name:'Farfetchd Wave',power:85,type:'Voador'}]}
       ]},
-      { id:'bruno', name:'Bruno', className:'Faixa Preta', portrait:'blackbelt', reward:6, team:[
+      { id:'bruno', name:'Bruno', className:'Faixa Preta', portrait:'blackbelt', reward:70, team:[
         {name:'Machop',id:66,hp:34,level:32,moves:[{name:'Low Kick',power:50,type:'Lutador'},{name:'Karate Chop',power:50,type:'Lutador'}]},
         {name:'Primeape',id:57,hp:38,level:33,moves:[{name:'Low Kick',power:50,type:'Lutador'},{name:'Thrash',power:60,type:'Normal'}]},
         {name:'Machoke',id:67,hp:42,level:34,moves:[{name:'Brick Break',power:60,type:'Lutador'},{name:'Rock Smash',power:40,type:'Lutador'}]},
@@ -10093,7 +10291,7 @@
         {name:'Kingler',id:99,hp:143,level:36,moves:[{name:'Kingler Strike',power:70,type:'Agua'},{name:'Kingler Wave',power:85,type:'Normal'}]},
         {name:'Exeggutor',id:103,hp:146,level:37,moves:[{name:'Exeggutor Strike',power:70,type:'Planta'},{name:'Exeggutor Wave',power:85,type:'Psiquico'}]}
       ]},
-      { id:'ezra', name:'Ezra', className:'Médium', portrait:'psychic', reward:7, team:[
+      { id:'ezra', name:'Ezra', className:'Médium', portrait:'psychic', reward:80, team:[
         {name:'Gastly',id:92,hp:28,level:37,moves:[{name:'Shadow Ball',power:60,type:'Fantasma'},{name:'Confuse Ray',power:0,type:'Fantasma'}]},
         {name:'Haunter',id:93,hp:34,level:38,moves:[{name:'Shadow Ball',power:60,type:'Fantasma'},{name:'Night Shade',power:45,type:'Fantasma'}]},
         {name:'Marowak',id:105,hp:152,level:39,moves:[{name:'Marowak Strike',power:70,type:'Terra'},{name:'Marowak Wave',power:85,type:'Fantasma'}]},
@@ -10101,7 +10299,7 @@
         {name:'Hitmonchan',id:107,hp:158,level:41,moves:[{name:'Hitmonchan Strike',power:70,type:'Lutador'},{name:'Hitmonchan Wave',power:85,type:'Normal'}]},
         {name:'Weezing',id:110,hp:161,level:42,moves:[{name:'Weezing Strike',power:70,type:'Veneno'},{name:'Weezing Wave',power:85,type:'Normal'}]}
       ]},
-      { id:'nina', name:'Nina', className:'Treinadora Vet', portrait:'beauty-gen7', reward:8, team:[
+      { id:'nina', name:'Nina', className:'Treinadora Vet', portrait:'beauty-gen7', reward:90, team:[
         {name:'Vulpix',id:37,hp:32,level:40,moves:[{name:'Flamethrower',power:65,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Ivysaur',id:2,hp:40,level:41,moves:[{name:'Razor Leaf',power:55,type:'Planta'},{name:'Vine Whip',power:45,type:'Planta'}]},
         {name:'Wartortle',id:8,hp:44,level:42,moves:[{name:'Water Pulse',power:55,type:'Agua'},{name:'Bite',power:35,type:'Sombrio'}]},
@@ -10109,7 +10307,7 @@
         {name:'Rhydon',id:112,hp:167,level:44,moves:[{name:'Rhydon Strike',power:70,type:'Terra'},{name:'Rhydon Wave',power:85,type:'Pedra'}]},
         {name:'Starmie',id:121,hp:170,level:45,moves:[{name:'Starmie Strike',power:70,type:'Agua'},{name:'Starmie Wave',power:85,type:'Psiquico'}]}
       ]},
-      { id:'kenji', name:'Kenji', className:'Cientista', portrait:'scientist', reward:9, team:[
+      { id:'kenji', name:'Kenji', className:'Cientista', portrait:'scientist', reward:100, team:[
         {name:'Electabuzz',id:125,hp:42,level:44,moves:[{name:'Thunder Punch',power:60,type:'Eletrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Scyther',id:123,hp:44,level:45,moves:[{name:'X-Scissor',power:65,type:'Inseto'},{name:'Wing Attack',power:50,type:'Voador'}]},
         {name:'Rhydon',id:112,hp:52,level:46,moves:[{name:'Rock Slide',power:60,type:'Pedra'},{name:'Stomp',power:45,type:'Normal'}]},
@@ -10117,7 +10315,7 @@
         {name:'Pinsir',id:127,hp:179,level:48,moves:[{name:'Pinsir Strike',power:70,type:'Inseto'},{name:'Pinsir Wave',power:85,type:'Normal'}]},
         {name:'Lapras',id:131,hp:182,level:49,moves:[{name:'Lapras Strike',power:70,type:'Agua'},{name:'Lapras Wave',power:85,type:'Gelo'}]}
       ]},
-      { id:'camila', name:'Camila', className:'Domadora de Dragões', portrait:'dragontamer-gen9', reward:10, team:[
+      { id:'camila', name:'Camila', className:'Domadora de Dragões', portrait:'dragontamer-gen9', reward:110, team:[
         {name:'Dratini',id:147,hp:34,level:48,moves:[{name:'Dragon Rage',power:60,type:'Dragao'},{name:'Aqua Tail',power:60,type:'Agua'}]},
         {name:'Dragonair',id:148,hp:46,level:49,moves:[{name:'Dragon Claw',power:70,type:'Dragao'},{name:'Thunderbolt',power:65,type:'Eletrico'}]},
         {name:'Aerodactyl',id:142,hp:54,level:50,moves:[{name:'Rock Slide',power:65,type:'Pedra'},{name:'Wing Attack',power:60,type:'Voador'}]},
@@ -10125,7 +10323,7 @@
         {name:'Omastar',id:139,hp:191,level:52,moves:[{name:'Omastar Strike',power:70,type:'Pedra'},{name:'Omastar Wave',power:85,type:'Agua'}]},
         {name:'Kabutops',id:141,hp:194,level:53,moves:[{name:'Kabutops Strike',power:70,type:'Pedra'},{name:'Kabutops Wave',power:85,type:'Agua'}]}
       ]},
-      { id:'carlos', name:'Carlos', className:'Observador de Passaros', portrait:'birdkeeper', reward:11, team:[
+      { id:'carlos', name:'Carlos', className:'Observador de Passaros', portrait:'birdkeeper', reward:120, team:[
         {name:'Pidgeot',id:18,hp:116,level:53,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Fearow',id:22,hp:108,level:54,moves:[{name:'Drill Peck',power:80,type:'Voador'},{name:'Drill Run',power:70,type:'Terra'}]},
         {name:'Dodrio',id:85,hp:112,level:55,moves:[{name:'Tri Attack',power:80,type:'Normal'},{name:'Peck',power:35,type:'Voador'}]},
@@ -10133,7 +10331,7 @@
         {name:'Articuno',id:144,hp:206,level:57,moves:[{name:'Articuno Strike',power:70,type:'Gelo'},{name:'Articuno Wave',power:85,type:'Voador'}]},
         {name:'Zapdos',id:145,hp:209,level:58,moves:[{name:'Zapdos Strike',power:70,type:'Eletrico'},{name:'Zapdos Wave',power:85,type:'Voador'}]}
       ]},
-      { id:'bianca', name:'Bianca', className:'Modelo', portrait:'beauty', reward:12, team:[
+      { id:'bianca', name:'Bianca', className:'Modelo', portrait:'beauty', reward:130, team:[
         {name:'Vaporeon',id:134,hp:142,level:56,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Aurora Beam',power:65,type:'Gelo'}]},
         {name:'Clefable',id:36,hp:138,level:57,moves:[{name:'Moonblast',power:85,type:'Fada'},{name:'Psychic',power:90,type:'Psiquico'}]},
         {name:'Ninetales',id:38,hp:132,level:58,moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}]},
@@ -10141,7 +10339,7 @@
         {name:'Dragonite',id:149,hp:215,level:60,moves:[{name:'Dragonite Strike',power:70,type:'Dragao'},{name:'Dragonite Wave',power:85,type:'Voador'}]},
         {name:'Bulbasaur',id:1,hp:218,level:61,moves:[{name:'Bulbasaur Strike',power:70,type:'Planta'},{name:'Bulbasaur Wave',power:85,type:'Veneno'}]}
       ]},
-      { id:'zeca', name:'Zeca', className:'Motociclista', portrait:'biker', reward:13, team:[
+      { id:'zeca', name:'Zeca', className:'Motociclista', portrait:'biker', reward:140, team:[
         {name:'Arbok',id:24,hp:137,level:59,moves:[{name:'Poison Jab',power:80,type:'Veneno'},{name:'Crunch',power:80,type:'Sombrio'}]},
         {name:'Muk',id:89,hp:158,level:60,moves:[{name:'Sludge Bomb',power:90,type:'Veneno'},{name:'Mega Punch',power:80,type:'Normal'}]},
         {name:'Weezing',id:110,hp:149,level:61,moves:[{name:'Sludge Bomb',power:90,type:'Veneno'},{name:'Flamethrower',power:90,type:'Fogo'}]},
@@ -10149,7 +10347,7 @@
         {name:'Squirtle',id:7,hp:224,level:63,moves:[{name:'Squirtle Strike',power:70,type:'Agua'},{name:'Squirtle Wave',power:85,type:'Normal'}]},
         {name:'Butterfree',id:12,hp:227,level:64,moves:[{name:'Butterfree Strike',power:70,type:'Inseto'},{name:'Butterfree Wave',power:85,type:'Voador'}]}
       ]},
-      { id:'tito', name:'Tito', className:'Insetomaniaco', portrait:'bugcatcher', reward:14, team:[
+      { id:'tito', name:'Tito', className:'Insetomaniaco', portrait:'bugcatcher', reward:150, team:[
         {name:'Beedrill',id:15,hp:145,level:62,moves:[{name:'X-Scissor',power:80,type:'Inseto'},{name:'Poison Jab',power:80,type:'Veneno'}]},
         {name:'Scyther',id:123,hp:157,level:63,moves:[{name:'X-Scissor',power:80,type:'Inseto'},{name:'Wing Attack',power:60,type:'Voador'}]},
         {name:'Pinsir',id:127,hp:163,level:64,moves:[{name:'X-Scissor',power:80,type:'Inseto'},{name:'Brick Break',power:75,type:'Lutador'}]},
@@ -10157,7 +10355,7 @@
         {name:'Nidoqueen',id:31,hp:233,level:66,moves:[{name:'Nidoqueen Strike',power:70,type:'Veneno'},{name:'Nidoqueen Wave',power:85,type:'Terra'}]},
         {name:'Nidoking',id:34,hp:236,level:67,moves:[{name:'Nidoking Strike',power:70,type:'Veneno'},{name:'Nidoking Wave',power:85,type:'Terra'}]}
       ]},
-      { id:'otavio', name:'Otavio', className:'Super Nerd', portrait:'supernerd', reward:15, team:[
+      { id:'otavio', name:'Otavio', className:'Super Nerd', portrait:'supernerd', reward:160, team:[
         {name:'Magneton',id:82,hp:154,level:65,moves:[{name:'Thunderbolt',power:90,type:'Eletrico'},{name:'Flash Cannon',power:80,type:'Aco'}]},
         {name:'Electrode',id:101,hp:160,level:66,moves:[{name:'Thunderbolt',power:90,type:'Eletrico'},{name:'Swift',power:60,type:'Normal'}]},
         {name:'Porygon',id:137,hp:167,level:67,moves:[{name:'Tri Attack',power:80,type:'Normal'},{name:'Psychic',power:90,type:'Psiquico'}]},
@@ -10165,7 +10363,7 @@
         {name:'Poliwrath',id:62,hp:242,level:69,moves:[{name:'Poliwrath Strike',power:70,type:'Agua'},{name:'Poliwrath Wave',power:85,type:'Lutador'}]},
         {name:'Alakazam',id:65,hp:245,level:70,moves:[{name:'Alakazam Strike',power:70,type:'Psiquico'},{name:'Alakazam Wave',power:85,type:'Normal'}]}
       ]},
-      { id:'raul', name:'Raul', className:'Pescador', portrait:'fisherman', reward:16, team:[
+      { id:'raul', name:'Raul', className:'Pescador', portrait:'fisherman', reward:170, team:[
         {name:'Kingler',id:99,hp:170,level:68,moves:[{name:'Crabhammer',power:100,type:'Agua'},{name:'X-Scissor',power:80,type:'Inseto'}]},
         {name:'Seadra',id:117,hp:165,level:69,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]},
         {name:'Gyarados',id:130,hp:191,level:70,moves:[{name:'Waterfall',power:80,type:'Agua'},{name:'Crunch',power:80,type:'Sombrio'}]},
@@ -10173,7 +10371,7 @@
         {name:'Golem',id:76,hp:251,level:72,moves:[{name:'Golem Strike',power:70,type:'Pedra'},{name:'Golem Wave',power:85,type:'Terra'}]},
         {name:'Rapidash',id:78,hp:254,level:73,moves:[{name:'Rapidash Strike',power:70,type:'Fogo'},{name:'Rapidash Wave',power:85,type:'Normal'}]}
       ]},
-      { id:'ernesto', name:'Ernesto', className:'Cavalheiro', portrait:'gentleman', reward:17, team:[
+      { id:'ernesto', name:'Ernesto', className:'Cavalheiro', portrait:'gentleman', reward:180, team:[
         {name:'Persian',id:53,hp:170,level:71,moves:[{name:'Slash',power:70,type:'Normal'},{name:'Shadow Claw',power:70,type:'Fantasma'}]},
         {name:'Rapidash',id:78,hp:177,level:72,moves:[{name:'Flare Blitz',power:120,type:'Fogo'},{name:'Drill Run',power:80,type:'Terra'}]},
         {name:'Tauros',id:128,hp:184,level:73,moves:[{name:'Take Down',power:90,type:'Normal'},{name:'Earthquake',power:100,type:'Terra'}]},
@@ -10181,7 +10379,7 @@
         {name:'Farfetchd',id:83,hp:260,level:75,moves:[{name:'Farfetchd Strike',power:70,type:'Normal'},{name:'Farfetchd Wave',power:85,type:'Voador'}]},
         {name:'Cloyster',id:91,hp:263,level:76,moves:[{name:'Cloyster Strike',power:70,type:'Agua'},{name:'Cloyster Wave',power:85,type:'Gelo'}]}
       ]},
-      { id:'nando', name:'Nando', className:'Pokemon Maniaco', portrait:'pokemaniac', reward:18, team:[
+      { id:'nando', name:'Nando', className:'Pokemon Maniaco', portrait:'pokemaniac', reward:190, team:[
         {name:'Lickitung',id:108,hp:206,level:74,moves:[{name:'Body Slam',power:85,type:'Normal'},{name:'Power Whip',power:120,type:'Planta'}]},
         {name:'Kangaskhan',id:115,hp:211,level:75,moves:[{name:'Dizzy Punch',power:70,type:'Normal'},{name:'Crunch',power:80,type:'Sombrio'}]},
         {name:'Snorlax',id:143,hp:248,level:76,moves:[{name:'Body Slam',power:85,type:'Normal'},{name:'Earthquake',power:100,type:'Terra'}]},
@@ -10189,7 +10387,7 @@
         {name:'Exeggutor',id:103,hp:269,level:78,moves:[{name:'Exeggutor Strike',power:70,type:'Planta'},{name:'Exeggutor Wave',power:85,type:'Psiquico'}]},
         {name:'Marowak',id:105,hp:272,level:79,moves:[{name:'Marowak Strike',power:70,type:'Terra'},{name:'Marowak Wave',power:85,type:'Fantasma'}]}
       ]},
-      { id:'rogerio', name:'Rogerio', className:'Ladrao', portrait:'burglar', reward:19, team:[
+      { id:'rogerio', name:'Rogerio', className:'Ladrao', portrait:'burglar', reward:200, team:[
         {name:'Magmar',id:126,hp:193,level:77,moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Psychic',power:90,type:'Psiquico'}]},
         {name:'Arcanine',id:59,hp:204,level:78,moves:[{name:'Flare Blitz',power:120,type:'Fogo'},{name:'Crunch',power:80,type:'Sombrio'}]},
         {name:'Flareon',id:136,hp:198,level:79,moves:[{name:'Fire Fang',power:65,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}]},
@@ -10197,7 +10395,7 @@
         {name:'Hitmonchan',id:107,hp:278,level:81,moves:[{name:'Hitmonchan Strike',power:70,type:'Lutador'},{name:'Hitmonchan Wave',power:85,type:'Normal'}]},
         {name:'Weezing',id:110,hp:281,level:82,moves:[{name:'Weezing Strike',power:70,type:'Veneno'},{name:'Weezing Wave',power:85,type:'Normal'}]}
       ]},
-      { id:'iris', name:'Iris', className:'Treinadora de Elite', portrait:'plasmagruntf-gen5bw', reward:20, team:[
+      { id:'iris', name:'Iris', className:'Treinadora de Elite', portrait:'plasmagruntf-gen5bw', reward:210, team:[
         {name:'Lapras',id:131,hp:236,level:80,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]},
         {name:'Alakazam',id:65,hp:198,level:81,moves:[{name:'Psychic',power:90,type:'Psiquico'},{name:'Shadow Ball',power:80,type:'Fantasma'}]},
         {name:'Dragonite',id:149,hp:240,level:82,moves:[{name:'Outrage',power:120,type:'Dragao'},{name:'Hurricane',power:110,type:'Voador'}]},
@@ -10463,16 +10661,42 @@
       const grid = document.getElementById('battleTowerGrid');
       if (!grid) return;
       if (!Array.isArray(player.battleTowerDefeated)) player.battleTowerDefeated = [];
-      const wins = player.battleTowerDefeated.length;
-      document.getElementById('towerProgress').textContent = `${Math.min(wins, BATTLE_TOWER_TRAINERS.length)}/${BATTLE_TOWER_TRAINERS.length}`;
+      const progress = getBattleTowerProgress();
+      document.getElementById('towerProgress').textContent = `${progress}/${BATTLE_TOWER_TRAINERS.length}`;
       document.getElementById('towerBattlePoints').textContent = (Number(player.battlePoints) || 0).toLocaleString('pt-BR');
-      grid.innerHTML = BATTLE_TOWER_TRAINERS.map(trainer => {
-        const done = player.battleTowerDefeated.includes(trainer.id);
-        return `<div class="game-card" role="button" tabindex="0" onclick="startTowerBattle('${trainer.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startTowerBattle('${trainer.id}')}">
+      grid.innerHTML = BATTLE_TOWER_TRAINERS.map((trainer, index) => {
+        const done = index < progress;
+        const unlocked = isAdminAccount() || index <= progress;
+        const action = isAdminAccount() || index <= progress
+          ? `startTowerBattle('${trainer.id}')`
+          : `showProgressionNotice('É necessário derrotar o treinador anterior para liberar este oponente.')`;
+        return `<div class="game-card${unlocked ? '' : ' tower-opponent-locked'}" role="button" tabindex="0" onclick="${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}" style="${unlocked ? '' : 'opacity:.62;'}">
           <div class="game-card-header" style="background:linear-gradient(135deg,#3a3151,#171321);height:110px"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png" alt="${escapeHTML(trainer.name)}" style="width:86px;height:86px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:2.8rem">🥊</span></div>
           <div class="game-card-body"><div class="game-card-title">${escapeHTML(trainer.name)} · ${escapeHTML(trainer.className)}</div><div class="game-card-desc">Equipe com ${trainer.team.length} Pokémon · níveis ${trainer.team[0].level}–${trainer.team[trainer.team.length-1].level}</div><div class="game-card-meta"><span class="status-tag ${done?'status-locked':'status-available'}">${done?'Rebatalhar':'Desafiar'}</span><span class="reward">${done?'Recompensa resgatada':`+${trainer.reward} BP`}</span></div></div>
         </div>`;
       }).join('');
+      grid.querySelectorAll('.tower-opponent-locked').forEach(card => {
+        card.title = 'É necessário derrotar o treinador anterior para liberar este oponente.';
+        card.setAttribute('aria-label', card.title);
+        const status = card.querySelector('.game-card-meta .status-tag');
+        if (status) {
+          status.textContent = 'Bloqueado';
+          status.classList.remove('status-available');
+          status.classList.add('status-locked');
+        }
+      });
+      grid.querySelectorAll('.game-card').forEach((card, index) => {
+        if (index >= progress) return;
+        const rewardLabel = card.querySelector('.game-card-meta .reward');
+        if (rewardLabel) rewardLabel.textContent = `Revanche: +${Math.max(5, Math.floor(BATTLE_TOWER_TRAINERS[index].reward * 0.25))} BP`;
+      });
+    }
+
+    function getBattleTowerProgress() {
+      const defeated = Array.isArray(player?.battleTowerDefeated) ? player.battleTowerDefeated : [];
+      let progress = 0;
+      while (progress < BATTLE_TOWER_TRAINERS.length && defeated.includes(BATTLE_TOWER_TRAINERS[progress].id)) progress++;
+      return progress;
     }
 
     function getDojoProgress() {
@@ -11157,9 +11381,9 @@
       if (id === 'elite-four' && !isAdminAccount() && !hasAllKantoBadges()) { showToast(`Conquiste todas as 8 Ins\u00edgnias de Kanto para desafiar a Elite Four (${getKantoBadgeCount()}/8).`, 'error'); id = 'home'; }
       if (id === 'ss-anne' && player) {
         const blockReason = getSSAnneBlockReason();
-        if (blockReason) { showToast(blockReason, 'error'); id = 'home'; }
+        if (blockReason) { showProgressionNotice(blockReason); id = 'home'; }
       }
-      if (id === 'silph-co' && !GameRules.canAccessSilphCo(isAdminAccount(), hasDefeatedSabrinaGym())) { showToast('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.', 'error'); id = 'home'; }
+      if (id === 'silph-co' && !GameRules.canAccessSilphCo(isAdminAccount(), hasDefeatedSabrinaGym())) { showProgressionNotice('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.'); id = 'home'; }
       const currentPanelId = document.querySelector('.panel.active')?.id.replace('panel-', '') || 'home';
       if (['admin', 'social'].includes(id) && currentPanelId !== id) panelReturnTargets[id] = currentPanelId;
       for (const panelId of ['admin', 'social']) {
@@ -14128,8 +14352,13 @@
     }
 
     function startTowerBattle(trainerId) {
-      const trainer = BATTLE_TOWER_TRAINERS.find(entry => entry.id === trainerId);
+      const trainerIndex = BATTLE_TOWER_TRAINERS.findIndex(entry => entry.id === trainerId);
+      const trainer = BATTLE_TOWER_TRAINERS[trainerIndex];
       if (!trainer || battle?.busy) return;
+      if (!isAdminAccount() && trainerIndex > getBattleTowerProgress()) {
+        showProgressionNotice('É necessário derrotar o treinador anterior para liberar este oponente.');
+        return;
+      }
       const eligibleTeam = player.party.filter(pokemon => pokemon && pokemon.hp > 0);
       if (!eligibleTeam.length) {
         showToast('Sua equipe precisa estar saudável para entrar na Torre de Batalha.', 'error');
@@ -14345,7 +14574,7 @@
     }
 
     function startSilphCoBattle(trainerId) {
-      if (!GameRules.canAccessSilphCo(isAdminAccount(), hasDefeatedSabrinaGym())) { showToast('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.', 'error'); return; }
+      if (!GameRules.canAccessSilphCo(isAdminAccount(), hasDefeatedSabrinaGym())) { showProgressionNotice('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.'); return; }
       const index = SILPH_CO_TRAINERS.findIndex(entry => entry.id === trainerId);
       const trainer = SILPH_CO_TRAINERS[index];
       if (!trainer || battle?.busy) return;
@@ -14677,12 +14906,11 @@
     function endTowerVictory() {
       const trainer = battle.towerTrainer;
       player.poke.hp = Math.max(0, Math.min(player.poke.maxHp, battle.playerHp));
-      const reward = Array.isArray(player.battleTowerDefeated) && player.battleTowerDefeated.includes(trainer.id) ? 0 : trainer.reward;
       if (!Array.isArray(player.battleTowerDefeated)) player.battleTowerDefeated = [];
-      if (reward > 0) {
-        player.battleTowerDefeated.push(trainer.id);
-        player.battlePoints = (Number(player.battlePoints) || 0) + reward;
-      }
+      const firstVictory = !player.battleTowerDefeated.includes(trainer.id);
+      const reward = firstVictory ? trainer.reward : Math.max(5, Math.floor(trainer.reward * 0.25));
+      if (firstVictory) player.battleTowerDefeated.push(trainer.id);
+      player.battlePoints = (Number(player.battlePoints) || 0) + reward;
       document.getElementById('battleMenu').style.display = 'none';
       document.getElementById('movesMenu').style.display = 'none';
       const bag = document.getElementById('bagMenu');
