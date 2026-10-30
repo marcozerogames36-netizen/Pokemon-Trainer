@@ -750,7 +750,7 @@
       awakener: ['sleep'], awakening: ['sleep'], chesto: ['sleep'],
       iceheal: ['freeze'],
       fullheal: ['all'], heal_powder: ['all'], lum: ['all'], fullrestore: ['all'],
-      aspear: ['freeze'], persim: ['confusion']
+      aspear: ['freeze'], persim: ['confusion'], yellow_flute: ['confusion']
     };
 
     function itemCuresStatus(key, pokemon) {
@@ -1326,6 +1326,7 @@
       ['dashName', 'welcomeName'].forEach(id => document.getElementById(id)?.classList.toggle('vip-profile-name', active));
       document.querySelectorAll('.trainer-card-name').forEach(node => node.classList.toggle('vip-profile-name', active));
       const status = document.getElementById('trainerVipStatus');
+      const benefits = document.getElementById('trainerVipBenefits');
       if (status) {
         const remaining = Math.max(0, Number(player?.vipExpiresAt) - Date.now());
         status.style.display = active ? 'block' : 'none';
@@ -1333,6 +1334,7 @@
           ? `VIP ativo · ${Math.ceil(remaining / (24 * 60 * 60 * 1000))} dias restantes`
           : '';
       }
+      if (benefits) benefits.hidden = !active;
     }
 
     function processVipBenefits() {
@@ -1442,15 +1444,75 @@
       return 250 * (n - 1) * n;
     }
 
+    const SEASON_PASS_LEVELS = 60;
+    const SEASON_PASS_TRACKS = [
+      { id: 'bronze', name: 'Bronze', icon: 'assets/season-pass-bronze.png', reward: level => ({ label: `₽ ${(level * 500).toLocaleString('pt-BR')}`, type: 'money', amount: level * 500 }) },
+      { id: 'silver', name: 'Prata', icon: 'assets/season-pass-silver.png', reward: level => ({ label: `${level} BP`, type: 'battlePoints', amount: level }) },
+      { id: 'gold', name: 'Gold', icon: 'assets/season-pass-gold.png', reward: level => ({ label: `${level * 5} PokéCoins`, type: 'pokeCoins', amount: level * 5 }) }
+    ];
+
+    function ensureSeasonPassState() {
+      if (!player) return { xp: 0, claimed: {} };
+      if (!player.seasonPass || typeof player.seasonPass !== 'object') player.seasonPass = { xp: 0, claimed: {} };
+      const state = player.seasonPass;
+      state.xp = Math.max(0, Math.floor(Number(state.xp) || 0));
+      if (!state.claimed || typeof state.claimed !== 'object') state.claimed = {};
+      SEASON_PASS_TRACKS.forEach(track => {
+        if (!Array.isArray(state.claimed[track.id])) state.claimed[track.id] = [];
+        state.claimed[track.id] = [...new Set(state.claimed[track.id].map(Number).filter(level => Number.isInteger(level) && level >= 1 && level <= SEASON_PASS_LEVELS))];
+      });
+      return state;
+    }
+
+    function renderSeasonPass() {
+      const root = document.getElementById('seasonPassTracks');
+      if (!root || !player) return;
+      const state = ensureSeasonPassState();
+      const currentLevel = Math.min(SEASON_PASS_LEVELS, Math.floor(state.xp / 1000));
+      const xpToNext = currentLevel >= SEASON_PASS_LEVELS ? 0 : (currentLevel + 1) * 1000 - state.xp;
+      const progress = currentLevel >= SEASON_PASS_LEVELS ? 100 : Math.max(0, (state.xp - currentLevel * 1000) / 10);
+      document.getElementById('seasonPassXp').textContent = `${state.xp.toLocaleString('pt-BR')} XP`;
+      document.getElementById('seasonPassNext').textContent = currentLevel >= SEASON_PASS_LEVELS ? 'Todas as etapas liberadas' : `Faltam ${xpToNext.toLocaleString('pt-BR')} XP para a etapa ${currentLevel + 1}`;
+      document.getElementById('seasonPassProgressFill').style.width = `${progress}%`;
+      root.innerHTML = SEASON_PASS_TRACKS.map(track => `<section class="season-pass-track season-pass-${track.id}"><header><span class="season-pass-medal" aria-hidden="true"><img src="${track.icon}" alt="" /></span><div><h3>${track.name}</h3><p>${track.id === 'bronze' ? 'Recompensas de jornada' : track.id === 'silver' ? 'Recursos de batalha' : 'Moeda especial'}</p></div></header><div class="season-pass-rewards">${Array.from({ length: SEASON_PASS_LEVELS }, (_, index) => {
+        const level = index + 1;
+        const reward = track.reward(level);
+        const claimed = state.claimed[track.id].includes(level);
+        const unlocked = currentLevel >= level;
+        return `<article class="season-pass-reward ${unlocked ? 'unlocked' : ''} ${claimed ? 'claimed' : ''}"><span class="season-pass-level">${level}</span><strong>${reward.label}</strong><button type="button" onclick="claimSeasonPassReward('${track.id}',${level})" ${!unlocked || claimed ? 'disabled' : ''}>${claimed ? 'Resgatado' : unlocked ? 'Resgatar' : 'Bloqueado'}</button></article>`;
+      }).join('')}</div></section>`).join('');
+    }
+
+    function claimSeasonPassReward(trackId, level) {
+      if (!player) return;
+      const track = SEASON_PASS_TRACKS.find(entry => entry.id === trackId);
+      const state = ensureSeasonPassState();
+      const rewardLevel = Math.floor(Number(level));
+      if (!track || rewardLevel < 1 || rewardLevel > SEASON_PASS_LEVELS || state.xp < rewardLevel * 1000 || state.claimed[trackId].includes(rewardLevel)) return;
+      const reward = track.reward(rewardLevel);
+      player[reward.type] = Math.max(0, Number(player[reward.type]) || 0) + reward.amount;
+      state.claimed[trackId].push(rewardLevel);
+      updateStatsUI();
+      saveGame();
+      renderSeasonPass();
+      showToast(`Recompensa ${track.name} resgatada: ${reward.label}.`);
+    }
+
     function awardAccountExperience(amount) {
       if (!player) return 0;
       const currentLevel = Math.max(1, Math.floor(Number(player.level) || 1));
       player.accountXp = Math.max(getAccountExperienceForLevel(currentLevel), Math.floor(Number(player.accountXp) || 0));
       const vipMultiplier = isVipActive() ? 1.5 : 1;
-      player.accountXp += Math.max(0, Math.floor((Number(amount) || 0) * vipMultiplier));
+      const earnedXp = Math.max(0, Math.floor((Number(amount) || 0) * vipMultiplier));
+      player.accountXp += earnedXp;
+      if (earnedXp > 0) {
+        const pass = ensureSeasonPassState();
+        pass.xp += earnedXp;
+      }
       let nextLevel = currentLevel;
       while (nextLevel < 100 && player.accountXp >= getAccountExperienceForLevel(nextLevel + 1)) nextLevel++;
       player.level = Math.max(currentLevel, nextLevel);
+      if (document.getElementById('panel-season-pass')?.classList.contains('active')) renderSeasonPass();
       return player.level - currentLevel;
     }
 
@@ -3367,6 +3429,252 @@
       t.textContent = msg; t.className = `toast ${type} show`;
       clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 3000);
     }
+
+    const GAME_CORNER_CHIP_PACKS = { 50: 1000, 500: 10000 };
+    let activeGameCornerTab = 'slot';
+    function getGameCornerFrames() {
+      return [document.getElementById('gameCornerSlotFrame'), document.getElementById('gameCornerRouletteFrame'), document.getElementById('gameCornerMineFrame')].filter(Boolean);
+    }
+    function ensureGameCornerWallet() {
+      if (!player) return 0;
+      player.gameCornerCoins = Math.max(0, Math.floor(Number(player.gameCornerCoins) || 0));
+      return player.gameCornerCoins;
+    }
+    function sendGameCornerWallet(frame, notice = '', noticeType = 'text-purple-200') {
+      if (!frame?.contentWindow || !player) return;
+      frame.contentWindow.postMessage({ type: 'gamecorner-wallet', coins: ensureGameCornerWallet(), money: Math.max(0, Number(player.money) || 0), notice, noticeType }, '*');
+    }
+    function renderGameCornerWallet() {
+      if (!player) return;
+      const money = Math.max(0, Number(player.money) || 0);
+      const coins = ensureGameCornerWallet();
+      const moneyNode = document.getElementById('gameCornerMoney');
+      const coinsNode = document.getElementById('gameCornerChips');
+      if (moneyNode) moneyNode.textContent = `₽ ${money.toLocaleString('pt-BR')}`;
+      if (coinsNode) coinsNode.textContent = coins.toLocaleString('pt-BR');
+    }
+    function openGameCorner() {
+      if (!player) return;
+      ensureGameCornerWallet();
+      renderGameCornerWallet();
+      switchGameCornerTab(activeGameCornerTab);
+    }
+    function switchGameCornerTab(tab) {
+      if (!['slot', 'roulette', 'mine', 'prizes'].includes(tab)) return;
+      activeGameCornerTab = tab;
+      const prizeShop = document.getElementById('gameCornerPrizeShop');
+      if (prizeShop) prizeShop.hidden = tab !== 'prizes';
+      const games = [
+        [document.getElementById('gameCornerSlotFrame'), 'slot', 'gameCornerTabSlot'],
+        [document.getElementById('gameCornerRouletteFrame'), 'roulette', 'gameCornerTabRoulette'],
+        [document.getElementById('gameCornerMineFrame'), 'mine', 'gameCornerTabMine'],
+        [null, 'prizes', 'gameCornerTabPrizes']
+      ];
+      games.forEach(([frame, id, buttonId]) => {
+        const active = id === tab;
+        const button = document.getElementById(buttonId);
+        if (button) { button.classList.toggle('active', active); button.setAttribute('aria-selected', String(active)); }
+        if (!frame) return;
+        frame.hidden = !active;
+        if (!frame.src || frame.src === 'about:blank') frame.src = frame.dataset.src;
+      });
+      renderGameCornerWallet();
+      const activeFrame = games.find(([, id]) => id === tab)?.[0];
+      if (activeFrame?.contentWindow && activeFrame.dataset.loaded === 'true') sendGameCornerWallet(activeFrame);
+      if (tab === 'prizes') renderGameCornerPrizes();
+    }
+    const GAME_CORNER_PRIZE_CATALOG = {
+      tms: [
+        { id: 'tm13', name: 'TM13 · Ice Beam', itemKey: 'gamecorner_tm13', coins: 4000, money: 80000, nuggets: 16, kind: 'tm', move: { name: 'Ice Beam', slug: 'ice-beam', type: 'ice', power: 95, accuracy: 100, pp: 10, category: 'special', version: 'firered-leafgreen' } },
+        { id: 'tm23', name: 'TM23 · Iron Tail', itemKey: 'gamecorner_tm23', coins: 3500, money: 70000, nuggets: 14, kind: 'tm', move: { name: 'Iron Tail', slug: 'iron-tail', type: 'steel', power: 100, accuracy: 75, pp: 15, category: 'physical', version: 'firered-leafgreen' } },
+        { id: 'tm24', name: 'TM24 · Thunderbolt', itemKey: 'gamecorner_tm24', coins: 4000, money: 80000, nuggets: 16, kind: 'tm', move: { name: 'Thunderbolt', slug: 'thunderbolt', type: 'electric', power: 95, accuracy: 100, pp: 15, category: 'special', version: 'firered-leafgreen' } },
+        { id: 'tm30', name: 'TM30 · Shadow Ball', itemKey: 'gamecorner_tm30', coins: 4500, money: 90000, nuggets: 18, kind: 'tm', move: { name: 'Shadow Ball', slug: 'shadow-ball', type: 'ghost', power: 80, accuracy: 100, pp: 15, category: 'physical', version: 'firered-leafgreen' } },
+        { id: 'tm35', name: 'TM35 · Flamethrower', itemKey: 'gamecorner_tm35', coins: 4000, money: 80000, nuggets: 16, kind: 'tm', move: { name: 'Flamethrower', slug: 'flamethrower', type: 'fire', power: 95, accuracy: 100, pp: 15, category: 'special', version: 'firered-leafgreen' } }
+      ],
+      items: [
+        { id: 'smoke-ball', name: 'Smoke Ball', itemKey: 'smoke_ball', coins: 800, money: 16000, nuggets: 4, kind: 'item', sprite: 'smoke-ball', desc: 'Permite fugir de batalhas selvagens quando equipada.' },
+        { id: 'miracle-seed', name: 'Miracle Seed', itemKey: 'miracle_seed', coins: 1000, money: 20000, nuggets: 4, kind: 'item', sprite: 'miracle-seed', desc: 'Aumenta em 10% o poder de golpes de Planta quando equipada.' },
+        { id: 'charcoal', name: 'Charcoal', itemKey: 'charcoal', coins: 1000, money: 20000, nuggets: 4, kind: 'item', sprite: 'charcoal', desc: 'Aumenta em 10% o poder de golpes de Fogo quando equipado.' },
+        { id: 'mystic-water', name: 'Mystic Water', itemKey: 'mystic_water', coins: 1000, money: 20000, nuggets: 4, kind: 'item', sprite: 'mystic-water', desc: 'Aumenta em 10% o poder de golpes de Água quando equipada.' },
+        { id: 'yellow-flute', name: 'Yellow Flute', itemKey: 'yellow_flute', coins: 1600, money: 32000, nuggets: 7, kind: 'item', sprite: 'yellow-flute', desc: 'Cura a confusão de um Pokémon.' }
+      ],
+      pokemon: [
+        { id: 'abra-fr', pokemonId: 63, name: 'Abra', version: 'FireRed', level: 9, coins: 180, money: 4000, nuggets: 1 },
+        { id: 'clefairy-fr', pokemonId: 35, name: 'Clefairy', version: 'FireRed', level: 8, coins: 500, money: 10000, nuggets: 2 },
+        { id: 'dratini-fr', pokemonId: 147, name: 'Dratini', version: 'FireRed', level: 18, coins: 2800, money: 56000, nuggets: 12 },
+        { id: 'scyther-fr', pokemonId: 123, name: 'Scyther', version: 'FireRed', level: 25, coins: 5500, money: 110000, nuggets: 22 },
+        { id: 'porygon-fr', pokemonId: 137, name: 'Porygon', version: 'FireRed', level: 26, coins: 9999, money: 200000, nuggets: 40 },
+        { id: 'abra-lg', pokemonId: 63, name: 'Abra', version: 'LeafGreen', level: 7, coins: 120, money: 3000, nuggets: 1 },
+        { id: 'clefairy-lg', pokemonId: 35, name: 'Clefairy', version: 'LeafGreen', level: 12, coins: 750, money: 15000, nuggets: 3 },
+        { id: 'dratini-lg', pokemonId: 147, name: 'Dratini', version: 'LeafGreen', level: 24, coins: 4600, money: 92000, nuggets: 19 },
+        { id: 'pinsir-lg', pokemonId: 127, name: 'Pinsir', version: 'LeafGreen', level: 18, coins: 2500, money: 50000, nuggets: 10 },
+        { id: 'porygon-lg', pokemonId: 137, name: 'Porygon', version: 'LeafGreen', level: 18, coins: 6500, money: 130000, nuggets: 26 }
+      ]
+    };
+    let activeGameCornerPrizeCategory = 'pokemon';
+    let gameCornerPrizePurchasePending = false;
+    function setGameCornerPrizeCategory(category) {
+      if (!['pokemon', 'tms', 'items'].includes(category)) return;
+      activeGameCornerPrizeCategory = category;
+      document.querySelectorAll('[data-prize-category]').forEach(button => {
+        const active = button.dataset.prizeCategory === category;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      renderGameCornerPrizes();
+    }
+    function getGameCornerPrizes() {
+      if (activeGameCornerPrizeCategory === 'pokemon') {
+        return GAME_CORNER_PRIZE_CATALOG.pokemon.map(prize => ({ ...prize, kind: 'pokemon', category: 'pokemon' }));
+      }
+      return GAME_CORNER_PRIZE_CATALOG[activeGameCornerPrizeCategory].map(prize => ({ ...prize, category: activeGameCornerPrizeCategory }));
+    }
+    function renderGameCornerPrizes() {
+      const grid = document.getElementById('gameCornerPrizeGrid');
+      if (!grid || !player) return;
+      const coins = ensureGameCornerWallet();
+      const prizes = getGameCornerPrizes();
+      const totals = prizes.reduce((sum, prize) => ({ coins: sum.coins + prize.coins, money: sum.money + prize.money, nuggets: sum.nuggets + prize.nuggets }), { coins: 0, money: 0, nuggets: 0 });
+      const totalsNode = document.getElementById('gameCornerPrizeTotals');
+      if (totalsNode) totalsNode.textContent = `Catálogo completo: ${totals.coins.toLocaleString('pt-BR')} fichas · ₽ ${totals.money.toLocaleString('pt-BR')} · ${totals.nuggets} Nuggets.`;
+      grid.innerHTML = prizes.map(prize => {
+        const sprite = prize.kind === 'pokemon'
+          ? `<img src="${SPRITE_FB(prize.pokemonId)}" alt="${escapeHTML(prize.name)}" loading="lazy" onerror="this.onerror=null;this.src='${SPRITE_FRONT(prize.pokemonId)}'">`
+          : prize.kind === 'tm'
+            ? itemIcon(prize.itemKey, '', '📀')
+            : itemIcon(prize.itemKey, '', '🎒');
+        const description = prize.kind === 'pokemon'
+          ? `${prize.version} · nível ${prize.level}`
+          : prize.desc || `Ensina ${prize.move?.name || ''} a um Pokémon compatível.`;
+        const fullPC = prize.kind === 'pokemon' && player.party.length >= 6 && !player.pc?.boxes?.some(box => box.some(slot => !slot));
+        const disabled = coins < prize.coins || fullPC || gameCornerPrizePurchasePending;
+        const buttonText = fullPC ? 'PC cheio' : coins < prize.coins ? 'Fichas insuficientes' : 'Trocar por fichas';
+        return `<article class="game-corner-prize-card">
+          ${sprite}<div class="game-corner-prize-copy"><strong>${escapeHTML(prize.name)}</strong><small>${escapeHTML(description)}</small></div>
+          <div class="game-corner-prize-meta">${prize.coins.toLocaleString('pt-BR')} fichas <span>₽ ${prize.money.toLocaleString('pt-BR')} · Nugget ×${prize.nuggets}</span></div>
+          <button type="button" class="game-corner-prize-buy" onclick="buyGameCornerPrize('${prize.id}')" ${disabled ? 'disabled' : ''}>${buttonText}</button>
+        </article>`;
+      }).join('');
+    }
+    function buildGameCornerPrizePokemon(prize) {
+      const species = {
+        35: { stats: [70, 45, 48, 60, 65, 35], types: ['normal'] },
+        63: { stats: [25, 20, 15, 105, 55, 90], types: ['psychic'] },
+        123: { stats: [70, 110, 80, 55, 80, 105], types: ['bug', 'flying'] },
+        127: { stats: [65, 125, 100, 55, 70, 85], types: ['bug'] },
+        137: { stats: [65, 60, 70, 85, 75, 40], types: ['normal'] },
+        147: { stats: [41, 64, 45, 50, 50, 50], types: ['dragon'] }
+      }[prize.pokemonId];
+      if (!species) throw new Error('Não foi possível criar este Pokémon. Tente novamente.');
+      const statNames = ['hp', 'attack', 'defense', 'specialAttack', 'specialDefense', 'speed'];
+      const baseStats = Object.fromEntries(statNames.map((key, index) => [key, species.stats[index]]));
+      const types = species.types.map(normalizeBattleType);
+      const pokemon = {
+        id: prize.pokemonId, name: prize.name, level: prize.level, shiny: false,
+        type: typeLabel(types), typeClass: typeClass(types), types,
+        baseStats,
+        nature: NATURES[Math.floor(Math.random() * NATURES.length)].name,
+        ability: 'Adaptabilidade',
+        ivs: Object.fromEntries(statNames.map(key => [key, Math.floor(Math.random() * 32)])),
+        evs: { hp: 0, attack: 0, defense: 0, specialAttack: 0, specialDefense: 0, speed: 0 },
+        growthRate: 'mediumFast', exp: getExperienceForLevel(prize.level),
+        heldItem: '', status: '', moves: getMovesForLevel(prize.pokemonId, prize.level)
+      };
+      ensurePokemonTraits(pokemon);
+      const stats = pvpCalculateStats(baseStats, pokemon, pokemon.ivs, pokemon.evs);
+      pokemon.stats = stats;
+      pokemon.maxHp = stats.hp;
+      pokemon.hp = stats.hp;
+      normalizePokemonMoves(pokemon);
+      ensurePokemonGender(pokemon);
+      return pokemon;
+    }
+    async function buyGameCornerPrize(prizeId) {
+      if (!player || battle || gameCornerPrizePurchasePending) return;
+      const prize = getGameCornerPrizes().find(entry => entry.id === prizeId);
+      if (!prize) return;
+      if (ensureGameCornerWallet() < prize.coins) { showToast('Você não tem fichas suficientes para esse prêmio.', 'error'); return; }
+      ensureBagItems();
+      if (prize.kind === 'pokemon') {
+        ensurePC();
+        if (player.party.length >= 6 && !player.pc.boxes.some(box => box.some(slot => !slot))) {
+          showToast('Sua equipe e o PC estão cheios. Libere um espaço para receber o Pokémon.', 'error');
+          renderGameCornerPrizes();
+          return;
+        }
+      }
+      gameCornerPrizePurchasePending = true;
+      renderGameCornerPrizes();
+      try {
+        const pokemon = prize.kind === 'pokemon' ? buildGameCornerPrizePokemon(prize) : null;
+        if (ensureGameCornerWallet() < prize.coins) throw new Error('O saldo de fichas mudou. Tente novamente.');
+        if (prize.kind === 'pokemon') {
+          if (player.party.length < 6) {
+            player.party.push(pokemon);
+            if (!player.poke || player.poke.hp <= 0) player.poke = pokemon;
+            onMissionEvent('party_changed', player.party.length);
+          } else if (depositToPC(pokemon) < 0) {
+            throw new Error('Não foi possível guardar o Pokémon no PC.');
+          }
+          markPokedex(pokemon.id, true);
+          onMissionEvent('capture', pokemon.id);
+        } else if (prize.kind === 'tm') {
+          setItemQty(prize.itemKey, getItemQty(prize.itemKey) + 1);
+        } else {
+          setItemQty(prize.itemKey, getItemQty(prize.itemKey) + 1);
+        }
+        player.gameCornerCoins = ensureGameCornerWallet() - prize.coins;
+        renderGameCornerWallet();
+        renderBag();
+        refreshPartyUI();
+        renderPC();
+        updateStatsUI();
+        saveGame();
+        showToast(`${prize.name} foi resgatado por ${prize.coins.toLocaleString('pt-BR')} fichas!`);
+      } catch (error) {
+        showToast(error.message || 'Não foi possível concluir a troca.', 'error');
+      } finally {
+        gameCornerPrizePurchasePending = false;
+        renderGameCornerPrizes();
+      }
+    }
+    window.addEventListener('message', event => {
+      const frame = getGameCornerFrames().find(candidate => candidate.contentWindow === event.source);
+      if (!frame || event.origin !== 'null' || !player) return;
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+      if (data.type === 'gamecorner-ready') {
+        frame.dataset.loaded = 'true';
+        sendGameCornerWallet(frame);
+        return;
+      }
+      if (data.type === 'gamecorner-buy-chips') {
+        const packSize = Number(data.amount);
+        const packPrice = GAME_CORNER_CHIP_PACKS[packSize];
+        if (!packPrice) return;
+        if ((Number(player.money) || 0) < packPrice) {
+          sendGameCornerWallet(frame, 'Pokédólares insuficientes para comprar fichas.', 'text-red-400');
+          return;
+        }
+        player.money -= packPrice;
+        player.gameCornerCoins = ensureGameCornerWallet() + packSize;
+        updateStatsUI();
+        renderGameCornerWallet();
+        saveGame();
+        sendGameCornerWallet(frame, `${packSize.toLocaleString('pt-BR')} fichas compradas por ₽ ${packPrice.toLocaleString('pt-BR')}.`, 'text-green-400');
+        getGameCornerFrames().filter(candidate => candidate !== frame && candidate.dataset.loaded === 'true').forEach(candidate => sendGameCornerWallet(candidate));
+        return;
+      }
+      if (data.type === 'gamecorner-balance') {
+        const coins = Number(data.coins);
+        if (!Number.isSafeInteger(coins) || coins < 0 || coins > 1000000000 || coins === ensureGameCornerWallet()) return;
+        player.gameCornerCoins = coins;
+        renderGameCornerWallet();
+        saveGame();
+        getGameCornerFrames().filter(candidate => candidate !== frame && candidate.dataset.loaded === 'true').forEach(candidate => sendGameCornerWallet(candidate));
+      }
+    });
+
     function showWelcomePopup(trainerName) {
       const overlay = document.getElementById('welcomePopupOverlay');
       document.getElementById('welcomePopupMessage').textContent = `Bem-vindo de volta, ${trainerName}!`;
@@ -3552,7 +3860,7 @@
       { short: 'Poção', title: '1 Poção', detail: 'Recupere 25 HP de um Pokémon.', icons: ['item:potions'], items: { potions: 1 } },
       { short: '₽1 mil', title: '1.000 Pokédollars', detail: 'Uma ajuda extra para comprar itens.', icons: ['assets/daily-money.svg'], money: 1000 },
       { short: '3 BP', title: '3 BP', detail: 'Pontos de Batalha para gastar no Poké Market.', icons: ['assets/daily-bp.svg'], battlePoints: 3 },
-      { short: '1 PC', title: '1 PokeCoin', detail: 'Uma PokeCoin para usar no Poké Market.', icons: ['assets/daily-pokecoin.svg'], pokeCoins: 1 },
+      { short: '1 PC', title: '1 PokeCoin', detail: 'Uma PokeCoin para usar no Poké Market.', icons: ['emoji:💎'], pokeCoins: 1 },
       { short: '₽2 mil + 5 BP', title: '2.000 Pokédollars + 5 BP', detail: 'Prêmio especial por completar os sete dias.', icons: ['assets/daily-money.svg', 'assets/daily-bp.svg'], money: 2000, battlePoints: 5 }
     ];
     let dailyLoginClaimInProgress = false;
@@ -3576,6 +3884,7 @@
     function dailyLoginIconHTML(reward, className = '') {
       const icons = reward.icons || [];
       return `<span class="${className}">${icons.map(icon => {
+        if (icon.startsWith('emoji:')) return `<span aria-hidden="true">${escapeHTML(icon.slice(6))}</span>`;
         if (icon.startsWith('item:')) {
           const key = icon.slice(5);
           const src = ITEM_SPRITE[key] || ITEM_SPRITE.balls;
@@ -3911,7 +4220,7 @@
         name, gender: selectedGender, originRegion: region, starter,
         rivalName: '', oakIntroStep: 0, oakIntroFinished: false, oakIntroRewardClaimed: false,
         billIntroStep: 0, billIntroVersion: 2, billTicketRewardClaimed: false, billMissionRewardClaimed: false,
-        money: 3000, battlePoints: 0, pokeCoins: 0, dailyLoginLastClaimDate: null, dailyLoginStreak: 0, accountXp: 0, level: 1, badges: 0, missionsDone: 0, potions: 5, balls: 8, centerCards: 5,
+        money: 3000, battlePoints: 0, pokeCoins: 0, gameCornerCoins: 0, dailyLoginLastClaimDate: null, dailyLoginStreak: 0, accountXp: 0, level: 1, badges: 0, missionsDone: 0, potions: 5, balls: 8, centerCards: 5,
         antidote: 2, antiparalyze: 2, antiburn: 2,
         badgesList: [],
         party: [starterPokemon],
@@ -4378,9 +4687,10 @@
       fairy_feather: { name: 'Fairy Feather', desc: 'Aumenta em 10% o dano de golpes do tipo Fada.', type: 'Fada' },
       flame_orb: { name: 'Flame Orb', desc: 'Queima o portador durante a batalha.', type: '' },
       toxic_orb: { name: 'Toxic Orb', desc: 'Aplica envenenamento ao portador no fim do turno.', type: '' },
+      smoke_ball: { name: 'Smoke Ball', desc: 'Permite fugir de batalhas selvagens quando equipada.', type: '' },
     };
 
-    const EXTRA_HELD_ITEM_KEYS = ['choice_band','choice_scarf','choice_specs','quick_claw','focus_band','scope_lens','white_herb','wise_glasses','muscle_band','life_orb','light_clay','rocky_helmet','assault_vest','heavy_duty_boots','covert_cloak','fairy_feather','flame_orb','toxic_orb'];
+    const EXTRA_HELD_ITEM_KEYS = ['choice_band','choice_scarf','choice_specs','quick_claw','focus_band','scope_lens','white_herb','wise_glasses','muscle_band','life_orb','light_clay','rocky_helmet','assault_vest','heavy_duty_boots','covert_cloak','fairy_feather','flame_orb','toxic_orb','smoke_ball'];
     EXTRA_HELD_ITEM_KEYS.forEach(key => {
       const item = HELD_ITEM_INFO[key];
       const id = key.replace(/_/g, '-');
@@ -5669,6 +5979,7 @@
     ];
     const EXTRA_SPECIAL_ITEMS = [
       { id: 'heal-powder', key: 'heal_powder', name: 'Heal Powder', desc: 'Cura qualquer problema de status.', category: 'medicine', kind: 'statusCure', price: 450 },
+      { id: 'yellow-flute', key: 'yellow_flute', name: 'Yellow Flute', desc: 'Cura a confusão de um Pokémon.', category: 'medicine', kind: 'statusCure', price: 0, gameCornerRewardOnly: true },
       { id: 'figy-berry', key: 'figy', name: 'Figy Berry', desc: 'Recupera 1/8 do HP abaixo da metade.', category: 'medicine', kind: 'heal', amount: 0.125, price: 200 },
       { id: 'wiki-berry', key: 'wiki', name: 'Wiki Berry', desc: 'Recupera 1/8 do HP abaixo da metade.', category: 'medicine', kind: 'heal', amount: 0.125, price: 200 },
       { id: 'mago-berry', key: 'mago', name: 'Mago Berry', desc: 'Recupera 1/8 do HP abaixo da metade.', category: 'medicine', kind: 'heal', amount: 0.125, price: 200 },
@@ -5691,7 +6002,7 @@
       }
       BAG_FIELD_ITEMS.push({ key: item.key, name: item.key === 'rarecandy' ? 'Rare Candy' : item.name, sprite: item.key, kind: item.kind, amount: item.amount, stat: item.stat });
       if (!['ev', 'level', 'mint', 'tm', 'expCharm'].includes(item.kind)) BATTLE_BAG_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount });
-      if (!['mint'].includes(item.kind) && !SHOP_ITEMS.some(entry => entry.key === item.key)) {
+      if (!['mint'].includes(item.kind) && !item.gameCornerRewardOnly && !SHOP_ITEMS.some(entry => entry.key === item.key)) {
         SHOP_ITEMS.push({ id: item.key, name: item.name, icon: item.kind === 'ev' ? '💊' : item.kind === 'level' ? '🍬' : '🧪', sprite: item.key, desc: item.desc, price: item.price, key: item.key, kind: item.kind, qty: item.qty });
       }
     });
@@ -5716,27 +6027,33 @@
       category: 'medicine', kind: 'tm', price: 0, gymRewardOnly: true,
       move: { ...tm, name: tm.name.split(' · ')[1], version: 'firered-leafgreen' }
     }));
-    EXTRA_TM_ITEMS.push(...GYM_TM_ITEMS);
+    const GAME_CORNER_TM_ITEMS = GAME_CORNER_PRIZE_CATALOG.tms.map(prize => ({
+      id: prize.id, key: prize.itemKey, name: prize.name,
+      desc: `Ensina ${prize.move.name} a um Pokémon compatível. Resgatada no Game Corner.`,
+      category: 'medicine', kind: 'tm', price: 0, gameCornerRewardOnly: true,
+      move: { ...prize.move }
+    }));
+    EXTRA_TM_ITEMS.push(...GAME_CORNER_TM_ITEMS, ...GYM_TM_ITEMS);
     EXTRA_TM_ITEMS.forEach(item => {
       ITEM_SPRITE[item.key] = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.id}.png`;
       ITEM_SPRITE_FB[item.key] = `https://img.pokemondb.net/sprites/items/${item.id}.png`;
       BAG_CATEGORIES.find(category => category.id === 'technical-machines')?.items.push({ key: item.key, name: item.name, sprite: item.key, desc: item.desc });
       BAG_FIELD_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, move: item.move });
-      if (!item.gymRewardOnly && !SHOP_ITEMS.some(entry => entry.key === item.key)) SHOP_ITEMS.push({ id: item.key, name: item.name, icon: '📀', sprite: item.key, desc: item.desc, price: item.price, key: item.key, kind: item.kind });
+      if (!item.gymRewardOnly && !item.gameCornerRewardOnly && !SHOP_ITEMS.some(entry => entry.key === item.key)) SHOP_ITEMS.push({ id: item.key, name: item.name, icon: '📀', sprite: item.key, desc: item.desc, price: item.price, key: item.key, kind: item.kind });
     });
 
     ITEM_SPRITE.tm40 = ITEM_SPRITE.tm43 || ITEM_SPRITE.tm40;
     ITEM_SPRITE_FB.tm40 = ITEM_SPRITE_FB.tm43 || ITEM_SPRITE_FB.tm40;
 
     const EXTRA_BATTLE_ITEMS = [
-      { id: 'guard-spec', key: 'guard_spec', name: 'Guard Spec.', desc: 'Impede reduções de atributos da equipe por 5 turnos.', kind: 'guardSpec', price: 1 },
-      { id: 'dire-hit', key: 'dire_hit', name: 'Dire Hit', desc: 'Aumenta bastante a chance de acerto crítico do Pokémon ativo.', kind: 'direHit', price: 1 },
-      { id: 'x-attack', key: 'x_attack', name: 'X Attack', desc: 'Aumenta o Ataque do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'attack', price: 1 },
-      { id: 'x-defense', key: 'x_defense', name: 'X Defense', desc: 'Aumenta a Defesa do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'defense', price: 1 },
-      { id: 'x-speed', key: 'x_speed', name: 'X Speed', desc: 'Aumenta a Velocidade do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'speed', price: 1 },
-      { id: 'x-accuracy', key: 'x_accuracy', name: 'X Accuracy', desc: 'Aumenta a precisão do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'accuracy', price: 1 },
-      { id: 'x-sp-atk', key: 'x_special_attack', name: 'X Sp. Atk', desc: 'Aumenta o Ataque Especial do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'specialAttack', price: 1 },
-      { id: 'x-sp-def', key: 'x_special_defense', name: 'X Sp. Def', desc: 'Aumenta a Defesa Especial do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'specialDefense', price: 1 }
+      { id: 'guard-spec', key: 'guard_spec', name: 'Guard Spec.', desc: 'Impede reduções de atributos da equipe por 5 turnos.', kind: 'guardSpec', price: 700 },
+      { id: 'dire-hit', key: 'dire_hit', name: 'Dire Hit', desc: 'Aumenta bastante a chance de acerto crítico do Pokémon ativo.', kind: 'direHit', price: 650 },
+      { id: 'x-attack', key: 'x_attack', name: 'X Attack', desc: 'Aumenta o Ataque do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'attack', price: 500 },
+      { id: 'x-defense', key: 'x_defense', name: 'X Defense', desc: 'Aumenta a Defesa do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'defense', price: 550 },
+      { id: 'x-speed', key: 'x_speed', name: 'X Speed', desc: 'Aumenta a Velocidade do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'speed', price: 350 },
+      { id: 'x-accuracy', key: 'x_accuracy', name: 'X Accuracy', desc: 'Aumenta a precisão do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'accuracy', price: 950 },
+      { id: 'x-sp-atk', key: 'x_special_attack', name: 'X Sp. Atk', desc: 'Aumenta o Ataque Especial do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'specialAttack', price: 350 },
+      { id: 'x-sp-def', key: 'x_special_defense', name: 'X Sp. Def', desc: 'Aumenta a Defesa Especial do Pokémon ativo em 2 estágios.', kind: 'battleBoost', stat: 'specialDefense', price: 350 }
     ];
     BAG_CATEGORIES.push({ id: 'battle-items', title: 'Itens de batalha', items: [] });
     EXTRA_BATTLE_ITEMS.forEach(item => {
@@ -6149,7 +6466,7 @@
       const bonusEnabled = pokeCoinsSupporterCodeValidated;
       grid.innerHTML = POKECOIN_PACKAGES.map((pack, index) => {
         const diamondCount = Math.min(6, Math.max(1, Math.ceil(pack.coins / 75)));
-        const diamonds = Array.from({ length: diamondCount }, () => '<span class="poke-coins-diamond"></span>').join('');
+        const diamonds = Array.from({ length: diamondCount }, () => '<span class="poke-coins-pack-gem">💎</span>').join('');
         const price = pack.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const bonus = bonusEnabled ? pack.supporterCoins - pack.coins : 0;
         const totalCoins = pack.coins + bonus;
@@ -6235,7 +6552,7 @@
       renderPokeCoinsPackageCards();
     }
     function marketItemUsesBattlePoints(item) {
-      return ['tm', 'battleBoost', 'guardSpec', 'direHit', 'flameBox'].includes(item?.kind) ||
+      return ['tm', 'flameBox'].includes(item?.kind) ||
         ['leftovers', 'charcoal', 'miracle_seed', 'mystic_water', 'magnet', 'twisted_spoon', 'black_belt', 'focus_sash',
           'silk_scarf', 'silver_powder', 'hard_stone', 'sharp_beak', 'poison_barb', 'spell_tag', 'dragon_fang',
           'never_melt_ice', 'metal_coat', 'black_glasses', 'amulet_coin', 'shell_bell', 'choice_band', 'choice_scarf',
@@ -8021,6 +8338,8 @@
       }
       if (id === 'center') refreshCenterUI();
       if (id === 'market') refreshMarketUI();
+      if (id === 'game-corner') openGameCorner();
+      if (id === 'season-pass') renderSeasonPass();
       if (id === 'bag') renderBag();
       if (id === 'item-catalog') renderItemCatalog();
       if (id === 'pokemon') {
@@ -10550,6 +10869,17 @@
     function tryRun() {
       if (battle.busy) return;
       battle.busy = true;
+      if (battle.dungeon && player.poke?.heldItem === 'smoke_ball') {
+        SFX.run();
+        setLog('A Smoke Ball permitiu escapar da batalha selvagem!');
+        setTimeout(() => {
+          stopBattleBgm();
+          document.getElementById('battleOverlay').classList.remove('active');
+          battle = null;
+          showToast('VocÃª fugiu da batalha com a Smoke Ball.');
+        }, 800);
+        return;
+      }
       if (Math.random() > 0.3) {
         SFX.run();
         setLog('Conseguiu fugir!');
@@ -12182,6 +12512,12 @@
               <span class="trainer-card-avatar"><img src="https://play.pokemonshowdown.com/sprites/trainers/${avatar.id}.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span aria-hidden="true" style="display:none;font-size:2rem">\u{1F464}</span></span>
               <span style="min-width:0"><span class="trainer-card-name ${isVipActive() ? 'vip-profile-name' : ''}" style="display:block">${escapeHTML(player.name)}</span><span class="trainer-card-profile-hint">Toque para trocar imagem</span><span id="trainerVipStatus" class="trainer-card-vip-status" style="display:none"></span></span>
             </button>
+            <ul id="trainerVipBenefits" class="trainer-card-vip-benefits" aria-label="Benefícios VIP" hidden>
+              <li>Nome do perfil dourado</li>
+              <li>1,5× mais XP</li>
+              <li>1,5× mais chance de Shiny</li>
+              <li>1 Flame Box toda sexta-feira, às 18h (horário de Brasília)</li>
+            </ul>
           </section>
           <section class="trainer-card-panel" aria-label="Ins\u00edgnias de Kanto">
             <h3 class="trainer-card-section-title">Ins\u00edgnias</h3>
@@ -12696,4 +13032,3 @@
         showToast('Desafio aceito. Aguardando o anfitrião iniciar a batalha.');
       } catch(error) { showToast('Não foi possível aceitar o desafio: '+error.message,'error'); }
     }
-

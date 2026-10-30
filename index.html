@@ -200,6 +200,10 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#2a1f3d,#15101f);"><img src="assets/missions-tablet.png" alt="" style="width:80px;height:88px;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="quick-mission-title-row"><div class="game-card-title">Missões</div><div class="quick-mission-progress"><strong id="quickMissionCount">0 / 0</strong><span>concluídas</span></div></div><div class="game-card-desc">Acompanhe objetivos e recompensas.</div></div>
             </div>
+            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('season-pass')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('season-pass')}">
+              <div class="game-card-header season-pass-home-art">&#127942;</div>
+              <div class="game-card-body"><div class="game-card-title">Passe da Temporada</div><div class="game-card-desc">Avance nas trilhas Bronze, Prata e Gold e resgate recompensas.</div></div>
+            </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('dungeons')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('dungeons')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#1e3a2f,#0f1f18);"><img src="assets/exploration-magnifier.png" alt="" style="width:84px;height:84px;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">Exploração</div><div class="game-card-desc">Explore Kanto e encontre Pokémon selvagens.</div></div>
@@ -213,7 +217,7 @@
               <div class="game-card-body"><div class="game-card-title">Centro Pokémon</div><div class="game-card-desc">Cuide da equipe e restaure HP, PP e status.</div></div>
             </div>
             <button type="button" class="game-card" onclick="openPokeCoinsStore()" style="padding:0;text-align:left;color:inherit;">
-              <div class="game-card-header poke-coins-quick-header"><img src="assets/daily-pokecoin.svg" alt="" /><span class="poke-coins-quick-header-copy"><strong>POKÉCOINS</strong><small>Central de pacotes</small></span></div>
+              <div class="game-card-header poke-coins-quick-header"><span class="poke-coins-gem" aria-hidden="true">💎</span><span class="poke-coins-quick-header-copy"><strong>POKÉCOINS</strong><small>Central de pacotes</small></span></div>
               <div class="game-card-body"><div class="game-card-title">PokéCoins</div><div class="game-card-desc">Veja os pacotes de PokéCoins e escolha uma opção.</div></div>
             </button>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('market')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('market')}">
@@ -231,6 +235,10 @@
             <div class="game-card" id="silphCoHomeCard" role="button" tabindex="0" aria-disabled="true" onclick="switchPanel('silph-co')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('silph-co')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#244b68,#122337);height:100px;overflow:hidden;"><img src="assets/silph-co-building.png" alt="Edifício da Silph Co." title="Silph Co. — imagem: WikiDex" style="width:84px;height:126px;object-fit:contain;image-rendering:pixelated;transform:translateY(12px);" /></div>
               <div class="game-card-body"><div class="game-card-title">Silph C.O</div><div class="game-card-desc" id="silphCoHomeDesc">Derrote Sabrina no Ginásio de Saffron para liberar o acesso.</div></div>
+            </div>
+            <div class="game-card" id="gameCornerHomeCard" role="button" tabindex="0" onclick="switchPanel('game-corner')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('game-corner')}">
+              <div class="game-card-header"><img src="assets/game-corner/game-corner-guide.png" alt="Game Corner Guide: cena da área de jogos de Pokémon FireRed e LeafGreen" /></div>
+              <div class="game-card-body"><div class="game-card-title">Game Corner</div><div class="game-card-desc">Jogue Pok&eacute;N&iacute;quel, Roleta Pok&eacute;mon e Pok&eacute;Mina; troque fichas por pr&ecirc;mios.</div></div>
             </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('battle-tower')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('battle-tower')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#241638,#100a1d);"><img src="assets/battle-tower-castle.png" alt="Castelo pixel art da Torre de Batalha" style="width:154px;height:92px;object-fit:contain;image-rendering:pixelated;" /></div>
@@ -344,7 +352,7 @@
         </div>
         <div class="panel" id="panel-missions">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">← Voltar para Início</button>
-          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero"><div class="center-hero-copy"><span class="center-kicker">Tarefas da jornada</span><h3>Complete miss&otilde;es e receba recompensas.</h3><p>Avance pela hist&oacute;ria de Kanto, cumpra desafios di&aacute;rios e acompanhe seu progresso.</p></div><div class="center-hero-art"><img src="assets/missions-tablet.png" alt="Miss&otilde;es do treinador" loading="lazy" /></div></section></div>
+          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero missions-page-hero"><div class="center-hero-copy"><span class="center-kicker">Tarefas da jornada</span><h3>Complete miss&otilde;es e receba recompensas.</h3><p>Avance pela hist&oacute;ria de Kanto, cumpra desafios di&aacute;rios e acompanhe seu progresso.</p></div><div class="center-hero-art"><img src="assets/missions-tablet.png" alt="Miss&otilde;es do treinador" loading="lazy" /></div></section></div>
           <section class="daily-mission-section" aria-labelledby="dailyMissionHeading">
             <div class="daily-mission-heading"><h3 id="dailyMissionHeading">Missões diárias</h3><span class="daily-mission-timer" id="dailyMissionCountdown">Renovam à meia-noite</span></div>
             <div class="daily-mission-list" id="dailyMissionsList"></div>
@@ -354,6 +362,14 @@
             <button type="button" id="missionTabCompleted" class="mission-tab" role="tab" aria-selected="false" onclick="setMissionTab('completed')">Conclu&#237;das <span id="missionCompletedCount"></span></button>
           </div>
           <div class="mission-list" id="missionsList"></div>
+        </div>
+
+        <div class="panel" id="panel-season-pass">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
+          <div class="season-pass-shell">
+            <section class="season-pass-hero"><div><span class="season-pass-kicker">Temporada 1</span><h2>Passe da Temporada</h2><p>Ganhe XP em batalhas e miss&otilde;es para avan&ccedil;ar. Cada marco libera uma recompensa nas tr&ecirc;s trilhas.</p></div><div class="season-pass-progress"><strong id="seasonPassXp">0 XP</strong><span id="seasonPassNext">Pr&oacute;ximo marco: 1.000 XP</span><div class="season-pass-progress-track"><i id="seasonPassProgressFill"></i></div></div></section>
+            <div class="season-pass-track-grid" id="seasonPassTracks"></div>
+          </div>
         </div>
 
         <div class="panel" id="panel-guide">
@@ -467,7 +483,7 @@
         <div class="panel" id="panel-center">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
           <div class="center-dashboard">
-            <section class="center-hero">
+            <section class="center-hero healing-center-hero">
               <div class="center-hero-copy"><span class="center-kicker">Centro de recupera&ccedil;&atilde;o</span><h3>Um descanso e a equipe fica pronta de novo.</h3><p>Selecione os Pok&eacute;mon que precisam de cuidado. A cura restaura HP e PP e remove condi&ccedil;&otilde;es de status.</p></div>
               <div class="center-hero-art"><img src="assets/pokemon-center.png" alt="Centro Pok&eacute;mon" loading="lazy" /></div>
             </section>
@@ -546,6 +562,28 @@
           </section>
         </div>
 
+        <div class="panel" id="panel-game-corner">
+          <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('home')">&#8592; Voltar para In&iacute;cio</button>
+          <section class="game-corner-page">
+            <header class="game-corner-page-head"><div><span class="game-corner-eyebrow">Celadon City</span><h2>Game Corner</h2><p>Jogue com fichas compradas usando Pok&eacute;d&oacute;lares. Seus cr&eacute;ditos ficam salvos e s&atilde;o compartilhados entre os jogos.</p></div><div class="game-corner-wallet"><span>Pok&eacute;d&oacute;lares</span><strong id="gameCornerMoney">₽ 0</strong><span>Fichas</span><strong id="gameCornerChips">0</strong></div></header>
+            <div class="game-corner-tabs" role="tablist" aria-label="Jogos do Game Corner">
+              <button type="button" class="game-corner-tab active" id="gameCornerTabSlot" role="tab" aria-selected="true" onclick="switchGameCornerTab('slot')">Pok&eacute;N&iacute;quel</button>
+              <button type="button" class="game-corner-tab" id="gameCornerTabRoulette" role="tab" aria-selected="false" onclick="switchGameCornerTab('roulette')">Roleta Pok&eacute;mon</button>
+              <button type="button" class="game-corner-tab" id="gameCornerTabMine" role="tab" aria-selected="false" onclick="switchGameCornerTab('mine')">Pok&eacute;Mina</button>
+              <button type="button" class="game-corner-tab" id="gameCornerTabPrizes" role="tab" aria-selected="false" onclick="switchGameCornerTab('prizes')">Troca de Pr&ecirc;mios</button>
+            </div>
+            <div class="game-corner-game"><iframe id="gameCornerSlotFrame" title="PokéNíquel do Game Corner" sandbox="allow-scripts" data-src="assets/game-corner/pokeniquel.html" hidden></iframe><iframe id="gameCornerRouletteFrame" title="Roleta Pokémon do Game Corner" sandbox="allow-scripts" data-src="assets/game-corner/roleta-pokemon.html" hidden></iframe><iframe id="gameCornerMineFrame" title="PokéMina do Game Corner" sandbox="allow-scripts" data-src="assets/game-corner/pokemina.html" hidden></iframe>
+              <section id="gameCornerPrizeShop" class="game-corner-prize-shop" hidden aria-labelledby="gameCornerPrizeTitle">
+                <div class="game-corner-prize-heading"><div><span class="game-corner-eyebrow">Loja de pr&ecirc;mios</span><h3 id="gameCornerPrizeTitle">Troque fichas por pr&ecirc;mios</h3><p>TMs, itens e Pok&eacute;mon exclusivos do balc&atilde;o de Celadon.</p></div></div>
+                <div class="game-corner-prize-filters" role="group" aria-label="Categorias de pr&ecirc;mios"><button type="button" class="active" aria-pressed="true" data-prize-category="pokemon" onclick="setGameCornerPrizeCategory('pokemon')">Pok&eacute;mon</button><button type="button" aria-pressed="false" data-prize-category="tms" onclick="setGameCornerPrizeCategory('tms')">TMs</button><button type="button" aria-pressed="false" data-prize-category="items" onclick="setGameCornerPrizeCategory('items')">Itens</button></div>
+                <div id="gameCornerPrizeTotals" class="game-corner-prize-totals" aria-live="polite"></div>
+                <div id="gameCornerPrizeGrid" class="game-corner-prize-grid"></div>
+                <p class="game-corner-prize-note">Os Pok&eacute;mon chegam no n&iacute;vel indicado. Pok&eacute;d&oacute;lares e Nuggets aparecem como refer&ecirc;ncia; as trocas usam fichas.</p>
+              </section>
+            </div>
+          </section>
+        </div>
+
         <div class="panel" id="panel-bag">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="switchPanel('profile')">← Voltar para Perfil</button>
           <div class="center-dashboard bag-dashboard"><section class="center-hero kanto-feature-hero bag-journey-hero"><div class="center-hero-copy"><span class="center-kicker">Suprimentos da jornada</span><h3>Tudo pronto para sua pr&oacute;xima aventura.</h3><p>Consulte seus itens, use recursos e mantenha sua mochila organizada.</p></div><div class="center-hero-art"><img src="assets/trainer-backpack.png" alt="Mochila de treinador" loading="lazy" /></div></section></div>
@@ -606,7 +644,7 @@
 
         <div class="panel" id="panel-social">
           <button type="button" class="btn btn-secondary panel-back-button" onclick="returnFromPanel('social')">&#8592; Voltar para In&iacute;cio</button>
-          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero"><div class="center-hero-copy"><span class="center-kicker">Conex&otilde;es de treinador</span><h3 id="socialHubTitle">Central de Amizade</h3><p>Encontre treinadores, converse, troque Pok&eacute;mon e marque batalhas.</p></div><div class="center-hero-art"><img class="social-friendship-icon" src="assets/friends-group.svg" alt="Ícone de amizade" loading="lazy" /></div></section></div>
+          <div class="center-dashboard kanto-feature-dashboard"><section class="center-hero kanto-feature-hero social-friendship-hero"><div class="center-hero-copy"><span class="center-kicker">Conex&otilde;es de treinador</span><h3 id="socialHubTitle">Central de Amizade</h3><p>Encontre treinadores, converse, troque Pok&eacute;mon e marque batalhas.</p></div><div class="center-hero-art"><img class="social-friendship-icon" src="assets/friends-group.svg" alt="Ícone de amizade" loading="lazy" /></div></section></div>
           <section class="social-hub" aria-labelledby="socialHubTitle">
             <div class="social-content">
               <div class="social-subpanel">
@@ -931,10 +969,10 @@
           style="flex-shrink:0;width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:1.1rem;">🔊</button>
       </div>
       <div class="battle-actions" id="battleMenu">
-        <button class="battle-btn fight" onclick="showMoves()">⚔️ Lutar</button>
-        <button class="battle-btn bag" onclick="showBag()">🎒 Mochila</button>
-        <button class="battle-btn pokemon" id="btnSwitch" onclick="showSwitchMenu()">🔄 Trocar</button>
-        <button class="battle-btn run" onclick="tryRun()">🏃 Fugir</button>
+        <button class="battle-btn fight" onclick="showMoves()">Lutar</button>
+        <button class="battle-btn bag" onclick="showBag()">Mochila</button>
+        <button class="battle-btn pokemon" id="btnSwitch" onclick="showSwitchMenu()">Trocar</button>
+        <button class="battle-btn run" onclick="tryRun()">Fugir</button>
       </div>
       <div class="battle-actions" id="bagMenu" style="display:none;"></div>
       <div class="battle-actions moves-view" id="movesMenu" style="display:none;"></div>
@@ -989,7 +1027,7 @@
   <dialog id="pokeCoinsStoreDialog" aria-labelledby="pokeCoinsStoreTitle">
     <div class="poke-coins-store">
       <div class="poke-coins-store-head">
-        <div class="poke-coins-store-heading"><span class="poke-coins-store-kicker">CENTRAL DE RECARGAS</span><h2 class="poke-coins-store-title" id="pokeCoinsStoreTitle"><img src="assets/daily-pokecoin.svg" alt="" /> Pacotes de PokéCoins</h2></div>
+        <div class="poke-coins-store-heading"><span class="poke-coins-store-kicker">CENTRAL DE RECARGAS</span><h2 class="poke-coins-store-title" id="pokeCoinsStoreTitle"><span aria-hidden="true">💎</span> Pacotes de PokéCoins</h2></div>
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('pokeCoinsStoreDialog').close()" aria-label="Fechar pacotes de PokéCoins">Fechar</button>
       </div>
       <div class="poke-coins-pack-grid" id="pokeCoinsPackGrid" aria-label="Pacotes disponíveis"></div>

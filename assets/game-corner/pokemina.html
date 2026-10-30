@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<!-- saved from url=(0078)file:///C:/Users/Marco%20Zero%20Games/Downloads/gemini-code-1793359051807.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PokéMina - Celadon Game Corner</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+    :root {
+      --gc-red: #2e1065;
+      --gc-dark-red: #0f0b1e;
+      --gc-gold: #facc15;
+      --gc-gold-dark: #b8860b;
+      --gc-bg: #0b0712;
+      --gc-panel: #1e1b4b;
+      --gc-screen: #111827;
+      --gc-screen-text: #c4b5fd;
+      --gc-green: #22c55e;
+      --gc-blue: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--gc-bg);
+      background-image: 
+        radial-gradient(circle at 50% 50%, #200b3b 0%, var(--gc-bg) 100%),
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.4) 3px, rgba(0, 0, 0, 0.4) 3px);
+      color: #fff;
+      font-family: 'Press Start 2P', monospace;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .cabinet {
+      background: linear-gradient(180deg, #2e1065 0%, #1e1b4b 50%, #0f0b1e 100%);
+      border: 4px solid #f59e0b;
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 576px;
+      box-shadow: 
+        0 0 35px rgba(168, 85, 247, 0.35),
+        inset 0 2px 5px rgba(255, 255, 255, 0.2);
+      position: relative;
+      zoom: .88;
+    }
+
+    .marquee {
+      background: #581c87;
+      border: 4px solid #facc15;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 12px;
+      box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    .marquee h1 {
+      color: var(--gc-gold);
+      font-size: 1.2rem;
+      text-shadow: 3px 3px 0px #880000, -2px -2px 0px #000;
+      letter-spacing: 2px;
+    }
+
+    .marquee .subtitle {
+      font-family: 'VT323', monospace;
+      color: #ddd6fe;
+      font-size: 1.2rem;
+      margin-top: 5px;
+    }
+
+    .stats-screen {
+      background: #000;
+      border: 4px solid #374151;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.2);
+    }
+
+    .stat-box {
+      background: #111;
+      border: 2px solid #333;
+      padding: 8px 4px;
+      text-align: center;
+      border-radius: 6px;
+    }
+
+    .stat-label {
+      font-size: 0.5rem;
+      color: #aaa;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .stat-value {
+      font-size: 0.8rem;
+      color: var(--gc-gold);
+      text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+    }
+
+    .grid-container {
+      background: #11081f;
+      border: 4px solid var(--gc-gold-dark);
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .tile {
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #3d2259 0%, #1e0d30 100%);
+      border: 3px solid #6b3ba7;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 0 #120620;
+    }
+
+    .tile:hover:not(.revealed) {
+      background: linear-gradient(135deg, #532f7a 0%, #2a1244 100%);
+      transform: translateY(-2px);
+    }
+
+    .tile:active:not(.revealed) {
+      transform: translateY(2px);
+      box-shadow: 0 0 0 #120620;
+    }
+
+    .tile.revealed {
+      background: #0a0412;
+      border-color: #221038;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+      cursor: default;
+      transform: none;
+    }
+
+    .grass-sprite, .tile-sprite {
+      width: 46%;
+      height: 46%;
+      object-fit: contain;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+
+    .tile.revealed .tile-sprite { width: 58%; height: 58%; }
+    .tile.revealed .pokemon-sprite { width: 84%; height: 84%; }
+
+    .tile.pokeball {
+      border-color: var(--gc-green);
+      background: #052e16;
+    }
+
+    .tile.electrode {
+      border-color: #ef4444;
+      background: #450a0a;
+    }
+
+    .controls-panel {
+      background: var(--gc-panel);
+      border: 3px solid var(--gc-gold-dark);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.6rem;
+    }
+
+    select {
+      background: #000;
+      border: 2px solid var(--gc-gold);
+      color: var(--gc-gold);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.6rem;
+      padding: 6px;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .btn-action {
+      background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+      border: 3px solid #86efac;
+      color: #fff;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.8rem;
+      padding: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-shadow: 2px 2px 0 #000;
+      box-shadow: 0 5px 0 #052e16;
+      transition: all 0.1s ease;
+    }
+
+    .btn-action:hover:not(:disabled) {
+      filter: brightness(1.1);
+    }
+
+    .btn-action:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #052e16;
+    }
+
+    .btn-action:disabled {
+      background: #475569;
+      border-color: #94a3b8;
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .btn-buy {
+      background: linear-gradient(180deg, #059669 0%, #047857 100%);
+      border: 2px solid #6ee7b7;
+      color: #fff;
+      font: 700 0.55rem 'Press Start 2P', monospace;
+      padding: 10px 8px;
+      border-radius: 7px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #431407;
+    }
+
+    .btn-buy:hover { filter: brightness(1.12); }
+    .buy-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+    .buy-options .btn-buy { min-width:0; padding:9px 4px; font-size:.42rem; line-height:1.5; }
+
+    .message-banner {
+      text-align: center;
+      font-size: 0.65rem;
+      height: 20px;
+      margin-bottom: 10px;
+      color: var(--gc-gold);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cabinet">
+    <div class="marquee">
+      <h1>POKÉMINA</h1>
+      <div class="subtitle">CELADON GAME CORNER</div>
+    </div>
+
+    <div class="stats-screen">
+      <div class="stat-box">
+        <span class="stat-label">COINS</span>
+        <span class="stat-value" id="coins">1000</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">MULT.</span>
+        <span class="stat-value" id="multiplier">1.00x</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">LUCRO</span>
+        <span class="stat-value" id="payout">0</span>
+      </div>
+    </div>
+
+    <div class="message-banner" id="message">FAÇA SUA APOSTA!</div>
+
+    <div class="grid-container">
+      <div class="grid" id="grid"><div class="tile" data-index="0"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="1"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="2"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="3"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="4"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="5"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="6"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="7"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="8"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="9"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="10"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="11"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="12"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="13"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="14"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="15"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="16"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="17"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="18"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="19"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="20"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="21"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="22"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="23"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div><div class="tile" data-index="24"><img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta"></div></div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-row">
+        <label>APOSTA:</label>
+        <select id="bet-amount">
+          <option value="10">10 COINS</option>
+          <option value="50">50 COINS</option>
+          <option value="100">100 COINS</option>
+          <option value="500">500 COINS</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <label>ELECTRODES:</label>
+        <select id="mines-count">
+          <option value="1">1 ELECTRODE</option>
+          <option value="3" selected="">3 ELECTRODES</option>
+          <option value="5">5 ELECTRODES</option>
+          <option value="10">10 ELECTRODES</option>
+        </select>
+      </div>
+
+      <div class="buy-options">
+        <button class="btn-buy" type="button" data-pack="50">50 FICHAS<br>₽ 1.000</button>
+        <button class="btn-buy" type="button" data-pack="500">500 FICHAS<br>₽ 10.000</button>
+      </div>
+      <button class="btn-action" id="action-btn">JOGAR</button>
+    </div>
+  </div>
+
+  <script>
+    const GRID_SIZE = 25;
+    let coins = 0;
+    let walletReady = false;
+    let gameState = 'IDLE';
+    let minePositions = [];
+    let revealedCount = 0;
+    let currentBet = 10;
+    let currentMines = 3;
+    let currentMultiplier = 1.00;
+
+    const coinsEl = document.getElementById('coins');
+    const multiplierEl = document.getElementById('multiplier');
+    const payoutEl = document.getElementById('payout');
+    const betSelect = document.getElementById('bet-amount');
+    const minesSelect = document.getElementById('mines-count');
+    const gridEl = document.getElementById('grid');
+    const actionBtn = document.getElementById('action-btn');
+    const messageEl = document.getElementById('message');
+
+    window.addEventListener('message', event => {
+      if (event.data?.type !== 'gamecorner-wallet') return;
+      walletReady = true;
+      coins = Math.max(0, Math.floor(Number(event.data.coins) || 0));
+      updateUI(false);
+      if (event.data.notice) messageEl.textContent = event.data.notice;
+    });
+
+    document.querySelectorAll('[data-pack]').forEach(button => button.addEventListener('click', () => {
+      if (gameState === 'PLAYING') return;
+      window.parent.postMessage({ type: 'gamecorner-buy-chips', amount: Number(button.dataset.pack) }, '*');
+    }));
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'reveal') {
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.08);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+      } else if (type === 'explosion') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(30, audioCtx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.25);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+      } else if (type === 'win') {
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.35);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
+      }
+    }
+
+    function createGrid() {
+      gridEl.innerHTML = '';
+      for (let i = 0; i < GRID_SIZE; i++) {
+        const tile = document.createElement('div');
+        tile.classList.add('tile');
+        tile.dataset.index = i;
+        tile.innerHTML = '<img class="grass-sprite" src="sprites/tall-grass.svg" alt="Grama alta">';
+        tile.addEventListener('click', () => handleTileClick(i));
+        gridEl.appendChild(tile);
+      }
+    }
+
+    function calculateNextMultiplier(safeRevealed) {
+      let mult = 1.0;
+      const totalSafe = GRID_SIZE - currentMines;
+      for (let i = 0; i < safeRevealed; i++) {
+        mult *= (GRID_SIZE - i) / (totalSafe - i);
+      }
+      return mult * 0.97;
+    }
+
+    function startGame() {
+      currentBet = parseInt(betSelect.value);
+      currentMines = parseInt(minesSelect.value);
+
+      if (coins < currentBet) {
+        messageEl.textContent = 'SEM COINS SUFICIENTES!';
+        return;
+      }
+
+      coins -= currentBet;
+      updateUI();
+
+      minePositions = [];
+      while (minePositions.length < currentMines) {
+        const pos = Math.floor(Math.random() * GRID_SIZE);
+        if (!minePositions.includes(pos)) minePositions.push(pos);
+      }
+
+      gameState = 'PLAYING';
+      revealedCount = 0;
+      currentMultiplier = 1.00;
+
+      betSelect.disabled = true;
+      minesSelect.disabled = true;
+      actionBtn.textContent = 'CASH OUT';
+      actionBtn.disabled = true;
+
+      messageEl.textContent = 'ENCONTRE AS POKÉBOLAS!';
+      createGrid();
+    }
+
+    function handleTileClick(index) {
+      if (gameState !== 'PLAYING') return;
+
+      const tile = gridEl.children[index];
+      if (tile.classList.contains('revealed')) return;
+
+      if (minePositions.includes(index)) {
+        playSound('explosion');
+        tile.classList.add('revealed', 'electrode');
+        tile.innerHTML = '<img class="tile-sprite pokemon-sprite" src="sprites/electrode.png" alt="Electrode">';
+        endGame(false);
+      } else {
+        playSound('reveal');
+        tile.classList.add('revealed', 'pokeball');
+        tile.innerHTML = '<img class="tile-sprite" src="sprites/poke-ball.png" alt="Poké Ball">';
+        revealedCount++;
+
+        currentMultiplier = calculateNextMultiplier(revealedCount);
+        actionBtn.disabled = false;
+        updateUI();
+
+        if (revealedCount === GRID_SIZE - currentMines) {
+          cashOut();
+        }
+      }
+    }
+
+    function cashOut() {
+      if (gameState !== 'PLAYING') return;
+      const winAmount = Math.floor(currentBet * currentMultiplier);
+      coins += winAmount;
+      playSound('win');
+      messageEl.textContent = `GANHOU ${winAmount} COINS!`;
+      endGame(true);
+    }
+
+    function endGame(isWin) {
+      gameState = 'ENDED';
+
+      minePositions.forEach(pos => {
+        const tile = gridEl.children[pos];
+        if (!tile.classList.contains('revealed')) {
+          tile.classList.add('revealed', 'electrode');
+          tile.innerHTML = '<img class="tile-sprite pokemon-sprite" src="sprites/electrode.png" alt="Electrode">';
+        }
+      });
+
+      if (!isWin) {
+        messageEl.textContent = 'ELECTRODE EXPLODIU!';
+      }
+
+      betSelect.disabled = false;
+      minesSelect.disabled = false;
+      actionBtn.textContent = 'JOGAR';
+      actionBtn.disabled = false;
+      updateUI();
+    }
+
+    function updateUI(publish = true) {
+      coinsEl.textContent = coins;
+      multiplierEl.textContent = currentMultiplier.toFixed(2) + 'x';
+      payoutEl.textContent = Math.floor(currentBet * currentMultiplier);
+      if (publish && walletReady) window.parent.postMessage({ type: 'gamecorner-balance', coins }, '*');
+    }
+
+    actionBtn.addEventListener('click', () => {
+      if (gameState === 'PLAYING') {
+        cashOut();
+      } else {
+        startGame();
+      }
+    });
+
+    createGrid();
+    updateUI();
+    window.parent.postMessage({ type: 'gamecorner-ready' }, '*');
+  </script>
+
+</body></html>

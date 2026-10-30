@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Game Corner - Roleta de Apostas</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fontes Estilo Arcade / Pixel Art -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <!-- FontAwesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background-color: #0d0914;
+            color: #ffffff;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .vt323-font {
+            font-family: 'VT323', monospace;
+        }
+
+        /* Moldura estilo Gabinete Game Corner */
+        .arcade-cabinet {
+            background: linear-gradient(180deg, #1e1b4b 0%, #311042 50%, #180928 100%);
+            box-shadow: 0 0 35px rgba(168, 85, 247, 0.35), inset 0 2px 5px rgba(255, 255, 255, 0.2);
+            border: 4px solid #f59e0b;
+        }
+
+        .screen-bezel {
+            background: linear-gradient(145deg, #1f2937, #111827);
+            box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.9);
+            border: 4px solid #374151;
+        }
+
+        /* CRT Scanline Efeito */
+        .crt-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        /* Estilização de Botões Retrô */
+        .btn-retro {
+            position: relative;
+            transition: all 0.08s ease;
+            box-shadow: 0 5px 0 #000, 0 6px 8px rgba(0,0,0,0.6);
+        }
+
+        .btn-retro:active:not(:disabled) {
+            top: 3px;
+            box-shadow: 0 2px 0 #000, 0 3px 5px rgba(0,0,0,0.6);
+        }
+
+        .btn-retro:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: 0 3px 0 #000;
+        }
+
+        /* Animações e Efeitos */
+        @keyframes flash-jackpot {
+            0%, 100% { background-color: #f59e0b; color: #000; border-color: #fff; }
+            50% { background-color: #a855f7; color: #fff; border-color: #f59e0b; }
+        }
+
+        .jackpot-anim {
+            animation: flash-jackpot 0.35s infinite;
+        }
+
+        @keyframes pulse-led {
+            0%, 100% { opacity: 0.3; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        .led-light {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .led-active {
+            animation: pulse-led 0.6s infinite;
+        }
+
+        .bet-card {
+            transition: all 0.15s ease;
+            border: 2px solid #374151;
+        }
+
+        .bet-card.selected {
+            border-color: #f59e0b !important;
+            background-color: rgba(245, 158, 11, 0.2) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+
+        .roulette-wheel-frame { transition: filter .25s ease, box-shadow .25s ease; }
+        .roulette-wheel-frame.is-spinning { animation: roulette-glow .7s ease-in-out infinite alternate; }
+        @keyframes roulette-glow {
+            from { filter: brightness(1); box-shadow: 0 0 18px rgba(245,158,11,.35); }
+            to { filter: brightness(1.18); box-shadow: 0 0 34px rgba(249,115,22,.75); }
+        }
+        .roulette-sprite { width: 42px; height: 42px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 2px 2px #000b); }
+        .bet-card img { width: 36px; height: 36px; object-fit: contain; image-rendering: pixelated; }
+        .arcade-cabinet { zoom: .88; }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a855f7;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
+
+    <!-- Container do Gabinete Arcade -->
+    <div class="arcade-cabinet w-full max-w-xl rounded-2xl p-3 sm:p-5 relative">
+        
+        <!-- Topo / Marquee da Roleta -->
+        <div class="bg-purple-900 border-4 border-yellow-400 rounded-lg p-2.5 mb-3 text-center text-yellow-300 shadow-lg relative overflow-hidden">
+            <!-- LEDs laterais -->
+            <div class="absolute left-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                <span class="led-light bg-yellow-400 led-active"></span>
+                <span class="led-light bg-purple-400 led-active" style="animation-delay: 0.2s;"></span>
+                <span class="led-light bg-red-500 led-active" style="animation-delay: 0.4s;"></span>
+            </div>
+            <div class="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                <span class="led-light bg-red-500 led-active" style="animation-delay: 0.4s;"></span>
+                <span class="led-light bg-purple-400 led-active" style="animation-delay: 0.2s;"></span>
+                <span class="led-light bg-yellow-400 led-active"></span>
+            </div>
+
+            <h1 class="text-[10px] sm:text-xs tracking-widest text-purple-200">CELADON GAME CORNER</h1>
+            <h2 class="text-sm sm:text-lg font-black text-yellow-400 drop-shadow">ROLETA POKÉMON</h2>
+            <div class="text-[8px] sm:text-[9px] mt-0.5 bg-yellow-400 text-purple-950 py-0.5 px-2 rounded inline-block font-bold">
+                MULTIPLICADORES DE ATÉ <span class="underline font-extrabold">100X</span>!
+            </div>
+        </div>
+
+        <!-- Bezel com Placar e Roleta -->
+        <div class="screen-bezel rounded-xl p-3 mb-3 relative overflow-hidden">
+            <div class="crt-overlay absolute inset-0 z-10"></div>
+
+            <!-- Placar de Moedas e Aposta -->
+            <div class="grid grid-cols-2 gap-2 mb-3 z-20 relative">
+                <!-- Coins -->
+                <div class="bg-black border-2 border-yellow-500/70 rounded p-1.5 text-center">
+                    <span class="text-[8px] sm:text-[9px] text-yellow-400 block mb-0.5">FICHAS / COINS</span>
+                    <div class="vt323-font text-2xl sm:text-3xl text-yellow-400 leading-none tracking-widest flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-coins text-yellow-500 text-base"></i>
+                        <span id="coin-balance">0</span>
+                    </div>
+                </div>
+
+                <!-- Aposta Total -->
+                <div class="bg-black border-2 border-purple-500/70 rounded p-1.5 text-center">
+                    <span class="text-[8px] sm:text-[9px] text-purple-400 block mb-0.5">APOSTA / BET</span>
+                    <div class="vt323-font text-2xl sm:text-3xl text-purple-300 leading-none tracking-widest" id="total-bet-display">
+                        10
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas da Roleta e Ponteiro -->
+            <div class="relative flex justify-center items-center my-2 z-20">
+                <!-- Ponteiro Indicador Superior (Pino) -->
+                <div class="absolute -top-3 z-30 flex flex-col items-center">
+                    <div class="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[20px] border-t-yellow-400 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]"></div>
+                </div>
+
+                <!-- Elemento Canvas -->
+                <div id="roulette-wheel-frame" class="roulette-wheel-frame relative p-1 bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-full shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+                    <canvas id="rouletteCanvas" width="300" height="300" class="rounded-full max-w-full h-auto cursor-pointer"></canvas>
+                </div>
+            </div>
+
+            <!-- Banner de Status/Notificação -->
+            <div id="status-banner" class="bg-slate-900 border-2 border-purple-500 text-purple-200 text-[7px] sm:text-[10px] whitespace-nowrap text-center py-2 px-1 rounded mt-3 font-semibold min-h-[38px] flex items-center justify-center z-20 relative">
+                SELECIONE O VALOR E UM POKÉMON PARA APOSTAR!
+            </div>
+        </div>
+
+        <!-- Seletor de Ficha/Valor da Aposta -->
+        <div class="bg-purple-950/80 p-2 rounded-lg border border-purple-800 mb-3 z-20 relative">
+            <div class="flex items-center justify-between gap-1 mb-1.5">
+                <span class="text-[8px] sm:text-[9px] text-yellow-300 font-bold">VALOR DA FICHA:</span>
+                <button onclick="clearBets()" class="text-[8px] bg-red-800 hover:bg-red-700 text-white py-0.5 px-2 rounded">LIMPAR APOSTAS</button>
+            </div>
+            <div class="grid grid-cols-5 gap-1 sm:gap-2">
+                <button onclick="setChipValue(10)" class="chip-btn btn-retro bg-amber-600 border border-yellow-300 text-white text-[9px] sm:text-xs py-1.5 rounded font-bold">10</button>
+                <button onclick="setChipValue(50)" class="chip-btn btn-retro bg-amber-600 border border-yellow-300 text-white text-[9px] sm:text-xs py-1.5 rounded font-bold">50</button>
+                <button onclick="setChipValue(100)" class="chip-btn btn-retro bg-amber-600 border border-yellow-300 text-white text-[9px] sm:text-xs py-1.5 rounded font-bold">100</button>
+                <button onclick="setChipValue(500)" class="chip-btn btn-retro bg-amber-600 border border-yellow-300 text-white text-[9px] sm:text-xs py-1.5 rounded font-bold">500</button>
+                <button onclick="setBetMax()" class="btn-retro bg-purple-600 hover:bg-purple-500 border border-purple-300 text-white text-[9px] sm:text-xs py-1.5 rounded font-bold">MAX</button>
+            </div>
+        </div>
+
+        <!-- Painel de Apostas nos Pokémons -->
+        <div class="mb-3">
+            <span class="text-[8px] sm:text-[9px] text-gray-300 font-bold block mb-1">ESCOLHA ONDE APOSTAR (CLIQUE MULTIPLAS VEZES PARA SOMAR):</span>
+            <div class="grid grid-cols-4 gap-1 sm:gap-2" id="bet-targets-container">
+                <!-- Gerado via JS dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Botões Principais de Ação -->
+        <div class="grid grid-cols-12 gap-2 mb-3">
+            <!-- Botão +Coins -->
+            <button onclick="buyCoins(50)" class="col-span-3 btn-retro bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-300 text-white text-[7px] sm:text-[9px] py-3 px-1 rounded-lg font-bold flex flex-col items-center justify-center gap-0.5">
+                <i class="fa-solid fa-plus-circle text-xs"></i>
+                <span class="text-[7px] sm:text-[9px] leading-tight">50 FICHAS<br>₽1.000</span>
+            </button>
+            <button onclick="buyCoins(500)" class="col-span-3 btn-retro bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-300 text-white text-[7px] sm:text-[9px] py-3 px-1 rounded-lg font-bold flex flex-col items-center justify-center gap-0.5">
+                <i class="fa-solid fa-plus-circle text-xs"></i>
+                <span class="text-[7px] sm:text-[9px] leading-tight">500 FICHAS<br>₽10.000</span>
+            </button>
+
+            <!-- Botão Girar -->
+            <button id="spin-button" onclick="spin()" class="col-span-6 btn-retro bg-yellow-400 hover:bg-yellow-300 border-2 border-yellow-100 text-purple-950 text-xs sm:text-base py-3 px-2 rounded-lg font-black tracking-wider flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-right text-sm"></i>
+                <span id="spin-text">GIRAR ROLETA</span>
+            </button>
+        </div>
+
+        <!-- Controle de Áudio -->
+        <button onclick="toggleAudio()" id="audio-btn" class="absolute top-2 right-2 text-yellow-400/80 hover:text-yellow-300 text-xs p-1">
+            <i class="fa-solid fa-volume-high"></i>
+        </button>
+    </div>
+
+    <!-- Script da Lógica e Animação -->
+    <script>
+        /* ===================================================================
+           SÍMBOLOS E CONFIGURAÇÃO DA ROLETA
+           =================================================================== */
+        const POKEMON_SECTORS = [
+            { id: 'pokeball', name: 'Poké Ball', icon: '🔴', sprite: 'sprites/poke-ball.png', mult: 2, bg: '#ef4444', text: '#ffffff', weight: 35 },
+            { id: 'pikachu', name: 'Pikachu', icon: '⚡', sprite: 'sprites/pikachu.png', mult: 3, bg: '#eab308', text: '#000000', weight: 25 },
+            { id: 'bulbasaur', name: 'Bulbasaur', icon: '🍃', sprite: 'sprites/bulbasaur.png', mult: 5, bg: '#22c55e', text: '#ffffff', weight: 15 },
+            { id: 'squirtle', name: 'Squirtle', icon: '💧', sprite: 'sprites/squirtle.png', mult: 5, bg: '#3b82f6', text: '#ffffff', weight: 15 },
+            { id: 'charmander', name: 'Charmander', icon: '🔥', sprite: 'sprites/charmander.png', mult: 8, bg: '#f97316', text: '#ffffff', weight: 10 },
+            { id: 'gengar', name: 'Gengar', icon: '👻', sprite: 'sprites/gengar.png', mult: 15, bg: '#7e22ce', text: '#ffffff', weight: 6 },
+            { id: 'mewtwo', name: 'Mewtwo', icon: '👑', sprite: 'sprites/mewtwo.png', mult: 50, bg: '#ec4899', text: '#ffffff', weight: 2 },
+            { id: 'masterball', name: 'Master Ball', icon: '🔮', sprite: 'sprites/master-ball.png', mult: 100, bg: '#3b0764', text: '#fde047', weight: 1 }
+        ];
+
+        // Estado Global
+        let coins = 0;
+        let selectedChip = 10;
+        let bets = {}; // Objeto para guardar as apostas { pokeball: 10, pikachu: 50 }
+        let isSpinning = false;
+        let audioEnabled = true;
+        let walletReady = false;
+
+        // Física da Roleta
+        let currentAngle = 0; // Ângulo atual em radianos
+        let spinVelocity = 0;
+        let spinDeceleration = 0.988;
+        let animFrameId = null;
+
+        // Canvas Context
+        let canvas, ctx;
+
+        // Web Audio Context
+        let audioCtx = null;
+        const rouletteSprites = {};
+
+        /* ===================================================================
+           INICIALIZAÇÃO DA PÁGINA E EVENTOS
+           =================================================================== */
+        window.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('rouletteCanvas');
+            ctx = canvas.getContext('2d');
+
+            // Ajusta tamanho responsivo no canvas em telas menores
+            adjustCanvasResolution();
+            window.addEventListener('resize', adjustCanvasResolution);
+
+            renderBetTargets();
+            loadRouletteSprites();
+            highlightChipButton();
+            updateUI();
+            drawRoulette();
+            window.parent.postMessage({ type: 'gamecorner-ready' }, '*');
+        });
+
+        window.addEventListener('message', event => {
+            if (event.data?.type !== 'gamecorner-wallet') return;
+            walletReady = true;
+            coins = Math.max(0, Math.floor(Number(event.data.coins) || 0));
+            updateUI(false);
+            if (event.data.notice) updateStatus(event.data.notice, event.data.noticeType || 'text-purple-200');
+        });
+
+        function adjustCanvasResolution() {
+            const size = window.innerWidth < 400 ? 250 : 300;
+            canvas.width = size;
+            canvas.height = size;
+            drawRoulette();
+        }
+
+        function loadRouletteSprites() {
+            POKEMON_SECTORS.forEach(sector => {
+                const sprite = new Image();
+                sprite.onload = drawRoulette;
+                sprite.src = sector.sprite;
+                rouletteSprites[sector.id] = sprite;
+            });
+        }
+
+        /* ===================================================================
+           AUDIO SYNTHESIZER (WEB AUDIO API)
+           =================================================================== */
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, duration = 0.08, type = 'square', gainVal = 0.1) {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log('Erro ao tocar áudio', e);
+            }
+        }
+
+        function playTickSound() {
+            playTone(450 + Math.random() * 50, 0.03, 'triangle', 0.06);
+        }
+
+        function playWinSound(isBig = false) {
+            if (!audioEnabled) return;
+            const notes = isBig ? [261, 329, 392, 523, 659, 783, 1046] : [330, 440, 554, 659];
+            notes.forEach((note, i) => {
+                setTimeout(() => {
+                    playTone(note, 0.15, 'square', 0.12);
+                }, i * 80);
+            });
+        }
+
+        function playLossSound() {
+            if (!audioEnabled) return;
+            [220, 180, 140].forEach((note, i) => {
+                setTimeout(() => {
+                    playTone(note, 0.1, 'sawtooth', 0.08);
+                }, i * 90);
+            });
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const btn = document.getElementById('audio-btn');
+            btn.innerHTML = audioEnabled 
+                ? '<i class="fa-solid fa-volume-high"></i>' 
+                : '<i class="fa-solid fa-volume-xmark text-red-400"></i>';
+        }
+
+        /* ===================================================================
+           DESENHO DA ROLETA (CANVAS)
+           =================================================================== */
+        function drawRoulette() {
+            if (!ctx) return;
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = width / 2 - 8;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const totalSectors = POKEMON_SECTORS.length;
+            const arcSize = (2 * Math.PI) / totalSectors;
+
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(currentAngle);
+
+            // Desenha os segmentos
+            POKEMON_SECTORS.forEach((sector, index) => {
+                const startAngle = index * arcSize;
+                const endAngle = startAngle + arcSize;
+
+                // Fatia
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = sector.bg;
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#1e1b4b';
+                ctx.stroke();
+
+                // Sprite sempre na vertical; multiplicador fica mais perto do centro.
+                const midAngle = startAngle + arcSize / 2;
+                const spriteRadius = radius * 0.69;
+                const spriteX = Math.cos(midAngle) * spriteRadius;
+                const spriteY = Math.sin(midAngle) * spriteRadius;
+                const sprite = rouletteSprites[sector.id];
+                const spriteSize = width < 280 ? 40 : 50;
+                if (sprite?.complete && sprite.naturalWidth) {
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(sprite, spriteX - spriteSize / 2, spriteY - spriteSize / 2, spriteSize, spriteSize);
+                } else {
+                    ctx.fillStyle = sector.text;
+                    ctx.font = `${width < 280 ? '15px' : '18px'} sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(sector.icon, spriteX, spriteY);
+                }
+
+                const labelRadius = radius * 0.39;
+                ctx.fillStyle = sector.text;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = `bold ${width < 280 ? '8px' : '9px'} 'Press Start 2P', monospace`;
+                ctx.fillText(`${sector.mult}X`, Math.cos(midAngle) * labelRadius, Math.sin(midAngle) * labelRadius);
+            });
+
+            // Centro Decorativo Pokeball
+            ctx.beginPath();
+            ctx.arc(0, 0, 24, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#000000';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        /* ===================================================================
+           SISTEMA DE APOSTAS
+           =================================================================== */
+        function renderBetTargets() {
+            const container = document.getElementById('bet-targets-container');
+            container.innerHTML = '';
+
+            POKEMON_SECTORS.forEach(p => {
+                const currentBet = bets[p.id] || 0;
+                const card = document.createElement('div');
+                card.className = `bet-card bg-slate-900 rounded p-1 sm:p-1.5 flex flex-col items-center justify-between cursor-pointer select-none text-center ${currentBet > 0 ? 'selected' : ''}`;
+                card.onclick = () => addBet(p.id);
+
+                card.innerHTML = `
+                    <img src="${p.sprite}" alt="${p.name}" title="${p.name}">
+                    <span class="text-[8px] sm:text-[10px] leading-tight font-bold text-gray-200 whitespace-nowrap">${p.name}</span>
+                    <span class="text-[8px] sm:text-[9px] text-yellow-400 font-extrabold mt-0.5">${p.mult}X</span>
+                    <div class="mt-1 w-full bg-purple-950/80 rounded border border-purple-800 text-[8px] sm:text-[9px] text-green-400 font-mono py-0.5">
+                        ${currentBet > 0 ? currentBet : '0'}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function setChipValue(val) {
+            if (isSpinning) return;
+            selectedChip = val;
+            playTone(520, 0.04, 'sine', 0.05);
+            highlightChipButton();
+        }
+
+        function highlightChipButton() {
+            const buttons = document.querySelectorAll('.chip-btn');
+            buttons.forEach(btn => {
+                if (parseInt(btn.innerText) === selectedChip) {
+                    btn.classList.remove('bg-amber-600');
+                    btn.classList.add('bg-yellow-400', 'text-black', 'scale-105');
+                } else {
+                    btn.classList.remove('bg-yellow-400', 'text-black', 'scale-105');
+                    btn.classList.add('bg-amber-600');
+                }
+            });
+        }
+
+        function addBet(pokemonId) {
+            if (isSpinning) return;
+
+            const totalBetCurrent = getTotalBetAmount();
+            if (coins < totalBetCurrent + selectedChip) {
+                playLossSound();
+                updateStatus('SALDO DE MOEDAS INSUFICIENTE!', 'text-red-400');
+                return;
+            }
+
+            bets[pokemonId] = (bets[pokemonId] || 0) + selectedChip;
+            playTone(600, 0.05, 'triangle', 0.08);
+            renderBetTargets();
+            updateUI();
+            updateStatus(`APOSTADO +${selectedChip} NO ${pokemonId.toUpperCase()}!`, 'text-yellow-300');
+        }
+
+        function setBetMax() {
+            if (isSpinning) return;
+            // Distribui as moedas disponíveis proporcionalmente ou foca nas melhores de forma rápida
+            if (coins <= 0) return;
+            
+            // Exemplo: coloca o máximo na primeira opção selecionada ou distribui nas Pokebolas
+            const targets = Object.keys(bets).length > 0 ? Object.keys(bets) : ['pokeball'];
+            const amountPerTarget = Math.floor(coins / targets.length);
+
+            if (amountPerTarget <= 0) return;
+
+            targets.forEach(t => {
+                bets[t] = (bets[t] || 0) + amountPerTarget;
+            });
+
+            playTone(700, 0.08, 'square', 0.1);
+            renderBetTargets();
+            updateUI();
+            updateStatus('APOSTA MÁXIMA APLICADA!', 'text-yellow-300');
+        }
+
+        function clearBets() {
+            if (isSpinning) return;
+            bets = {};
+            playTone(300, 0.05, 'sine', 0.05);
+            renderBetTargets();
+            updateUI();
+            updateStatus('TODAS AS APOSTAS FORAM REMOVIDAS.', 'text-purple-300');
+        }
+
+        function getTotalBetAmount() {
+            return Object.values(bets).reduce((a, b) => a + b, 0);
+        }
+
+        function buyCoins(amount) {
+            if (isSpinning) return;
+            window.parent.postMessage({ type: 'gamecorner-buy-chips', amount }, '*');
+        }
+
+        function updateUI(publish = true) {
+            const totalBet = getTotalBetAmount();
+            document.getElementById('coin-balance').innerText = coins - (isSpinning ? 0 : totalBet);
+            document.getElementById('total-bet-display').innerText = totalBet;
+            if (publish && walletReady) window.parent.postMessage({ type: 'gamecorner-balance', coins }, '*');
+        }
+
+        function updateStatus(msg, colorClass = 'text-purple-200') {
+            const banner = document.getElementById('status-banner');
+            banner.className = `bg-slate-900 border-2 border-purple-500 text-[7px] sm:text-[10px] whitespace-nowrap text-center py-2 px-1 rounded mt-3 font-semibold min-h-[38px] flex items-center justify-center z-20 relative ${colorClass}`;
+            banner.innerText = msg;
+        }
+
+        /* ===================================================================
+           LÓGICA DO GIRO COM FÍSICA DE DESACELERAÇÃO
+           =================================================================== */
+        function spin() {
+            if (isSpinning) return;
+
+            const totalBet = getTotalBetAmount();
+            if (totalBet <= 0) {
+                playLossSound();
+                updateStatus('SELECIONE 1 OPÇÃO ABAIXO, PARA CONTINUAR!', 'text-red-400');
+                return;
+            }
+
+            if (coins < totalBet) {
+                playLossSound();
+                updateStatus('SALDO DE MOEDAS INSUFICIENTE!', 'text-red-400');
+                return;
+            }
+
+            // Consome o valor da aposta do saldo
+            coins -= totalBet;
+            updateUI();
+
+            isSpinning = true;
+            document.getElementById('spin-button').disabled = true;
+            document.getElementById('spin-text').innerText = 'GIRANDO...';
+            updateStatus('ROLETA EM MOVIMENTO... BOA SORTE!', 'text-yellow-300');
+
+            // Impulso inicial aleatório
+            spinVelocity = 0.35 + Math.random() * 0.25;
+            document.getElementById('roulette-wheel-frame').classList.add('is-spinning');
+
+            let lastSectorIndex = -1;
+
+            function animateSpin() {
+                spinVelocity *= spinDeceleration;
+                currentAngle += spinVelocity;
+
+                // Garante rotação contínua nos limites
+                if (currentAngle >= 2 * Math.PI) {
+                    currentAngle -= 2 * Math.PI;
+                }
+
+                drawRoulette();
+
+                // Calcula qual setor está sob o pino (ponteiro do topo = 270 graus ou -PI/2)
+                const currentSectorIdx = getWinningSectorIndex();
+                if (currentSectorIdx !== lastSectorIndex) {
+                    playTickSound();
+                    lastSectorIndex = currentSectorIdx;
+                }
+
+                // Verifica se a roleta parou
+                if (spinVelocity < 0.0015) {
+                    spinVelocity = 0;
+                    cancelAnimationFrame(animFrameId);
+                    evaluateResult();
+                } else {
+                    animFrameId = requestAnimationFrame(animateSpin);
+                }
+            }
+
+            animateSpin();
+        }
+
+        function getWinningSectorIndex() {
+            const totalSectors = POKEMON_SECTORS.length;
+            const arcSize = (2 * Math.PI) / totalSectors;
+
+            // O pino fica no topo (3 * Math.PI / 2 radianos ou 270 graus em relação ao centro)
+            const pointerAngle = (3 * Math.PI / 2);
+            
+            // Normaliza o ângulo ajustando pela rotação atual do canvas
+            let normalizedAngle = (pointerAngle - currentAngle) % (2 * Math.PI);
+            if (normalizedAngle < 0) normalizedAngle += (2 * Math.PI);
+
+            const sectorIdx = Math.floor(normalizedAngle / arcSize);
+            return sectorIdx % totalSectors;
+        }
+
+        /* ===================================================================
+           PROCESSAMENTO DO RESULTADO DA ROLETA
+           =================================================================== */
+        function evaluateResult() {
+            document.getElementById('roulette-wheel-frame').classList.remove('is-spinning');
+            isSpinning = false;
+            document.getElementById('spin-button').disabled = false;
+            document.getElementById('spin-text').innerText = 'GIRAR ROLETA';
+
+            const winningIndex = getWinningSectorIndex();
+            const winner = POKEMON_SECTORS[winningIndex];
+
+            // Verifica se o jogador apostou no Pokémon vencedor
+            const betOnWinner = bets[winner.id] || 0;
+            let totalPayout = 0;
+
+            if (betOnWinner > 0) {
+                totalPayout = betOnWinner * winner.mult;
+                coins += totalPayout;
+
+                const isBigWin = winner.mult >= 15;
+                playWinSound(isBigWin);
+                
+                const statusMsg = `🏆 PARABÉNS! DEU ${winner.name.toUpperCase()} (${winner.mult}X)! VOCÊ GANHOU +${totalPayout} COINS!`;
+                updateStatus(statusMsg, isBigWin ? 'jackpot-anim' : 'text-green-400');
+            } else {
+                playLossSound();
+                updateStatus(`DEU ${winner.name.toUpperCase()} (${winner.mult}X). VOCÊ NÃO APOSTOU NELE!`, 'text-red-400');
+            }
+
+            // Reseta apostas e atualiza tela
+            bets = {};
+            renderBetTargets();
+            updateUI();
+        }
+    </script>
+</body>
+</html>
