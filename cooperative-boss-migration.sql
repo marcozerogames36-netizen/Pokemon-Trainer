@@ -106,6 +106,8 @@ declare
   v_room public.coop_boss_rooms; v_member jsonb; v_user text; v_members jsonb; v_actions jsonb; v_battle jsonb;
   v_states jsonb; v_state jsonb; v_team jsonb; v_hp jsonb; v_active integer; v_action jsonb; v_move jsonb;
   v_boss_hp integer; v_attack numeric; v_defense numeric; v_power integer; v_damage integer; v_mult numeric; v_base numeric;
+  v_boss_move jsonb; v_boss_candidate jsonb; v_boss_moves jsonb:='[{"name":"Aura Sphere","type":"Lutador","power":80},{"name":"Ice Beam","type":"Gelo","power":90},{"name":"Flamethrower","type":"Fogo","power":90},{"name":"Shadow Ball","type":"Fantasma","power":80}]'::jsonb;
+  v_boss_best_moves jsonb; v_boss_move_score numeric; v_boss_best_score numeric; v_boss_multiplier numeric;
   v_stab numeric; v_accuracy numeric; v_critical boolean; v_physical boolean; v_missed boolean; v_modifier numeric;
   v_current_hp integer; v_pp jsonb; v_pp_index integer; v_hit_count integer; v_min_hits integer; v_max_hits integer;
   v_idx integer; v_move_idx integer; v_target jsonb; v_log jsonb; v_all_fainted boolean:=true; v_status text:='battle';
@@ -396,16 +398,28 @@ begin
         end loop;
       end if;
       if (v_hp->>v_active)::integer>0 then
+        v_boss_best_score:=-1; v_boss_best_moves:='[]'::jsonb;
+        for v_boss_candidate in select value from jsonb_array_elements(v_boss_moves) loop
+          v_boss_multiplier:=public.pvp_type_multiplier(v_boss_candidate->>'type',v_team->v_active->'types');
+          v_boss_move_score:=(v_boss_candidate->>'power')::numeric*v_boss_multiplier;
+          if v_team->v_active->>'ability'='Wonder Guard' and v_boss_multiplier<=1 then v_boss_move_score:=0; end if;
+          if v_boss_move_score>v_boss_best_score then
+            v_boss_best_score:=v_boss_move_score; v_boss_best_moves:=jsonb_build_array(v_boss_candidate);
+          elsif v_boss_move_score=v_boss_best_score then
+            v_boss_best_moves:=v_boss_best_moves||jsonb_build_array(v_boss_candidate);
+          end if;
+        end loop;
+        v_boss_move:=v_boss_best_moves->(floor(random()*jsonb_array_length(v_boss_best_moves))::integer);
       v_defense:=greatest(0.01,public.coop_boss_stat_multiplier(v_team->v_active,'specialDefense')*public.coop_boss_stat_multiplier(v_team->v_active,'hp'));
         v_stages:=coalesce(v_state->'stages','{}'::jsonb); v_stage_mult:=coalesce((v_stages->>'specialDefense')::integer,0);
         v_defense:=v_defense*case when v_stage_mult>=0 then (2+v_stage_mult)/2.0 else 2.0/(2-v_stage_mult) end;
-        v_mult:=public.pvp_type_multiplier('Psiquico',v_team->v_active->'types');
+        v_mult:=public.pvp_type_multiplier(v_boss_move->>'type',v_team->v_active->'types');
       v_critical:=random()<1.0/16.0;
         if v_mult=0 or (v_team->v_active->>'ability'='Wonder Guard' and v_mult<=1) then v_damage:=0;
-        else v_base:=((2*100/5+2)*90/50)+2; v_stage_mult:=coalesce((v_boss_stages->>'specialAttack')::integer,0); v_base:=v_base*case when v_stage_mult>=0 then (2+v_stage_mult)/2.0 else 2.0/(2-v_stage_mult) end; v_damage:=greatest(1,floor(v_base*1.5*v_mult*(0.85+random()*0.15)*0.925/v_defense*(case when v_critical then 1.5 else 1 end)*0.45)::integer); end if;
+        else v_base:=((2*100/5+2)*(v_boss_move->>'power')::numeric/50)+2; v_stage_mult:=coalesce((v_boss_stages->>'specialAttack')::integer,0); v_base:=v_base*case when v_stage_mult>=0 then (2+v_stage_mult)/2.0 else 2.0/(2-v_stage_mult) end; v_damage:=greatest(1,floor(v_base*v_mult*(0.85+random()*0.15)*0.925/v_defense*(case when v_critical then 1.5 else 1 end)*0.45)::integer); end if;
         v_hp:=jsonb_set(v_hp,array[v_active::text],to_jsonb(greatest(0,(v_hp->>v_active)::integer-v_damage)),false);
         v_state:=jsonb_set(v_state,'{hp}',v_hp,true); v_state:=jsonb_set(v_state,'{active}',to_jsonb(v_active),true); v_states:=jsonb_set(v_states,array[v_user],v_state,true);
-        v_log:=v_log||jsonb_build_array(case when v_damage=0 then 'Mewtwo nÃ£o conseguiu causar dano Ã  equipe de '||(v_member->>'name')||'.' else 'Mewtwo atingiu a equipe de '||(v_member->>'name')||' por '||v_damage||' de dano.'||case when v_critical then ' CrÃ­tico!' else '' end end);
+        v_log:=v_log||jsonb_build_array(case when v_damage=0 then 'Mewtwo utilizou '||(v_boss_move->>'name')||' e nao causou dano para a equipe de '||(v_member->>'name')||'.' else 'Mewtwo utilizou '||(v_boss_move->>'name')||' e atingiu a equipe de '||(v_member->>'name')||' por '||v_damage||' de dano.'||case when v_critical then ' Critico!' else '' end end);
       end if;
     end loop;
   end if;

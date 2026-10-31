@@ -192,56 +192,56 @@
           </div>
           <h3 style="font-size:1.1rem;margin-bottom:14px;">Acesso rápido</h3>
           <div class="cards-grid">
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('guide')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('guide')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#35265b,#171326);font-size:3rem;">&#128214;</div>
-              <div class="game-card-body"><div class="game-card-title">Guia de Progress&atilde;o</div><div class="game-card-desc">Veja os requisitos e descubra seu pr&oacute;ximo objetivo.</div></div>
+            <div class="game-card" id="progressGuideHomeCard" role="button" tabindex="0" onclick="switchPanel('guide')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('guide')}">
+              <div class="game-card-header"><img src="assets/progress-guide-card.png" alt="Guia de Progressão com treinador e Pokémon" /></div>
+              <div class="game-card-body"><div class="game-card-title">Guia de Progresso</div><div class="game-card-desc">Veja os requisitos e descubra seu pr&oacute;ximo objetivo.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('missions')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('missions')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#2a1f3d,#15101f);"><img src="assets/missions-tablet.png" alt="" style="width:80px;height:88px;object-fit:contain;image-rendering:pixelated;" /></div>
+            <div class="game-card" id="missionHomeCard" role="button" tabindex="0" onclick="switchPanel('missions')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('missions')}">
+              <div class="game-card-header"><img src="assets/missions-card.png" alt="Centro Pokémon com placa Missão" /></div>
               <div class="game-card-body"><div class="quick-mission-title-row"><div class="game-card-title">Missões</div><div class="quick-mission-progress"><strong id="quickMissionCount">0 / 0</strong><span>concluídas</span></div></div><div class="game-card-desc">Acompanhe objetivos e recompensas.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('season-pass')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('season-pass')}">
-              <div class="game-card-header season-pass-home-art">&#127942;</div>
+            <div class="game-card" id="seasonPassHomeCard" role="button" tabindex="0" onclick="switchPanel('season-pass')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('season-pass')}">
+              <div class="game-card-header season-pass-home-art"><img src="assets/season-pass-card.png" alt="Passe da Temporada dourado" /></div>
               <div class="game-card-body"><div class="game-card-title">Passe da Temporada</div><div class="game-card-desc">Avance nas trilhas Bronze, Prata e Gold e resgate recompensas.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('dungeons')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('dungeons')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#1e3a2f,#0f1f18);"><img src="assets/exploration-magnifier.png" alt="" style="width:84px;height:84px;object-fit:contain;image-rendering:pixelated;" /></div>
+            <div class="game-card" id="explorationHomeCard" role="button" tabindex="0" onclick="switchPanel('dungeons')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('dungeons')}">
+              <div class="game-card-header"><img src="assets/exploration-card.png" alt="Mapa de exploração Pokémon com rotas e áreas selvagens" /></div>
               <div class="game-card-body"><div class="game-card-title">Exploração</div><div class="game-card-desc">Explore Kanto e encontre Pokémon selvagens.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('gyms')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('gyms')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#42351d,#201a10);"><img src="assets/gym-badges.png" alt="" style="width:154px;height:92px;object-fit:contain;" /></div>
+            <div class="game-card" id="gymsHomeCard" role="button" tabindex="0" onclick="switchPanel('gyms')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('gyms')}">
+              <div class="game-card-header"><img src="assets/gyms-card.png" alt="Ginásio de Pokémon e as oito insígnias de Kanto" /></div>
               <div class="game-card-body"><div class="quick-mission-title-row"><div class="game-card-title">Ginásios</div><div class="quick-mission-progress"><strong id="quickGymCount">0 / 8</strong><span>insígnias</span></div></div><div class="game-card-desc">Desafie os líderes e conquiste insígnias.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('center')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('center')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#3b2533,#1d141b);"><img src="assets/pokemon-center.png" alt="" style="width:128px;height:98px;object-fit:contain;image-rendering:pixelated;" /></div>
+            <div class="game-card" id="pokemonCenterHomeCard" role="button" tabindex="0" onclick="switchPanel('center')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('center')}">
+              <div class="game-card-header"><img src="assets/pokemon-center-card.png" alt="Centro Pokémon com Pokémon em frente" /></div>
               <div class="game-card-body"><div class="game-card-title">Centro Pokémon</div><div class="game-card-desc">Cuide da equipe e restaure HP, PP e status.</div></div>
             </div>
-            <button type="button" class="game-card" onclick="openPokeCoinsStore()" style="padding:0;text-align:left;color:inherit;">
-              <div class="game-card-header poke-coins-quick-header"><span class="poke-coins-gem" aria-hidden="true">💎</span><span class="poke-coins-quick-header-copy"><strong>POKÉCOINS</strong><small>Central de pacotes</small></span></div>
+            <button type="button" class="game-card" id="pokeCoinsHomeCard" onclick="openPokeCoinsStore()" style="padding:0;text-align:left;color:inherit;">
+              <div class="game-card-header poke-coins-quick-header"><img src="assets/pokecoins-card.png" alt="PokéCoins — Central de pacotes" /></div>
               <div class="game-card-body"><div class="game-card-title">PokéCoins</div><div class="game-card-desc">Veja os pacotes de PokéCoins e escolha uma opção.</div></div>
             </button>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('market')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('market')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#2b3c25,#141d11);"><img src="assets/poke-market.png" alt="Pok? Market" style="width:100px;height:98px;object-fit:contain;" /></div>
+            <div class="game-card" id="pokeMarketHomeCard" role="button" tabindex="0" onclick="switchPanel('market')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('market')}">
+              <div class="game-card-header"><img src="assets/poke-market-card.png" alt="Loja Pokémon em uma rota de Kanto" /></div>
               <div class="game-card-body"><div class="game-card-title">Poké Market</div><div class="game-card-desc">Compre itens para sua jornada.</div></div>
             </div>
             <div class="game-card" id="eliteFourHomeCard" role="button" tabindex="0" onclick="switchPanel('elite-four')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('elite-four')}">
               <div class="game-card-header" style="background:linear-gradient(135deg,#4a3522,#211728);height:126px;"><img src="assets/elite-four-card.png" alt="Elite Four de Kanto" style="width:100%;height:126px;object-fit:contain;image-rendering:pixelated;" /></div>
               <div class="game-card-body"><div class="game-card-title">Elite Four</div><div class="game-card-desc" id="eliteFourHomeDesc">Requer todas as 8 Ins&iacute;gnias de Kanto.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('ss-anne')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('ss-anne')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#1d4960,#102b3a);"><img src="assets/ss-anne-ship-cutout.png" alt="Navio S.S. Anne" style="width:100%;height:92px;object-fit:contain;" /></div>
+            <div class="game-card" id="ssAnneHomeCard" role="button" tabindex="0" onclick="switchPanel('ss-anne')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('ss-anne')}">
+              <div class="game-card-header"><img src="assets/ss-anne-card.png" alt="Navio S.S. Anne no mar" /></div>
               <div class="game-card-body"><div class="game-card-title">S.S. Anne</div><div class="game-card-desc">Desafie os treinadores do navio em ordem e abra caminho at&eacute; o rival.</div></div>
             </div>
             <div class="game-card" id="silphCoHomeCard" role="button" tabindex="0" aria-disabled="true" onclick="switchPanel('silph-co')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('silph-co')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#244b68,#122337);height:100px;overflow:hidden;"><img src="assets/silph-co-building.png" alt="Edifício da Silph Co." title="Silph Co. — imagem: WikiDex" style="width:84px;height:126px;object-fit:contain;image-rendering:pixelated;transform:translateY(12px);" /></div>
-              <div class="game-card-body"><div class="game-card-title">Silph C.O</div><div class="game-card-desc" id="silphCoHomeDesc">Derrote Sabrina no Ginásio de Saffron para liberar o acesso.</div></div>
+              <div class="game-card-header"><img src="assets/silph-co-card.png" alt="Prédio da Silph Co. em Saffron" /></div>
+              <div class="game-card-body"><div class="game-card-title">Silph Co.</div><div class="game-card-desc" id="silphCoHomeDesc">Derrote Sabrina no Ginásio de Saffron para liberar o acesso.</div></div>
             </div>
             <div class="game-card" id="gameCornerHomeCard" role="button" tabindex="0" onclick="switchPanel('game-corner')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('game-corner')}">
-              <div class="game-card-header"><img src="assets/game-corner/game-corner-guide.png" alt="Game Corner Guide: cena da área de jogos de Pokémon FireRed e LeafGreen" /></div>
+              <div class="game-card-header"><img src="assets/game-corner/game-corner-guide.png" alt="Arte do Game Corner com máquinas de jogos e letreiro dourado" /></div>
               <div class="game-card-body"><div class="game-card-title">Game Corner</div><div class="game-card-desc">Jogue Pok&eacute;N&iacute;quel, Roleta Pok&eacute;mon e Pok&eacute;Mina; troque fichas por pr&ecirc;mios.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('battle-tower')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('battle-tower')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#241638,#100a1d);"><img src="assets/battle-tower-castle.png" alt="Castelo pixel art da Torre de Batalha" style="width:154px;height:92px;object-fit:contain;image-rendering:pixelated;" /></div>
+            <div class="game-card" id="battleTowerHomeCard" role="button" tabindex="0" onclick="switchPanel('battle-tower')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('battle-tower')}">
+              <div class="game-card-header"><img src="assets/battle-tower-card.png" alt="Prédio da Battle Tower e treinador" /></div>
               <div class="game-card-body"><div class="game-card-title">Torre de Batalha</div><div class="game-card-desc">Desafie treinadores NPC e ganhe BP nas primeiras vitórias.</div></div>
             </div>
             <div class="game-card" role="button" tabindex="0" onclick="switchPanel('dojo')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('dojo')}">
@@ -260,8 +260,8 @@
               <div class="game-card-header" style="background:linear-gradient(135deg,#293949,#141d26);">🧰</div>
               <div class="game-card-body"><div class="game-card-title">Catálogo de Itens</div><div class="game-card-desc">Consulte itens, categorias e efeitos.</div></div>
             </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pvp')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pvp')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#41234d,#1d1225);overflow:hidden;"><img src="assets/pvp-versus.png" alt="" style="width:230px;height:230px;max-width:none;flex:none;object-fit:contain;image-rendering:pixelated;" /></div>
+            <div class="game-card" id="pvpHomeCard" role="button" tabindex="0" onclick="switchPanel('pvp')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pvp')}">
+              <div class="game-card-header"><img src="assets/pvp-versus.png" alt="Arte de batalha PvP Online com Pokémon de treinadores" /></div>
               <div class="game-card-body"><div class="game-card-title">PvP Online</div><div class="game-card-desc">Desafie outro treinador por código de sala.</div></div>
             </div>
 
@@ -965,6 +965,7 @@
     <div class="battle-ui">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
         <div class="battle-log" id="battleLog" style="flex:1;margin:0;">Um Pokémon selvagem apareceu!</div>
+        <label class="battle-volume-control" aria-label="Volume do áudio da batalha"><span>Volume</span><input id="battleSfxVolume" type="range" min="0" max="100" step="5" value="70" aria-label="Volume do áudio da batalha" oninput="setBattleSfxVolume(this.value)"><output id="battleSfxVolumeValue">70%</output></label>
         <button type="button" id="btnMuteSfx" onclick="toggleBattleSfx()" title="Som on/off"
           style="flex-shrink:0;width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:1.1rem;">🔊</button>
       </div>

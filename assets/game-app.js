@@ -22,19 +22,19 @@
       "Fogo": {"Fogo": 0.5, "Agua": 0.5, "Planta": 2, "Gelo": 2, "Inseto": 2, "Pedra": 0.5, "Dragao": 0.5, "A\u00e7o": 2, "Fada": 0.5},
       "Agua": {"Fogo": 2, "Agua": 0.5, "Planta": 0.5, "Terra": 2, "Pedra": 2, "Dragao": 0.5},
       "Planta": {"Fogo": 0.5, "Agua": 2, "Planta": 0.5, "Veneno": 0.5, "Terra": 2, "Voador": 0.5, "Inseto": 0.5, "Pedra": 2, "Dragao": 0.5, "A\u00e7o": 0.5},
-      "Eletrico": {"Agua": 2, "Eletrico": 0.5, "Planta": 0.5, "Terra": 0, "Voador": 2, "Dragao": 0.5},
+      "Elétrico": {"Agua": 2, "Elétrico": 0.5, "Planta": 0.5, "Terra": 0, "Voador": 2, "Dragao": 0.5},
       "Gelo": {"Fogo": 0.5, "Agua": 0.5, "Planta": 2, "Gelo": 0.5, "Terra": 2, "Voador": 2, "Dragao": 2, "A\u00e7o": 0.5},
-      "Lutador": {"Normal": 2, "Gelo": 2, "Veneno": 0.5, "Voador": 0.5, "Psiquico": 0.5, "Inseto": 0.5, "Pedra": 2, "Fantasma": 0, "Sombrio": 2, "A\u00e7o": 2, "Fada": 0.5},
+      "Lutador": {"Normal": 2, "Gelo": 2, "Veneno": 0.5, "Voador": 0.5, "Psíquico": 0.5, "Inseto": 0.5, "Pedra": 2, "Fantasma": 0, "Sombrio": 2, "A\u00e7o": 2, "Fada": 0.5},
       "Veneno": {"Planta": 2, "Veneno": 0.5, "Terra": 0.5, "Pedra": 0.5, "Fantasma": 0.5, "A\u00e7o": 0, "Fada": 2},
-      "Terra": {"Fogo": 2, "Eletrico": 2, "Planta": 0.5, "Veneno": 2, "Voador": 0, "Inseto": 0.5, "Pedra": 2, "A\u00e7o": 2},
-      "Voador": {"Eletrico": 0.5, "Planta": 2, "Lutador": 2, "Inseto": 2, "Pedra": 0.5, "A\u00e7o": 0.5},
-      "Psiquico": {"Lutador": 2, "Veneno": 2, "Psiquico": 0.5, "Sombrio": 0, "A\u00e7o": 0.5},
-      "Inseto": {"Fogo": 0.5, "Planta": 2, "Lutador": 0.5, "Veneno": 0.5, "Voador": 0.5, "Psiquico": 2, "Fantasma": 0.5, "Sombrio": 2, "A\u00e7o": 0.5},
+      "Terra": {"Fogo": 2, "Elétrico": 2, "Planta": 0.5, "Veneno": 2, "Voador": 0, "Inseto": 0.5, "Pedra": 2, "A\u00e7o": 2},
+      "Voador": {"Elétrico": 0.5, "Planta": 2, "Lutador": 2, "Inseto": 2, "Pedra": 0.5, "A\u00e7o": 0.5},
+      "Psíquico": {"Lutador": 2, "Veneno": 2, "Psíquico": 0.5, "Sombrio": 0, "A\u00e7o": 0.5},
+      "Inseto": {"Fogo": 0.5, "Planta": 2, "Lutador": 0.5, "Veneno": 0.5, "Voador": 0.5, "Psíquico": 2, "Fantasma": 0.5, "Sombrio": 2, "A\u00e7o": 0.5},
       "Pedra": {"Fogo": 2, "Gelo": 2, "Lutador": 0.5, "Terra": 0.5, "Voador": 2, "Inseto": 2, "A\u00e7o": 0.5},
-      "Fantasma": {"Normal": 0, "Psiquico": 2, "Fantasma": 2, "Sombrio": 0.5},
+      "Fantasma": {"Normal": 0, "Psíquico": 2, "Fantasma": 2, "Sombrio": 0.5},
       "Dragao": {"Dragao": 2, "Fada": 0},
-      "Sombrio": {"Lutador": 0.5, "Psiquico": 2, "Fantasma": 2, "Sombrio": 0.5, "Fada": 0.5},
-      "A\u00e7o": {"Fogo": 0.5, "Agua": 0.5, "Eletrico": 0.5, "Gelo": 2, "Pedra": 2, "A\u00e7o": 0.5, "Fada": 2},
+      "Sombrio": {"Lutador": 0.5, "Psíquico": 2, "Fantasma": 2, "Sombrio": 0.5, "Fada": 0.5},
+      "A\u00e7o": {"Fogo": 0.5, "Agua": 0.5, "Elétrico": 0.5, "Gelo": 2, "Pedra": 2, "A\u00e7o": 0.5, "Fada": 2},
       "Fada": {"Fogo": 0.5, "Lutador": 2, "Veneno": 0.5, "Dragao": 2, "Sombrio": 2, "A\u00e7o": 0.5}
     };
 
@@ -42,9 +42,9 @@
       type.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(), type
     ]));
     const ENGLISH_TYPE_TO_GAME_TYPE = {
-      normal:'Normal', fire:'Fogo', water:'Agua', grass:'Planta', electric:'Eletrico',
+      normal:'Normal', fire:'Fogo', water:'Agua', grass:'Planta', electric:'Elétrico',
       ice:'Gelo', fighting:'Lutador', poison:'Veneno', ground:'Terra', flying:'Voador',
-      psychic:'Psiquico', bug:'Inseto', rock:'Pedra', ghost:'Fantasma', dragon:'Dragao',
+      psychic:'Psíquico', bug:'Inseto', rock:'Pedra', ghost:'Fantasma', dragon:'Dragao',
       dark:'Sombrio', steel:'A\u00e7o', fairy:'Fada'
     };
     function normalizeBattleType(type) {
@@ -54,20 +54,20 @@
 
     const POKE_TYPES = window.POKE_TYPES_DATA || {
       1: ['Planta','Veneno'], 4: ['Fogo'], 7: ['Agua'],
-      10: ['Inseto'], 13: ['Inseto','Veneno'], 25: ['Eletrico'], 26: ['Eletrico'],
+      10: ['Inseto'], 13: ['Inseto','Veneno'], 25: ['Elétrico'], 26: ['Elétrico'],
       35: ['Normal'], 41: ['Veneno','Voador'], 42: ['Veneno','Voador'],
       45: ['Planta','Veneno'], 51: ['Terra'], 58: ['Fogo'], 59: ['Fogo'],
-      64: ['Psiquico'], 65: ['Psiquico'], 66: ['Lutador'], 67: ['Lutador'],
+      64: ['Psíquico'], 65: ['Psíquico'], 66: ['Lutador'], 67: ['Lutador'],
       71: ['Planta','Veneno'], 74: ['Pedra','Terra'], 76: ['Pedra','Terra'],
-      77: ['Fogo'], 78: ['Fogo'], 80: ['Agua','Psiquico'],
-      81: ['Eletrico','Aço'], 82: ['Eletrico','Aço'], 86: ['Agua'], 87: ['Agua','Gelo'],
+      77: ['Fogo'], 78: ['Fogo'], 80: ['Agua','Psíquico'],
+      81: ['Elétrico','Aço'], 82: ['Elétrico','Aço'], 86: ['Agua'], 87: ['Agua','Gelo'],
       89: ['Veneno'], 92: ['Fantasma','Veneno'], 93: ['Fantasma','Veneno'],
-      95: ['Pedra','Terra'], 100: ['Eletrico'], 101: ['Eletrico'],
+      95: ['Pedra','Terra'], 100: ['Elétrico'], 101: ['Elétrico'],
       104: ['Terra'], 109: ['Veneno'], 110: ['Veneno'],
       111: ['Terra','Pedra'], 112: ['Terra','Pedra'], 113: ['Normal'],
-      114: ['Planta'], 120: ['Agua'], 121: ['Agua','Psiquico'],
-      122: ['Psiquico'], 132: ['Normal'], 147: ['Dragao'],
-      150: ['Psiquico'],
+      114: ['Planta'], 120: ['Agua'], 121: ['Agua','Psíquico'],
+      122: ['Psíquico'], 132: ['Normal'], 147: ['Dragao'],
+      150: ['Psíquico'],
       152: ['Planta'], 155: ['Fogo'], 158: ['Agua'],
       252: ['Planta'], 255: ['Fogo'], 258: ['Agua'],
       387: ['Planta'], 390: ['Fogo'], 393: ['Agua'],
@@ -118,10 +118,22 @@
       24:'Intimidate',58:'Intimidate',59:'Intimidate',130:'Intimidate',66:'Guts',67:'Guts',68:'Guts',
       92:'Levitate',93:'Levitate',94:'Levitate',133:'Adaptabilidade',134:'Water Absorb',135:'Volt Absorb',136:'Flash Fire',143:'Thick Fat',150:'Adaptabilidade',807:'Volt Absorb'
     };
-    const ABILITY_BY_TYPE = {Planta:'Overgrow',Fogo:'Blaze',Agua:'Torrent',Eletrico:'Static',Inseto:'Swarm',Veneno:'Poison Point',Fantasma:'Levitate',Lutador:'Guts'};
+    const ABILITY_BY_TYPE = {Planta:'Overgrow',Fogo:'Blaze',Agua:'Torrent',Elétrico:'Static',Inseto:'Swarm',Veneno:'Poison Point',Fantasma:'Levitate',Lutador:'Guts'};
+    function formatPokemonName(name) {
+      const value = String(name || 'Pokémon').trim();
+      if (!value || value !== value.toLocaleLowerCase('pt-BR')) return value || 'Pokémon';
+      return value.replace(/(^|[\s-])([\p{L}])/gu, (_, separator, letter) => separator + letter.toLocaleUpperCase('pt-BR'));
+    }
     function ensurePokemonTraits(pokemon) {
       if (!pokemon) return false;
       let changed = false;
+      if (!pokemon.isNicknamed && typeof pokemon.name === 'string') {
+        const formattedName = formatPokemonName(pokemon.name);
+        if (formattedName !== pokemon.name) {
+          pokemon.name = formattedName;
+          changed = true;
+        }
+      }
       if (!NATURES.some(n=>n.name===pokemon.nature)) {
         pokemon.nature = NATURES[Math.floor(Math.random()*NATURES.length)].name;
         changed = true;
@@ -174,7 +186,7 @@
       113:{hp:2},114:{defense:1},115:{hp:2},118:{specialDefense:1},119:{attack:2},121:{speed:2},122:{specialDefense:2},123:{attack:1},125:{specialAttack:2},
       126:{specialAttack:2},127:{attack:2},128:{attack:1},129:{speed:1},130:{attack:2},132:{hp:1},143:{hp:2},147:{attack:1},148:{attack:2},150:{specialAttack:3}
     };
-    const EV_YIELD_BY_TYPE = {Normal:'hp',Fogo:'speed',Agua:'hp',Planta:'specialAttack',Eletrico:'speed',Gelo:'specialDefense',Lutador:'attack',Veneno:'specialDefense',Terra:'attack',Voador:'speed',Psiquico:'specialAttack',Inseto:'speed',Pedra:'defense',Fantasma:'specialDefense',Dragao:'attack',Aço:'defense'};
+    const EV_YIELD_BY_TYPE = {Normal:'hp',Fogo:'speed',Agua:'hp',Planta:'specialAttack',Elétrico:'speed',Gelo:'specialDefense',Lutador:'attack',Veneno:'specialDefense',Terra:'attack',Voador:'speed',Psíquico:'specialAttack',Inseto:'speed',Pedra:'defense',Fantasma:'specialDefense',Dragao:'attack',Aço:'defense'};
     function getBattleStatStage(pokemon, stat) {
       if (!battle || !pokemon) return 0;
       const stages = pokemon === player?.poke ? battle.playerStatStages : pokemon === battle.enemy ? battle.enemyStatStages : null;
@@ -315,13 +327,13 @@
     function abilityTypeImmunity(defender, moveType) {
       if (defender.ability==='Levitate' && moveType==='Terra') return 'Levitate';
       if (defender.ability==='Water Absorb' && moveType==='Agua') return 'Water Absorb';
-      if (defender.ability==='Volt Absorb' && moveType==='Eletrico') return 'Volt Absorb';
+      if (defender.ability==='Volt Absorb' && moveType==='Elétrico') return 'Volt Absorb';
       if (defender.ability==='Flash Fire' && moveType==='Fogo') return 'Flash Fire';
       return '';
     }
     function getBattleMoveType(move) {
       const moveType = normalizeBattleType(move?.type || 'Normal');
-      return battle?.plasmaFistsActive && moveType === 'Normal' ? 'Eletrico' : moveType;
+      return battle?.plasmaFistsActive && moveType === 'Normal' ? 'Elétrico' : moveType;
     }
     function applyAbilityOnHit(attacker, defender, damaging) {
       if (!damaging || !attacker || !defender) return '';
@@ -369,17 +381,19 @@
 
     function getPokemonDisplayName(pokemon) {
       ensurePokemonGender(pokemon);
-      if (pokemon.hideGenderSymbol) return pokemon.name;
+      const name = pokemon.isNicknamed ? String(pokemon.name || 'Pokémon') : formatPokemonName(pokemon.name);
+      if (pokemon.hideGenderSymbol) return name;
       const symbol = pokemon.gender === 'male' ? '♂' : pokemon.gender === 'female' ? '♀' : '';
-      return symbol ? `${pokemon.name} ${symbol}` : pokemon.name;
+      return symbol ? `${name} ${symbol}` : name;
     }
     function getPokemonDisplayNameHTML(pokemon) {
       ensurePokemonGender(pokemon);
-      if (pokemon.hideGenderSymbol) return escapeHTML(pokemon.name);
+      const name = pokemon.isNicknamed ? String(pokemon.name || 'Pokémon') : formatPokemonName(pokemon.name);
+      if (pokemon.hideGenderSymbol) return escapeHTML(name);
       const shinyBadge = pokemon.shiny ? ' <span title="Pokémon Shiny" aria-label="Pokémon Shiny">✨</span>' : '';
-      if (pokemon.gender !== 'male' && pokemon.gender !== 'female') return `${escapeHTML(pokemon.name)}${shinyBadge}`;
+      if (pokemon.gender !== 'male' && pokemon.gender !== 'female') return `${escapeHTML(name)}${shinyBadge}`;
       const gender = pokemon.gender === 'male' ? ['male','♂'] : ['female','♀'];
-      return `${escapeHTML(pokemon.name)}${shinyBadge} <span class="gender-symbol gender-symbol-${gender[0]}" aria-label="${getPokemonGenderLabel(pokemon)}">${gender[1]}</span>`;
+      return `${escapeHTML(name)}${shinyBadge} <span class="gender-symbol gender-symbol-${gender[0]}" aria-label="${getPokemonGenderLabel(pokemon)}">${gender[1]}</span>`;
     }
 
     const STATUS_LABELS = {
@@ -800,7 +814,6 @@
       if (!types || !types.length) return 'type-normal';
       const t = types[0].toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-        .replace('psiquico','psiquico');
       const map = {
         normal:'type-normal', fogo:'type-fogo', agua:'type-agua', planta:'type-planta',
         eletrico:'type-eletrico', gelo:'type-gelo', lutador:'type-lutador', veneno:'type-veneno',
@@ -828,23 +841,23 @@
       9: [{level:1,name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{level:1,name:'Bolhas',power:40,type:'Agua',typeColor:'#6890f0'},{level:1,name:'Jato de Agua',power:55,type:'Agua',typeColor:'#6890f0'},{level:48,name:'Hidro Bomba',power:100,type:'Agua',typeColor:'#6890f0'}],
       10:[{level:1,name:'Investida',power:30,type:'Normal',typeColor:'#a8a878'},{level:1,name:'Fio de Seda',power:0,type:'Inseto',typeColor:'#a8b820'}],
       13:[{level:1,name:'Ferrão Venenoso',power:35,type:'Veneno',typeColor:'#a040a0'},{level:1,name:'Fio de Seda',power:0,type:'Inseto',typeColor:'#a8b820'}],
-      25:[{level:1,name:'Choque do Trovão',power:40,type:'Eletrico',typeColor:'#f8d030'},{level:1,name:'Onda Trovão',power:0,type:'Eletrico',typeColor:'#f8d030',statusEffect:{status:'paralysis',chance:1}},{level:9,name:'Ataque Rápido',power:40,type:'Normal',typeColor:'#a8a878'},{level:26,name:'Raio',power:70,type:'Eletrico',typeColor:'#f8d030'},{level:33,name:'Trovão',power:90,type:'Eletrico',typeColor:'#f8d030'}],
-      26:[{level:1,name:'Choque do Trovão',power:40,type:'Eletrico',typeColor:'#f8d030'},{level:1,name:'Ataque Rápido',power:40,type:'Normal',typeColor:'#a8a878'},{level:1,name:'Raio',power:70,type:'Eletrico',typeColor:'#f8d030'},{level:1,name:'Trovão',power:90,type:'Eletrico',typeColor:'#f8d030'}]
+      25:[{level:1,name:'Choque do Trovão',power:40,type:'Elétrico',typeColor:'#f8d030'},{level:1,name:'Onda Trovão',power:0,type:'Elétrico',typeColor:'#f8d030',statusEffect:{status:'paralysis',chance:1}},{level:9,name:'Ataque Rápido',power:40,type:'Normal',typeColor:'#a8a878'},{level:26,name:'Raio',power:70,type:'Elétrico',typeColor:'#f8d030'},{level:33,name:'Trovão',power:90,type:'Elétrico',typeColor:'#f8d030'}],
+      26:[{level:1,name:'Choque do Trovão',power:40,type:'Elétrico',typeColor:'#f8d030'},{level:1,name:'Ataque Rápido',power:40,type:'Normal',typeColor:'#a8a878'},{level:1,name:'Raio',power:70,type:'Elétrico',typeColor:'#f8d030'},{level:1,name:'Trovão',power:90,type:'Elétrico',typeColor:'#f8d030'}]
     };
     // Slowpoke/Slowbro FireRed & LeafGreen damaging level-up moves, referenced against Pokémon Database.
     LEVEL_MOVES[79] = [
       {level:1,name:'Tackle',power:35,type:'Normal',accuracy:95,category:'physical'},
       {level:13,name:'Water Gun',power:40,type:'Agua',accuracy:100,category:'special'},
-      {level:17,name:'Confusion',power:50,type:'Psiquico',accuracy:100,category:'special'},
+      {level:17,name:'Confusion',power:50,type:'Psíquico',accuracy:100,category:'special'},
       {level:29,name:'Headbutt',power:70,type:'Normal',accuracy:100,category:'physical'},
-      {level:40,name:'Psychic',power:90,type:'Psiquico',accuracy:100,category:'special'}
+      {level:40,name:'Psychic',power:90,type:'Psíquico',accuracy:100,category:'special'}
     ];
     LEVEL_MOVES[80] = [
       {level:1,name:'Tackle',power:35,type:'Normal',accuracy:95,category:'physical'},
       {level:13,name:'Water Gun',power:40,type:'Agua',accuracy:100,category:'special'},
-      {level:17,name:'Confusion',power:50,type:'Psiquico',accuracy:100,category:'special'},
+      {level:17,name:'Confusion',power:50,type:'Psíquico',accuracy:100,category:'special'},
       {level:29,name:'Headbutt',power:70,type:'Normal',accuracy:100,category:'physical'},
-      {level:44,name:'Psychic',power:90,type:'Psiquico',accuracy:100,category:'special'}
+      {level:44,name:'Psychic',power:90,type:'Psíquico',accuracy:100,category:'special'}
     ];
 
     // Zeraora level-up moves (Generation VIII); API hydration supplies the full modern learnset online.
@@ -854,29 +867,29 @@
       {level:1,name:'Scratch',power:40,type:'Normal',typeColor:'#a8a878',category:'physical'},
       {level:1,name:'Quick Attack',power:40,type:'Normal',typeColor:'#a8a878',category:'physical',priority:1},
       {level:1,name:'Snarl',power:55,type:'Sombrio',typeColor:'#705848',category:'special',statChanges:[{target:'target',stat:'specialAttack',stages:-1}]},
-      {level:1,name:'Spark',power:65,type:'Eletrico',typeColor:'#f8d030',category:'physical',statusEffect:{status:'paralysis',chance:0.3}},
+      {level:1,name:'Spark',power:65,type:'Elétrico',typeColor:'#f8d030',category:'physical',statusEffect:{status:'paralysis',chance:0.3}},
       {level:8,name:'Fury Swipes',power:18,type:'Normal',typeColor:'#a8a878',category:'physical',multiHit:{min:2,max:5}},
       {level:24,name:'Slash',power:70,type:'Normal',typeColor:'#a8a878',category:'physical',highCritical:true},
-      {level:40,name:'Agility',power:0,type:'Psiquico',typeColor:'#f85888',category:'status',statChanges:[{target:'self',stat:'speed',stages:2}]},
-      {level:32,name:'Volt Switch',power:70,type:'Eletrico',typeColor:'#f8d030',category:'special'},
+      {level:40,name:'Agility',power:0,type:'Psíquico',typeColor:'#f85888',category:'status',statChanges:[{target:'self',stat:'speed',stages:2}]},
+      {level:32,name:'Volt Switch',power:70,type:'Elétrico',typeColor:'#f8d030',category:'special'},
       {level:56,name:'Hone Claws',power:0,type:'Sombrio',typeColor:'#705848',category:'status',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'accuracy',stages:1}]},
-      {level:48,name:'Thunder Punch',power:75,type:'Eletrico',typeColor:'#f8d030',category:'physical',punch:true},
-      {level:64,name:'Discharge',power:80,type:'Eletrico',typeColor:'#f8d030',category:'special',statusEffect:{status:'paralysis',chance:0.3}},
-      {level:72,name:'Wild Charge',power:90,type:'Eletrico',typeColor:'#f8d030',category:'physical',recoil:0.25},
-      {level:88,name:'Plasma Fists',power:100,type:'Eletrico',typeColor:'#f8d030',category:'physical'},
+      {level:48,name:'Thunder Punch',power:75,type:'Elétrico',typeColor:'#f8d030',category:'physical',punch:true},
+      {level:64,name:'Discharge',power:80,type:'Elétrico',typeColor:'#f8d030',category:'special',statusEffect:{status:'paralysis',chance:0.3}},
+      {level:72,name:'Wild Charge',power:90,type:'Elétrico',typeColor:'#f8d030',category:'physical',recoil:0.25},
+      {level:88,name:'Plasma Fists',power:100,type:'Elétrico',typeColor:'#f8d030',category:'physical'},
       {level:96,name:'Close Combat',power:120,type:'Lutador',typeColor:'#c03028',category:'physical',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}
     ];
     const TYPE_DEFAULT_MOVES = {
       Planta:[{name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Pó Venenoso',power:0,type:'Planta',typeColor:'#78c850',statusEffect:{status:'poison',chance:0.75}},{name:'Pó do Sono',power:0,type:'Planta',typeColor:'#78c850',statusEffect:{status:'sleep',chance:0.75}},{name:'Chicote de Vinha',power:45,type:'Planta',typeColor:'#78c850'},{name:'Folha Mágica',power:60,type:'Planta',typeColor:'#78c850'},{name:'Raio Solar',power:90,type:'Planta',typeColor:'#78c850'}],
       Fogo:[{name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Brasas',power:40,type:'Fogo',typeColor:'#f08030'},{name:'Lança-chamas',power:70,type:'Fogo',typeColor:'#f08030'},{name:'Explosão de Fogo',power:95,type:'Fogo',typeColor:'#f08030'}],
       Agua:[{name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Bolhas',power:40,type:'Agua',typeColor:'#6890f0'},{name:'Raio de Gelo',power:55,type:'Gelo',typeColor:'#98d8d8'},{name:'Jato de Agua',power:55,type:'Agua',typeColor:'#6890f0'},{name:'Hidro Bomba',power:90,type:'Agua',typeColor:'#6890f0'}],
-      Eletrico:[{name:'Choque do Trovão',power:40,type:'Eletrico',typeColor:'#f8d030'},{name:'Onda Trovão',power:0,type:'Eletrico',typeColor:'#f8d030',statusEffect:{status:'paralysis',chance:1}},{name:'Ataque Rápido',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Raio',power:70,type:'Eletrico',typeColor:'#f8d030'},{name:'Trovão',power:90,type:'Eletrico',typeColor:'#f8d030'}],
+      Elétrico:[{name:'Choque do Trovão',power:40,type:'Elétrico',typeColor:'#f8d030'},{name:'Onda Trovão',power:0,type:'Elétrico',typeColor:'#f8d030',statusEffect:{status:'paralysis',chance:1}},{name:'Ataque Rápido',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Raio',power:70,type:'Elétrico',typeColor:'#f8d030'},{name:'Trovão',power:90,type:'Elétrico',typeColor:'#f8d030'}],
       Normal:[{name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Pancada',power:50,type:'Normal',typeColor:'#a8a878'},{name:'Hiper-raio',power:90,type:'Normal',typeColor:'#a8a878'}],
       Pedra:[{name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Rolamento',power:45,type:'Pedra',typeColor:'#b8a038'},{name:'Explosão de Rocha',power:60,type:'Pedra',typeColor:'#b8a038'}],
       Terra:[{name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Escavação',power:55,type:'Terra',typeColor:'#e0c068'},{name:'Terremoto',power:70,type:'Terra',typeColor:'#e0c068'}],
       Veneno:[{name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Ferrão Venenoso',power:35,type:'Veneno',typeColor:'#a040a0'},{name:'Lodo',power:50,type:'Veneno',typeColor:'#a040a0'}],
       Fantasma:[{name:'Lambida',power:30,type:'Fantasma',typeColor:'#705898'},{name:'Sombra Noturna',power:50,type:'Fantasma',typeColor:'#705898'},{name:'Bola Sombria',power:70,type:'Fantasma',typeColor:'#705898'}],
-      Psiquico:[{name:'Hipnose',power:0,type:'Psiquico',typeColor:'#f85888',statusEffect:{status:'sleep',chance:0.6}},{name:'Confusão',power:50,type:'Psiquico',typeColor:'#f85888'},{name:'Psíquico',power:70,type:'Psiquico',typeColor:'#f85888'}],
+      Psíquico:[{name:'Hipnose',power:0,type:'Psíquico',typeColor:'#f85888',statusEffect:{status:'sleep',chance:0.6}},{name:'Confusão',power:50,type:'Psíquico',typeColor:'#f85888'},{name:'Psíquico',power:70,type:'Psíquico',typeColor:'#f85888'}],
       Lutador:[{name:'Soco',power:40,type:'Lutador',typeColor:'#c03028'},{name:'Chute Baixo',power:50,type:'Lutador',typeColor:'#c03028'},{name:'Soco Dinâmico',power:70,type:'Lutador',typeColor:'#c03028'}],
       Inseto:[{name:'Investida',power:30,type:'Normal',typeColor:'#a8a878'},{name:'Picada',power:40,type:'Inseto',typeColor:'#a8b820'}],
       Voador:[{name:'Investida',power:40,type:'Normal',typeColor:'#a8a878'},{name:'Rajada de Vento',power:40,type:'Voador',typeColor:'#a890f0'},{name:'Ataque de Asa',power:60,type:'Voador',typeColor:'#a890f0'}],
@@ -932,8 +945,8 @@
       try { return await request; } catch (error) { fireRedLearnsetCache.delete(id); throw error; }
     }
 
-    // A lista de Pok?mon Mythology cobre as gera??es I-V; tipagens alteradas depois disso
-    // usam o valor anterior ? Gen VI quando a API registra uma mudan?a hist?rica.
+    // A lista de Pokémon Mythology cobre as gerações I-V; tipagens alteradas depois disso
+    // usam o valor anterior ? Gen VI quando a API registra uma mudança histórica.
     const POST_GEN5_MOVE_TYPE_GROUPS = [
       'x-y','omega-ruby-alpha-sapphire','sun-moon','ultra-sun-ultra-moon',
       'lets-go-pikachu-lets-go-eevee','sword-shield','brilliant-diamond-shining-pearl',
@@ -1689,7 +1702,11 @@
       return slug ? `https://img.pokemondb.net/sprites/black-white/anim/shiny/${slug}.gif` : SPRITE_SHINY(id);
     };
     const SPRITE_POKEMON = pokemon => pokemon?.shiny ? SPRITE_SHINY(pokemon.id) : SPRITE(pokemon.id);
-    const SPRITE_BACK_POKEMON = pokemon => pokemon?.shiny ? SPRITE_BACK_SHINY(pokemon.id) : SPRITE_BACK(pokemon.id);
+    const SPRITE_BACK_POKEMON = pokemon => Number(pokemon?.id) === 318
+      ? pokemon.shiny
+        ? 'https://img.pokemondb.net/sprites/black-white/anim/back-shiny/carvanha.gif'
+        : 'https://img.pokemondb.net/sprites/black-white/anim/back-normal/carvanha.gif'
+      : pokemon?.shiny ? SPRITE_BACK_SHINY(pokemon.id) : SPRITE_BACK(pokemon.id);
     const SPRITE_ANIM_POKEMON = pokemon => pokemon?.shiny ? SPRITE_ANIM_SHINY(pokemon.id) : SPRITE_ANIM(pokemon.id);
 
     function renderEffortReward(effortText) {
@@ -2062,7 +2079,7 @@
         { name: 'Spearow', id: 21, hp: 20, rate: 5, minLevel: 3, maxLevel: 8, expYield: 52, rarity: 'Raro', notes: 'Ave rara que aparece entre as ?rvores', moves: [{name:'Bicada',power:35,type:'Voador'},{name:'Investida',power:30}] },
         { name: 'Metapod', id: 11, hp: 22, rate: 8, minLevel: 5, maxLevel: 8, expYield: 72, rarity: 'Incomum', notes: 'Forma evoluída intermediária', moves: [{name:'Endurecer',power:0},{name:'Investida',power:25}] },
         { name: 'Kakuna', id: 14, hp: 22, rate: 8, minLevel: 5, maxLevel: 8, expYield: 72, rarity: 'Incomum', notes: 'Forma evoluída intermediária', moves: [{name:'Endurecer',power:0},{name:'Ferrão',power:30}] },
-        { name: 'Pikachu', id: 25, hp: 22, rate: 5, minLevel: 6, maxLevel: 10, expYield: 112, rarity: 'Raro', notes: 'O clássico encontro raro da floresta', moves: [{name:'Choque do Trovão',power:40,type:'Eletrico'},{name:'Investida',power:30}] },
+        { name: 'Pikachu', id: 25, hp: 22, rate: 5, minLevel: 6, maxLevel: 10, expYield: 112, rarity: 'Raro', notes: 'O clássico encontro raro da floresta', moves: [{name:'Choque do Trovão',power:40,type:'Elétrico'},{name:'Investida',power:30}] },
         { name: 'Oddish', id: 43, hp: 22, rate: 2, minLevel: 3, maxLevel: 8, expYield: 78, rarity: 'Muito Raro', notes: 'Tipo Planta (ideal para noite/áreas úmidas)', moves: [{name:'Absorver',power:30,type:'Planta'},{name:'Pó Venenoso',power:0}] },
         { name: 'Bellsprout', id: 69, hp: 22, rate: 1.5, minLevel: 3, maxLevel: 8, expYield: 84, rarity: 'Muito Raro', notes: 'Tipo Planta (parceiro/macho de área úmida)', moves: [{name:'Chicote de Vinha',power:35,type:'Planta'},{name:'Enrolar',power:30}] },
         { name: "Farfetch'd", id: 83, hp: 28, rate: 0.5, minLevel: 8, maxLevel: 12, expYield: 132, rarity: 'Ultrarraro', notes: 'Encontro especial / Easter Egg da floresta', moves: [{name:'Ataque de Asa',power:40},{name:'Corte',power:35}] }
@@ -2077,7 +2094,7 @@
       'Rota 4': [
         { name: 'Ekans', id: 23, hp: 28, rate: 31.5, minLevel: 10, maxLevel: 15, rarity: 'Comum', moves: [{name:'Poison Sting',power:25,type:'Veneno'},{name:'Bite',power:40,type:'Sombrio'}] },
         { name: 'Arbok', id: 24, hp: 42, rate: 3.5, minLevel: 15, maxLevel: 18, rarity: 'Raro', moves: [{name:'Poison Jab',power:50,type:'Veneno'},{name:'Bite',power:45,type:'Sombrio'}] },
-        { name: 'Butterfree', id: 12, hp: 34, rate: 17.5, minLevel: 10, maxLevel: 16, rarity: 'Incomum', moves: [{name:'Confusion',power:40,type:'Psiquico'},{name:'Gust',power:35,type:'Voador'}] },
+        { name: 'Butterfree', id: 12, hp: 34, rate: 17.5, minLevel: 10, maxLevel: 16, rarity: 'Incomum', moves: [{name:'Confusion',power:40,type:'Psíquico'},{name:'Gust',power:35,type:'Voador'}] },
         { name: 'Beedrill', id: 15, hp: 34, rate: 17.5, minLevel: 10, maxLevel: 16, rarity: 'Incomum', moves: [{name:'Twineedle',power:40,type:'Inseto'},{name:'Poison Sting',power:25,type:'Veneno'}] },
         { name: 'Meowth', id: 52, hp: 30, rate: 20, minLevel: 10, maxLevel: 16, rarity: 'Incomum', moves: [{name:'Scratch',power:40,type:'Normal'},{name:'Bite',power:40,type:'Sombrio'}] },
         { name: 'Pidgeotto', id: 17, hp: 38, rate: 10, minLevel: 14, maxLevel: 18, rarity: 'Raro', moves: [{name:'Gust',power:40,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}] }
@@ -2088,9 +2105,9 @@
       ],
       'Túnel Rochoso': [
         { name: 'Geodude', id: 74, hp: 26, rate: 25, minLevel: 17, maxLevel: 25, rarity: 'Muito Comum', moves: [{name:'Rolamento',power:45,type:'Pedra'},{name:'Explosão de Rocha',power:50}] },
-        { name: 'Sandshrew', id: 27, hp: 28, rate: 10, minLevel: 17, maxLevel: 25, rarity: 'Incomum', notes: 'Pokemon terrestre encontrado no tunel', moves: [{name:'Scratch',power:40,type:'Normal'},{name:'Sand Attack',power:0,type:'Terra'}] },
+        { name: 'Sandshrew', id: 27, hp: 28, rate: 10, minLevel: 17, maxLevel: 25, rarity: 'Incomum', notes: 'Pokémon terrestre encontrado no tunel', moves: [{name:'Scratch',power:40,type:'Normal'},{name:'Sand Attack',power:0,type:'Terra'}] },
         { name: 'Zubat', id: 41, hp: 20, rate: 20, minLevel: 17, maxLevel: 25, rarity: 'Muito Comum', moves: [{name:'Supersônico',power:0},{name:'Mordida',power:40,type:'Sombrio'}] },
-        { name: 'Drowzee', id: 96, hp: 30, rate: 10, minLevel: 19, maxLevel: 26, rarity: 'Incomum', notes: 'Pokemon psiquico encontrado nas cavernas', moves: [{name:'Pound',power:40},{name:'Confusion',power:50,type:'Psiquico'}] },
+        { name: 'Drowzee', id: 96, hp: 30, rate: 10, minLevel: 19, maxLevel: 26, rarity: 'Incomum', notes: 'Pokémon psíquico encontrado nas cavernas', moves: [{name:'Pound',power:40},{name:'Confusion',power:50,type:'Psíquico'}] },
         { name: 'Machop', id: 66, hp: 30, rate: 15, minLevel: 19, maxLevel: 26, rarity: 'Incomum', moves: [{name:'Soco',power:40},{name:'Chute Baixo',power:50}] },
         { name: 'Mankey', id: 56, hp: 28, rate: 15, minLevel: 19, maxLevel: 26, rarity: 'Incomum', moves: [{name:'Arranhão',power:40},{name:'Karate Chop',power:50}] },
         { name: 'Onix', id: 95, hp: 35, rate: 5, minLevel: 18, maxLevel: 26, rarity: 'Raro', moves: [{name:'Enrolar',power:40},{name:'Terremoto',power:60,type:'Terra'}] }
@@ -2103,13 +2120,13 @@
         { name: 'Metapod', id: 11, hp: 22, rate: 2.5, minLevel: 14, maxLevel: 18, rarity: 'Incomum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Harden',power:0,type:'Normal'},{name:'Tackle',power:25,type:'Normal'}] },
         { name: 'Weedle', id: 13, hp: 18, rate: 2.5, minLevel: 14, maxLevel: 18, rarity: 'Incomum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Poison Sting',power:15,type:'Veneno'},{name:'Bug Bite',power:20,type:'Inseto'}] },
         { name: 'Kakuna', id: 14, hp: 22, rate: 2.5, minLevel: 14, maxLevel: 18, rarity: 'Incomum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Harden',power:0,type:'Normal'},{name:'Poison Sting',power:15,type:'Veneno'}] },
-        { name: 'Venonat', id: 48, hp: 24, rate: 5, minLevel: 16, maxLevel: 21, rarity: 'Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Poison Powder',power:0,type:'Veneno'}] },
+        { name: 'Venonat', id: 48, hp: 24, rate: 5, minLevel: 16, maxLevel: 21, rarity: 'Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Confusion',power:50,type:'Psíquico'},{name:'Poison Powder',power:0,type:'Veneno'}] },
         { name: 'Abra', id: 63, hp: 18, rate: 2.5, minLevel: 14, maxLevel: 20, rarity: 'Incomum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Pound',power:40,type:'Normal'},{name:'Teleport',power:0,type:'Normal'}], teleportFlee: true },
-        { name: 'Psyduck', id: 54, hp: 32, rate: 17, minLevel: 18, maxLevel: 24, rarity: 'Muito Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}] },
-        { name: 'Slowpoke', id: 79, hp: 35, rate: 17, minLevel: 18, maxLevel: 24, rarity: 'Muito Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}] },
+        { name: 'Psyduck', id: 54, hp: 32, rate: 17, minLevel: 18, maxLevel: 24, rarity: 'Muito Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psíquico'}] },
+        { name: 'Slowpoke', id: 79, hp: 35, rate: 17, minLevel: 18, maxLevel: 24, rarity: 'Muito Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psíquico'}] },
         { name: 'Goldeen', id: 118, hp: 30, rate: 6.375, minLevel: 18, maxLevel: 24, rarity: 'Comum', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Peck',power:35,type:'Voador'},{name:'Water Gun',power:40,type:'Agua'}] },
-        { name: 'Golduck', id: 55, hp: 40, rate: 1.0625, minLevel: 26, maxLevel: 32, rarity: 'Raro', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}] },
-        { name: 'Slowbro', id: 80, hp: 42, rate: 1.0625, minLevel: 26, maxLevel: 32, rarity: 'Raro', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}] },
+        { name: 'Golduck', id: 55, hp: 40, rate: 1.0625, minLevel: 26, maxLevel: 32, rarity: 'Raro', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psíquico'}] },
+        { name: 'Slowbro', id: 80, hp: 42, rate: 1.0625, minLevel: 26, maxLevel: 32, rarity: 'Raro', notes: 'Encontro terrestre ou aquatico da Rota 24', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psíquico'}] },
         { name: 'Magikarp', id: 129, hp: 22, rate: 5, minLevel: 18, maxLevel: 24, rarity: 'Incomum', moves: [{name:'Splash',power:0,type:'Normal'},{name:'Tackle',power:40,type:'Normal'}] },
         { name: 'Starmie', id: 121, hp: 42, rate: 2.5, minLevel: 28, maxLevel: 34, rarity: 'Raro', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Swift',power:60,type:'Normal'}] },
       ],
@@ -2117,25 +2134,25 @@
         { name: 'Gastly', id: 92, hp: 22, rate: 49.5, minLevel: 20, maxLevel: 27, moves: [{name:'Lambida',power:30},{name:'Sombra Noturna',power:45,type:'Fantasma'}] },
         { name: 'Haunter', id: 93, hp: 30, rate: 30, minLevel: 26, maxLevel: 34, moves: [{name:'Sombra Noturna',power:50,type:'Fantasma'},{name:'Hipnose',power:0}] },
         { name: 'Cubone', id: 104, hp: 28, rate: 20, minLevel: 22, maxLevel: 30, moves: [{name:'Ossada',power:45},{name:'Investida',power:35}] },
-        { name: 'Marowak', id: 105, hp: 42, rate: 0.5, minLevel: 32, maxLevel: 38, rarity: 'Ultrarraro', notes: 'Aparicao extremamente rara na Torre Pokemon', moves: [{name:'Bone Club',power:65,type:'Terra'},{name:'Headbutt',power:70,type:'Normal'}] },
+        { name: 'Marowak', id: 105, hp: 42, rate: 0.5, minLevel: 32, maxLevel: 38, rarity: 'Ultrarraro', notes: 'Aparição extremamente rara na Torre Pokémon', moves: [{name:'Bone Club',power:65,type:'Terra'},{name:'Headbutt',power:70,type:'Normal'}] },
       ],
       'Usina Elétrica': [
-        { name: 'Pikachu', id: 25, hp: 30, rate: 25, minLevel: 30, maxLevel: 40, rarity: 'Comum', moves: [{name:'Thunder Shock',power:40,type:'Eletrico'},{name:'Quick Attack',power:40,type:'Normal'}] },
-        { name: 'Magnemite', id: 81, hp: 32, rate: 25, minLevel: 30, maxLevel: 40, rarity: 'Comum', moves: [{name:'Thunder Shock',power:40,type:'Eletrico'},{name:'Sonic Boom',power:40,type:'Normal'}] },
-        { name: 'Voltorb', id: 100, hp: 30, rate: 20, minLevel: 30, maxLevel: 40, rarity: 'Comum', moves: [{name:'Spark',power:65,type:'Eletrico'},{name:'Tackle',power:40,type:'Normal'}] },
-        { name: 'Magneton', id: 82, hp: 38, rate: 10, minLevel: 38, maxLevel: 46, rarity: 'Incomum', moves: [{name:'Thunder Shock',power:40,type:'Eletrico'},{name:'Swift',power:60,type:'Normal'}] },
-        { name: 'Electrode', id: 101, hp: 38, rate: 10, minLevel: 38, maxLevel: 46, rarity: 'Incomum', moves: [{name:'Spark',power:65,type:'Eletrico'},{name:'Swift',power:60,type:'Normal'}] },
-        { name: 'Electabuzz', id: 125, hp: 42, rate: 5, minLevel: 40, maxLevel: 48, rarity: 'Raro', moves: [{name:'Thunder Punch',power:75,type:'Eletrico'},{name:'Quick Attack',power:40,type:'Normal'}] },
-        { name: 'Raichu', id: 26, hp: 45, rate: 5, minLevel: 42, maxLevel: 50, rarity: 'Raro', moves: [{name:'Thunder Punch',power:75,type:'Eletrico'},{name:'Slam',power:80,type:'Normal'}] }
+        { name: 'Pikachu', id: 25, hp: 30, rate: 25, minLevel: 30, maxLevel: 40, rarity: 'Comum', moves: [{name:'Thunder Shock',power:40,type:'Elétrico'},{name:'Quick Attack',power:40,type:'Normal'}] },
+        { name: 'Magnemite', id: 81, hp: 32, rate: 25, minLevel: 30, maxLevel: 40, rarity: 'Comum', moves: [{name:'Thunder Shock',power:40,type:'Elétrico'},{name:'Sonic Boom',power:40,type:'Normal'}] },
+        { name: 'Voltorb', id: 100, hp: 30, rate: 20, minLevel: 30, maxLevel: 40, rarity: 'Comum', moves: [{name:'Spark',power:65,type:'Elétrico'},{name:'Tackle',power:40,type:'Normal'}] },
+        { name: 'Magneton', id: 82, hp: 38, rate: 10, minLevel: 38, maxLevel: 46, rarity: 'Incomum', moves: [{name:'Thunder Shock',power:40,type:'Elétrico'},{name:'Swift',power:60,type:'Normal'}] },
+        { name: 'Electrode', id: 101, hp: 38, rate: 10, minLevel: 38, maxLevel: 46, rarity: 'Incomum', moves: [{name:'Spark',power:65,type:'Elétrico'},{name:'Swift',power:60,type:'Normal'}] },
+        { name: 'Electabuzz', id: 125, hp: 42, rate: 5, minLevel: 40, maxLevel: 48, rarity: 'Raro', moves: [{name:'Thunder Punch',power:75,type:'Elétrico'},{name:'Quick Attack',power:40,type:'Normal'}] },
+        { name: 'Raichu', id: 26, hp: 45, rate: 5, minLevel: 42, maxLevel: 50, rarity: 'Raro', moves: [{name:'Thunder Punch',power:75,type:'Elétrico'},{name:'Slam',power:80,type:'Normal'}] }
       ],
       'Zona do Safari': [
         { name: 'Kangaskhan', id: 115, hp: 48, rate: 3.2, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Comet Punch',power:18,type:'Normal'},{name:'Bite',power:60,type:'Sombrio'}] },
         { name: 'Tauros', id: 128, hp: 48, rate: 3.2, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Stomp',power:65,type:'Normal'},{name:'Take Down',power:90,type:'Normal'}] },
         { name: 'Chansey', id: 113, hp: 55, rate: 3.2, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Pound',power:40,type:'Normal'},{name:'Sing',power:0,type:'Normal'}] },
         { name: 'Pinsir', id: 127, hp: 45, rate: 3.2, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Vice Grip',power:55,type:'Normal'},{name:'Seismic Toss',power:50,type:'Lutador'}] },
-        { name: 'Exeggcute', id: 102, hp: 32, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Bullet Seed',power:25,type:'Planta'}] },
+        { name: 'Exeggcute', id: 102, hp: 32, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Confusion',power:50,type:'Psíquico'},{name:'Bullet Seed',power:25,type:'Planta'}] },
         { name: 'Rhyhorn', id: 111, hp: 40, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Rock Blast',power:25,type:'Pedra'},{name:'Stomp',power:65,type:'Normal'}] },
-        { name: 'Venomoth', id: 49, hp: 38, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Psybeam',power:65,type:'Psiquico'},{name:'Bug Buzz',power:90,type:'Inseto'}] },
+        { name: 'Venomoth', id: 49, hp: 38, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Psybeam',power:65,type:'Psíquico'},{name:'Bug Buzz',power:90,type:'Inseto'}] },
         { name: 'Nidoran?', id: 32, hp: 30, rate: 8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Poison Sting',power:15,type:'Veneno'},{name:'Double Kick',power:30,type:'Lutador'}] },
         { name: 'Nidoran?', id: 29, hp: 30, rate: 8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Poison Sting',power:15,type:'Veneno'},{name:'Double Kick',power:30,type:'Lutador'}] },
         { name: 'Nidorino', id: 33, hp: 38, rate: 0.6, minLevel: 35, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Poison Jab',power:80,type:'Veneno'},{name:'Horn Attack',power:65,type:'Normal'}] },
@@ -2143,10 +2160,10 @@
         { name: 'Parasect', id: 47, hp: 40, rate: 4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Slash',power:70,type:'Normal'},{name:'Giga Drain',power:75,type:'Planta'}] },
         { name: 'Dratini', id: 147, hp: 30, rate: 0.6, minLevel: 32, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Dragon Breath',power:60,type:'Dragao'},{name:'Wrap',power:15,type:'Normal'}] },
         { name: 'Dragonair', id: 148, hp: 42, rate: 0.2, minLevel: 48, maxLevel: 60, rarity: 'Raro', moves: [{name:'Dragon Breath',power:60,type:'Dragao'},{name:'Aqua Tail',power:90,type:'Agua'}] },
-        { name: 'Psyduck', id: 54, hp: 32, rate: 5.6, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}] },
+        { name: 'Psyduck', id: 54, hp: 32, rate: 5.6, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psíquico'}] },
         { name: 'Goldeen', id: 118, hp: 30, rate: 8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Peck',power:35,type:'Voador'},{name:'Water Gun',power:40,type:'Agua'}] },
         { name: 'Seaking', id: 119, hp: 40, rate: 0.6, minLevel: 34, maxLevel: 44, rarity: 'Incomum', moves: [{name:'Waterfall',power:80,type:'Agua'},{name:'Peck',power:35,type:'Voador'}] },
-        { name: 'Poliwag', id: 60, hp: 30, rate: 4.8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Bubble',power:40,type:'Agua'},{name:'Hypnosis',power:0,type:'Psiquico'}] },
+        { name: 'Poliwag', id: 60, hp: 30, rate: 4.8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Bubble',power:40,type:'Agua'},{name:'Hypnosis',power:0,type:'Psíquico'}] },
         { name: 'Poliwhirl', id: 61, hp: 40, rate: 0.6, minLevel: 34, maxLevel: 44, rarity: 'Incomum', moves: [{name:'Bubble Beam',power:65,type:'Agua'},{name:'Double Slap',power:15,type:'Normal'}] },
         { name: 'Doduo', id: 84, hp: 28, rate: 6.4, minLevel: 28, maxLevel: 40, rarity: 'Comum', moves: [{name:'Peck',power:35,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}] },
         { name: 'Scyther', id: 123, hp: 45, rate: 1.6, minLevel: 38, maxLevel: 50, rarity: 'Raro', moves: [{name:'Slash',power:70,type:'Normal'},{name:'Wing Attack',power:60,type:'Voador'}] },
@@ -2157,12 +2174,12 @@
         { name: 'Seadra', id: 117, hp: 38, rate: 1.5, minLevel: 35, maxLevel: 45, rarity: 'Incomum', moves: [{name:'Water Gun',power:40,type:'Agua'},{name:'Dragon Breath',power:50,type:'Dragao'}] },
         { name: 'Gyarados', id: 130, hp: 55, rate: 0.5, minLevel: 45, maxLevel: 50, rarity: 'Muito Raro', moves: [{name:'Bite',power:55,type:'Sombrio'},{name:'Aqua Tail',power:70,type:'Agua'}] },
         { name: 'Krabby', id: 98, hp: 28, rate: 8, minLevel: 28, maxLevel: 40, rarity: 'Muito Comum', moves: [{name:'Bubble',power:40,type:'Agua'},{name:'Vice Grip',power:50,type:'Normal'}] },
-        { name: 'Exeggutor', id: 103, hp: 48, rate: 2.5, minLevel: 35, maxLevel: 45, rarity: 'Raro', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Seed Bomb',power:60,type:'Planta'}] },
+        { name: 'Exeggutor', id: 103, hp: 48, rate: 2.5, minLevel: 35, maxLevel: 45, rarity: 'Raro', moves: [{name:'Confusion',power:50,type:'Psíquico'},{name:'Seed Bomb',power:60,type:'Planta'}] },
       ],
       'Ilhas Espuma': [
         { name: 'Seel', id: 86, hp: 32, minLevel: 40, maxLevel: 52, moves: [{name:'Cabeçada',power:45},{name:'Raio de Gelo',power:55,type:'Gelo'}] },
         { name: 'Dewgong', id: 87, hp: 42, minLevel: 48, maxLevel: 60, moves: [{name:'Raio de Gelo',power:60,type:'Gelo'},{name:'Aqua Jato',power:50}] },
-        { name: 'Jynx', id: 124, hp: 38, minLevel: 48, maxLevel: 60, moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Ice Beam',power:55,type:'Gelo'}] },
+        { name: 'Jynx', id: 124, hp: 38, minLevel: 48, maxLevel: 60, moves: [{name:'Confusion',power:50,type:'Psíquico'},{name:'Ice Beam',power:55,type:'Gelo'}] },
         { name: 'Shellder', id: 90, hp: 30, minLevel: 40, maxLevel: 52, moves: [{name:'Ice Shard',power:40,type:'Gelo'},{name:'Water Gun',power:40,type:'Agua'}] },
         { name: 'Cloyster', id: 91, hp: 42, minLevel: 48, maxLevel: 60, moves: [{name:'Ice Beam',power:55,type:'Gelo'},{name:'Water Pulse',power:60,type:'Agua'}] },
         { name: 'Lapras', id: 131, hp: 50, minLevel: 48, maxLevel: 60, moves: [{name:'Ice Beam',power:55,type:'Gelo'},{name:'Surf',power:70,type:'Agua'}] },
@@ -2188,7 +2205,7 @@
         { name: 'Vulpix', id: 37, hp: 42, rate: 25, minLevel: 52, maxLevel: 62, rarity: 'Comum', moves: [{name:'Ember',power:40,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}] },
         { name: 'Growlithe', id: 58, hp: 44, rate: 25, minLevel: 52, maxLevel: 62, rarity: 'Comum', moves: [{name:'Flame Wheel',power:60,type:'Fogo'},{name:'Bite',power:60,type:'Sombrio'}] },
         { name: 'Ponyta', id: 77, hp: 44, rate: 20, minLevel: 55, maxLevel: 65, rarity: 'Comum', moves: [{name:'Flame Wheel',power:60,type:'Fogo'},{name:'Stomp',power:65,type:'Normal'}] },
-        { name: 'Magmar', id: 126, hp: 48, rate: 10, minLevel: 60, maxLevel: 70, rarity: 'Incomum', moves: [{name:'Fire Punch',power:75,type:'Fogo'},{name:'Confusion',power:50,type:'Psiquico'}] },
+        { name: 'Magmar', id: 126, hp: 48, rate: 10, minLevel: 60, maxLevel: 70, rarity: 'Incomum', moves: [{name:'Fire Punch',power:75,type:'Fogo'},{name:'Confusion',power:50,type:'Psíquico'}] },
         { name: 'Ninetales', id: 38, hp: 52, rate: 5, minLevel: 66, maxLevel: 76, rarity: 'Raro', moves: [{name:'Flamethrower',power:90,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}] },
         { name: 'Arcanine', id: 59, hp: 55, rate: 5, minLevel: 66, maxLevel: 76, rarity: 'Raro', moves: [{name:'Flamethrower',power:90,type:'Fogo'},{name:'Crunch',power:80,type:'Sombrio'}] },
         { name: 'Rapidash', id: 78, hp: 52, rate: 9, minLevel: 66, maxLevel: 76, rarity: 'Incomum', moves: [{name:'Flame Wheel',power:60,type:'Fogo'},{name:'Stomp',power:65,type:'Normal'}] },
@@ -2200,11 +2217,11 @@
         { name: 'Rhydon', id: 112, hp: 55, minLevel: 76, maxLevel: 88, moves: [{name:'Megachifre',power:75},{name:'Terremoto',power:70,type:'Terra'}] }
       ],
       'Cerulean Cave': [
-        { name: 'Kadabra', id: 64, hp: 40, rate: 35, minLevel: 78, maxLevel: 88, moves: [{name:'Psíquico',power:70,type:'Psiquico'},{name:'Confusão',power:50}] },
+        { name: 'Kadabra', id: 64, hp: 40, rate: 35, minLevel: 78, maxLevel: 88, moves: [{name:'Psíquico',power:70,type:'Psíquico'},{name:'Confusão',power:50}] },
         { name: 'Golbat', id: 42, hp: 45, rate: 35, minLevel: 78, maxLevel: 88, moves: [{name:'Voar',power:60},{name:'Mordida',power:50}] },
-        { name: 'Mewtwo', id: 150, hp: 80, rate: 5, minLevel: 100, maxLevel: 100, rarity: 'Lendário', notes: 'Encontro lendário extremamente raro.', moves: [{name:'Psíquico',power:90,type:'Psiquico'},{name:'Raio',power:70},{name:'Sombra Noturna',power:60,type:'Fantasma'}] },
-        { name: 'Mr. Mime', id: 122, hp: 38, rate: 5, minLevel: 82, maxLevel: 92, rarity: 'Raro', notes: 'Aparição rara na Caverna de Cerulean.', moves: [{name:'Confusion',power:50,type:'Psiquico'},{name:'Pound',power:40,type:'Normal'}] },
-        { name: 'Porygon', id: 137, hp: 65, rate: 6, minLevel: 84, maxLevel: 94, rarity: 'Raro', notes: 'Pokémon artificial raro encontrado nas profundezas.', moves: [{name:'Tri Attack',power:80,type:'Normal'},{name:'Psybeam',power:65,type:'Psiquico'}] },
+        { name: 'Mewtwo', id: 150, hp: 80, rate: 5, minLevel: 100, maxLevel: 100, rarity: 'Lendário', notes: 'Encontro lendário extremamente raro.', moves: [{name:'Psíquico',power:90,type:'Psíquico'},{name:'Raio',power:70},{name:'Sombra Noturna',power:60,type:'Fantasma'}] },
+        { name: 'Mr. Mime', id: 122, hp: 38, rate: 5, minLevel: 82, maxLevel: 92, rarity: 'Raro', notes: 'Aparição rara na Caverna de Cerulean.', moves: [{name:'Confusion',power:50,type:'Psíquico'},{name:'Pound',power:40,type:'Normal'}] },
+        { name: 'Porygon', id: 137, hp: 65, rate: 6, minLevel: 84, maxLevel: 94, rarity: 'Raro', notes: 'Pokémon artificial raro encontrado nas profundezas.', moves: [{name:'Tri Attack',power:80,type:'Normal'},{name:'Psybeam',power:65,type:'Psíquico'}] },
         { name: 'Omanyte', id: 138, hp: 35, rate: 3, minLevel: 82, maxLevel: 92, rarity: 'Muito raro', notes: 'Fóssil antigo encontrado nas áreas úmidas da caverna.', moves: [{name:'Surf',power:90,type:'Agua'},{name:'Ancient Power',power:60,type:'Pedra'}] },
         { name: 'Kabuto', id: 140, hp: 30, rate: 3, minLevel: 82, maxLevel: 92, rarity: 'Muito raro', notes: 'Fóssil antigo que vive nas partes mais profundas.', moves: [{name:'Waterfall',power:80,type:'Agua'},{name:'Ancient Power',power:60,type:'Pedra'}] },
         { name: 'Aerodactyl', id: 142, hp: 80, rate: 3, minLevel: 90, maxLevel: 98, rarity: 'Muito raro', notes: 'Pokémon fóssil voador que quase nunca aparece.', moves: [{name:'Wing Attack',power:60,type:'Voador'},{name:'Rock Slide',power:75,type:'Pedra'}] },
@@ -2231,7 +2248,7 @@
         portrait: 'https://play.pokemonshowdown.com/sprites/trainers/misty.png',
         team: [
           { name: 'Staryu', id: 120, hp: 30, level: 18, hideGenderSymbol: true, moves: [{name:'Jato de Agua',power:40},{name:'Investida',power:35}] },
-          { name: 'Starmie', id: 121, hp: 42, level: 21, hideGenderSymbol: true, moves: [{name:'Hidro Bomba',power:65,type:'Agua'},{name:'Psíquico',power:50,type:'Psiquico'}] }
+          { name: 'Starmie', id: 121, hp: 42, level: 21, hideGenderSymbol: true, moves: [{name:'Hidro Bomba',power:65,type:'Agua'},{name:'Psíquico',power:50,type:'Psíquico'}] }
         ],
         reward: 2000, tmReward: 'gym_tm03'
       },
@@ -2242,7 +2259,7 @@
         team: [
           { name: 'Voltorb', id: 100, hp: 32, level: 21, moves: [{name:'Choque',power:40},{name:'Investida',power:35}] },
           { name: 'Pikachu', id: 25, hp: 35, level: 24, moves: [{name:'Choque do Trovão',power:50},{name:'Ataque Rápido',power:40}] },
-          { name: 'Raichu', id: 26, hp: 45, level: 28, moves: [{name:'Trovão',power:70,type:'Eletrico'},{name:'Soco Elétrico',power:55}] }
+          { name: 'Raichu', id: 26, hp: 45, level: 28, moves: [{name:'Trovão',power:70,type:'Elétrico'},{name:'Soco Elétrico',power:55}] }
         ],
         reward: 2500, tmReward: 'gym_tm34'
       },
@@ -2273,9 +2290,9 @@
         icon: '🔮', color: 'linear-gradient(135deg,#3d1a3d,#1f101f)',
         portrait: 'https://play.pokemonshowdown.com/sprites/trainers/sabrina.png',
         team: [
-          { name: 'Kadabra', id: 64, hp: 40, level: 38, moves: [{name:'Psíquico',power:55,type:'Psiquico'},{name:'Confusão',power:45}] },
-          { name: 'Mr. Mime', id: 122, hp: 42, level: 40, moves: [{name:'Barreira',power:0},{name:'Psíquico',power:60,type:'Psiquico'}] },
-          { name: 'Alakazam', id: 65, hp: 55, level: 43, moves: [{name:'Psíquico',power:80,type:'Psiquico'},{name:'Raio',power:50}] }
+          { name: 'Kadabra', id: 64, hp: 40, level: 38, moves: [{name:'Psíquico',power:55,type:'Psíquico'},{name:'Confusão',power:45}] },
+          { name: 'Mr. Mime', id: 122, hp: 42, level: 40, moves: [{name:'Barreira',power:0},{name:'Psíquico',power:60,type:'Psíquico'}] },
+          { name: 'Alakazam', id: 65, hp: 55, level: 43, moves: [{name:'Psíquico',power:80,type:'Psíquico'},{name:'Raio',power:50}] }
         ],
         reward: 4000, tmReward: 'gym_tm04'
       },
@@ -2461,35 +2478,35 @@
 
     MISSIONS[9] = { ...MISSIONS[9], name: 'Marujos da S.S. Anne', desc: 'Derrote 5 treinadores a bordo da S.S. Anne.', type: 'battle_in', targetValue: 'S.S. Anne' };
     MISSIONS.push(
-      { id: 'catch_10', name: 'Colecao em Expansao', icon: '&#127183;', desc: 'Capture 10 Pokemon selvagens.', type: 'capture', target: 10, money: 1200, xp: 350, unlock: 'catch_3', color: '#3b82f622' },
-      { id: 'catch_25', name: 'Especialista em Capturas', icon: '&#127919;', desc: 'Capture 25 Pokemon selvagens.', type: 'capture', target: 25, money: 2500, xp: 700, unlock: 'catch_10', color: '#3b82f622' },
+      { id: 'catch_10', name: 'Colecao em Expansao', icon: '&#127183;', desc: 'Capture 10 Pokémon selvagens.', type: 'capture', target: 10, money: 1200, xp: 350, unlock: 'catch_3', color: '#3b82f622' },
+      { id: 'catch_25', name: 'Especialista em Capturas', icon: '&#127919;', desc: 'Capture 25 Pokémon selvagens.', type: 'capture', target: 25, money: 2500, xp: 700, unlock: 'catch_10', color: '#3b82f622' },
       { id: 'dex_10', name: 'Pesquisador Iniciante', icon: '&#128214;', desc: 'Capture 10 espécies diferentes para registrá-las na Pokédex.', type: 'pokedex', target: 10, money: 900, xp: 300, unlock: 'catch_3', color: '#22c55e22' },
       { id: 'dex_40', name: 'Pesquisador de Campo', icon: '&#128300;', desc: 'Capture 40 espécies diferentes para registrá-las na Pokédex.', type: 'pokedex', target: 40, money: 3500, xp: 1000, unlock: 'dex_10', color: '#22c55e22' },
-      { id: 'team_three', name: 'Equipe em Formacao', icon: '&#128101;', desc: 'Monte uma equipe com 3 Pokemon.', type: 'party_size', target: 3, money: 700, xp: 250, unlock: 'catch_3', color: '#8b5cf622' },
-      { id: 'team_six', name: 'Time Completo', icon: '&#127942;', desc: 'Monte uma equipe com 6 Pokemon.', type: 'party_size', target: 6, money: 1800, xp: 550, unlock: 'team_three', color: '#8b5cf622' },
-      { id: 'battle_10', name: 'Treinamento Constante', icon: '&#9876;', desc: 'Venca 10 batalhas.', type: 'battle', target: 10, money: 1200, xp: 400, unlock: 'explore_1', color: '#ef444422' },
-      { id: 'battle_30', name: 'Veterano de Kanto', icon: '&#129354;', desc: 'Venca 30 batalhas.', type: 'battle', target: 30, money: 4000, xp: 1200, unlock: 'battle_10', color: '#ef444422' },
-      { id: 'battle_60', name: 'Lenda das Batalhas', icon: '&#127775;', desc: 'Venca 60 batalhas.', type: 'battle', target: 60, money: 9000, xp: 2200, unlock: 'battle_30', color: '#ef444422' },
+      { id: 'team_three', name: 'Equipe em Formacao', icon: '&#128101;', desc: 'Monte uma equipe com 3 Pokémon.', type: 'party_size', target: 3, money: 700, xp: 250, unlock: 'catch_3', color: '#8b5cf622' },
+      { id: 'team_six', name: 'Time Completo', icon: '&#127942;', desc: 'Monte uma equipe com 6 Pokémon.', type: 'party_size', target: 6, money: 1800, xp: 550, unlock: 'team_three', color: '#8b5cf622' },
+      { id: 'battle_10', name: 'Treinamento Constante', icon: '&#9876;', desc: 'Vença 10 batalhas.', type: 'battle', target: 10, money: 1200, xp: 400, unlock: 'explore_1', color: '#ef444422' },
+      { id: 'battle_30', name: 'Veterano de Kanto', icon: '&#129354;', desc: 'Vença 30 batalhas.', type: 'battle', target: 30, money: 4000, xp: 1200, unlock: 'battle_10', color: '#ef444422' },
+      { id: 'battle_60', name: 'Lenda das Batalhas', icon: '&#127775;', desc: 'Vença 60 batalhas.', type: 'battle', target: 60, money: 9000, xp: 2200, unlock: 'battle_30', color: '#ef444422' },
       { id: 'use_items_10', name: 'Mochila Preparada', icon: '&#129514;', desc: 'Use 10 itens durante batalhas.', type: 'battle_item_used', target: 10, money: 1100, xp: 350, unlock: 'battle_supplies', color: '#ef444422' },
       { id: 'use_items_25', name: 'Socorro na Hora Certa', icon: '&#128138;', desc: 'Use 25 itens durante batalhas.', type: 'battle_item_used', target: 25, money: 3000, xp: 900, unlock: 'use_items_10', color: '#ef444422' },
-      { id: 'heal_10', name: 'Cliente Frequente', icon: '&#127973;', desc: 'Trate 10 Pokemon no Centro Pokemon.', type: 'center_heal', target: 10, money: 900, xp: 300, unlock: 'center_care', color: '#ec489922' },
+      { id: 'heal_10', name: 'Cliente Frequente', icon: '&#127973;', desc: 'Trate 10 Pokémon no Centro Pokémon.', type: 'center_heal', target: 10, money: 900, xp: 300, unlock: 'center_care', color: '#ec489922' },
       { id: 'buy_10', name: 'Preparado para a Jornada', icon: '&#128717;', desc: 'Compre 10 unidades de itens no Poke Market.', type: 'item_bought', target: 10, money: 800, xp: 300, unlock: 'catch_3', color: '#f59e0b22' },
       { id: 'sell_20', name: 'Comerciante de Kanto', icon: '&#129689;', desc: 'Venda 20 unidades de itens no Poké Market.', type: 'item_sold', target: 20, money: 1300, xp: 400, unlock: 'market_seller', color: '#f59e0b22' },
-      { id: 'evolve_3', name: 'Crescimento da Equipe', icon: '&#10024;', desc: 'Evolua 3 Pokemon.', type: 'evolution', target: 3, money: 2200, xp: 700, unlock: 'first_evolution', color: '#8b5cf622' },
-      { id: 'evolve_6', name: 'Mestre da Evolucao', icon: '&#128302;', desc: 'Evolua 6 Pokemon.', type: 'evolution', target: 6, money: 5000, xp: 1500, unlock: 'evolve_3', color: '#8b5cf622' },
-      { id: 'level_10', name: 'Treinamento da Equipe', icon: '&#128200;', desc: 'Ganhe 10 niveis com seus Pokemon.', type: 'pokemon_level', target: 10, money: 1400, xp: 450, unlock: 'battle_10', color: '#a855f722' },
-      { id: 'level_30', name: 'Treinador Dedicado', icon: '&#128200;', desc: 'Ganhe 30 niveis com seus Pokemon.', type: 'pokemon_level', target: 30, money: 4000, xp: 1200, unlock: 'level_10', color: '#a855f722' },
-      { id: 'water_catch_5', name: 'Amigo dos Mares', icon: '&#128167;', desc: 'Capture 5 Pokemon do tipo Agua.', type: 'capture_type', filterType: 'Agua', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#3b82f622' },
-      { id: 'fire_catch_5', name: 'Chama de Kanto', icon: '&#128293;', desc: 'Capture 5 Pokemon do tipo Fogo.', type: 'capture_type', filterType: 'Fogo', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#ef444422' },
-      { id: 'tower_5', name: 'Desafiante da Torre', icon: '&#127984;', desc: 'Venca 5 treinadores na Torre de Batalha.', type: 'battle_in', targetValue: 'Torre de Batalha', target: 5, money: 2500, xp: 800, unlock: 'battle_10', color: '#a855f722' },
-      { id: 'elite_5', name: 'Desafio da Elite', icon: '&#128081;', desc: 'Venca 5 combates na Elite Four.', type: 'battle_in', targetValue: 'Elite Four', target: 5, money: 5000, xp: 1600, unlock: 'gym_rest', color: '#a855f722' },
-      { id: 'badges_all', name: 'Orgulho de Kanto', icon: '&#129351;', desc: 'Conquiste as 8 insignias de Kanto.', type: 'badges', target: 8, money: 10000, xp: 3000, unlock: 'gym_rest', color: '#a855f722' }
+      { id: 'evolve_3', name: 'Crescimento da Equipe', icon: '&#10024;', desc: 'Evolua 3 Pokémon.', type: 'evolution', target: 3, money: 2200, xp: 700, unlock: 'first_evolution', color: '#8b5cf622' },
+      { id: 'evolve_6', name: 'Mestre da Evolução', icon: '&#128302;', desc: 'Evolua 6 Pokémon.', type: 'evolution', target: 6, money: 5000, xp: 1500, unlock: 'evolve_3', color: '#8b5cf622' },
+      { id: 'level_10', name: 'Treinamento da Equipe', icon: '&#128200;', desc: 'Ganhe 10 níveis com seus Pokémon.', type: 'pokemon_level', target: 10, money: 1400, xp: 450, unlock: 'battle_10', color: '#a855f722' },
+      { id: 'level_30', name: 'Treinador Dedicado', icon: '&#128200;', desc: 'Ganhe 30 níveis com seus Pokémon.', type: 'pokemon_level', target: 30, money: 4000, xp: 1200, unlock: 'level_10', color: '#a855f722' },
+      { id: 'water_catch_5', name: 'Amigo dos Mares', icon: '&#128167;', desc: 'Capture 5 Pokémon do tipo Agua.', type: 'capture_type', filterType: 'Agua', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#3b82f622' },
+      { id: 'fire_catch_5', name: 'Chama de Kanto', icon: '&#128293;', desc: 'Capture 5 Pokémon do tipo Fogo.', type: 'capture_type', filterType: 'Fogo', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#ef444422' },
+      { id: 'tower_5', name: 'Desafiante da Torre', icon: '&#127984;', desc: 'Vença 5 treinadores na Torre de Batalha.', type: 'battle_in', targetValue: 'Torre de Batalha', target: 5, money: 2500, xp: 800, unlock: 'battle_10', color: '#a855f722' },
+      { id: 'elite_5', name: 'Desafio da Elite', icon: '&#128081;', desc: 'Vença 5 combates na Elite Four.', type: 'battle_in', targetValue: 'Elite Four', target: 5, money: 5000, xp: 1600, unlock: 'gym_rest', color: '#a855f722' },
+      { id: 'badges_all', name: 'Orgulho de Kanto', icon: '&#129351;', desc: 'Conquiste as 8 insígnias de Kanto.', type: 'badges', target: 8, money: 10000, xp: 3000, unlock: 'gym_rest', color: '#a855f722' }
     );
     MISSIONS.push(
       { id: 'catch_50', name: 'Mestre das Capturas', icon: '&#127919;', desc: 'Capture 50 Pokémon selvagens.', type: 'capture', target: 50, money: 5000, xp: 1500, unlock: 'catch_25', color: '#3b82f622' },
       { id: 'dex_75', name: 'Enciclopédia de Kanto', icon: '&#128214;', desc: 'Capture 75 espécies diferentes para registrá-las na Pokédex.', type: 'pokedex', target: 75, money: 6000, xp: 1800, unlock: 'dex_40', color: '#22c55e22' },
       { id: 'grass_catch_5', name: 'Trilha Verde', icon: '&#127793;', desc: 'Capture 5 Pokémon do tipo Planta.', type: 'capture_type', filterType: 'Planta', target: 5, money: 1200, xp: 400, unlock: 'catch_3', color: '#22c55e22' },
-      { id: 'electric_catch_5', name: 'Carga Elétrica', icon: '&#9889;', desc: 'Capture 5 Pokémon do tipo Elétrico.', type: 'capture_type', filterType: 'Eletrico', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#f59e0b22' },
+      { id: 'electric_catch_5', name: 'Carga Elétrica', icon: '&#9889;', desc: 'Capture 5 Pokémon do tipo Elétrico.', type: 'capture_type', filterType: 'Elétrico', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#f59e0b22' },
       { id: 'poison_catch_5', name: 'Pesquisa Tóxica', icon: '&#9760;', desc: 'Capture 5 Pokémon do tipo Veneno.', type: 'capture_type', filterType: 'Veneno', target: 5, money: 1400, xp: 450, unlock: 'catch_3', color: '#a855f722' },
       { id: 'fighting_catch_5', name: 'Espírito de Luta', icon: '&#129354;', desc: 'Capture 5 Pokémon do tipo Lutador.', type: 'capture_type', filterType: 'Lutador', target: 5, money: 1500, xp: 500, unlock: 'catch_3', color: '#ef444422' },
       { id: 'battle_100', name: 'Desafio sem Fim', icon: '&#9876;', desc: 'Vença 100 batalhas.', type: 'battle', target: 100, money: 12000, xp: 3000, unlock: 'battle_60', color: '#ef444422' },
@@ -2506,7 +2523,7 @@
       { id: 'level_60', name: 'Treinamento de Elite', icon: '&#128200;', desc: 'Faça seus Pokémon ganharem 60 níveis ao todo.', type: 'pokemon_level', target: 60, money: 6500, xp: 1900, unlock: 'level_30', color: '#a855f722' },
       { id: 'team_care', name: 'Equipe em Forma', icon: '&#128101;', desc: 'Trate 6 Pokémon no Centro Pokémon.', type: 'center_heal', target: 6, money: 1200, xp: 400, unlock: 'team_six', color: '#ec489922' }
     );
-    MISSIONS.push({ id: 'dojo_chuck_reward', name: 'Desafio do Mestre do Dojo', icon: '&#129354;', desc: 'Depois de derrotar Chuck, escolha um Pok?mon: Hitmonlee ou Hitmonchan.', type: 'dojo_chuck_reward', target: 1, money: 0, xp: 0, unlock: null, color: '#ef444422' });
+    MISSIONS.push({ id: 'dojo_chuck_reward', name: 'Desafio do Mestre do Dojo', icon: '&#129354;', desc: 'Depois de derrotar Chuck, escolha um Pokémon: Hitmonlee ou Hitmonchan.', type: 'dojo_chuck_reward', target: 1, money: 0, xp: 0, unlock: null, color: '#ef444422' });
     MISSIONS.push(
       { id: 'daily_boss_first', name: 'Desafio Lendário', icon: '&#9889;', desc: 'Derrote um Boss Diário e receba sua recompensa.', type: 'daily_boss_win', target: 1, money: 1200, xp: 400, unlock: null, color: '#c084fc22' },
       { id: 'daily_boss_three', name: 'Caçador de Lendários', icon: '&#127945;', desc: 'Derrote 3 Bosses Diários.', type: 'daily_boss_win', target: 3, money: 3000, xp: 1000, unlock: null, color: '#c084fc22' },
@@ -2522,14 +2539,14 @@
     const DAILY_MISSIONS_PER_DAY = 3;
     const DAILY_MISSIONS = [
       { id: 'daily_capture_2', title: 'Novos registros', description: 'Capture 2 Pok\u00e9mon selvagens.', event: 'capture', target: 2, money: 650, xp: 180 },
-      { id: 'daily_battle_3', title: 'Treino de campo', description: 'Venca 3 batalhas em qualquer lugar de Kanto.', event: 'battle_win', target: 3, money: 700, xp: 200 },
+      { id: 'daily_battle_3', title: 'Treino de campo', description: 'Vença 3 batalhas em qualquer lugar de Kanto.', event: 'battle_win', target: 3, money: 700, xp: 200 },
       { id: 'daily_heal_3', title: 'Cuidado com a equipe', description: 'Recupere 3 Pok\u00e9mon no Centro Pok\u00e9mon.', event: 'center_heal', target: 3, money: 550, xp: 160 },
       { id: 'daily_items_2', title: 'Preparo para a jornada', description: 'Use 2 itens durante batalhas.', event: 'battle_item_used', target: 2, money: 600, xp: 170 },
       { id: 'daily_levels_3', title: 'Treinamento constante', description: 'Ajude sua equipe a ganhar 3 n\u00edveis ao todo.', event: 'pokemon_level', target: 3, money: 750, xp: 220 },
       { id: 'daily_buy_5', title: 'Reposi\u00e7\u00e3o de suprimentos', description: 'Compre 5 unidades de itens no Poke Market.', event: 'item_bought', target: 5, money: 500, xp: 150 },
       { id: 'daily_sell_3', title: 'Invent\u00e1rio organizado', description: 'Venda 3 unidades de itens no Poke Market.', event: 'item_sold', target: 3, money: 500, xp: 150 },
-      { id: 'daily_exploration_2', title: 'Rotas de Kanto', description: 'Venca 2 batalhas durante a explora\u00e7\u00e3o.', event: 'exploration_win', target: 2, money: 600, xp: 180 },
-      { id: 'daily_gym_1', title: 'Desafio aos l\u00edderes', description: 'Venca uma batalha contra um L\u00edder de Gin\u00e1sio.', event: 'gym_win', target: 1, money: 900, xp: 260 },
+      { id: 'daily_exploration_2', title: 'Rotas de Kanto', description: 'Vença 2 batalhas durante a explora\u00e7\u00e3o.', event: 'exploration_win', target: 2, money: 600, xp: 180 },
+      { id: 'daily_gym_1', title: 'Desafio aos l\u00edderes', description: 'Vença uma batalha contra um L\u00edder de Gin\u00e1sio.', event: 'gym_win', target: 1, money: 900, xp: 260 },
       { id: 'daily_boss_1', title: 'Confronto lend\u00e1rio', description: 'Derrote um Boss Di\u00e1rio.', event: 'daily_boss_win', target: 1, money: 1000, xp: 280 }
     ];
     let activeMissionTab = 'open';
@@ -3220,7 +3237,7 @@
         player.dojoRewardClaimed = true;
         player.dojoRewardChoice = pokemonName;
         player.missions.progress.dojo_chuck_reward = 1;
-        if (!tryCompleteMission('dojo_chuck_reward')) throw new Error('Nao foi possivel concluir a missao. Tente novamente.');
+        if (!tryCompleteMission('dojo_chuck_reward')) throw new Error('Não foi possível concluir a missão. Tente novamente.');
         closeDojoRewardChoice();
         refreshPartyUI();
         updateStatsUI();
@@ -3230,7 +3247,7 @@
         showToast(`${pokemonName} foi adicionado a ${destination}!`);
       } catch (error) {
         buttons.forEach(button => { button.disabled = false; });
-        showToast(error.message || 'Nao foi possivel receber a recompensa.', 'error');
+        showToast(error.message || 'Não foi possível receber a recompensa.', 'error');
       }
     }
 
@@ -3300,7 +3317,7 @@
               <span class="status-tag ${cls[st]}">${label[st]}</span>
               <span class="reward" style="font-size:0.75rem;">${m.id === 'dojo_chuck_reward' ? 'Escolha 1: Hitmonlee ou Hitmonchan' : `+${Number(m.xp).toLocaleString('pt-BR')} XP \u00b7 \u20bd ${Number(m.money).toLocaleString('pt-BR')}`}</span>
               ${st === 'available' ? `<button type="button" class="mission-accept-button" onclick="acceptMission('${m.id}')">Aceitar</button>` : ''}
-              ${st === 'active' && m.id === 'dojo_chuck_reward' ? `<button type="button" class="mission-accept-button" onclick="openDojoRewardChoice()">Escolher Pok?mon</button>` : ''}
+              ${st === 'active' && m.id === 'dojo_chuck_reward' ? `<button type="button" class="mission-accept-button" onclick="openDojoRewardChoice()">Escolher Pokémon</button>` : ''}
               ${st === 'active' && m.id === 'gym_brock' ? `<button type="button" class="mission-accept-button" onclick="openBrockIntro()">Falar com Brock</button>` : ''}
               ${st === 'active' && m.type === 'talk' ? `<button type="button" class="mission-accept-button" onclick="${m.id === 'oak_talk' ? 'openOakIntro()' : m.id === 'help_bill' ? 'openBillIntro()' : m.id === 'parcel' ? (getItemQty('parcelbox') > 0 ? 'deliverParcel()' : "switchPanel('market')") : `tryCompleteMission('${m.id}')`}">${m.id === 'oak_talk' || m.id === 'help_bill' ? 'Continuar conversa' : m.id === 'parcel' ? (getItemQty('parcelbox') > 0 ? 'Entregar' : 'Ir ao Market') : 'Concluir'}</button>` : ''}
             </div>
@@ -3843,7 +3860,7 @@
         console.error('[Auth] Falha ao iniciar Supabase:', error);
       }
       if (supabaseClient) return true;
-      showToast('NÃ£o foi possÃ­vel conectar ao serviÃ§o de login. Verifique sua conexÃ£o e recarregue a pÃ¡gina.', 'error');
+      showToast('Não foi possível conectar ao serviço de login. Verifique sua conexão e recarregue a página.', 'error');
       return false;
     }
 
@@ -4498,8 +4515,8 @@
           { key: 'charcoal', name: 'Carvao', sprite: 'charcoal', desc: 'Aumenta em 10% o poder de golpes de Fogo.' },
           { key: 'miracle_seed', name: 'Miracle Seed', sprite: 'miracle_seed', desc: 'Aumenta em 10% o poder de golpes de Planta.' },
           { key: 'mystic_water', name: 'Mystic Water', sprite: 'mystic_water', desc: 'Aumenta em 10% o poder de golpes de Agua.' },
-          { key: 'magnet', name: 'Magnet', sprite: 'magnet', desc: 'Aumenta em 10% o poder de golpes Eletricos.' },
-          { key: 'twisted_spoon', name: 'Twisted Spoon', sprite: 'twisted_spoon', desc: 'Aumenta em 10% o poder de golpes Psiquicos.' },
+          { key: 'magnet', name: 'Magnet', sprite: 'magnet', desc: 'Aumenta em 10% o poder de golpes Elétricos.' },
+          { key: 'twisted_spoon', name: 'Twisted Spoon', sprite: 'twisted_spoon', desc: 'Aumenta em 10% o poder de golpes Psíquicos.' },
           { key: 'black_belt', name: 'Black Belt', sprite: 'black_belt', desc: 'Aumenta em 10% o poder de golpes Lutadores.' },
           { key: 'exp_share', name: 'Exp. Share', sprite: 'exp_share', desc: 'Compartilha metade da EXP de batalha com quem o segura.' },
           { key: 'lucky_egg', name: 'Lucky Egg', sprite: 'lucky_egg', desc: 'Aumenta em 50% a experiência recebida pelo Pokémon que o segura.' },
@@ -4523,7 +4540,7 @@
         id: 'other', title: 'Outros',
         items: [
           { key: 'ss_ticket', name: 'S.S. TICKET', desc: 'Ingresso para embarcar no navio de luxo S.S. Anne, em Vermilion.' },
-          { key: 'rarecandy', name: 'Rare Candy', sprite: 'rarecandy', desc: 'Unidade individual. Sobe 1 n?vel.' },
+          { key: 'rarecandy', name: 'Rare Candy', sprite: 'rarecandy', desc: 'Unidade individual. Sobe 1 nível.' },
           { key: 'naturebox', name: 'Caixa de Nature', sprite: 'naturebox', desc: 'Escolha uma natureza para alterar os efeitos de um Pokémon.' },
           { key: 'shiny_charm', name: 'Shiny Charm', sprite: 'shiny_charm', desc: 'Triplica a chance de encontrar um Pok\u00e9mon Shiny selvagem enquanto estiver na mochila.' },
           { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', desc: 'Escolha um atributo para maximizar seu IV para 31.' },
@@ -4632,7 +4649,7 @@
 
     const HELD_ITEM_INFO = {
       oran: { name: 'Oran Berry', desc: 'Consome ao chegar a metade do HP e recupera 10 HP.', berry: 'heal', amount: 10 },
-      sitrus: { name: 'Sitrus Berry', desc: 'Consome ao chegar a metade do HP e recupera 25% do HP maximo.', berry: 'heal', amount: 0.25 },
+      sitrus: { name: 'Sitrus Berry', desc: 'Consome ao chegar a metade do HP e recupera 25% do HP máximo.', berry: 'heal', amount: 0.25 },
       figy: { name: 'Figy Berry', desc: 'Recupera 1/8 do HP; pode causar confusão a certas naturezas.', berry: 'heal', amount: 0.125, flavorStat: 'Ataque' },
       wiki: { name: 'Wiki Berry', desc: 'Recupera 1/8 do HP; pode causar confusão a certas naturezas.', berry: 'heal', amount: 0.125, flavorStat: 'Ataque Especial' },
       mago: { name: 'Mago Berry', desc: 'Recupera 1/8 do HP; pode causar confusão a certas naturezas.', berry: 'heal', amount: 0.125, flavorStat: 'Velocidade' },
@@ -4646,12 +4663,12 @@
       cherri: { name: 'Cheri Berry', desc: 'Consome para curar paralisia.', berry: 'status', cures: ['paralysis'] },
       aspear: { name: 'Aspear Berry', desc: 'Consome para curar congelamento.', berry: 'status', cures: ['freeze'] },
       persim: { name: 'Persim Berry', desc: 'Consome para curar confusao.', berry: 'status', cures: ['confusion'] },
-      leftovers: { name: 'Leftovers', desc: 'Recupera 1/16 do HP maximo ao fim de cada turno.', type: '' },
+      leftovers: { name: 'Leftovers', desc: 'Recupera 1/16 do HP máximo ao fim de cada turno.', type: '' },
       charcoal: { name: 'Carvao', desc: 'Aumenta em 10% o poder de golpes de Fogo.', type: 'Fogo' },
       miracle_seed: { name: 'Miracle Seed', desc: 'Aumenta em 10% o poder de golpes de Planta.', type: 'Planta' },
       mystic_water: { name: 'Mystic Water', desc: 'Aumenta em 10% o poder de golpes de Agua.', type: 'Agua' },
-      magnet: { name: 'Magnet', desc: 'Aumenta em 10% o poder de golpes Eletricos.', type: 'Eletrico' },
-      twisted_spoon: { name: 'Twisted Spoon', desc: 'Aumenta em 10% o poder de golpes Psiquicos.', type: 'Psiquico' },
+      magnet: { name: 'Magnet', desc: 'Aumenta em 10% o poder de golpes Elétricos.', type: 'Elétrico' },
+      twisted_spoon: { name: 'Twisted Spoon', desc: 'Aumenta em 10% o poder de golpes Psíquicos.', type: 'Psíquico' },
       black_belt: { name: 'Black Belt', desc: 'Aumenta em 10% o poder de golpes Lutadores.', type: 'Lutador' },
       exp_share: { name: 'Exp. Share', desc: 'Compartilha metade da experiência de batalha com quem o segura.', type: '' },
       lucky_egg: { name: 'Lucky Egg', desc: 'Aumenta em 50% a experiência recebida em batalha.', type: '' },
@@ -4672,18 +4689,18 @@
       choice_band: { name: 'Choice Band', desc: 'Aumenta o Ataque em 50% e prende o portador ao primeiro golpe escolhido.', type: '' },
       choice_scarf: { name: 'Choice Scarf', desc: 'Aumenta a Velocidade em 50% e prende o portador ao primeiro golpe escolhido.', type: '' },
       choice_specs: { name: 'Choice Specs', desc: 'Aumenta o Ataque Especial em 50% e prende o portador ao primeiro golpe escolhido.', type: '' },
-      quick_claw: { name: 'Quick Claw', desc: 'Tem 18,75% de chance de impedir a resposta do adversario neste turno.', type: '' },
+      quick_claw: { name: 'Quick Claw', desc: 'Tem 18,75% de chance de impedir a resposta do adversário neste turno.', type: '' },
       focus_band: { name: 'Focus Band', desc: 'Tem 10% de chance de sobreviver a um golpe fatal com 1 HP.', type: '' },
       scope_lens: { name: 'Scope Lens', desc: 'Aumenta a chance de acerto critico em um estagio.', type: '' },
       white_herb: { name: 'White Herb', desc: 'Restaura os atributos reduzidos uma vez.', type: '' },
       wise_glasses: { name: 'Wise Glasses', desc: 'Aumenta em 10% o dano de golpes especiais.', type: '' },
       muscle_band: { name: 'Muscle Band', desc: 'Aumenta em 10% o dano de golpes fisicos.', type: '' },
-      life_orb: { name: 'Life Orb', desc: 'Aumenta em 30% o dano e causa recuo de 10% do HP maximo.', type: '' },
-      rocky_helmet: { name: 'Rocky Helmet', desc: 'Golpes de contato causam dano de retorno igual a 1/6 do HP maximo.', type: '' },
+      life_orb: { name: 'Life Orb', desc: 'Aumenta em 30% o dano e causa recuo de 10% do HP máximo.', type: '' },
+      rocky_helmet: { name: 'Rocky Helmet', desc: 'Golpes de contato causam dano de retorno igual a 1/6 do HP máximo.', type: '' },
       assault_vest: { name: 'Assault Vest', desc: 'Aumenta a Defesa Especial em 50% e bloqueia golpes de status.', type: '' },
       covert_cloak: { name: 'Covert Cloak', desc: 'Bloqueia efeitos secundarios de golpes e habilidades.', type: '' },
       heavy_duty_boots: { name: 'Heavy-Duty Boots', desc: 'Protege contra perigos de entrada no campo.', type: '' },
-      light_clay: { name: 'Light Clay', desc: 'Estende Reflect e Light Screen; esses golpes ainda nao existem no jogo.', type: '' },
+      light_clay: { name: 'Light Clay', desc: 'Estende Reflect e Light Screen; esses golpes ainda não existem no jogo.', type: '' },
       fairy_feather: { name: 'Fairy Feather', desc: 'Aumenta em 10% o dano de golpes do tipo Fada.', type: 'Fada' },
       flame_orb: { name: 'Flame Orb', desc: 'Queima o portador durante a batalha.', type: '' },
       toxic_orb: { name: 'Toxic Orb', desc: 'Aplica envenenamento ao portador no fim do turno.', type: '' },
@@ -4725,7 +4742,7 @@
           ${itemIcon(key)}
           <span style="flex:1;min-width:0;"><strong>${escapeHTML(info.name)}</strong><br><small style="color:var(--text-muted);">${escapeHTML(info.desc)}</small></span>
           <span style="color:var(--primary);font-weight:700;">x${getItemQty(key)}</span>
-        </button>`).join('') : '<div style="padding:18px;text-align:center;color:var(--text-muted);">Voce nao tem itens seguraveis na mochila.</div>';
+        </button>`).join('') : '<div style="padding:18px;text-align:center;color:var(--text-muted);">Você não tem itens seguráveis na mochila.</div>';
       overlay.classList.add('active');
     }
 
@@ -4745,7 +4762,7 @@
       renderBag();
       renderSummaryHeldItem(idx);
       refreshPartyUI();
-      showToast(`${pokemon.name} esta segurando ${HELD_ITEM_INFO[key].name}.`);
+      showToast(`${pokemon.name} est? segurando ${HELD_ITEM_INFO[key].name}.`);
     }
 
     function removeHeldItem(idx) {
@@ -4911,7 +4928,7 @@
           showDamageNumber(isPlayerPokemon ? 'player' : 'enemy', restored, 'heal');
           return `${attacker.name} recuperou ${restored} HP com ${move.name}.`;
         }
-        return `${attacker.name} jÃ¡ estÃ¡ com o HP cheio.`;
+        return `${attacker.name} já está com o HP cheio.`;
       }
       const side = attacker === player?.poke ? 'enemy' : 'player';
       if (name === 'reflect' || name === 'light screen') {
@@ -4925,9 +4942,9 @@
       if (!hazard) return '';
       const cap = hazard === 'spikes' ? 3 : hazard === 'toxicSpikes' ? 2 : 1;
       const existing = hazards.find(entry => entry.kind === hazard);
-      if (existing && existing.layers >= cap) return `Ja ha ${move.name} no campo do adversario.`;
+      if (existing && existing.layers >= cap) return `J? h? ${move.name} no campo do adversário.`;
       if (existing) existing.layers++; else hazards.push({ kind: hazard, layers: 1 });
-      return `${attacker.name} espalhou ${move.name} no campo adversario.`;
+      return `${attacker.name} espalhou ${move.name} no campo adversário.`;
     }
 
     function applyEntryHazards(pokemon, side) {
@@ -5226,7 +5243,7 @@
       try {
         const compatible = await isPokemonCompatibleWithTechnicalMachine(pokemon, item);
         if (!compatible) {
-          showToast(`${pokemon.name} nao e compativel com ${item.name}.`, 'error');
+          showToast(`${pokemon.name} não ? compatível com ${item.name}.`, 'error');
           return;
         }
         if (pokemon.moves.length >= 4 && slotIndex === null) {
@@ -5433,11 +5450,12 @@
         const catalog = await getFlameBoxSpeciesCatalog();
         const selected = selectFlameBoxPokemon(catalog);
         status.textContent = 'A Flame Box está se abrindo...';
-        const pokemon = await adminBuildPokemonFromCatalog({ id: selected.id, name: selected.name }, 10);
-        const targetIndex = 42;
+        const pokemonPromise = adminBuildPokemonFromCatalog({ id: selected.id, name: selected.name }, 10)
+          .then(pokemon => ({ pokemon }), error => ({ error }));
+        const targetIndex = 32;
         const reelEntries = Array.from({ length: targetIndex + 9 }, () => catalog[Math.floor(Math.random() * catalog.length)]);
         reelEntries[targetIndex] = selected;
-        reel.innerHTML = reelEntries.map((entry, index) => `<span class="flamebox-reel-tile${index === targetIndex ? ' winner' : ''}"><img src="${SPRITE_FB(entry.id)}" alt="${escapeHTML(entry.name)}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FRONT(entry.id)}'"></span>`).join('');
+        reel.innerHTML = reelEntries.map(entry => `<span class="flamebox-reel-tile"><img src="${SPRITE_FB(entry.id)}" alt="${escapeHTML(entry.name)}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FRONT(entry.id)}'"></span>`).join('');
         reel.style.transform = 'translateX(0)';
         void reel.offsetWidth;
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -5445,6 +5463,10 @@
         reel.classList.add('spinning');
         reel.style.transform = `translateX(${offset}px)`;
         await new Promise(resolve => setTimeout(resolve, 9150));
+        reel.children[targetIndex]?.classList.add('winner');
+        const pokemonResult = await pokemonPromise;
+        if (pokemonResult.error) throw pokemonResult.error;
+        const pokemon = pokemonResult.pokemon;
 
         let destination;
         if (player.party.length < 6) {
@@ -5916,11 +5938,11 @@
       { id: 'charcoal', name: 'Carvao', icon: '🔥', sprite: 'charcoal', desc: 'Fortalece golpes de Fogo em 10%', price: 980, key: 'charcoal' },
       { id: 'miracle_seed', name: 'Miracle Seed', icon: '🌱', sprite: 'miracle_seed', desc: 'Fortalece golpes de Planta em 10%', price: 980, key: 'miracle_seed' },
       { id: 'mystic_water', name: 'Mystic Water', icon: '💧', sprite: 'mystic_water', desc: 'Fortalece golpes de Agua em 10%', price: 980, key: 'mystic_water' },
-      { id: 'magnet', name: 'Magnet', icon: '🧲', sprite: 'magnet', desc: 'Fortalece golpes Eletricos em 10%', price: 980, key: 'magnet' },
-      { id: 'twisted_spoon', name: 'Twisted Spoon', icon: '🥄', sprite: 'twisted_spoon', desc: 'Fortalece golpes Psiquicos em 10%', price: 980, key: 'twisted_spoon' },
+      { id: 'magnet', name: 'Magnet', icon: '🧲', sprite: 'magnet', desc: 'Fortalece golpes Elétricos em 10%', price: 980, key: 'magnet' },
+      { id: 'twisted_spoon', name: 'Twisted Spoon', icon: '🥄', sprite: 'twisted_spoon', desc: 'Fortalece golpes Psíquicos em 10%', price: 980, key: 'twisted_spoon' },
       { id: 'black_belt', name: 'Black Belt', icon: '🥋', sprite: 'black_belt', desc: 'Fortalece golpes Lutadores em 10%', price: 980, key: 'black_belt' },
-      { id: 'exp_share', name: 'Exp. Share', icon: '\u{1F4D8}', sprite: 'exp_share', desc: 'Compartilha metade da experiencia com quem o segura', price: 15, key: 'exp_share' },
-      { id: 'lucky_egg', name: 'Lucky Egg', icon: '\u{1F95A}', sprite: 'lucky_egg', desc: 'Aumenta em 50% a experiencia recebida pelo Pokemon que o segura', price: 5, key: 'lucky_egg' },
+      { id: 'exp_share', name: 'Exp. Share', icon: '\u{1F4D8}', sprite: 'exp_share', desc: 'Compartilha metade da experiência com quem o segura', price: 15, key: 'exp_share' },
+      { id: 'lucky_egg', name: 'Lucky Egg', icon: '\u{1F95A}', sprite: 'lucky_egg', desc: 'Aumenta em 50% a experiência recebida pelo Pokémon que o segura', price: 5, key: 'lucky_egg' },
       { id: 'naturebox', name: 'Mint Box', icon: '🎁', sprite: 'naturebox', desc: 'Escolha uma natureza para alterar os efeitos de um Pokémon.', price: 5, key: 'naturebox' },
       { id: 'bottlecap', name: 'Bottle Cap', icon: '🧢', sprite: 'bottlecap', desc: 'Escolha um atributo para maximizar seu IV para 31.', price: 10, key: 'bottlecap' },
       { id: 'goldbottlecap', name: 'Gold Bottle Cap', icon: '✨', sprite: 'goldbottlecap', desc: 'Maximiza os seis IVs do Pokémon para 31.', price: 50, key: 'goldbottlecap' },
@@ -5974,7 +5996,7 @@
       { id: 'carbos', key: 'carbos', name: 'Carbos', desc: 'Aumenta 10 EVs de Velocidade.', category: 'medicine', kind: 'ev', stat: 'speed', amount: 10, price: 9800 },
       { id: 'calcium', key: 'calcium', name: 'Calcium', desc: 'Aumenta 10 EVs de Ataque Especial.', category: 'medicine', kind: 'ev', stat: 'specialAttack', amount: 10, price: 9800 },
       { id: 'zinc', key: 'zinc', name: 'Zinc', desc: 'Aumenta 10 EVs de Defesa Especial.', category: 'medicine', kind: 'ev', stat: 'specialDefense', amount: 10, price: 9800 },
-      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy 10x', desc: 'Pacote com 10 unidades de Rare Candy. Cada uso consome 1 unidade e sobe 1 n?vel.', category: 'medicine', kind: 'level', qty: 10, price: 15 },
+      { id: 'rare-candy', key: 'rarecandy', name: 'Rare Candy 10x', desc: 'Pacote com 10 unidades de Rare Candy. Cada uso consome 1 unidade e sobe 1 nível.', category: 'medicine', kind: 'level', qty: 10, price: 15 },
       { id: 'exp-charm', key: 'exp_charm', name: 'Exp. Charm', desc: 'Consumível: aumenta em 50% a experiência recebida em batalhas por 1 hora.', category: 'medicine', kind: 'expCharm', price: 10 }
     ];
     const EXTRA_SPECIAL_ITEMS = [
@@ -6378,7 +6400,8 @@
           centerHealingAudio = new Audio('assets/pokemon-healed.mp3');
           centerHealingAudio.preload = 'auto';
           centerHealingAudio.loop = false;
-          centerHealingAudio.volume = 0.55;
+          centerHealingAudio._baseVolume = 0.55;
+          applyBattleVolumeToAudio(centerHealingAudio);
           centerHealingAudio.addEventListener('ended', finishCenterHealingSequence);
         }
         centerHealingAudio.currentTime = 0;
@@ -7189,7 +7212,7 @@
         {name:'Jigglypuff',id:39,hp:30,level:12,moves:[{name:'Pound',power:40,type:'Normal'},{name:'Sing',power:0,type:'Normal'}]},
         {name:'Clefairy',id:35,hp:30,level:13,moves:[{name:'Pound',power:40,type:'Normal'},{name:'Magical Leaf',power:45,type:'Planta'}]},
         {name:'Butterfree',id:12,hp:77,level:14,moves:[{name:'Butterfree Strike',power:70,type:'Inseto'},{name:'Butterfree Wave',power:85,type:'Voador'}]},
-        {name:'Raichu',id:26,hp:80,level:15,moves:[{name:'Raichu Strike',power:70,type:'Eletrico'},{name:'Raichu Wave',power:85,type:'Normal'}]},
+        {name:'Raichu',id:26,hp:80,level:15,moves:[{name:'Raichu Strike',power:70,type:'Elétrico'},{name:'Raichu Wave',power:85,type:'Normal'}]},
         {name:'Nidoqueen',id:31,hp:83,level:16,moves:[{name:'Nidoqueen Strike',power:70,type:'Veneno'},{name:'Nidoqueen Wave',power:85,type:'Terra'}]},
         {name:'Nidoking',id:34,hp:86,level:17,moves:[{name:'Nidoking Strike',power:70,type:'Veneno'},{name:'Nidoking Wave',power:85,type:'Terra'}]}
       ]},
@@ -7199,22 +7222,22 @@
         {name:'Nidoking',id:34,hp:92,level:19,moves:[{name:'Nidoking Strike',power:70,type:'Veneno'},{name:'Nidoking Wave',power:85,type:'Terra'}]},
         {name:'Vileplume',id:45,hp:95,level:20,moves:[{name:'Vileplume Strike',power:70,type:'Planta'},{name:'Vileplume Wave',power:85,type:'Veneno'}]},
         {name:'Poliwrath',id:62,hp:98,level:21,moves:[{name:'Poliwrath Strike',power:70,type:'Agua'},{name:'Poliwrath Wave',power:85,type:'Lutador'}]},
-        {name:'Alakazam',id:65,hp:101,level:22,moves:[{name:'Alakazam Strike',power:70,type:'Psiquico'},{name:'Alakazam Wave',power:85,type:'Normal'}]}
+        {name:'Alakazam',id:65,hp:101,level:22,moves:[{name:'Alakazam Strike',power:70,type:'Psíquico'},{name:'Alakazam Wave',power:85,type:'Normal'}]}
       ]},
       { id:'marina', name:'Marina', className:'Marinheira', portrait:'sailor', reward:50, team:[
         {name:'Shellder',id:90,hp:25,level:21,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Ice Shard',power:40,type:'Gelo'}]},
-        {name:'Psyduck',id:54,hp:30,level:22,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psiquico'}]},
+        {name:'Psyduck',id:54,hp:30,level:22,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Confusion',power:50,type:'Psíquico'}]},
         {name:'Staryu',id:120,hp:30,level:23,moves:[{name:'Water Gun',power:40,type:'Agua'},{name:'Swift',power:45,type:'Normal'}]},
-        {name:'Alakazam',id:65,hp:107,level:24,moves:[{name:'Alakazam Strike',power:70,type:'Psiquico'},{name:'Alakazam Wave',power:85,type:'Normal'}]},
+        {name:'Alakazam',id:65,hp:107,level:24,moves:[{name:'Alakazam Strike',power:70,type:'Psíquico'},{name:'Alakazam Wave',power:85,type:'Normal'}]},
         {name:'Victreebel',id:71,hp:110,level:25,moves:[{name:'Victreebel Strike',power:70,type:'Planta'},{name:'Victreebel Wave',power:85,type:'Veneno'}]},
         {name:'Golem',id:76,hp:113,level:26,moves:[{name:'Golem Strike',power:70,type:'Pedra'},{name:'Golem Wave',power:85,type:'Terra'}]}
       ]},
       { id:'lia', name:'Lia', className:'Treinadora Vet', portrait:'backpackerf', reward:60, team:[
         {name:'Growlithe',id:58,hp:32,level:27,moves:[{name:'Ember',power:40,type:'Fogo'},{name:'Bite',power:35,type:'Sombrio'}]},
-        {name:'Pikachu',id:25,hp:28,level:28,moves:[{name:'Thunder Shock',power:40,type:'Eletrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
-        {name:'Kadabra',id:64,hp:32,level:29,moves:[{name:'Confusion',power:50,type:'Psiquico'},{name:'Psybeam',power:55,type:'Psiquico'}]},
+        {name:'Pikachu',id:25,hp:28,level:28,moves:[{name:'Thunder Shock',power:40,type:'Elétrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
+        {name:'Kadabra',id:64,hp:32,level:29,moves:[{name:'Confusion',power:50,type:'Psíquico'},{name:'Psybeam',power:55,type:'Psíquico'}]},
         {name:'Rapidash',id:78,hp:125,level:30,moves:[{name:'Rapidash Strike',power:70,type:'Fogo'},{name:'Rapidash Wave',power:85,type:'Normal'}]},
-        {name:'Slowbro',id:80,hp:128,level:31,moves:[{name:'Slowbro Strike',power:70,type:'Agua'},{name:'Slowbro Wave',power:85,type:'Psiquico'}]},
+        {name:'Slowbro',id:80,hp:128,level:31,moves:[{name:'Slowbro Strike',power:70,type:'Agua'},{name:'Slowbro Wave',power:85,type:'Psíquico'}]},
         {name:'Farfetchd',id:83,hp:131,level:32,moves:[{name:'Farfetchd Strike',power:70,type:'Normal'},{name:'Farfetchd Wave',power:85,type:'Voador'}]}
       ]},
       { id:'bruno', name:'Bruno', className:'Faixa Preta', portrait:'blackbelt', reward:70, team:[
@@ -7223,7 +7246,7 @@
         {name:'Machoke',id:67,hp:42,level:34,moves:[{name:'Brick Break',power:60,type:'Lutador'},{name:'Rock Smash',power:40,type:'Lutador'}]},
         {name:'Cloyster',id:91,hp:140,level:35,moves:[{name:'Cloyster Strike',power:70,type:'Agua'},{name:'Cloyster Wave',power:85,type:'Gelo'}]},
         {name:'Kingler',id:99,hp:143,level:36,moves:[{name:'Kingler Strike',power:70,type:'Agua'},{name:'Kingler Wave',power:85,type:'Normal'}]},
-        {name:'Exeggutor',id:103,hp:146,level:37,moves:[{name:'Exeggutor Strike',power:70,type:'Planta'},{name:'Exeggutor Wave',power:85,type:'Psiquico'}]}
+        {name:'Exeggutor',id:103,hp:146,level:37,moves:[{name:'Exeggutor Strike',power:70,type:'Planta'},{name:'Exeggutor Wave',power:85,type:'Psíquico'}]}
       ]},
       { id:'ezra', name:'Ezra', className:'Médium', portrait:'psychic', reward:80, team:[
         {name:'Gastly',id:92,hp:28,level:37,moves:[{name:'Shadow Ball',power:60,type:'Fantasma'},{name:'Confuse Ray',power:0,type:'Fantasma'}]},
@@ -7239,21 +7262,21 @@
         {name:'Wartortle',id:8,hp:44,level:42,moves:[{name:'Water Pulse',power:55,type:'Agua'},{name:'Bite',power:35,type:'Sombrio'}]},
         {name:'Weezing',id:110,hp:164,level:43,moves:[{name:'Weezing Strike',power:70,type:'Veneno'},{name:'Weezing Wave',power:85,type:'Normal'}]},
         {name:'Rhydon',id:112,hp:167,level:44,moves:[{name:'Rhydon Strike',power:70,type:'Terra'},{name:'Rhydon Wave',power:85,type:'Pedra'}]},
-        {name:'Starmie',id:121,hp:170,level:45,moves:[{name:'Starmie Strike',power:70,type:'Agua'},{name:'Starmie Wave',power:85,type:'Psiquico'}]}
+        {name:'Starmie',id:121,hp:170,level:45,moves:[{name:'Starmie Strike',power:70,type:'Agua'},{name:'Starmie Wave',power:85,type:'Psíquico'}]}
       ]},
       { id:'kenji', name:'Kenji', className:'Cientista', portrait:'scientist', reward:100, team:[
-        {name:'Electabuzz',id:125,hp:42,level:44,moves:[{name:'Thunder Punch',power:60,type:'Eletrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
+        {name:'Electabuzz',id:125,hp:42,level:44,moves:[{name:'Thunder Punch',power:60,type:'Elétrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Scyther',id:123,hp:44,level:45,moves:[{name:'X-Scissor',power:65,type:'Inseto'},{name:'Wing Attack',power:50,type:'Voador'}]},
         {name:'Rhydon',id:112,hp:52,level:46,moves:[{name:'Rock Slide',power:60,type:'Pedra'},{name:'Stomp',power:45,type:'Normal'}]},
-        {name:'Jynx',id:124,hp:176,level:47,moves:[{name:'Jynx Strike',power:70,type:'Gelo'},{name:'Jynx Wave',power:85,type:'Psiquico'}]},
+        {name:'Jynx',id:124,hp:176,level:47,moves:[{name:'Jynx Strike',power:70,type:'Gelo'},{name:'Jynx Wave',power:85,type:'Psíquico'}]},
         {name:'Pinsir',id:127,hp:179,level:48,moves:[{name:'Pinsir Strike',power:70,type:'Inseto'},{name:'Pinsir Wave',power:85,type:'Normal'}]},
         {name:'Lapras',id:131,hp:182,level:49,moves:[{name:'Lapras Strike',power:70,type:'Agua'},{name:'Lapras Wave',power:85,type:'Gelo'}]}
       ]},
       { id:'camila', name:'Camila', className:'Domadora de Dragões', portrait:'dragontamer-gen9', reward:110, team:[
         {name:'Dratini',id:147,hp:34,level:48,moves:[{name:'Dragon Rage',power:60,type:'Dragao'},{name:'Aqua Tail',power:60,type:'Agua'}]},
-        {name:'Dragonair',id:148,hp:46,level:49,moves:[{name:'Dragon Claw',power:70,type:'Dragao'},{name:'Thunderbolt',power:65,type:'Eletrico'}]},
+        {name:'Dragonair',id:148,hp:46,level:49,moves:[{name:'Dragon Claw',power:70,type:'Dragao'},{name:'Thunderbolt',power:65,type:'Elétrico'}]},
         {name:'Aerodactyl',id:142,hp:54,level:50,moves:[{name:'Rock Slide',power:65,type:'Pedra'},{name:'Wing Attack',power:60,type:'Voador'}]},
-        {name:'Jolteon',id:135,hp:188,level:51,moves:[{name:'Jolteon Strike',power:70,type:'Eletrico'},{name:'Jolteon Wave',power:85,type:'Normal'}]},
+        {name:'Jolteon',id:135,hp:188,level:51,moves:[{name:'Jolteon Strike',power:70,type:'Elétrico'},{name:'Jolteon Wave',power:85,type:'Normal'}]},
         {name:'Omastar',id:139,hp:191,level:52,moves:[{name:'Omastar Strike',power:70,type:'Pedra'},{name:'Omastar Wave',power:85,type:'Agua'}]},
         {name:'Kabutops',id:141,hp:194,level:53,moves:[{name:'Kabutops Strike',power:70,type:'Pedra'},{name:'Kabutops Wave',power:85,type:'Agua'}]}
       ]},
@@ -7261,13 +7284,13 @@
         {name:'Pidgeot',id:18,hp:116,level:53,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Fearow',id:22,hp:108,level:54,moves:[{name:'Drill Peck',power:80,type:'Voador'},{name:'Drill Run',power:70,type:'Terra'}]},
         {name:'Dodrio',id:85,hp:112,level:55,moves:[{name:'Tri Attack',power:80,type:'Normal'},{name:'Peck',power:35,type:'Voador'}]},
-        {name:'Snorlax',id:143,hp:203,level:56,moves:[{name:'Snorlax Strike',power:70,type:'Normal'},{name:'Snorlax Wave',power:85,type:'Psiquico'}]},
+        {name:'Snorlax',id:143,hp:203,level:56,moves:[{name:'Snorlax Strike',power:70,type:'Normal'},{name:'Snorlax Wave',power:85,type:'Psíquico'}]},
         {name:'Articuno',id:144,hp:206,level:57,moves:[{name:'Articuno Strike',power:70,type:'Gelo'},{name:'Articuno Wave',power:85,type:'Voador'}]},
-        {name:'Zapdos',id:145,hp:209,level:58,moves:[{name:'Zapdos Strike',power:70,type:'Eletrico'},{name:'Zapdos Wave',power:85,type:'Voador'}]}
+        {name:'Zapdos',id:145,hp:209,level:58,moves:[{name:'Zapdos Strike',power:70,type:'Elétrico'},{name:'Zapdos Wave',power:85,type:'Voador'}]}
       ]},
       { id:'bianca', name:'Bianca', className:'Modelo', portrait:'beauty', reward:130, team:[
         {name:'Vaporeon',id:134,hp:142,level:56,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Aurora Beam',power:65,type:'Gelo'}]},
-        {name:'Clefable',id:36,hp:138,level:57,moves:[{name:'Moonblast',power:85,type:'Fada'},{name:'Psychic',power:90,type:'Psiquico'}]},
+        {name:'Clefable',id:36,hp:138,level:57,moves:[{name:'Moonblast',power:85,type:'Fada'},{name:'Psychic',power:90,type:'Psíquico'}]},
         {name:'Ninetales',id:38,hp:132,level:58,moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Moltres',id:146,hp:212,level:59,moves:[{name:'Moltres Strike',power:70,type:'Fogo'},{name:'Moltres Wave',power:85,type:'Voador'}]},
         {name:'Dragonite',id:149,hp:215,level:60,moves:[{name:'Dragonite Strike',power:70,type:'Dragao'},{name:'Dragonite Wave',power:85,type:'Voador'}]},
@@ -7285,17 +7308,17 @@
         {name:'Beedrill',id:15,hp:145,level:62,moves:[{name:'X-Scissor',power:80,type:'Inseto'},{name:'Poison Jab',power:80,type:'Veneno'}]},
         {name:'Scyther',id:123,hp:157,level:63,moves:[{name:'X-Scissor',power:80,type:'Inseto'},{name:'Wing Attack',power:60,type:'Voador'}]},
         {name:'Pinsir',id:127,hp:163,level:64,moves:[{name:'X-Scissor',power:80,type:'Inseto'},{name:'Brick Break',power:75,type:'Lutador'}]},
-        {name:'Raichu',id:26,hp:230,level:65,moves:[{name:'Raichu Strike',power:70,type:'Eletrico'},{name:'Raichu Wave',power:85,type:'Normal'}]},
+        {name:'Raichu',id:26,hp:230,level:65,moves:[{name:'Raichu Strike',power:70,type:'Elétrico'},{name:'Raichu Wave',power:85,type:'Normal'}]},
         {name:'Nidoqueen',id:31,hp:233,level:66,moves:[{name:'Nidoqueen Strike',power:70,type:'Veneno'},{name:'Nidoqueen Wave',power:85,type:'Terra'}]},
         {name:'Nidoking',id:34,hp:236,level:67,moves:[{name:'Nidoking Strike',power:70,type:'Veneno'},{name:'Nidoking Wave',power:85,type:'Terra'}]}
       ]},
       { id:'otavio', name:'Otavio', className:'Super Nerd', portrait:'supernerd', reward:160, team:[
-        {name:'Magneton',id:82,hp:154,level:65,moves:[{name:'Thunderbolt',power:90,type:'Eletrico'},{name:'Flash Cannon',power:80,type:'Aco'}]},
-        {name:'Electrode',id:101,hp:160,level:66,moves:[{name:'Thunderbolt',power:90,type:'Eletrico'},{name:'Swift',power:60,type:'Normal'}]},
-        {name:'Porygon',id:137,hp:167,level:67,moves:[{name:'Tri Attack',power:80,type:'Normal'},{name:'Psychic',power:90,type:'Psiquico'}]},
+        {name:'Magneton',id:82,hp:154,level:65,moves:[{name:'Thunderbolt',power:90,type:'Elétrico'},{name:'Flash Cannon',power:80,type:'Aco'}]},
+        {name:'Electrode',id:101,hp:160,level:66,moves:[{name:'Thunderbolt',power:90,type:'Elétrico'},{name:'Swift',power:60,type:'Normal'}]},
+        {name:'Porygon',id:137,hp:167,level:67,moves:[{name:'Tri Attack',power:80,type:'Normal'},{name:'Psychic',power:90,type:'Psíquico'}]},
         {name:'Vileplume',id:45,hp:239,level:68,moves:[{name:'Vileplume Strike',power:70,type:'Planta'},{name:'Vileplume Wave',power:85,type:'Veneno'}]},
         {name:'Poliwrath',id:62,hp:242,level:69,moves:[{name:'Poliwrath Strike',power:70,type:'Agua'},{name:'Poliwrath Wave',power:85,type:'Lutador'}]},
-        {name:'Alakazam',id:65,hp:245,level:70,moves:[{name:'Alakazam Strike',power:70,type:'Psiquico'},{name:'Alakazam Wave',power:85,type:'Normal'}]}
+        {name:'Alakazam',id:65,hp:245,level:70,moves:[{name:'Alakazam Strike',power:70,type:'Psíquico'},{name:'Alakazam Wave',power:85,type:'Normal'}]}
       ]},
       { id:'raul', name:'Raul', className:'Pescador', portrait:'fisherman', reward:170, team:[
         {name:'Kingler',id:99,hp:170,level:68,moves:[{name:'Crabhammer',power:100,type:'Agua'},{name:'X-Scissor',power:80,type:'Inseto'}]},
@@ -7309,20 +7332,20 @@
         {name:'Persian',id:53,hp:170,level:71,moves:[{name:'Slash',power:70,type:'Normal'},{name:'Shadow Claw',power:70,type:'Fantasma'}]},
         {name:'Rapidash',id:78,hp:177,level:72,moves:[{name:'Flare Blitz',power:120,type:'Fogo'},{name:'Drill Run',power:80,type:'Terra'}]},
         {name:'Tauros',id:128,hp:184,level:73,moves:[{name:'Take Down',power:90,type:'Normal'},{name:'Earthquake',power:100,type:'Terra'}]},
-        {name:'Slowbro',id:80,hp:257,level:74,moves:[{name:'Slowbro Strike',power:70,type:'Agua'},{name:'Slowbro Wave',power:85,type:'Psiquico'}]},
+        {name:'Slowbro',id:80,hp:257,level:74,moves:[{name:'Slowbro Strike',power:70,type:'Agua'},{name:'Slowbro Wave',power:85,type:'Psíquico'}]},
         {name:'Farfetchd',id:83,hp:260,level:75,moves:[{name:'Farfetchd Strike',power:70,type:'Normal'},{name:'Farfetchd Wave',power:85,type:'Voador'}]},
         {name:'Cloyster',id:91,hp:263,level:76,moves:[{name:'Cloyster Strike',power:70,type:'Agua'},{name:'Cloyster Wave',power:85,type:'Gelo'}]}
       ]},
-      { id:'nando', name:'Nando', className:'Pokemon Maniaco', portrait:'pokemaniac', reward:190, team:[
+      { id:'nando', name:'Nando', className:'Pokémon Maniaco', portrait:'pokemaniac', reward:190, team:[
         {name:'Lickitung',id:108,hp:206,level:74,moves:[{name:'Body Slam',power:85,type:'Normal'},{name:'Power Whip',power:120,type:'Planta'}]},
         {name:'Kangaskhan',id:115,hp:211,level:75,moves:[{name:'Dizzy Punch',power:70,type:'Normal'},{name:'Crunch',power:80,type:'Sombrio'}]},
         {name:'Snorlax',id:143,hp:248,level:76,moves:[{name:'Body Slam',power:85,type:'Normal'},{name:'Earthquake',power:100,type:'Terra'}]},
         {name:'Kingler',id:99,hp:266,level:77,moves:[{name:'Kingler Strike',power:70,type:'Agua'},{name:'Kingler Wave',power:85,type:'Normal'}]},
-        {name:'Exeggutor',id:103,hp:269,level:78,moves:[{name:'Exeggutor Strike',power:70,type:'Planta'},{name:'Exeggutor Wave',power:85,type:'Psiquico'}]},
+        {name:'Exeggutor',id:103,hp:269,level:78,moves:[{name:'Exeggutor Strike',power:70,type:'Planta'},{name:'Exeggutor Wave',power:85,type:'Psíquico'}]},
         {name:'Marowak',id:105,hp:272,level:79,moves:[{name:'Marowak Strike',power:70,type:'Terra'},{name:'Marowak Wave',power:85,type:'Fantasma'}]}
       ]},
       { id:'rogerio', name:'Rogerio', className:'Ladrao', portrait:'burglar', reward:200, team:[
-        {name:'Magmar',id:126,hp:193,level:77,moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Psychic',power:90,type:'Psiquico'}]},
+        {name:'Magmar',id:126,hp:193,level:77,moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Psychic',power:90,type:'Psíquico'}]},
         {name:'Arcanine',id:59,hp:204,level:78,moves:[{name:'Flare Blitz',power:120,type:'Fogo'},{name:'Crunch',power:80,type:'Sombrio'}]},
         {name:'Flareon',id:136,hp:198,level:79,moves:[{name:'Fire Fang',power:65,type:'Fogo'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Hitmonlee',id:106,hp:275,level:80,moves:[{name:'Hitmonlee Strike',power:70,type:'Lutador'},{name:'Hitmonlee Wave',power:85,type:'Normal'}]},
@@ -7331,17 +7354,17 @@
       ]},
       { id:'iris', name:'Iris', className:'Treinadora de Elite', portrait:'plasmagruntf-gen5bw', reward:210, team:[
         {name:'Lapras',id:131,hp:236,level:80,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]},
-        {name:'Alakazam',id:65,hp:198,level:81,moves:[{name:'Psychic',power:90,type:'Psiquico'},{name:'Shadow Ball',power:80,type:'Fantasma'}]},
+        {name:'Alakazam',id:65,hp:198,level:81,moves:[{name:'Psychic',power:90,type:'Psíquico'},{name:'Shadow Ball',power:80,type:'Fantasma'}]},
         {name:'Dragonite',id:149,hp:240,level:82,moves:[{name:'Outrage',power:120,type:'Dragao'},{name:'Hurricane',power:110,type:'Voador'}]},
         {name:'Rhydon',id:112,hp:284,level:83,moves:[{name:'Rhydon Strike',power:70,type:'Terra'},{name:'Rhydon Wave',power:85,type:'Pedra'}]},
-        {name:'Starmie',id:121,hp:287,level:84,moves:[{name:'Starmie Strike',power:70,type:'Agua'},{name:'Starmie Wave',power:85,type:'Psiquico'}]},
-        {name:'Jynx',id:124,hp:290,level:85,moves:[{name:'Jynx Strike',power:70,type:'Gelo'},{name:'Jynx Wave',power:85,type:'Psiquico'}]}
+        {name:'Starmie',id:121,hp:287,level:84,moves:[{name:'Starmie Strike',power:70,type:'Agua'},{name:'Starmie Wave',power:85,type:'Psíquico'}]},
+        {name:'Jynx',id:124,hp:290,level:85,moves:[{name:'Jynx Strike',power:70,type:'Gelo'},{name:'Jynx Wave',power:85,type:'Psíquico'}]}
       ]}
     ];
 
     const DOJO_TRAINERS = [
       {id:'dojo_yoshi',name:'Yoshi',className:'Lutador iniciante',sprite:'assets/dojo-blackbelt-gen9.png',icon:'??',moneyReward:250,team:[
-        {name:'Hitmonchan',id:107,gender:'male',ability:'Keen Eye',hp:32,level:17,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50},{name:'Thunder Punch',power:75,type:'Eletrico'},{name:'Rapid Spin',power:50,type:'Normal'},{name:'Rock Slide',power:75,type:'Pedra',accuracy:90}]},
+        {name:'Hitmonchan',id:107,gender:'male',ability:'Keen Eye',hp:32,level:17,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50},{name:'Thunder Punch',power:75,type:'Elétrico'},{name:'Rapid Spin',power:50,type:'Normal'},{name:'Rock Slide',power:75,type:'Pedra',accuracy:90}]},
         {name:'Hitmonlee',id:106,gender:'male',ability:'Limber',hp:34,level:20,moves:[{name:'Low Kick',power:50,type:'Lutador'},{name:'Mach Punch',power:40,type:'Lutador',priority:1},{name:'Rock Tomb',power:60,type:'Pedra',accuracy:95},{name:'Poison Jab',power:80,type:'Veneno'}]}
       ]},
       {id:'dojo_kenji',name:'Kenji',className:'Faixa branca',sprite:'assets/dojo-blackbelt-gen6.png',icon:'??',moneyReward:350,team:[
@@ -7349,18 +7372,18 @@
         {name:'Machoke',id:67,ability:'Steadfast',hp:46,level:28,moves:[{name:'Brutal Swing',power:60,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo'},{name:'Drain Punch',power:75,type:'Lutador',drain:50},{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]}]}
       ]},
       {id:'dojo_mako',name:'Mako',className:'Faixa marrom',sprite:'assets/dojo-blackbelt-gen4.png',icon:'??',moneyReward:450,team:[
-        {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:52,level:31,moves:[{name:'Thunder Punch',power:75,type:'Eletrico',punch:true},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
+        {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:52,level:31,moves:[{name:'Thunder Punch',power:75,type:'Elétrico',punch:true},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
         {name:'Poliwrath',id:62,ability:'Water Absorb',hp:54,level:36,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Liquidation',power:85,type:'Agua'},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo',punch:true}]}
       ]},
       {id:'dojo_ryu',name:'Ryu',className:'Mestre de combate',sprite:'assets/dojo-blackbelt-gen7.png',icon:'??',moneyReward:600,team:[
         {name:'Primeape',id:57,ability:'Vital Spirit',evs:{hp:0,attack:150,defense:0,specialAttack:0,specialDefense:0,speed:200},hp:67,level:41,moves:[{name:'Rock Slide',power:75,type:'Pedra',accuracy:90},{name:'U-turn',power:70,type:'Inseto'},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
-        {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:56,level:36,moves:[{name:'Thunder Punch',power:75,type:'Eletrico',punch:true},{name:'Fire Punch',power:75,type:'Fogo',punch:true},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
+        {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:56,level:36,moves:[{name:'Thunder Punch',power:75,type:'Elétrico',punch:true},{name:'Fire Punch',power:75,type:'Fogo',punch:true},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
         {name:'Poliwrath',id:62,ability:'Water Absorb',hp:59,level:38,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Liquidation',power:85,type:'Agua'},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo',punch:true}]},
         {name:'Machamp',id:68,ability:'Guts',heldItem:'flame_orb',evs:{hp:0,attack:0,defense:120,specialAttack:0,specialDefense:140,speed:0},hp:63,level:40,moves:[{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Facade',power:70,type:'Normal'}]}
       ]},
       {id:'dojo_kiyo',name:'Chuck',className:'Mestre do Dojo',sprite:'assets/dojo-chuck.png',icon:'??',moneyReward:900,team:[
         {name:'Primeape',id:57,ability:'Vital Spirit',evs:{hp:0,attack:150,defense:0,specialAttack:0,specialDefense:0,speed:200},hp:80,level:50,moves:[{name:'Rock Slide',power:75,type:'Pedra',accuracy:90},{name:'U-turn',power:70,type:'Inseto'},{name:'Throat Chop',power:80,type:'Sombrio'},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
-        {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:68,level:41,moves:[{name:'Thunder Punch',power:75,type:'Eletrico',punch:true},{name:'Fire Punch',power:75,type:'Fogo',punch:true},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
+        {name:'Hitmonchan',id:107,gender:'male',ability:'Iron Fist',hp:68,level:41,moves:[{name:'Thunder Punch',power:75,type:'Elétrico',punch:true},{name:'Fire Punch',power:75,type:'Fogo',punch:true},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]}]},
         {name:'Poliwrath',id:62,ability:'Water Absorb',hp:70,level:44,moves:[{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Liquidation',power:85,type:'Agua'},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Ice Punch',power:75,type:'Gelo',punch:true}]},
         {name:'Machamp',id:68,ability:'Guts',heldItem:'flame_orb',evs:{hp:0,attack:0,defense:120,specialAttack:0,specialDefense:140,speed:0},hp:74,level:47,moves:[{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Close Combat',power:120,type:'Lutador',statChanges:[{target:'self',stat:'defense',stages:-1},{target:'self',stat:'specialDefense',stages:-1}]},{name:'Knock Off',power:65,type:'Sombrio'},{name:'Facade',power:70,type:'Normal'}]},
         {name:'Annihilape',id:979,ability:'Defiant',heldItem:'leftovers',evs:{hp:252,attack:4,defense:0,specialAttack:0,specialDefense:252,speed:0},hp:84,level:54,moves:[{name:'Rage Fist',power:50,type:'Fantasma'},{name:'Bulk Up',power:0,type:'Lutador',target:'user',statChanges:[{target:'self',stat:'attack',stages:1},{target:'self',stat:'defense',stages:1}]},{name:'Drain Punch',power:75,type:'Lutador',drain:50,punch:true},{name:'Protect',power:0,type:'Normal',target:'user',protect:true}]}
@@ -7384,7 +7407,7 @@
         {name:'Growlithe',id:58,hp:47,level:21,moves:[{name:'Flame Wheel',power:60,type:'Fogo'},{name:'Bite',power:45,type:'Sombrio'}]}
       ]},
       {id:'anne_lass_ann',name:'Ann',className:'Treinadora',portrait:'lass',moneyReward:340,team:[
-        {name:'Pikachu',id:25,hp:48,level:22,moves:[{name:'Thunderbolt',power:70,type:'Eletrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
+        {name:'Pikachu',id:25,hp:48,level:22,moves:[{name:'Thunderbolt',power:70,type:'Elétrico'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Clefairy',id:35,hp:53,level:22,moves:[{name:'Magical Leaf',power:50,type:'Planta'},{name:'Pound',power:40,type:'Normal'}]},
         {name:'Jigglypuff',id:39,hp:56,level:23,moves:[{name:'Body Slam',power:55,type:'Normal'},{name:'Sing',power:0,type:'Normal'}]}
       ]},
@@ -7405,13 +7428,13 @@
       ]},
       {id:'anne_captain',name:'Samuel',className:'Capitão',portrait:'gentleman',moneyReward:600,team:[
         {name:'Machoke',id:67,hp:76,level:28,moves:[{name:'Brick Break',power:75,type:'Lutador'},{name:'Rock Tomb',power:60,type:'Pedra'}]},
-        {name:'Starmie',id:121,hp:78,level:29,moves:[{name:'Surf',power:80,type:'Agua'},{name:'Psybeam',power:65,type:'Psiquico'}]},
+        {name:'Starmie',id:121,hp:78,level:29,moves:[{name:'Surf',power:80,type:'Agua'},{name:'Psybeam',power:65,type:'Psíquico'}]},
         {name:'Poliwrath',id:62,hp:86,level:30,moves:[{name:'Waterfall',power:75,type:'Agua'},{name:'Brick Break',power:75,type:'Lutador'}]}
       ]},
       {id:'anne_rival_blue',name:'Blue',className:'Rival',portrait:'blue',moneyReward:650,team:[
         {name:'Pidgeotto',id:17,hp:67,level:27,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}]},
         {name:'Raticate',id:20,hp:70,level:27,moves:[{name:'Hyper Fang',power:70,type:'Normal'},{name:'Bite',power:50,type:'Sombrio'}]},
-        {name:'Kadabra',id:64,hp:64,level:28,moves:[{name:'Psybeam',power:65,type:'Psiquico'},{name:'Shadow Ball',power:60,type:'Fantasma'}]},
+        {name:'Kadabra',id:64,hp:64,level:28,moves:[{name:'Psybeam',power:65,type:'Psíquico'},{name:'Shadow Ball',power:60,type:'Fantasma'}]},
         {name:'Wartortle',id:8,hp:76,level:28,moves:[{name:'Water Pulse',power:60,type:'Agua'},{name:'Bite',power:50,type:'Sombrio'}]}
       ]}
     ];
@@ -7421,16 +7444,16 @@
       [{name:'Ekans',id:23,hp:76,moves:[{name:'Poison Jab',power:65,type:'Veneno'},{name:'Bite',power:50,type:'Sombrio'}]},{name:'Arbok',id:24,hp:94,moves:[{name:'Poison Jab',power:70,type:'Veneno'},{name:'Crunch',power:70,type:'Sombrio'}]},{name:'Persian',id:53,hp:96,moves:[{name:'Slash',power:70,type:'Normal'},{name:'Bite',power:50,type:'Sombrio'}]}],
       [{name:'Golbat',id:42,hp:90,moves:[{name:'Wing Attack',power:65,type:'Voador'},{name:'Bite',power:55,type:'Sombrio'}]},{name:'Muk',id:89,hp:104,moves:[{name:'Sludge Bomb',power:75,type:'Veneno'},{name:'Slam',power:65,type:'Normal'}]},{name:'Weezing',id:110,hp:100,moves:[{name:'Sludge Bomb',power:75,type:'Veneno'},{name:'Shadow Ball',power:65,type:'Fantasma'}]}],
       [{name:'Persian',id:53,hp:98,moves:[{name:'Slash',power:70,type:'Normal'},{name:'Bite',power:55,type:'Sombrio'}]},{name:'Weezing',id:110,hp:102,moves:[{name:'Sludge Bomb',power:75,type:'Veneno'},{name:'Flamethrower',power:65,type:'Fogo'}]},{name:'Raticate',id:20,hp:88,moves:[{name:'Hyper Fang',power:70,type:'Normal'},{name:'Quick Attack',power:40,type:'Normal'}]}],
-      [{name:'Magneton',id:82,hp:96,moves:[{name:'Thunderbolt',power:75,type:'Eletrico'},{name:'Flash Cannon',power:65,type:'Aço'}]},{name:'Electrode',id:101,hp:90,moves:[{name:'Thunderbolt',power:75,type:'Eletrico'},{name:'Swift',power:50,type:'Normal'}]},{name:'Golbat',id:42,hp:94,moves:[{name:'Wing Attack',power:65,type:'Voador'},{name:'Poison Fang',power:60,type:'Veneno'}]}],
+      [{name:'Magneton',id:82,hp:96,moves:[{name:'Thunderbolt',power:75,type:'Elétrico'},{name:'Flash Cannon',power:65,type:'Aço'}]},{name:'Electrode',id:101,hp:90,moves:[{name:'Thunderbolt',power:75,type:'Elétrico'},{name:'Swift',power:50,type:'Normal'}]},{name:'Golbat',id:42,hp:94,moves:[{name:'Wing Attack',power:65,type:'Voador'},{name:'Poison Fang',power:60,type:'Veneno'}]}],
       [{name:'Haunter',id:93,hp:92,moves:[{name:'Shadow Ball',power:70,type:'Fantasma'},{name:'Confuse Ray',power:0,type:'Fantasma'}]},{name:'Arbok',id:24,hp:100,moves:[{name:'Poison Jab',power:70,type:'Veneno'},{name:'Crunch',power:70,type:'Sombrio'}]},{name:'Koffing',id:109,hp:96,moves:[{name:'Sludge Bomb',power:70,type:'Veneno'},{name:'Self-Destruct',power:70,type:'Normal'}]}],
       [{name:'Dugtrio',id:51,hp:90,moves:[{name:'Dig',power:70,type:'Terra'},{name:'Slash',power:65,type:'Normal'}]},{name:'Rhydon',id:112,hp:116,moves:[{name:'Rock Slide',power:70,type:'Pedra'},{name:'Earthquake',power:80,type:'Terra'}]},{name:'Primeape',id:57,hp:102,moves:[{name:'Brick Break',power:70,type:'Lutador'},{name:'Rock Tomb',power:55,type:'Pedra'}]}],
-      [{name:'Slowbro',id:80,hp:112,moves:[{name:'Water Pulse',power:65,type:'Agua'},{name:'Psychic',power:75,type:'Psiquico'}]},{name:'Electabuzz',id:125,hp:100,moves:[{name:'Thunder Punch',power:70,type:'Eletrico'},{name:'Low Kick',power:55,type:'Lutador'}]},{name:'Nidoqueen',id:31,hp:112,moves:[{name:'Earthquake',power:80,type:'Terra'},{name:'Poison Jab',power:65,type:'Veneno'}]}],
+      [{name:'Slowbro',id:80,hp:112,moves:[{name:'Water Pulse',power:65,type:'Agua'},{name:'Psychic',power:75,type:'Psíquico'}]},{name:'Electabuzz',id:125,hp:100,moves:[{name:'Thunder Punch',power:70,type:'Elétrico'},{name:'Low Kick',power:55,type:'Lutador'}]},{name:'Nidoqueen',id:31,hp:112,moves:[{name:'Earthquake',power:80,type:'Terra'},{name:'Poison Jab',power:65,type:'Veneno'}]}],
       [{name:'Koffing',id:109,hp:96,moves:[{name:'Sludge Bomb',power:70,type:'Veneno'},{name:'Smokescreen',power:0,type:'Normal'}]},{name:'Golbat',id:42,hp:98,moves:[{name:'Wing Attack',power:65,type:'Voador'},{name:'Poison Fang',power:60,type:'Veneno'}]},{name:'Persian',id:53,hp:100,moves:[{name:'Slash',power:70,type:'Normal'},{name:'Feint Attack',power:60,type:'Sombrio'}]}],
       [{name:'Vaporeon',id:134,hp:124,moves:[{name:'Surf',power:80,type:'Agua'},{name:'Bite',power:55,type:'Sombrio'}]},{name:'Arbok',id:24,hp:104,moves:[{name:'Poison Jab',power:70,type:'Veneno'},{name:'Earthquake',power:75,type:'Terra'}]},{name:'Weezing',id:110,hp:108,moves:[{name:'Sludge Bomb',power:75,type:'Veneno'},{name:'Fire Blast',power:85,type:'Fogo'}]}],
-      [{name:'Nidoking',id:34,hp:116,moves:[{name:'Earthquake',power:80,type:'Terra'},{name:'Megahorn',power:75,type:'Inseto'}]},{name:'Magneton',id:82,hp:102,moves:[{name:'Thunderbolt',power:75,type:'Eletrico'},{name:'Flash Cannon',power:65,type:'Aço'}]},{name:'Raticate',id:20,hp:98,moves:[{name:'Hyper Fang',power:70,type:'Normal'},{name:'Crunch',power:65,type:'Sombrio'}]}],
+      [{name:'Nidoking',id:34,hp:116,moves:[{name:'Earthquake',power:80,type:'Terra'},{name:'Megahorn',power:75,type:'Inseto'}]},{name:'Magneton',id:82,hp:102,moves:[{name:'Thunderbolt',power:75,type:'Elétrico'},{name:'Flash Cannon',power:65,type:'Aço'}]},{name:'Raticate',id:20,hp:98,moves:[{name:'Hyper Fang',power:70,type:'Normal'},{name:'Crunch',power:65,type:'Sombrio'}]}],
       [{name:'Nidoqueen',id:31,hp:118,moves:[{name:'Earthquake',power:80,type:'Terra'},{name:'Body Slam',power:65,type:'Normal'}]},{name:'Haunter',id:93,hp:100,moves:[{name:'Shadow Ball',power:70,type:'Fantasma'},{name:'Sludge Bomb',power:70,type:'Veneno'}]},{name:'Golbat',id:42,hp:104,moves:[{name:'Air Cutter',power:65,type:'Voador'},{name:'Bite',power:55,type:'Sombrio'}]}],
       [{name:'Rhydon',id:112,hp:122,moves:[{name:'Rock Slide',power:75,type:'Pedra'},{name:'Earthquake',power:85,type:'Terra'}]},{name:'Muk',id:89,hp:114,moves:[{name:'Sludge Bomb',power:75,type:'Veneno'},{name:'Brick Break',power:65,type:'Lutador'}]},{name:'Persian',id:53,hp:106,moves:[{name:'Slash',power:75,type:'Normal'},{name:'Bite',power:55,type:'Sombrio'}]}],
-      [{name:'Electabuzz',id:125,hp:108,moves:[{name:'Thunder Punch',power:75,type:'Eletrico'},{name:'Low Kick',power:60,type:'Lutador'}]},{name:'Weezing',id:110,hp:116,moves:[{name:'Sludge Bomb',power:80,type:'Veneno'},{name:'Thunderbolt',power:70,type:'Eletrico'}]},{name:'Nidoking',id:34,hp:122,moves:[{name:'Earthquake',power:85,type:'Terra'},{name:'Megahorn',power:80,type:'Inseto'}]}],
+      [{name:'Electabuzz',id:125,hp:108,moves:[{name:'Thunder Punch',power:75,type:'Elétrico'},{name:'Low Kick',power:60,type:'Lutador'}]},{name:'Weezing',id:110,hp:116,moves:[{name:'Sludge Bomb',power:80,type:'Veneno'},{name:'Thunderbolt',power:70,type:'Elétrico'}]},{name:'Nidoking',id:34,hp:122,moves:[{name:'Earthquake',power:85,type:'Terra'},{name:'Megahorn',power:80,type:'Inseto'}]}],
       [{name:'Raticate',id:20,hp:104,moves:[{name:'Hyper Fang',power:75,type:'Normal'},{name:'Crunch',power:70,type:'Sombrio'}]},{name:'Arbok',id:24,hp:112,moves:[{name:'Poison Jab',power:75,type:'Veneno'},{name:'Earthquake',power:80,type:'Terra'}]},{name:'Rhydon',id:112,hp:128,moves:[{name:'Rock Slide',power:80,type:'Pedra'},{name:'Earthquake',power:90,type:'Terra'}]}]
     ];
 
@@ -7461,8 +7484,8 @@
         {name:'Koffing',id:109,hp:88,level:30,moves:[{name:'Sludge',power:55,type:'Veneno'},{name:'Self-Destruct',power:70,type:'Normal'}]}
       ]},
       {id:'silph_scientist_gideon',name:'Gideon',className:'Cientista da Equipe Rocket',portrait:'assets/rocket-nerd.png',moneyReward:1100,team:[
-        {name:'Magnemite',id:81,hp:80,level:30,moves:[{name:'Thunderbolt',power:70,type:'Eletrico'},{name:'Sonic Boom',power:45,type:'Normal'}]},
-        {name:'Voltorb',id:100,hp:84,level:31,moves:[{name:'Thunderbolt',power:70,type:'Eletrico'},{name:'Swift',power:50,type:'Normal'}]},
+        {name:'Magnemite',id:81,hp:80,level:30,moves:[{name:'Thunderbolt',power:70,type:'Elétrico'},{name:'Sonic Boom',power:45,type:'Normal'}]},
+        {name:'Voltorb',id:100,hp:84,level:31,moves:[{name:'Thunderbolt',power:70,type:'Elétrico'},{name:'Swift',power:50,type:'Normal'}]},
         {name:'Weezing',id:110,hp:96,level:32,moves:[{name:'Sludge Bomb',power:80,type:'Veneno'},{name:'Shadow Ball',power:70,type:'Fantasma'}]}
       ]},
       {id:'silph_grunt_ava',name:'Ava',className:'Rocket Grunt',portrait:'assets/rocket-grunt-blonde.png',moneyReward:1300,team:[
@@ -7491,13 +7514,13 @@
       {id:'lorelei',name:'Lorelei',className:'Elite Four',portrait:'lorelei-lgpe',moneyReward:12000,team:[
         {name:'Dewgong',id:87,hp:166,level:52,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]},
         {name:'Cloyster',id:91,hp:155,level:51,moves:[{name:'Aurora Beam',power:65,type:'Gelo'},{name:'Spike Cannon',power:20,type:'Normal'}]},
-        {name:'Slowbro',id:80,hp:174,level:52,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Psychic',power:90,type:'Psiquico'}]},
-        {name:'Jynx',id:124,hp:160,level:54,moves:[{name:'Psychic',power:90,type:'Psiquico'},{name:'Ice Punch',power:75,type:'Gelo'}]},
+        {name:'Slowbro',id:80,hp:174,level:52,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Psychic',power:90,type:'Psíquico'}]},
+        {name:'Jynx',id:124,hp:160,level:54,moves:[{name:'Psychic',power:90,type:'Psíquico'},{name:'Ice Punch',power:75,type:'Gelo'}]},
         {name:'Lapras',id:131,hp:206,level:54,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]}
       ]},
       {id:'bruno_elite',name:'Bruno',className:'Elite Four',portrait:'bruno',moneyReward:13000,team:[
         {name:'Onix',id:95,hp:164,level:53,moves:[{name:'Rock Slide',power:75,type:'Pedra'},{name:'Dig',power:80,type:'Terra'}]},
-        {name:'Hitmonchan',id:107,hp:172,level:55,moves:[{name:'Brick Break',power:75,type:'Lutador'},{name:'Thunder Punch',power:75,type:'Eletrico'}]},
+        {name:'Hitmonchan',id:107,hp:172,level:55,moves:[{name:'Brick Break',power:75,type:'Lutador'},{name:'Thunder Punch',power:75,type:'Elétrico'}]},
         {name:'Hitmonlee',id:106,hp:170,level:55,moves:[{name:'Brick Break',power:75,type:'Lutador'},{name:'Blaze Kick',power:85,type:'Fogo'}]},
         {name:'Onix',id:95,hp:176,level:56,moves:[{name:'Rock Slide',power:75,type:'Pedra'},{name:'Earthquake',power:100,type:'Terra'}]},
         {name:'Machamp',id:68,hp:194,level:58,moves:[{name:'Cross Chop',power:100,type:'Lutador'},{name:'Rock Tomb',power:60,type:'Pedra'}]}
@@ -7511,17 +7534,17 @@
       ]},
       {id:'lance',name:'Lance',className:'Elite Four',portrait:'lance',moneyReward:15000,team:[
         {name:'Gyarados',id:130,hp:194,level:56,moves:[{name:'Waterfall',power:80,type:'Agua'},{name:'Bite',power:60,type:'Sombrio'}]},
-        {name:'Dragonair',id:148,hp:182,level:54,moves:[{name:'Dragon Claw',power:80,type:'Dragao'},{name:'Thunderbolt',power:90,type:'Eletrico'}]},
+        {name:'Dragonair',id:148,hp:182,level:54,moves:[{name:'Dragon Claw',power:80,type:'Dragao'},{name:'Thunderbolt',power:90,type:'Elétrico'}]},
         {name:'Dragonair',id:148,hp:188,level:54,moves:[{name:'Dragon Claw',power:80,type:'Dragao'},{name:'Ice Beam',power:90,type:'Gelo'}]},
         {name:'Aerodactyl',id:142,hp:204,level:58,moves:[{name:'Rock Slide',power:75,type:'Pedra'},{name:'Wing Attack',power:60,type:'Voador'}]},
         {name:'Dragonite',id:149,hp:230,level:60,moves:[{name:'Outrage',power:120,type:'Dragao'},{name:'Wing Attack',power:60,type:'Voador'}]}
       ]},
       {id:'champion_blue',name:'Blue',className:'Campe\u00e3o de Kanto',portrait:'blue',moneyReward:20000,team:[
         {name:'Pidgeot',id:18,hp:225,level:61,moves:[{name:'Wing Attack',power:60,type:'Voador'},{name:'Quick Attack',power:40,type:'Normal'}]},
-        {name:'Alakazam',id:65,hp:212,level:59,moves:[{name:'Psychic',power:90,type:'Psiquico'},{name:'Shadow Ball',power:80,type:'Fantasma'}]},
+        {name:'Alakazam',id:65,hp:212,level:59,moves:[{name:'Psychic',power:90,type:'Psíquico'},{name:'Shadow Ball',power:80,type:'Fantasma'}]},
         {name:'Rhydon',id:112,hp:244,level:59,moves:[{name:'Earthquake',power:100,type:'Terra'},{name:'Rock Slide',power:75,type:'Pedra'}]},
         {name:'Arcanine',id:59,hp:230,level:61,moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Crunch',power:80,type:'Sombrio'}]},
-        {name:'Exeggutor',id:103,hp:246,level:61,moves:[{name:'Psychic',power:90,type:'Psiquico'},{name:'Energy Ball',power:90,type:'Planta'}]},
+        {name:'Exeggutor',id:103,hp:246,level:61,moves:[{name:'Psychic',power:90,type:'Psíquico'},{name:'Energy Ball',power:90,type:'Planta'}]},
         {name:'Blastoise',id:9,hp:270,level:63,moves:[{name:'Surf',power:90,type:'Agua'},{name:'Ice Beam',power:90,type:'Gelo'}]}
       ]}
     ];
@@ -7543,9 +7566,9 @@
         silphWins,
       });
       if (reason === 'previous_badge') return `Derrote o gin\u00e1sio anterior primeiro! (${badgeCount}/${gymIndex} ins\u00edgnias)`;
-      if (reason === 'brock_exploration') return 'Venca 3 batalhas na Explora\u00e7\u00e3o de Kanto para liberar o desafio de Brock.';
+      if (reason === 'brock_exploration') return 'Vença 3 batalhas na Explora\u00e7\u00e3o de Kanto para liberar o desafio de Brock.';
       if (reason === 'lt_surge_ss_anne') return `Derrote 5 treinadores na S.S. Anne para liberar Lt. Surge. (${ssAnneWins}/5)`;
-      if (reason === 'erika_tower') return 'Venca uma batalha na Torre Pok\u00e9mon para liberar Erika.';
+      if (reason === 'erika_tower') return 'Vença uma batalha na Torre Pok\u00e9mon para liberar Erika.';
       if (reason === 'giovanni_silph') return `Derrote 3 treinadores na Silph Co. para liberar Giovanni. (${silphWins}/3)`;
       return '';
     }
@@ -7774,7 +7797,7 @@
         const unlocked = isAdminAccount() || index === progress;
         const action = isAdminAccount() || (unlocked && !done)
           ? `startEliteFourBattle('${trainer.id}')`
-          : `showToast('${done ? 'Este desafiante jÃ¡ foi derrotado.' : 'Derrote o desafiante anterior para avanÃ§ar.'}','${done ? 'info' : 'error'}')`;
+          : `showToast('${done ? 'Este desafiante já foi derrotado.' : 'Derrote o desafiante anterior para avançar.'}','${done ? 'info' : 'error'}')`;
         const badge = isAdminAccount() ? 'Desafiar' : done ? 'Derrotado' : unlocked ? 'Desafiar' : 'Bloqueado';
         return `<div class="game-card" role="button" tabindex="0" onclick="${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}" style="${unlocked?'':'opacity:.62;'}">
           <div class="game-card-header" style="background:linear-gradient(135deg,#4a3522,#211728);height:110px"><img src="https://play.pokemonshowdown.com/sprites/trainers/${trainer.portrait}.png" alt="${escapeHTML(trainer.name)}" style="width:86px;height:86px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><span style="display:none;font-size:2.8rem">${icon}</span></div>
@@ -8732,7 +8755,7 @@
     function pvpMyTeam() { return pvpIsHost() ? (pvpRoom?.host_team || []) : (pvpRoom?.guest_team || []); }
     function pvpTheirTeam() { return pvpIsHost() ? (pvpRoom?.guest_team || []) : (pvpRoom?.host_team || []); }
     function pvpTypeColor(type) {
-      return ({Normal:'#a8a878',Fogo:'#f08030',Agua:'#6890f0',Planta:'#78c850',Eletrico:'#f8d030',Gelo:'#98d8d8',Lutador:'#c03028',Veneno:'#a040a0',Terra:'#e0c068',Voador:'#a890f0',Psiquico:'#f85888',Inseto:'#a8b820',Pedra:'#b8a038',Fantasma:'#705898',Dragao:'#7038f8',Sombrio:'#705848','Aço':'#b8b8d0',Fada:'#ee99ac'})[normalizeBattleType(type)] || '#a8a878';
+      return ({Normal:'#a8a878',Fogo:'#f08030',Agua:'#6890f0',Planta:'#78c850',Elétrico:'#f8d030',Gelo:'#98d8d8',Lutador:'#c03028',Veneno:'#a040a0',Terra:'#e0c068',Voador:'#a890f0',Psíquico:'#f85888',Inseto:'#a8b820',Pedra:'#b8a038',Fantasma:'#705898',Dragao:'#7038f8',Sombrio:'#705848','Aço':'#b8b8d0',Fada:'#ee99ac'})[normalizeBattleType(type)] || '#a8a878';
     }
 
     function pvpBattleInfo(pokemon, hp, className, party = null, partyHp = null, majorStatus = null) {
@@ -8908,11 +8931,11 @@
       renderPvpPanel();
     }
 
-    let coopBossRoom=null, coopBossChannel=null, coopBossBusy=false, coopBossAnimating=false, coopBossAnimationKey='', coopBossVisualHp=null, coopBossMenu='main', coopBossSelectedItem='', coopBossConfirmExit=false, coopBossFaintedModalMessage='', coopBossDeadlineTimer=null, coopBossClockTimer=null, coopBossLastTimeoutTick=0, coopBossPersistChain=Promise.resolve(), coopBossPersistedTurnKey='', mewtwoRaidBgm=null;
+    let coopBossRoom=null, coopBossChannel=null, coopBossBusy=false, coopBossAnimating=false, coopBossAnimationKey='', coopBossVisualHp=null, coopBossAttackNotice='', coopBossMenu='main', coopBossSelectedItem='', coopBossConfirmExit=false, coopBossFaintedModalMessage='', coopBossDeadlineTimer=null, coopBossClockTimer=null, coopBossLastTimeoutTick=0, coopBossPersistChain=Promise.resolve(), coopBossPersistedTurnKey='', mewtwoRaidBgm=null;
     function playMewtwoRaidBgm(){
       if(coopBossRoom?.status!=='battle'||(SFX&&SFX.isMuted&&SFX.isMuted()))return;
       try{
-        if(!mewtwoRaidBgm){mewtwoRaidBgm=new Audio('assets/mewtwo-raid.mp3');mewtwoRaidBgm.loop=true;mewtwoRaidBgm.preload='auto';mewtwoRaidBgm.volume=.42;}
+        if(!mewtwoRaidBgm){mewtwoRaidBgm=new Audio('assets/mewtwo-raid.mp3');mewtwoRaidBgm.loop=true;mewtwoRaidBgm.preload='auto';mewtwoRaidBgm._baseVolume=.42;applyBattleVolumeToAudio(mewtwoRaidBgm);}
         if(!mewtwoRaidBgm.paused)return;
         stopBattleBgm();activeBattleBgmTrack='silent';
         const playback=mewtwoRaidBgm.play();if(playback?.catch)playback.catch(()=>{});
@@ -9005,8 +9028,10 @@
       const playerProtected=Boolean(oldPokemon&&newEvents.some(line=>line.startsWith(`${oldPokemon.name} se protegeu com `)));
       const playerAttacked=Boolean(oldPokemon&&!playerProtected&&newEvents.some(line=>line.startsWith(`${oldPokemon.name} usou `)||line.startsWith(`${oldPokemon.name} errou `)));
       const bossDamaged=newEvents.some(line=>/causou [1-9]\d* de dano\./.test(line));
-      const bossAttackEvent=me&&newEvents.find(line=>line.startsWith(`Mewtwo atingiu a equipe de ${me.name} `));
-      const bossAttacked=Boolean(bossAttackEvent&&/por [1-9]\d* de dano/.test(bossAttackEvent));
+      const bossAttackEvent=me&&newEvents.find(line=>line.startsWith('Mewtwo utilizou ')&&(line.includes(`atingiu a equipe de ${me.name} `)||line.includes(`nao causou dano para a equipe de ${me.name}`)));
+      const bossAttackMove=bossAttackEvent?.match(/^Mewtwo utilizou (.+?) e (?:atingiu|nao causou dano)/)?.[1]||'';
+      coopBossAttackNotice=bossAttackMove?`Mewtwo usou ${bossAttackMove}!`:'';
+      const bossAttacked=Boolean(bossAttackEvent&&/atingiu a equipe de .+ por [1-9]\d* de dano/.test(bossAttackEvent));
       const slot=Number(state?.active)||0,localPokemon=me?.team?.[slot],localHp=Number(state?.hp?.[slot])||0;
       const bossHp=Math.max(0,Number(room.battle?.mewtwo_hp)||0),bossMaxHp=Number(room.battle?.mewtwo_max_hp)||30000;
       coopBossAnimating=true;coopBossAnimationKey=animationKey;
@@ -9122,14 +9147,28 @@
         finishAfter=Math.max(finishAfter,attackDelay+1230);
         setTimeout(()=>{requestAnimationFrame(()=>animate('.enemy-sprite'));setTimeout(()=>requestAnimationFrame(()=>showHit('.player-sprite','.player-stage',receivedByPlayer,'60%','20%','.player-info',localHp,localPokemon?.maxHp)),430);},attackDelay);
       }
-      setTimeout(()=>{if(coopBossAnimationKey!==animationKey)return;coopBossAnimating=false;coopBossAnimationKey='';coopBossVisualHp=null;renderCoopBossPanel();},finishAfter);
+      setTimeout(()=>{if(coopBossAnimationKey!==animationKey)return;coopBossAnimating=false;coopBossAnimationKey='';coopBossVisualHp=null;coopBossAttackNotice='';renderCoopBossPanel();},finishAfter);
       if(room.status==='battle')renderCoopBossPanel();
     }
     function coopBossIsHost(){return coopBossRoom?.host_id===onlineUser?.id;}
     async function coopBossCopyCode(){const code=coopBossRoom?.room_code;if(!code)return;try{await navigator.clipboard.writeText(code);showToast('Código da sala copiado!');}catch(_){showToast('Copie o código da sala: '+code);}}
     async function coopBossStart(){if(!coopBossRoom||!coopBossIsHost()||coopBossBusy)return;const faintedTrainer=(coopBossRoom.members||[]).find(member=>!coopBossHasHealthyPokemon(member.team));if(faintedTrainer){coopBossShowFaintedModal((faintedTrainer.user_id===onlineUser.id?'Sua equipe':'A equipe de '+faintedTrainer.name)+' est\u00e1 sem Pok\u00e9mon consciente. Cure a equipe antes de iniciar a raid.');return;}coopBossBusy=true;try{const {data,error}=await supabaseClient.rpc('coop_boss_start',{p_code:coopBossRoom.room_code});if(error)throw error;coopBossRoom=data;renderCoopBossPanel();}catch(e){if(/desmai|consciente/i.test(e.message||''))coopBossShowFaintedModal(e.message);else showToast('N\u00e3o foi poss\u00edvel iniciar a raid: '+e.message,'error');}finally{coopBossBusy=false;}}
     function coopBossUpdateClock(room=coopBossRoom){const clock=document.getElementById('coopBossTurnTimer');if(!clock)return;const deadline=Date.parse(room?.turn_deadline||''),remaining=Number.isFinite(deadline)?Math.max(0,Math.ceil((deadline-Date.now())/1000)):0;clock.textContent=`${remaining}s`;clock.classList.toggle('urgent',remaining<=10);}
-    function coopBossScheduleDeadline(room=coopBossRoom){if(coopBossDeadlineTimer){clearTimeout(coopBossDeadlineTimer);coopBossDeadlineTimer=null;}if(coopBossClockTimer){clearInterval(coopBossClockTimer);coopBossClockTimer=null;}if(!room||room.status!=='battle')return;const deadline=Date.parse(room.turn_deadline||'');if(!Number.isFinite(deadline))return;coopBossUpdateClock(room);coopBossClockTimer=setInterval(()=>coopBossUpdateClock(room),1000);coopBossDeadlineTimer=setTimeout(()=>{coopBossDeadlineTimer=null;if(Date.now()-coopBossLastTimeoutTick<2500)return;coopBossLastTimeoutTick=Date.now();coopBossAct({type:'tick'},true);},Math.max(0,deadline-Date.now()+1200));}
+    function coopBossRunDeadlineTick(roomId,turn){
+      const room=coopBossRoom;
+      if(!room||room.id!==roomId||room.status!=='battle'||Number(room.turn)!==turn)return;
+      const deadline=Date.parse(room.turn_deadline||'');
+      if(!Number.isFinite(deadline)||Date.now()<deadline)return;
+      if(coopBossBusy||coopBossAnimating||Date.now()-coopBossLastTimeoutTick<2500){setTimeout(()=>coopBossRunDeadlineTick(roomId,turn),700);return;}
+      coopBossLastTimeoutTick=Date.now();
+      coopBossAct({type:'tick'},true).finally(()=>{
+        const current=coopBossRoom;
+        if(current?.id===roomId&&current.status==='battle'&&Number(current.turn)===turn&&Date.parse(current.turn_deadline||'')<=Date.now()){
+          setTimeout(()=>coopBossRunDeadlineTick(roomId,turn),1800);
+        }
+      });
+    }
+    function coopBossScheduleDeadline(room=coopBossRoom){if(coopBossDeadlineTimer){clearTimeout(coopBossDeadlineTimer);coopBossDeadlineTimer=null;}if(coopBossClockTimer){clearInterval(coopBossClockTimer);coopBossClockTimer=null;}if(!room||room.status!=='battle')return;const deadline=Date.parse(room.turn_deadline||'');if(!Number.isFinite(deadline))return;coopBossUpdateClock(room);coopBossClockTimer=setInterval(()=>coopBossUpdateClock(room),1000);const roomId=room.id,turn=Number(room.turn);coopBossDeadlineTimer=setTimeout(()=>{coopBossDeadlineTimer=null;coopBossRunDeadlineTick(roomId,turn);},Math.max(0,deadline-Date.now()+1200));}
     async function coopBossAct(action,internal=false){
       if(!coopBossRoom||coopBossRoom.status!=='battle'||coopBossBusy||coopBossAnimating||(!internal&&coopBossRoom.actions?.[onlineUser.id]))return;
       coopBossBusy=true;
@@ -9199,7 +9238,7 @@
         return `<button class="move-btn" onclick="coopBossAct({type:'item',key:'${selectedRaidItem.key}',index:${index}})" ${coopBossAnimating||myAction?'disabled':''}><span>${escapeHTML(pokemon.name)}</span><span class="move-power">HP ${currentHp}/${maxPokemonHp}</span></button>`;
       }).join(''):'';
       const waitingForTeam=allFainted&&!myAction&&!['bag','item_targets'].includes(coopBossMenu);
-      const actions=(coopBossMenu==='switch'&&!allFainted||['bag','item_targets'].includes(coopBossMenu))&&!myAction?'':waitingForTeam?`<div class="pvp-waiting-action">Sua equipe caiu. Use um Revive ou aguarde os outros treinadores.</div><div class="battle-actions"><button class="battle-btn bag" onclick="coopBossMenu='bag';renderCoopBossPanel()">🎒 Mochila</button><button class="battle-btn" onclick="coopBossAct({type:'wait'})" ${coopBossAnimating?'disabled':''}>Aguardar equipe</button></div>`:myAction?`<div class="pvp-waiting-action">Ação enviada · aguardando o grupo (${Object.keys(room.actions||{}).length}/${members.length})</div>`:coopBossMenu==='bag'?`<div class="battle-actions moves-view">${bagButtons||'<div class="pvp-waiting-action">Nenhum item de cura disponível.</div>'}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='item_targets'?`<div class="battle-actions moves-view">${itemTargets||'<div class="pvp-waiting-action">Nenhum Pokémon pode usar este item agora.</div>'}<button class="move-btn" onclick="coopBossMenu='bag';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='switch'?`<div class="battle-actions moves-view">${switchBtns}<button class="move-btn" onclick="coopBossMenu='bag';renderCoopBossPanel()">🎒 Mochila</button><button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='moves'?`<div class="battle-actions moves-view">${moveBtns}${hasUsableDamage?'':`<button class="move-btn" onclick="coopBossAct({type:'struggle'})" ${coopBossAnimating?'disabled':''}>Esforço · PWR 60</button>`}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:`<div class="battle-actions coop-main-actions"><button class="battle-btn fight" onclick="coopBossMenu='moves';renderCoopBossPanel()">⚔️ Lutar</button><button class="battle-btn pokemon" onclick="coopBossMenu='switch';renderCoopBossPanel()">🔄 Equipe</button><button class="battle-btn bag" onclick="coopBossMenu='bag';renderCoopBossPanel()">🎒 Mochila</button><button class="battle-btn run" onclick="coopBossConfirmExit=true;renderCoopBossPanel()">🚪 Sair</button></div>`;
+      const actions=(coopBossMenu==='switch'&&!allFainted||['bag','item_targets'].includes(coopBossMenu))&&!myAction?'':waitingForTeam?`<div class="pvp-waiting-action">Sua equipe caiu. Use um Revive ou aguarde os outros treinadores.</div><div class="battle-actions"><button class="battle-btn bag" onclick="coopBossMenu='bag';renderCoopBossPanel()">Mochila</button><button class="battle-btn" onclick="coopBossAct({type:'wait'})" ${coopBossAnimating?'disabled':''}>Aguardar equipe</button></div>`:myAction?`<div class="pvp-waiting-action">Ação enviada · aguardando o grupo (${Object.keys(room.actions||{}).length}/${members.length})</div>`:coopBossMenu==='bag'?`<div class="battle-actions moves-view">${bagButtons||'<div class="pvp-waiting-action">Nenhum item de cura disponível.</div>'}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='item_targets'?`<div class="battle-actions moves-view">${itemTargets||'<div class="pvp-waiting-action">Nenhum Pokémon pode usar este item agora.</div>'}<button class="move-btn" onclick="coopBossMenu='bag';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='switch'?`<div class="battle-actions moves-view">${switchBtns}<button class="move-btn" onclick="coopBossMenu='bag';renderCoopBossPanel()">Mochila</button><button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='moves'?`<div class="battle-actions moves-view">${moveBtns}${hasUsableDamage?'':`<button class="move-btn" onclick="coopBossAct({type:'struggle'})" ${coopBossAnimating?'disabled':''}>Esforço · PWR 60</button>`}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:`<div class="battle-actions coop-main-actions"><button class="battle-btn fight" onclick="coopBossMenu='moves';renderCoopBossPanel()">Lutar</button><button class="battle-btn pokemon" onclick="coopBossMenu='switch';renderCoopBossPanel()">Equipe</button><button class="battle-btn bag" onclick="coopBossMenu='bag';renderCoopBossPanel()">Mochila</button><button class="battle-btn run" onclick="coopBossConfirmExit=true;renderCoopBossPanel()">Sair</button></div>`;
       const boss={id:150,name:'Mewtwo Boss',level:100,maxHp};
       const raidCrySession=`raid:${room.id}`;
       playPokemonCry(activePokemon,`raid-player:${raidCrySession}`,raidCrySession);
@@ -9223,10 +9262,10 @@
       const faintSwitchModal=showSwitchModal?`<div class="coop-faint-switch-overlay"><section class="coop-faint-switch-dialog" role="dialog" aria-modal="true" aria-labelledby="coopFaintSwitchTitle"><h2 id="coopFaintSwitchTitle">${activeFainted?'Seu Pokémon desmaiou':'Escolha um Pokémon'}</h2><p>${activeFainted?'Escolha outro Pokémon para continuar a batalha.':'Escolha um Pokémon para trocar.'}</p><div class="coop-faint-switch-grid">${faintSwitchOptions}</div>${activeFainted?'':'<button class="move-btn" style="width:100%;justify-content:center;margin-top:12px" onclick="coopBossMenu=\'main\';renderCoopBossPanel()">Voltar</button>'}</section></div>`:'';
       const bagModal=showBagModal?`<div class="coop-faint-switch-overlay"><section class="coop-faint-switch-dialog" role="dialog" aria-modal="true" aria-labelledby="coopBagTitle"><h2 id="coopBagTitle">${coopBossMenu==='item_targets'?'Escolha um Pokémon':'Mochila'}</h2><p>${coopBossMenu==='item_targets'?'Escolha quem receberá '+escapeHTML(selectedRaidItem?.name||'o item')+'.':'Selecione um item para usar na raid.'}</p>${coopBossMenu==='item_targets'?`<div class="coop-faint-switch-grid">${itemTargetCards||'<div class="pvp-waiting-action" style="grid-column:1/-1">Nenhum Pokémon pode usar este item agora.</div>'}</div><button class="move-btn" style="width:100%;justify-content:center;margin-top:12px" onclick="coopBossMenu='bag';renderCoopBossPanel()">Voltar</button>`:`<div class="coop-bag-grid">${bagModalOptions||'<div class="pvp-waiting-action" style="grid-column:1/-1">Nenhum item de cura disponível.</div>'}</div><button class="move-btn" style="width:100%;justify-content:center;margin-top:12px" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button>`}</section></div>`:'';
       root.innerHTML=`<div class="coop-boss-arena"><div class="battle-bg"></div><div class="battle-sky"></div><div class="battle-ground"></div>
-        <div class="coop-boss-toolbar"><div class="coop-boss-toolbar-meta"><span>Rodada ${Number(room.turn)||1}</span><span>Sala <strong class="pvp-code" style="font-size:.95rem">${escapeHTML(room.room_code)}</strong></span></div><span class="coop-boss-turn-timer${turnSecondsLeft<=10?' urgent':''}" id="coopBossTurnTimer" aria-label="Tempo restante do turno">${turnSecondsLeft}s</span></div>
-        <div class="battle-field"><div class="battle-enemy"><div class="enemy-info daily-boss-info coop-mewtwo-info">${pvpBattleInfo(boss,displayBossHp,'enemy-info')}${bossEffects}</div><div class="sprite-stage enemy-stage"><div class="sprite-shadow"></div><img class="enemy-sprite" src="${enemySprite}" alt="Mewtwo" decoding="async" onerror="this.onerror=null;this.src='${enemyFallback}'" /></div></div>
+        <div class="coop-boss-toolbar"><div class="coop-boss-toolbar-meta"><span>Rodada ${Number(room.turn)||1}</span><span>Sala <strong class="pvp-code" style="font-size:.95rem">${escapeHTML(room.room_code)}</strong></span><button type="button" class="coop-boss-sound-btn" id="coopBossMuteSfx" onclick="toggleBattleSfx()" title="Alternar som" aria-label="${SFX.isMuted()?'Ativar':'Desativar'} som">${SFX.isMuted()?'\u{1F507}':'\u{1F50A}'}</button></div><span class="coop-boss-turn-timer${turnSecondsLeft<=10?' urgent':''}" id="coopBossTurnTimer" aria-label="Tempo restante do turno">${turnSecondsLeft}s</span></div>
+        <div class="battle-field"><div class="battle-enemy"><div class="coop-boss-info-wrap"><div class="enemy-info daily-boss-info coop-mewtwo-info">${pvpBattleInfo(boss,displayBossHp,'enemy-info')}${bossEffects}</div>${coopBossAttackNotice?`<div class="coop-boss-attack-banner" role="status" aria-live="assertive">${escapeHTML(coopBossAttackNotice)}</div>`:''}</div><div class="sprite-stage enemy-stage"><div class="sprite-shadow"></div><img class="enemy-sprite" src="${enemySprite}" alt="Mewtwo" decoding="async" onerror="this.onerror=null;this.src='${enemyFallback}'" /></div></div>
           <div class="battle-player"><div class="sprite-stage player-stage ${displayPlayerFainted?'pvp-fainted-stage':''}"><div class="sprite-shadow"></div>${activePokemon?`<img class="player-sprite${displayPlayerFainted?' faint':''}" src="${playerSprite}" alt="${escapeHTML(activePokemon.name)}" decoding="async" onerror="this.onerror=null;this.src='${playerFallback}'" />`:''}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(player.name)} · SUA EQUIPE</div>${activePokemon?pvpBattleInfo(activePokemon,displayActiveHp,'player-info',myTeam,myHp):''}${trainerEffects}</div></div>
-        </div><div class="battle-ui"><div class="coop-raid-roster" aria-label="Treinadores da raid">${rosterHTML}</div><div class="pvp-turn-prompt">${showSwitchModal||showBagModal?'':coopBossAnimating?'Ataques da rodada em andamento.':myAction?'Ação registrada.':allFainted?'Sua equipe está sem Pokémon consciente.':coopBossMenu==='moves'?'Escolha um golpe.':coopBossMenu==='switch'||activeFainted?'Escolha quem entrará na batalha.':'Escolha sua ação para esta rodada.'}</div>${actions}</div></div>${faintSwitchModal}${bagModal}${exitConfirmModal}`;
+        </div><div class="battle-ui"><div class="coop-raid-roster" aria-label="Treinadores da raid">${rosterHTML}</div><div class="pvp-turn-prompt">${showSwitchModal||showBagModal?'':coopBossAnimating?(coopBossAttackNotice?'':'Ataques da rodada em andamento.'):myAction?'Ação registrada.':allFainted?'Sua equipe está sem Pokémon consciente.':coopBossMenu==='moves'?'Escolha um golpe.':coopBossMenu==='switch'||activeFainted?'Escolha quem entrará na batalha.':''}</div>${actions}</div></div>${faintSwitchModal}${bagModal}${exitConfirmModal}`;
     }
     document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => switchPanel(i.dataset.panel)));
 
@@ -9234,7 +9273,12 @@
     const SFX = (() => {
       let ctx = null;
       let muted = false;
+      let volume = 0.7;
       try { muted = localStorage.getItem('pokemonTrainerMuteSfx') === '1'; } catch (e) {}
+      try {
+        const storedVolume = localStorage.getItem('pokemonTrainerVolume');
+        if (storedVolume !== null && Number.isFinite(Number(storedVolume))) volume = Math.max(0, Math.min(1, Number(storedVolume)));
+      } catch (e) {}
 
       function ac() {
         if (!ctx) {
@@ -9246,7 +9290,7 @@
         return ctx;
       }
       function tone(freq, dur, type, vol, when, slideTo) {
-        const c = ac(); if (!c || muted) return;
+        const c = ac(); if (!c || muted || volume <= 0) return;
         const t0 = c.currentTime + (when || 0);
         const o = c.createOscillator();
         const g = c.createGain();
@@ -9254,13 +9298,13 @@
         o.frequency.setValueAtTime(freq, t0);
         if (slideTo) o.frequency.linearRampToValueAtTime(slideTo, t0 + dur);
         g.gain.setValueAtTime(0.0001, t0);
-        g.gain.exponentialRampToValueAtTime(vol || 0.08, t0 + 0.01);
+        g.gain.exponentialRampToValueAtTime((vol || 0.08) * volume, t0 + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
         o.connect(g); g.connect(c.destination);
         o.start(t0); o.stop(t0 + dur + 0.02);
       }
       function noise(dur, vol, when, filterFreq) {
-        const c = ac(); if (!c || muted) return;
+        const c = ac(); if (!c || muted || volume <= 0) return;
         const t0 = c.currentTime + (when || 0);
         const n = Math.floor(c.sampleRate * dur);
         const buf = c.createBuffer(1, n, c.sampleRate);
@@ -9272,13 +9316,19 @@
         const f = c.createBiquadFilter();
         f.type = 'bandpass';
         f.frequency.value = filterFreq || 1200;
-        g.gain.setValueAtTime(vol || 0.1, t0);
+        g.gain.setValueAtTime((vol || 0.1) * volume, t0);
         g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
         src.connect(f); f.connect(g); g.connect(c.destination);
         src.start(t0); src.stop(t0 + dur + 0.02);
       }
       return {
         isMuted() { return muted; },
+        getVolume() { return volume; },
+        setVolume(value) {
+          volume = Math.max(0, Math.min(1, Number(value) || 0));
+          try { localStorage.setItem('pokemonTrainerVolume', String(volume)); } catch (e) {}
+          return volume;
+        },
         toggleMute() {
           muted = !muted;
           try { localStorage.setItem('pokemonTrainerMuteSfx', muted ? '1' : '0'); } catch (e) {}
@@ -9307,10 +9357,36 @@
     })();
     // Unlock audio on first user gesture
     document.addEventListener('pointerdown', () => SFX.unlock(), { once: true });
+    function applyBattleVolumeToAudio(audio) {
+      if (!audio) return;
+      const baseVolume = Number(audio._baseVolume);
+      if (Number.isFinite(baseVolume)) audio.volume = Math.max(0, Math.min(1, baseVolume * SFX.getVolume()));
+    }
+    function syncBattleVolumeControl() {
+      const volume = SFX.getVolume();
+      const slider = document.getElementById('battleSfxVolume');
+      if (slider) slider.value = String(Math.round(volume * 100));
+      const output = document.getElementById('battleSfxVolumeValue');
+      if (output) output.value = `${Math.round(volume * 100)}%`;
+      const button = document.getElementById('btnMuteSfx');
+      if (button) {
+        button.textContent = SFX.isMuted() || volume === 0 ? '\u{1F507}' : volume < 0.5 ? '\u{1F509}' : '\u{1F50A}';
+        button.title = SFX.isMuted() ? 'Ativar som' : 'Mutar som';
+        button.setAttribute('aria-label', button.title);
+        button.setAttribute('aria-pressed', String(SFX.isMuted()));
+      }
+    }
+    document.addEventListener('DOMContentLoaded', syncBattleVolumeControl, { once: true });
+    function setBattleSfxVolume(value) {
+      SFX.setVolume(Number(value) / 100);
+      [battleBgm, wildVictoryBgm, pokemonCaptureSfx, oakIntroBgm, mewtwoRaidBgm, centerHealingAudio, ...pokemonCryAudioByRole.values()]
+        .forEach(applyBattleVolumeToAudio);
+      syncMuteButton();
+      syncBattleVolumeControl();
+    }
     function toggleBattleSfx() {
       const muted = SFX.toggleMute();
-      const btn = document.getElementById('btnMuteSfx');
-      if (btn) btn.textContent = muted ? '🔇' : '🔊';
+      syncMuteButton();
       if (muted) { stopBattleBgm(); stopOakIntroBgm(); stopMewtwoRaidBgm(); }
       else if (coopBossRoom?.status === 'battle') playMewtwoRaidBgm();
       else if (document.getElementById('battleOverlay')?.classList.contains('active')) {
@@ -9318,10 +9394,12 @@
         else if (!['wild-victory-pending', 'silent'].includes(activeBattleBgmTrack)) playBattleBgm(activeBattleBgmTrack);
       } else if (document.getElementById('oakIntroOverlay')?.classList.contains('active')) playOakIntroBgm();
       if (!muted) SFX.click();
+      syncBattleVolumeControl();
     }
     function syncMuteButton() {
-      const btn = document.getElementById('btnMuteSfx');
-      if (btn) btn.textContent = SFX.isMuted() ? '🔇' : '🔊';
+      const muted=SFX.isMuted();
+      const icon=muted?'\u{1F507}':'\u{1F50A}';
+      ['btnMuteSfx','coopBossMuteSfx'].forEach(id=>{const btn=document.getElementById(id);if(btn){btn.textContent=icon;btn.setAttribute('aria-label',(muted?'Ativar':'Desativar')+' som');}});
     }
 
 
@@ -9352,7 +9430,8 @@
       if (!audio) {
         audio = new Audio();
         audio.preload = 'none';
-        audio.volume = 0.42;
+        audio._baseVolume = 0.42;
+        applyBattleVolumeToAudio(audio);
         pokemonCryAudioByRole.set(role, audio);
       }
       try {
@@ -9385,7 +9464,8 @@
             battleBgm = new Audio(BATTLE_BGM_SRC);
             battleBgm.loop = true;
             battleBgm.preload = 'auto';
-            battleBgm.volume = 0.22;
+            battleBgm._baseVolume = 0.22;
+            applyBattleVolumeToAudio(battleBgm);
           }
           const playback = battleBgm.play();
           if (playback && playback.catch) playback.catch(() => {
@@ -9407,7 +9487,8 @@
           wildVictoryBgm = new Audio(WILD_VICTORY_BGM_SRC);
           wildVictoryBgm.loop = false;
           wildVictoryBgm.preload = 'auto';
-          wildVictoryBgm.volume = 0.28;
+          wildVictoryBgm._baseVolume = 0.28;
+          applyBattleVolumeToAudio(wildVictoryBgm);
           wildVictoryBgm.addEventListener('ended', () => {
             if (activeBattleBgmTrack === 'wild-victory') activeBattleBgmTrack = 'silent';
           });
@@ -9432,7 +9513,8 @@
           pokemonCaptureSfx = new Audio(POKEMON_CAPTURE_SFX_SRC);
           pokemonCaptureSfx.loop = false;
           pokemonCaptureSfx.preload = 'auto';
-          pokemonCaptureSfx.volume = 0.55;
+          pokemonCaptureSfx._baseVolume = 0.55;
+          applyBattleVolumeToAudio(pokemonCaptureSfx);
         }
         pokemonCaptureSfx.currentTime = 0;
         const playback = pokemonCaptureSfx.play();
@@ -9454,7 +9536,8 @@
           oakIntroBgm = new Audio(OAK_INTRO_BGM_SRC);
           oakIntroBgm.loop = true;
           oakIntroBgm.preload = 'auto';
-          oakIntroBgm.volume = 0.28;
+          oakIntroBgm._baseVolume = 0.28;
+          applyBattleVolumeToAudio(oakIntroBgm);
         }
         oakIntroBgm.currentTime = 0;
         const playback = oakIntroBgm.play();
@@ -9487,7 +9570,7 @@
             const g = battleBgmCtx.createGain();
             o.type = 'square';
             o.frequency.value = f;
-            g.gain.setValueAtTime(vol, t);
+            g.gain.setValueAtTime(vol * SFX.getVolume(), t);
             g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
             o.connect(g); g.connect(battleBgmCtx.destination);
             o.start(t); o.stop(t + 0.2);
@@ -9497,7 +9580,7 @@
             const g2 = battleBgmCtx.createGain();
             o2.type = 'triangle';
             o2.frequency.value = b;
-            g2.gain.setValueAtTime(vol * 0.8, t);
+            g2.gain.setValueAtTime(vol * 0.8 * SFX.getVolume(), t);
             g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
             o2.connect(g2); g2.connect(battleBgmCtx.destination);
             o2.start(t); o2.stop(t + 0.24);
@@ -9696,7 +9779,7 @@
         if (healthy) {
           player.poke = healthy;
         } else {
-          showToast('Todos os seus Pokemon estao desmaiados! Cure um deles antes de lutar.', 'error');
+          showToast('Todos os seus Pokémon estão desmaiados! Cure um deles antes de lutar.', 'error');
           return;
         }
       }
@@ -9717,7 +9800,7 @@
       } finally {
         dungeonBattleStarting = false;
       }
-      // Weezing selvagem n?o deve receber Memento do moveset carregado pela API.
+      // Weezing selvagem não deve receber Memento do moveset carregado pela API.
       if (wild.id === 110) {
         wild.moves = (wild.moves || []).filter(move => String(getOriginalMoveName(move?.name || ''))
           .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '') !== 'memento');
@@ -9811,9 +9894,9 @@
       if (!row) return;
       const party = Array.isArray(player?.party) ? player.party.slice(0,6) : [];
       row.innerHTML = party.map((pokemon,index)=>
-        `<span class="party-ball" aria-hidden="true" title="Pokemon ${index+1}: ${escapeHTML(pokemon.name || 'Pokemon')}"></span>`
+        `<span class="party-ball" aria-hidden="true" title="Pokémon ${index+1}: ${escapeHTML(pokemon.name || 'Pokémon')}"></span>`
       ).join('');
-      row.setAttribute('aria-label', `${party.length} Pokemon na equipe`);
+      row.setAttribute('aria-label', `${party.length} Pokémon na equipe`);
     }
     function updatePlayerExperienceBar() {
       const progress = getPokemonExperienceProgress(player.poke);
@@ -9961,7 +10044,7 @@
       const hpKey = getBattleHpKey(attacker);
       if (attacker[hpKey] > 0) {
         attacker[hpKey] = 0;
-        const faintMessage = `${attacker.name} desmaiou ap?s usar ${move.name}!`;
+        const faintMessage = `${attacker.name} desmaiou após usar ${move.name}!`;
         return [message, faintMessage].filter(Boolean).join(' ');
       }
       return message;
@@ -10310,7 +10393,7 @@
           const recipient = move.target === 'user' ? enemy : playerPokemon;
           const moveIsImmune = power > 0 && (damageScore <= 0 || abilityTypeImmunity(playerPokemon, getBattleMoveType(move)) || typeMultiplier(getBattleMoveType(move), getTypes(playerPokemon.id)) <= 0);
           const statusImmune = statusEffect.status === 'paralysis' && typeMultiplier(getBattleMoveType(move), getTypes(recipient.id)) === 0;
-          const existingStatusImmunity = statusEffect.status === 'paralysis' && getTypes(recipient.id).includes('Eletrico');
+          const existingStatusImmunity = statusEffect.status === 'paralysis' && getTypes(recipient.id).includes('Elétrico');
           if (!moveIsImmune && !statusImmune && !existingStatusImmunity && canReceiveStatus(recipient, statusEffect.status)) {
             const effectValue = {sleep:0.36,freeze:0.32,paralysis:0.25,burn:0.22,poison:0.12,toxic:0.2,confusion:0.2}[statusEffect.status] || 0.12;
             const accuracy = getBattleMoveAccuracy(move) / 100;
@@ -10612,7 +10695,7 @@
             <span class="switch-hp">Nv.${p.level}${battle.isGym ? ` / max. ${getGymLevelCap()}` : ''} | HP ${Math.round(p.hp)}/${p.maxHp}</span>
           </button>`;
       }).join('');
-      menu.innerHTML = options + `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:0.8rem;padding:8px;">Escolha um Pok?mon para continuar a batalha</div>`;
+      menu.innerHTML = options + `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:0.8rem;padding:8px;">Escolha um Pokémon para continuar a batalha</div>`;
       document.getElementById('battleMenu').style.display = 'none';
       document.getElementById('movesMenu').style.display = 'none';
       const bag = document.getElementById('bagMenu');
@@ -10876,7 +10959,7 @@
           stopBattleBgm();
           document.getElementById('battleOverlay').classList.remove('active');
           battle = null;
-          showToast('VocÃª fugiu da batalha com a Smoke Ball.');
+          showToast('Você fugiu da batalha com a Smoke Ball.');
         }, 800);
         return;
       }
@@ -11197,6 +11280,7 @@
           return;
         }
         pending.pokemon.name = nickname;
+        pending.pokemon.isNicknamed = true;
       }
       pendingNicknameCapture = null;
       document.getElementById('nicknameDialog').close();
@@ -11302,9 +11386,9 @@
     }
 
     const DAILY_BOSSES = [
-      {id:'zapdos',name:'Zapdos',level:100,hp:5000,shield:2500,type:'Eletrico',sprite:'assets/daily-boss-zapdos.png',ivs:{defense:31,specialDefense:31},evs:{defense:252,specialDefense:252},money:20000,item:'rarecandy',itemName:'Doce Raro',itemCount:2,rewardText:'Grande quantidade de Pokédollar + 2 Doces Raros',moves:[{name:'Thunderbolt',power:90,type:'Eletrico'},{name:'Drill Peck',power:80,type:'Voador'},{name:'Ancient Power',power:60,type:'Pedra'},{name:'Agility',power:0,type:'Psiquico'}]},
-      {id:'moltres',name:'Moltres',level:100,hp:5000,shield:2500,type:'Fogo',sprite:'assets/daily-boss-moltres.png',ivs:{defense:31,specialDefense:31},evs:{defense:252,specialDefense:252},money:10000,item:'naturebox',itemName:'Caixa de Nature',itemCount:1,rewardText:'Pokédollar + 1 Caixa de Nature',moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Air Slash',power:75,type:'Voador'},{name:'Ancient Power',power:60,type:'Pedra'},{name:'Agility',power:0,type:'Psiquico'}]},
-      {id:'articuno',name:'Articuno',level:100,hp:5000,shield:2500,type:'Gelo',sprite:'assets/daily-boss-articuno.png',ivs:{defense:31,specialDefense:31},evs:{defense:252,specialDefense:252},money:0,item:'bottlecap',itemName:'Bottle Cap',itemCount:1,rewardText:'1 Bottle Cap (maximiza um IV à sua escolha)',moves:[{name:'Ice Beam',power:90,type:'Gelo'},{name:'Air Slash',power:75,type:'Voador'},{name:'Ancient Power',power:60,type:'Pedra'},{name:'Agility',power:0,type:'Psiquico'}]}
+      {id:'zapdos',name:'Zapdos',level:100,hp:5000,shield:2500,type:'Elétrico',sprite:'assets/daily-boss-zapdos.png',ivs:{defense:31,specialDefense:31},evs:{defense:252,specialDefense:252},money:20000,item:'rarecandy',itemName:'Doce Raro',itemCount:2,rewardText:'Grande quantidade de Pokédollar + 2 Doces Raros',moves:[{name:'Thunderbolt',power:90,type:'Elétrico'},{name:'Drill Peck',power:80,type:'Voador'},{name:'Ancient Power',power:60,type:'Pedra'},{name:'Agility',power:0,type:'Psíquico'}]},
+      {id:'moltres',name:'Moltres',level:100,hp:5000,shield:2500,type:'Fogo',sprite:'assets/daily-boss-moltres.png',ivs:{defense:31,specialDefense:31},evs:{defense:252,specialDefense:252},money:10000,item:'naturebox',itemName:'Caixa de Nature',itemCount:1,rewardText:'Pokédollar + 1 Caixa de Nature',moves:[{name:'Flamethrower',power:90,type:'Fogo'},{name:'Air Slash',power:75,type:'Voador'},{name:'Ancient Power',power:60,type:'Pedra'},{name:'Agility',power:0,type:'Psíquico'}]},
+      {id:'articuno',name:'Articuno',level:100,hp:5000,shield:2500,type:'Gelo',sprite:'assets/daily-boss-articuno.png',ivs:{defense:31,specialDefense:31},evs:{defense:252,specialDefense:252},money:0,item:'bottlecap',itemName:'Bottle Cap',itemCount:1,rewardText:'1 Bottle Cap (maximiza um IV à sua escolha)',moves:[{name:'Ice Beam',power:90,type:'Gelo'},{name:'Air Slash',power:75,type:'Voador'},{name:'Ancient Power',power:60,type:'Pedra'},{name:'Agility',power:0,type:'Psíquico'}]}
     ];
 
     function getDailyBossDateKey() {
@@ -12104,7 +12188,7 @@
         `<span class="type-badge ${typeClass([t])}">${t}</span>`
       ).join(' ');
       const nature = NATURES.find(x=>x.name===(p.natureMint || p.nature));
-      const natureDescription = nature?.up ? `Aumenta ${nature.up} e reduz ${nature.down}.` : 'Esta natureza não altera atributos.';
+      const natureDescription = nature?.up ? `Aumenta ${nature.up} e reduz ${nature.down}.` : 'Esta natureza não altera os atributos.';
       const abilityDescription = ABILITY_INFO[p.ability];
       document.getElementById('summaryStats').innerHTML = `
         <div class="summary-stat"><span>HP</span><strong>${Math.round(p.hp)} / ${p.maxHp}</strong></div>
@@ -12734,7 +12818,7 @@
         socialNotificationRequests=requests;
         socialRenderMessageNotifications();
       } catch(error) {
-        console.warn('[Social] Nao foi possivel atualizar notificacoes:',error);
+        console.warn('[Social] Não foi possível atualizar notificações:',error);
       } finally { socialNotificationBusy=false; }
     }
 
@@ -12879,7 +12963,7 @@
 
     function socialOpenChat(target) {
       const friend=socialProfilesById.get(target);
-      if (!friend) { showToast('NÃ£o foi possÃ­vel carregar esse amigo. Atualize a lista e tente novamente.','error'); return; }
+      if (!friend) { showToast('Não foi possível carregar esse amigo. Atualize a lista e tente novamente.','error'); return; }
       socialChatFriend=friend;
       const readIds=socialGetReadMessageIds();
       socialNotificationMessages.filter(message=>message.sender_id===target).forEach(message=>{readIds.add(message.id);socialUnreadMessageIds.delete(message.id);});
@@ -12928,10 +13012,10 @@
         root.innerHTML=messages.length ? messages.map(message=>{
           const sentAt=new Date(message.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
           return `<div class="social-message ${message.sender_id===onlineUser.id?'mine':''}">${escapeHTML(message.body)}<time>${escapeHTML(sentAt)}</time></div>`;
-        }).join('') : '<div class="social-chat-empty">Nenhuma mensagem ainda. Diga oi para comeÃ§ar!</div>';
+        }).join('') : '<div class="social-chat-empty">Nenhuma mensagem ainda. Diga oi para começar!</div>';
         root.scrollTop=root.scrollHeight;
       } catch(error) {
-        if (version===socialChatVersion) document.getElementById('socialChatMessages').innerHTML=`<div class="social-chat-empty">${escapeHTML(error.message||'NÃ£o foi possÃ­vel carregar as mensagens.')}</div>`;
+        if (version===socialChatVersion) document.getElementById('socialChatMessages').innerHTML=`<div class="social-chat-empty">${escapeHTML(error.message||'Não foi possível carregar as mensagens.')}</div>`;
       } finally { socialChatBusy=false; }
     }
 
@@ -12948,7 +13032,7 @@
         input.value='';
         socialChatLastRendered='';
         await socialLoadChat();
-      } catch(error) { showToast('NÃ£o foi possÃ­vel enviar a mensagem: '+error.message,'error'); }
+      } catch(error) { showToast('Não foi possível enviar a mensagem: '+error.message,'error'); }
       finally { button.disabled=false; input?.focus(); }
     }
 

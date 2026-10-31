@@ -606,7 +606,11 @@
     .coop-boss-arena .battle-ground { bottom:30%; height:28%; background:radial-gradient(ellipse at 50% 65%,rgba(234,88,12,.28),transparent 70%),linear-gradient(180deg,transparent,rgba(9,5,18,.6)); }
     .coop-boss-arena .battle-field { width:100%; max-width:1440px; min-height:600px; padding:74px 30px 8px; }
     .coop-boss-arena .battle-enemy { align-items:flex-start; gap:16px; }
-    .coop-boss-arena .enemy-info.daily-boss-info { width:min(460px,58vw); min-width:0; border-color:rgba(251,146,60,.45); }
+    .coop-boss-info-wrap { width:min(460px,58vw); min-width:0; }
+    .coop-boss-arena .enemy-info.daily-boss-info { width:100%; min-width:0; border-color:rgba(251,146,60,.45); }
+    .coop-boss-attack-banner { position:relative; width:max-content; max-width:100%; margin:4px 0 0 8px; padding:8px 12px; border:3px solid #17131d; background:#e8e5e4; color:#16121b; font-size:.82rem; font-weight:800; line-height:1.25; box-shadow:0 6px 16px #0006; animation:coopBossBannerIn .18s ease-out both; }
+    .coop-boss-attack-banner::before { position:absolute; top:-9px; left:14px; width:12px; height:12px; content:''; transform:rotate(45deg); border-top:3px solid #17131d; border-left:3px solid #17131d; background:#e8e5e4; }
+    @keyframes coopBossBannerIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
     .coop-boss-arena .coop-mewtwo-info .battle-level-type-row .poke-level,
     .coop-boss-arena .coop-mewtwo-info .hp-label span:nth-child(2) { display:none; }
     .coop-boss-arena .enemy-sprite { width:250px; height:250px; filter:drop-shadow(0 12px 24px rgba(0,0,0,.62)); }
@@ -630,6 +634,9 @@
     .coop-boss-toolbar { position:absolute; z-index:3; top:12px; left:16px; right:16px; display:flex; align-items:center; justify-content:flex-start; gap:10px; color:#ede9fe; font-size:.84rem; font-weight:700; }
     .coop-boss-toolbar span { padding:7px 10px; border:1px solid #ffffff24; border-radius:999px; background:#100b1dbb; backdrop-filter:blur(6px); }
     .coop-boss-toolbar-meta { display:flex; align-items:center; gap:8px; margin-left:auto; }
+    .coop-boss-sound-btn { display:grid; place-items:center; width:34px; height:34px; padding:0; border:1px solid #ffffff24; border-radius:999px; background:#100b1dbb; color:#ede9fe; font-size:1rem; cursor:pointer; }
+    .coop-boss-sound-btn:hover { border-color:rgba(249,115,22,.7); background:#28172a; }
+    .coop-boss-sound-btn:focus-visible { outline:2px solid #fdba74; outline-offset:2px; }
     .coop-boss-turn-timer { position:absolute; left:50%; top:50%; min-width:58px; transform:translate(-50%,-50%); border-color:rgba(249,115,22,.5)!important; color:#f5f3ff; text-align:center; font-variant-numeric:tabular-nums; box-shadow:0 0 18px rgba(234,88,12,.2); }
     .coop-boss-turn-timer.urgent { border-color:rgba(248,113,113,.65)!important; color:#fca5a5; }
     .coop-raid-roster { width:100%; display:grid; grid-template-columns:repeat(auto-fill,minmax(132px,150px)); justify-content:start; gap:8px; margin:0 0 12px; }
@@ -763,6 +770,7 @@
       .coop-boss-arena .battle-field { min-height:500px; padding:102px 12px 8px; gap:8px; justify-content:flex-start; }
       .coop-boss-arena .battle-enemy { display:flex; flex-direction:column; align-items:stretch; gap:0; padding:0; }
       .coop-boss-arena .enemy-info.daily-boss-info { width:100%; padding:10px 12px; }
+      .coop-boss-info-wrap { width:100%; }
       .coop-boss-arena .enemy-stage { width:100%; height:clamp(118px,34vw,146px); flex:0 0 auto; }
       .coop-boss-arena .enemy-sprite { width:clamp(120px,34vw,145px); height:clamp(120px,34vw,145px); }
       .coop-boss-arena .battle-player { min-height:140px; align-items:flex-end; justify-content:space-between; gap:6px; margin:8px 0 6px; padding:0 2%; }
@@ -847,8 +855,23 @@
     .game-card.dungeon-locked:hover { transform:none; box-shadow:none; border-color:var(--border); }
     .dungeon-lock-reason { margin-top:8px; color:var(--text-muted); font-size:.78rem; }
     .game-card-header { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; border-radius: 15px 15px 0 0; }
-    #gameCornerHomeCard .game-card-header { height:auto; aspect-ratio:1.91; overflow:hidden; padding:0; background:#e7a32d; }
+    #gameCornerHomeCard .game-card-header, #ssAnneHomeCard .game-card-header, #silphCoHomeCard .game-card-header, #battleTowerHomeCard .game-card-header { height:auto; aspect-ratio:1.91; overflow:hidden; padding:0; background:#e7a32d; }
     #gameCornerHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:contain; }
+    #ssAnneHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:cover; object-position:center 68%; }
+    #silphCoHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:cover; object-position:center 48%; }
+    #battleTowerHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:cover; object-position:center 42%; }
+    #missionHomeCard .game-card-header { height:auto; aspect-ratio:1.91; overflow:hidden; padding:0; background:#27834c; }
+    #missionHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:cover; object-position:center; }
+    #progressGuideHomeCard .game-card-header { height:auto; aspect-ratio:1.91; overflow:hidden; padding:0; background:#35a9e8; }
+    #progressGuideHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:cover; object-position:center; }
+    #gymsHomeCard .game-card-header { height:auto; aspect-ratio:1.91; overflow:hidden; padding:0; background:#277e6a; }
+    #gymsHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:cover; object-position:center; }
+    #explorationHomeCard .game-card-header { height:auto; aspect-ratio:1.91; overflow:hidden; padding:0; background:#bd6134; }
+    #explorationHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:cover; object-position:center bottom; }
+    #pokemonCenterHomeCard .game-card-header { height:auto; aspect-ratio:1.78; overflow:hidden; padding:0; background:#c92736; }
+    #pokemonCenterHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:cover; object-position:center; }
+    #pokeMarketHomeCard .game-card-header { height:auto; aspect-ratio:1.78; overflow:hidden; padding:0; background:#1885d1; }
+    #pokeMarketHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:cover; object-position:center; }
     .item-tooltip-card::after {
       content: attr(data-item-tooltip); position: absolute; z-index: 20;
       left: 50%; bottom: calc(100% + 8px); transform: translate(-50%, 4px);
@@ -1172,6 +1195,9 @@
       font-size: 0.9rem; line-height: 1.4; margin-bottom: 14px;
       color: var(--text); display: flex; align-items: center;
     }
+    .battle-volume-control { display:flex; align-items:center; gap:5px; flex:0 0 116px; color:var(--text-muted); font-size:.65rem; }
+    .battle-volume-control input { width:66px; height:20px; margin:0; accent-color:var(--primary); cursor:pointer; }
+    .battle-volume-control output { min-width:27px; color:var(--text); font-size:.65rem; text-align:right; }
     .battle-actions {
       display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
@@ -2200,9 +2226,10 @@
     .poke-coins-supporter-field input { width:100%; min-height:40px; padding:9px 11px; border:1px solid #526b91; border-radius:7px; color:var(--text); background:#0d1522; font:inherit; }
     .poke-coins-supporter-field input:focus-visible { outline:2px solid #72c8ff; outline-offset:1px; }
     .poke-coins-supporter-status { flex-basis:100%; min-height:1em; color:#9fb0c9; font-size:.75rem; }
-    .poke-coins-quick-header { position:relative; display:flex; align-items:center; justify-content:center; gap:12px; overflow:hidden; background:radial-gradient(ellipse at 50% 0%,rgba(93,172,255,.4),transparent 63%),linear-gradient(145deg,#28456a,#111a2a)!important; }
-    .poke-coins-quick-header::after { content:""; position:absolute; inset:7px; border:1px solid rgba(185,218,255,.22); border-radius:9px; pointer-events:none; }
-    .poke-coins-gem { position:relative; z-index:1; font-size:3.5rem; line-height:1; filter:drop-shadow(0 4px 12px rgba(55,177,255,.36)); }
+    .poke-coins-quick-header { position:relative; display:flex; align-items:center; justify-content:center; gap:12px; overflow:hidden; background:radial-gradient(ellipse at 50% 0%,rgba(20,115,224,.24),transparent 63%),linear-gradient(145deg,#082b59,#061329)!important; }
+    .poke-coins-quick-header > img { display:block; width:100%; height:100%; object-fit:contain; }
+    #pokeCoinsHomeCard .poke-coins-quick-header { height:155px; }
+    .poke-coins-gem { position:relative; z-index:1; font-size:4.5rem; line-height:1; filter:drop-shadow(0 4px 12px rgba(55,177,255,.36)); }
     .poke-coins-quick-header-copy { position:relative; z-index:1; color:#dcecff; }
     .poke-coins-quick-header-copy strong,.poke-coins-quick-header-copy small { display:block; }
     .poke-coins-quick-header-copy strong { font-size:.83rem; letter-spacing:.08em; }
@@ -2456,6 +2483,9 @@
       #battleOverlay { padding-bottom: env(safe-area-inset-bottom); }
       .battle-ui { padding: 12px 12px calc(14px + env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; }
       .battle-log { min-height: 44px; margin-bottom: 10px; padding: 9px 10px; font-size: .82rem; }
+      .battle-volume-control { flex-basis:88px; gap:3px; font-size:.58rem; }
+      .battle-volume-control input { width:48px; }
+      .battle-volume-control output { min-width:24px; font-size:.58rem; }
       .battle-btn, .move-btn, .btn { min-height: 44px; }
       .move-btn { gap: 6px; flex-wrap: wrap; overflow-wrap: anywhere; }
       .battle-result-overlay { padding: 12px; }
@@ -2497,11 +2527,32 @@
       #panel-home > .cards-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
       #panel-home > .cards-grid > .game-card { display: grid; grid-template-columns: 100px minmax(0, 1fr); align-items: stretch; }
       #panel-home > .cards-grid > .game-card > .game-card-header { width: 100px; height: auto !important; min-height: 104px; padding: 8px !important; border-radius: 15px 0 0 15px; overflow: hidden; }
-      #panel-home > .cards-grid > #gameCornerHomeCard > .game-card-header { aspect-ratio:auto; }
-      #panel-home > .cards-grid > #gameCornerHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #gameCornerHomeCard > .game-card-header,
+      #panel-home > .cards-grid > #ssAnneHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #silphCoHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #battleTowerHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #missionHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #progressGuideHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #gymsHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #explorationHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #pokemonCenterHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #pokeMarketHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #seasonPassHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #pvpHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #gameCornerHomeCard > .game-card-header img,
+      #panel-home > .cards-grid > #ssAnneHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #silphCoHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #battleTowerHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #missionHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #progressGuideHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #gymsHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #explorationHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #pokemonCenterHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #seasonPassHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #pvpHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
       #panel-home > .cards-grid > .game-card > .game-card-header img { width: auto !important; height: auto !important; max-width: 100% !important; max-height: 100% !important; }
       #panel-home > .cards-grid > .game-card > .poke-coins-quick-header { flex-direction: column; gap: 0; }
-      #panel-home > .cards-grid > .game-card > .poke-coins-quick-header .poke-coins-gem { font-size: 3.2rem; flex: 0 0 auto; }
+      #panel-home > .cards-grid > .game-card > .poke-coins-quick-header .poke-coins-gem { font-size: 4rem; flex: 0 0 auto; }
       #panel-home > .cards-grid > .game-card > .poke-coins-quick-header .poke-coins-quick-header-copy { display: none; }
       #panel-home > .cards-grid > .game-card > .game-card-body { min-width: 0; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; }
       #panel-home > .cards-grid .game-card-title, #panel-home > .cards-grid .game-card-desc { overflow-wrap: anywhere; }
@@ -2545,7 +2596,10 @@
     .trainer-card-identity-panel .trainer-card-vip-benefits { grid-column:1/-1; }
     .vip-profile-name { color:#fbbf24 !important; text-shadow:0 0 12px rgba(251,191,36,.35); }
 
-    .season-pass-home-art { background:linear-gradient(135deg,#432b12,#1b1510) !important; font-size:3rem; }
+    #seasonPassHomeCard .season-pass-home-art { height:auto; aspect-ratio:1.78; overflow:hidden; padding:0; background:#d9950d; }
+    #seasonPassHomeCard .season-pass-home-art img { display:block; width:100%; height:100%; object-fit:contain; }
+    #pvpHomeCard .game-card-header { height:auto; aspect-ratio:1.78; overflow:hidden; padding:0; background:#1d1225; }
+    #pvpHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:contain; }
     .season-pass-shell { display:grid; gap:18px; }
     .season-pass-hero { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(230px,.65fr); gap:24px; align-items:center; padding:26px; border:1px solid #9a4d1e88; border-radius:20px; background:radial-gradient(ellipse at 80% 35%,#f9731626,transparent 44%),linear-gradient(115deg,#382013,#171318 70%); }
     .season-pass-kicker { color:#fb923c; font-size:.76rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
@@ -2608,3 +2662,70 @@
     .game-corner-prize-buy { grid-column:1/-1; width:100%; min-height:38px; padding:8px 10px; border:1px solid #fbbf24; border-radius:9px; color:#fff; background:linear-gradient(135deg,#ea580c,#c2410c); font:inherit; font-size:.8rem; font-weight:800; cursor:pointer; }
     .game-corner-prize-buy:disabled { border-color:var(--border); color:var(--text-muted); background:#25232b; cursor:not-allowed; }
     @media(max-width:600px) { .game-corner-page-head { align-items:stretch; flex-direction:column; padding:16px; } .game-corner-wallet { width:100%; } .game-corner-tabs { width:100%; } .game-corner-tab { flex:1; min-width:0; padding:8px 6px; font-size:.78rem; } .game-corner-game iframe { height:970px; } .game-corner-prize-shop { padding:14px; } .game-corner-prize-heading { align-items:stretch; flex-direction:column; } .game-corner-prize-grid { grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); } }
+
+    /* Keep every battle mode on the same field, status-card and command-panel layout. */
+    .pvp-arena, .coop-boss-arena {
+      width:100%; max-width:1000px; min-height:min(82vh,760px); margin:0 auto;
+      align-items:center; justify-content:flex-end;
+    }
+    .pvp-arena .battle-field, .coop-boss-arena .battle-field {
+      width:100%; max-width:780px; min-height:0; flex:1 1 auto;
+      justify-content:space-between; gap:12px; padding:28px 24px 8px;
+    }
+    .pvp-arena .battle-enemy, .coop-boss-arena .battle-enemy {
+      display:flex; align-items:flex-start; justify-content:space-between; gap:20px;
+      padding:0 6% 0 2%;
+    }
+    .pvp-arena .battle-player, .coop-boss-arena .battle-player {
+      display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+      margin-bottom:8px; padding:0 2% 0 8%;
+    }
+    .pvp-arena .enemy-info, .pvp-arena .player-info,
+    .coop-boss-arena .enemy-info, .coop-boss-arena .player-info {
+      width:auto; min-width:200px; max-width:min(440px,62vw); padding:12px 16px;
+      border:2px solid rgba(255,255,255,.12); border-radius:14px;
+      background:rgba(12,14,22,.88); box-shadow:0 8px 28px rgba(0,0,0,.45);
+      backdrop-filter:blur(8px);
+    }
+    .pvp-arena .battle-ui, .coop-boss-arena .battle-ui {
+      width:100%; max-width:700px; flex:0 0 auto; padding:16px 20px 20px;
+      border:0; border-top:3px solid var(--primary); border-radius:20px 20px 0 0;
+      background:var(--card); box-shadow:0 -8px 32px rgba(0,0,0,.4);
+    }
+    .pvp-arena .battle-log, .coop-boss-arena .battle-log {
+      min-height:52px; margin-bottom:14px; padding:12px 14px;
+      border:1px solid var(--border); border-radius:10px;
+      background:var(--input-bg); color:var(--text); font-weight:400;
+    }
+    .pvp-arena .pvp-turn-prompt, .coop-boss-arena .pvp-turn-prompt {
+      display:block; margin:12px 0 0; color:var(--text-muted); font-size:.82rem; font-weight:400;
+    }
+    .coop-boss-arena .coop-raid-roster { justify-content:center; margin:0 0 12px; }
+    .pvp-arena .battle-actions, .coop-boss-arena .battle-actions { gap:10px; }
+
+    @media(max-width:700px) {
+      .pvp-arena, .coop-boss-arena { min-height:min(82vh,680px); }
+      .pvp-arena .battle-field, .coop-boss-arena .battle-field { padding:22px 12px 6px; gap:8px; }
+      .pvp-arena .battle-enemy, .coop-boss-arena .battle-enemy { gap:6px; padding:0 2%; }
+      .pvp-arena .battle-player, .coop-boss-arena .battle-player { gap:6px; margin-bottom:6px; padding:0 2% 0 4%; }
+      .pvp-arena .enemy-info, .pvp-arena .player-info,
+      .coop-boss-arena .enemy-info, .coop-boss-arena .player-info {
+        width:min(58%,240px); min-width:0; padding:8px 10px;
+      }
+      .coop-boss-arena .enemy-info.daily-boss-info { width:min(58%,240px); min-width:0; padding:8px 10px; }
+      .pvp-arena .battle-ui, .coop-boss-arena .battle-ui { padding:12px 12px calc(14px + env(safe-area-inset-bottom)); }
+      .pvp-arena .battle-log, .coop-boss-arena .battle-log { min-height:42px; margin-bottom:10px; padding:9px 10px; font-size:.82rem; }
+    }
+
+    .coop-boss-arena .battle-enemy { padding-left:0; }
+    .coop-boss-arena .battle-field { max-width:100%; }
+    .coop-boss-arena .battle-player { width:100%; max-width:780px; margin-left:auto; margin-right:auto; }
+    .coop-boss-arena .enemy-info.daily-boss-info.coop-mewtwo-info {
+      width:min(380px,52vw); min-width:0; max-width:100%; margin-left:0; margin-right:auto;
+    }
+    @media(max-width:700px) {
+      .coop-boss-arena .battle-enemy { padding:0; }
+      .coop-boss-arena .enemy-info.daily-boss-info.coop-mewtwo-info { width:min(100%,250px); }
+      .coop-boss-arena .enemy-stage { width:clamp(112px,34vw,160px); flex:0 0 auto; }
+      .coop-boss-arena .enemy-sprite { width:clamp(112px,34vw,160px); height:clamp(112px,34vw,160px); }
+    }
