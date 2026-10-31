@@ -349,8 +349,9 @@
     .welcome-popup-card .btn { min-width:150px; }
 
     /* DASHBOARD */
-    #dashboard { display: none; min-height: 100vh; }
+    #dashboard { position:relative; isolation:isolate; display: none; min-height: 100vh; }
     #dashboard.active { display: flex; }
+    #dashboard::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(rgba(11,11,15,.68),rgba(11,11,15,.78)),url('login-charizard-bg.png') center center / cover no-repeat; }
     .main { margin-left: 0; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
     .topbar {
       padding: 16px 28px; border-bottom: 1px solid var(--border);
@@ -2448,6 +2449,7 @@
     /* Mobile layout refinements */
     @media (max-width: 600px) {
       html, body { width: 100%; overflow-x: clip; }
+      #dashboard::before { background-position:center 34%; background-size:cover; }
       #authFlow { min-height:100vh; min-height:100dvh; padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom)); }
       #dashboard.active, .main { width: 100%; min-width: 0; min-height:100vh; min-height:100dvh; }
       .content, .panel, .container, .card { min-width:0; }
@@ -2539,6 +2541,8 @@
       #panel-home > .cards-grid > #pokeMarketHomeCard > .game-card-header { aspect-ratio:auto; }
       #panel-home > .cards-grid > #seasonPassHomeCard > .game-card-header { aspect-ratio:auto; }
       #panel-home > .cards-grid > #pvpHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #dailyBossHomeCard > .game-card-header { aspect-ratio:auto; }
+      #panel-home > .cards-grid > #eliteFourHomeCard > .game-card-header { aspect-ratio:auto; }
       #panel-home > .cards-grid > #gameCornerHomeCard > .game-card-header img,
       #panel-home > .cards-grid > #ssAnneHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
       #panel-home > .cards-grid > #silphCoHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
@@ -2550,6 +2554,8 @@
       #panel-home > .cards-grid > #pokemonCenterHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
       #panel-home > .cards-grid > #seasonPassHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
       #panel-home > .cards-grid > #pvpHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #dailyBossHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
+      #panel-home > .cards-grid > #eliteFourHomeCard > .game-card-header img { width:100% !important; height:auto !important; max-width:100% !important; max-height:100% !important; object-fit:contain; }
       #panel-home > .cards-grid > .game-card > .game-card-header img { width: auto !important; height: auto !important; max-width: 100% !important; max-height: 100% !important; }
       #panel-home > .cards-grid > .game-card > .poke-coins-quick-header { flex-direction: column; gap: 0; }
       #panel-home > .cards-grid > .game-card > .poke-coins-quick-header .poke-coins-gem { font-size: 4rem; flex: 0 0 auto; }
@@ -2600,6 +2606,10 @@
     #seasonPassHomeCard .season-pass-home-art img { display:block; width:100%; height:100%; object-fit:contain; }
     #pvpHomeCard .game-card-header { height:auto; aspect-ratio:1.78; overflow:hidden; padding:0; background:#1d1225; }
     #pvpHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:contain; }
+    #dailyBossHomeCard .game-card-header { height:auto; aspect-ratio:1.78; overflow:hidden; padding:0; background:#d99317; }
+    #dailyBossHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:contain; }
+    #eliteFourHomeCard .game-card-header { height:auto; aspect-ratio:1.78; overflow:hidden; padding:0; background:#291525; }
+    #eliteFourHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:contain; }
     .season-pass-shell { display:grid; gap:18px; }
     .season-pass-hero { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(230px,.65fr); gap:24px; align-items:center; padding:26px; border:1px solid #9a4d1e88; border-radius:20px; background:radial-gradient(ellipse at 80% 35%,#f9731626,transparent 44%),linear-gradient(115deg,#382013,#171318 70%); }
     .season-pass-kicker { color:#fb923c; font-size:.76rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
