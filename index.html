@@ -849,8 +849,8 @@
       <h2 id="dojoRewardTitle">Escolha sua recompensa do Dojo</h2>
       <p>Chuck reconhece sua vit&oacute;ria. Escolha um dos dois lutadores para entrar na sua equipe. A escolha s&oacute; pode ser feita uma vez.</p>
       <div class="dojo-reward-options">
-        <button type="button" class="dojo-reward-option" onclick="chooseDojoRewardPokemon(106)"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/106.png" alt="Hitmonlee" /><strong>Hitmonlee</strong><small>Chute &middot; Lutador</small></button>
-        <button type="button" class="dojo-reward-option" onclick="chooseDojoRewardPokemon(107)"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/107.png" alt="Hitmonchan" /><strong>Hitmonchan</strong><small>Soco &middot; Lutador</small></button>
+        <button type="button" class="dojo-reward-option" onclick="chooseDojoRewardPokemon(106)"><img src="https://img.pokemondb.net/sprites/black-white/normal/hitmonlee.png" alt="Hitmonlee" /><strong>Hitmonlee</strong><small>Chute &middot; Lutador</small></button>
+        <button type="button" class="dojo-reward-option" onclick="chooseDojoRewardPokemon(107)"><img src="https://img.pokemondb.net/sprites/black-white/normal/hitmonchan.png" alt="Hitmonchan" /><strong>Hitmonchan</strong><small>Soco &middot; Lutador</small></button>
       </div>
       <button type="button" class="btn btn-secondary" style="width:100%;margin-top:14px;" onclick="closeDojoRewardChoice()">Escolher depois</button>
     </section>
@@ -913,12 +913,12 @@
     <div class="battle-field">
       <div class="battle-enemy">
         <div class="enemy-info" id="enemyInfoBox">
-          <div class="enemy-name-row">
+          <div class="battle-pokemon-name-row">
             <div class="poke-name" id="enemyName">Wild Pokémon</div>
+            <div class="poke-level" id="enemyLevel">Nv. 5</div>
             <div class="enemy-caught-badge" id="enemyCaughtBadge">✓ Já capturado</div>
           </div>
           <div class="battle-level-type-row">
-            <div class="poke-level" id="enemyLevel">Nv. 5</div>
             <div id="enemyTypeBadge" class="battle-level-type-badges"></div>
           </div>
           <div id="enemyMajorStatus" class="type-badge" style="display:none;margin-bottom:6px;"></div>
@@ -944,9 +944,11 @@
         </div>
         <div class="player-info" id="playerInfoBox">
           <div class="party-ball-row" id="partyBallRow" role="img" aria-label="Pokémon da equipe"></div>
-          <div class="poke-name" id="playerPokeName">Bulbasaur</div>
-          <div class="battle-level-type-row">
+          <div class="battle-pokemon-name-row">
+            <div class="poke-name" id="playerPokeName">Bulbasaur</div>
             <div class="poke-level" id="playerPokeLevel">Nv. 5</div>
+          </div>
+          <div class="battle-level-type-row">
             <div id="playerTypeBadge" class="battle-level-type-badges"></div>
           </div>
           <div id="playerMajorStatus" class="type-badge" style="display:none;margin-bottom:6px;"></div>
@@ -972,7 +974,7 @@
       <div class="battle-actions" id="battleMenu">
         <button class="battle-btn fight" onclick="showMoves()">Lutar</button>
         <button class="battle-btn bag" onclick="showBag()">Mochila</button>
-        <button class="battle-btn pokemon" id="btnSwitch" onclick="showSwitchMenu()">Trocar</button>
+        <button class="battle-btn pokemon" id="btnSwitch" onclick="showSwitchMenu()">Pokémon</button>
         <button class="battle-btn run" onclick="tryRun()">Fugir</button>
       </div>
       <div class="battle-actions" id="bagMenu" style="display:none;"></div>
@@ -1095,7 +1097,8 @@
     </section>
   </div>
 
+  <script src="assets/pokemon-sprite-slugs.js"></script>
   <script src="assets/game-app.js"></script>
-<footer class="site-footer">Criado por <strong>Flash Game Company</strong></footer>
+<footer class="site-footer">Criado por <strong>Flash Game Company</strong> · Sprites: <a href="https://pokemondb.net/sprites" target="_blank" rel="noopener noreferrer">PokémonDB</a></footer>
 </body>
 </html>

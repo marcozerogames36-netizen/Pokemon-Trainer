@@ -66,7 +66,7 @@
       104: ['Terra'], 109: ['Veneno'], 110: ['Veneno'],
       111: ['Terra','Pedra'], 112: ['Terra','Pedra'], 113: ['Normal'],
       114: ['Planta'], 120: ['Agua'], 121: ['Agua','Psíquico'],
-      122: ['Psíquico'], 132: ['Normal'], 147: ['Dragao'],
+      122: ['Psíquico'], 132: ['Normal'], 147: ['Dragao'], 236: ['Lutador'],
       150: ['Psíquico'],
       152: ['Planta'], 155: ['Fogo'], 158: ['Agua'],
       252: ['Planta'], 255: ['Fogo'], 258: ['Agua'],
@@ -356,7 +356,7 @@
       29: 'female', 30: 'female', 31: 'female',
       32: 'male', 33: 'male', 34: 'male',
       106: 'male', 107: 'male', 113: 'female', 115: 'female',
-      124: 'female', 128: 'male', 238: 'female', 239: 'male',
+      124: 'female', 128: 'male', 236: 'male', 238: 'female', 239: 'male',
       240: 'female', 241: 'female'
     };
     function ensurePokemonGender(pokemon) {
@@ -1611,9 +1611,10 @@
       return Math.max(1, Math.floor(base * variance));
     }
 
-    // Sprites: official-artwork for UI; animated GIFs (pokemondb BW) in battle
+    // Generation 5 static and animated sprites from PokémonDB for National Dex #1–649.
+    // Keep the existing sources as fallbacks for later Pokémon and custom sprites.
     // Annihilape fan sprite by RetroNC: https://www.deviantart.com/retronc/art/Annihilape-Sprite-977387918
-    const SPRITE_FRONT = id => id === 979 ? 'assets/annihilape-retronc.gif' : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+    const SPRITE_FRONT = id => Number(id) === 667 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/667.gif' : id === 979 ? 'assets/annihilape-retronc.gif' : Number(id) <= 649 && pokeSlug(Number(id)) ? `https://img.pokemondb.net/sprites/black-white/normal/${pokeSlug(Number(id))}.png` : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
     const SPRITE_FB = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     const SPRITE = SPRITE_FRONT;
 
@@ -1664,42 +1665,46 @@
     };
 
     function pokeSlug(id) {
-      return POKE_SLUG[id] || null;
+      return POKE_SLUG[id] || window.GEN5_POKE_SLUG?.[id] || null;
     }
 
     // Animated battle sprites (Black/White GIFs — pokemondb)
     const SPRITE_BACK = id => {
-      if (id === 237) return 'assets/hitmontop-back.gif';
+      if (Number(id) === 667) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/667.gif';
+      if (Number(id) === 682) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/682.gif';
+      if (Number(id) === 685) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/685.gif';
       if (id === 810) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/810.gif';
       if (id === 811) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/811.gif';
       if (id === 812) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/812.gif';
       if (id === 807) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/807.gif';
       const slug = pokeSlug(id);
-      if (slug) return `https://img.pokemondb.net/sprites/black-white/anim/back-normal/${slug}.gif`;
+      if (Number(id) <= 649 && slug) return `https://img.pokemondb.net/sprites/black-white/anim/back-normal/${slug}.gif`;
       return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`;
     };
     const SPRITE_ANIM = id => {
-      if (id === 237) return 'assets/hitmontop-front.gif';
+      if (Number(id) === 667) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/667.gif';
       if (id === 979) return 'assets/annihilape-retronc.gif';
       if (id === 810) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/810.gif';
       if (id === 811) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/811.gif';
       if (id === 812) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/812.gif';
       if (id === 807) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/807.gif';
       const slug = pokeSlug(id);
-      if (slug) return `https://img.pokemondb.net/sprites/black-white/anim/normal/${slug}.gif`;
+      if (Number(id) <= 649 && slug) return `https://img.pokemondb.net/sprites/black-white/anim/normal/${slug}.gif`;
       return SPRITE_FRONT(id);
     };
-    const SPRITE_SHINY = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`;
+    const SPRITE_SHINY = id => Number(id) === 667 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/shiny/667.gif' : Number(id) <= 649 && pokeSlug(Number(id)) ? `https://img.pokemondb.net/sprites/black-white/shiny/${pokeSlug(Number(id))}.png` : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`;
     const SPRITE_BACK_SHINY = id => {
+      if (Number(id) === 667) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/shiny/667.gif';
       if (id === 807) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/shiny/807.gif';
       const slug = pokeSlug(id);
-      return slug ? `https://img.pokemondb.net/sprites/black-white/anim/back-shiny/${slug}.gif`
+      return Number(id) <= 649 && slug ? `https://img.pokemondb.net/sprites/black-white/anim/back-shiny/${slug}.gif`
         : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/${id}.png`;
     };
     const SPRITE_ANIM_SHINY = id => {
+      if (Number(id) === 667) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/shiny/667.gif';
       if (id === 807) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/shiny/807.gif';
       const slug = pokeSlug(id);
-      return slug ? `https://img.pokemondb.net/sprites/black-white/anim/shiny/${slug}.gif` : SPRITE_SHINY(id);
+      return Number(id) <= 649 && slug ? `https://img.pokemondb.net/sprites/black-white/anim/shiny/${slug}.gif` : SPRITE_SHINY(id);
     };
     const SPRITE_POKEMON = pokemon => pokemon?.shiny ? SPRITE_SHINY(pokemon.id) : SPRITE(pokemon.id);
     const SPRITE_BACK_POKEMON = pokemon => Number(pokemon?.id) === 318
@@ -1716,7 +1721,7 @@
     function renderLevelUpReward(pokemon, levelsGained, effortText = '') {
       if (!pokemon || levelsGained <= 0) return '';
       const name = escapeHTML(pokemon.name || 'Pokémon');
-      const sprite = pokemon.shiny ? SPRITE_SHINY(pokemon.id) : SPRITE_FB(pokemon.id);
+      const sprite = SPRITE_POKEMON(pokemon);
       const levelText = levelsGained === 1
         ? `${name} chegou ao Nv. ${pokemon.level}.`
         : `${name} subiu ${levelsGained} níveis e chegou ao Nv. ${pokemon.level}.`;
@@ -3522,14 +3527,14 @@
         { id: 'scyther-fr', pokemonId: 123, name: 'Scyther', version: 'FireRed', level: 25, coins: 5500, money: 110000, nuggets: 22 },
         { id: 'porygon-fr', pokemonId: 137, name: 'Porygon', version: 'FireRed', level: 26, coins: 9999, money: 200000, nuggets: 40 },
         { id: 'abra-lg', pokemonId: 63, name: 'Abra', version: 'LeafGreen', level: 7, coins: 120, money: 3000, nuggets: 1 },
-        { id: 'clefairy-lg', pokemonId: 35, name: 'Clefairy', version: 'LeafGreen', level: 12, coins: 750, money: 15000, nuggets: 3 },
-        { id: 'dratini-lg', pokemonId: 147, name: 'Dratini', version: 'LeafGreen', level: 24, coins: 4600, money: 92000, nuggets: 19 },
         { id: 'pinsir-lg', pokemonId: 127, name: 'Pinsir', version: 'LeafGreen', level: 18, coins: 2500, money: 50000, nuggets: 10 },
-        { id: 'porygon-lg', pokemonId: 137, name: 'Porygon', version: 'LeafGreen', level: 18, coins: 6500, money: 130000, nuggets: 26 }
+        { id: 'porygon-lg', pokemonId: 137, name: 'Porygon', version: 'LeafGreen', level: 18, coins: 6500, money: 130000, nuggets: 26 },
+        { id: 'tyrogue', pokemonId: 236, name: 'Tyrogue', version: 'Celadon', level: 10, coins: 1000, money: 20000, nuggets: 4 }
       ]
     };
     let activeGameCornerPrizeCategory = 'pokemon';
     let gameCornerPrizePurchasePending = false;
+    let gameCornerPrizeConfirmationPending = false;
     function setGameCornerPrizeCategory(category) {
       if (!['pokemon', 'tms', 'items'].includes(category)) return;
       activeGameCornerPrizeCategory = category;
@@ -3556,19 +3561,20 @@
       if (totalsNode) totalsNode.textContent = `Catálogo completo: ${totals.coins.toLocaleString('pt-BR')} fichas · ₽ ${totals.money.toLocaleString('pt-BR')} · ${totals.nuggets} Nuggets.`;
       grid.innerHTML = prizes.map(prize => {
         const sprite = prize.kind === 'pokemon'
-          ? `<img src="${SPRITE_FB(prize.pokemonId)}" alt="${escapeHTML(prize.name)}" loading="lazy" onerror="this.onerror=null;this.src='${SPRITE_FRONT(prize.pokemonId)}'">`
+          ? `<img src="${SPRITE(prize.pokemonId)}" alt="${escapeHTML(prize.name)}" loading="lazy" onerror="this.onerror=null;this.src='${SPRITE_FB(prize.pokemonId)}'">`
           : prize.kind === 'tm'
             ? itemIcon(prize.itemKey, '', '📀')
             : itemIcon(prize.itemKey, '', '🎒');
         const description = prize.kind === 'pokemon'
-          ? `${prize.version} · nível ${prize.level}`
+          ? `Nível ${prize.level}`
           : prize.desc || `Ensina ${prize.move?.name || ''} a um Pokémon compatível.`;
         const fullPC = prize.kind === 'pokemon' && player.party.length >= 6 && !player.pc?.boxes?.some(box => box.some(slot => !slot));
-        const disabled = coins < prize.coins || fullPC || gameCornerPrizePurchasePending;
-        const buttonText = fullPC ? 'PC cheio' : coins < prize.coins ? 'Fichas insuficientes' : 'Trocar por fichas';
-        return `<article class="game-corner-prize-card">
+        const disabled = coins < prize.coins || fullPC || gameCornerPrizePurchasePending || gameCornerPrizeConfirmationPending;
+        const buttonText = fullPC ? 'PC cheio' : coins < prize.coins ? 'Fichas insuficientes' : prize.kind === 'pokemon' ? `Trocar por ${prize.coins.toLocaleString('pt-BR')} Fichas` : 'Trocar por fichas';
+        const priceSummary = prize.kind === 'pokemon' ? '' : `<div class="game-corner-prize-meta"><span class="game-corner-prize-chip-cost">${prize.coins.toLocaleString('pt-BR')} fichas</span><details class="game-corner-cost-tooltip"><summary aria-label="Ver custo equivalente em Pok&eacute;d&oacute;lares e Nuggets" title="Ver custo equivalente">i</summary><span class="game-corner-cost-tooltip-bubble">Pok&eacute;d&oacute;lares: &#8381; ${prize.money.toLocaleString('pt-BR')}<br>Nuggets: &times;${prize.nuggets}<small>Valores de refer&ecirc;ncia. A compra &eacute; feita com fichas.</small></span></details></div>`;
+        return `<article class="game-corner-prize-card ${prize.kind === 'pokemon' ? 'game-corner-prize-pokemon-card' : ''}">
           ${sprite}<div class="game-corner-prize-copy"><strong>${escapeHTML(prize.name)}</strong><small>${escapeHTML(description)}</small></div>
-          <div class="game-corner-prize-meta">${prize.coins.toLocaleString('pt-BR')} fichas <span>₽ ${prize.money.toLocaleString('pt-BR')} · Nugget ×${prize.nuggets}</span></div>
+          ${priceSummary}
           <button type="button" class="game-corner-prize-buy" onclick="buyGameCornerPrize('${prize.id}')" ${disabled ? 'disabled' : ''}>${buttonText}</button>
         </article>`;
       }).join('');
@@ -3580,7 +3586,8 @@
         123: { stats: [70, 110, 80, 55, 80, 105], types: ['bug', 'flying'] },
         127: { stats: [65, 125, 100, 55, 70, 85], types: ['bug'] },
         137: { stats: [65, 60, 70, 85, 75, 40], types: ['normal'] },
-        147: { stats: [41, 64, 45, 50, 50, 50], types: ['dragon'] }
+        147: { stats: [41, 64, 45, 50, 50, 50], types: ['dragon'] },
+        236: { stats: [35, 35, 35, 35, 35, 35], types: ['fighting'] }
       }[prize.pokemonId];
       if (!species) throw new Error('Não foi possível criar este Pokémon. Tente novamente.');
       const statNames = ['hp', 'attack', 'defense', 'specialAttack', 'specialDefense', 'speed'];
@@ -3606,8 +3613,67 @@
       ensurePokemonGender(pokemon);
       return pokemon;
     }
+    function ensureGameCornerPrizeConfirmDialog() {
+      let dialog = document.getElementById('gameCornerPrizeConfirmDialog');
+      if (dialog) return dialog;
+      document.body.insertAdjacentHTML('beforeend', `<dialog id="gameCornerPrizeConfirmDialog" class="game-corner-confirm-dialog" aria-labelledby="gameCornerPrizeConfirmTitle">
+        <div class="game-corner-confirm-inner">
+          <span class="game-corner-confirm-kicker">Troca de prêmio</span>
+          <h2 id="gameCornerPrizeConfirmTitle">Deseja trocar?</h2>
+          <div class="game-corner-confirm-prize"><img id="gameCornerPrizeConfirmSprite" alt="" /><p id="gameCornerPrizeConfirmText"></p></div>
+          <div class="game-corner-confirm-actions">
+            <button type="button" class="game-corner-confirm-cancel">Cancelar</button>
+            <button type="button" class="game-corner-confirm-accept">Confirmar troca</button>
+          </div>
+        </div>
+      </dialog>`);
+      dialog = document.getElementById('gameCornerPrizeConfirmDialog');
+      const closeWith = value => { if (dialog.open) dialog.close(value ? 'confirm' : 'cancel'); };
+      dialog.querySelector('.game-corner-confirm-cancel').addEventListener('click', () => closeWith(false));
+      dialog.querySelector('.game-corner-confirm-accept').addEventListener('click', () => closeWith(true));
+      dialog.addEventListener('click', event => { if (event.target === dialog) closeWith(false); });
+      dialog.addEventListener('cancel', event => { event.preventDefault(); closeWith(false); });
+      return dialog;
+    }
+    function confirmGameCornerPrizePurchase(prize) {
+      const dialog = ensureGameCornerPrizeConfirmDialog();
+      const sprite = document.getElementById('gameCornerPrizeConfirmSprite');
+      sprite.src = SPRITE(prize.pokemonId);
+      sprite.alt = prize.name;
+      sprite.onerror = () => { sprite.onerror = null; sprite.src = SPRITE_FB(prize.pokemonId); };
+      document.getElementById('gameCornerPrizeConfirmText').textContent = `${prize.name} custa ${prize.coins.toLocaleString('pt-BR')} fichas!`;
+      dialog.returnValue = '';
+      return new Promise(resolve => {
+        dialog.addEventListener('close', () => resolve(dialog.returnValue === 'confirm'), { once: true });
+        dialog.showModal();
+      });
+    }
+    function showGameCornerPokemonAcquired(prize) {
+      let dialog = document.getElementById('gameCornerPokemonAcquiredDialog');
+      if (!dialog) {
+        document.body.insertAdjacentHTML('beforeend', `<dialog id="gameCornerPokemonAcquiredDialog" class="game-corner-acquired-dialog" aria-labelledby="gameCornerPokemonAcquiredTitle">
+          <div class="game-corner-acquired-inner">
+            <span class="game-corner-acquired-kicker">Prêmio resgatado</span>
+            <img class="game-corner-acquired-sprite" alt="" />
+            <h2 id="gameCornerPokemonAcquiredTitle">Pokémon adquirido!</h2>
+            <p class="game-corner-acquired-message"></p>
+            <button type="button" class="game-corner-acquired-close">Continuar</button>
+          </div>
+        </dialog>`);
+        dialog = document.getElementById('gameCornerPokemonAcquiredDialog');
+        dialog.querySelector('.game-corner-acquired-close').addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+        dialog.addEventListener('cancel', event => { event.preventDefault(); dialog.close(); });
+      }
+      const sprite = dialog.querySelector('.game-corner-acquired-sprite');
+      sprite.src = SPRITE_ANIM(prize.pokemonId);
+      sprite.alt = prize.name;
+      sprite.onerror = () => { sprite.onerror = null; sprite.src = SPRITE(prize.pokemonId); };
+      dialog.querySelector('.game-corner-acquired-message').textContent = `Você adquiriu ${prize.name}!`;
+      if (!dialog.open) dialog.showModal();
+    }
     async function buyGameCornerPrize(prizeId) {
-      if (!player || battle || gameCornerPrizePurchasePending) return;
+      if (!player || battle || gameCornerPrizePurchasePending || gameCornerPrizeConfirmationPending) return;
       const prize = getGameCornerPrizes().find(entry => entry.id === prizeId);
       if (!prize) return;
       if (ensureGameCornerWallet() < prize.coins) { showToast('Você não tem fichas suficientes para esse prêmio.', 'error'); return; }
@@ -3619,6 +3685,19 @@
           renderGameCornerPrizes();
           return;
         }
+      }
+      if (prize.kind === 'pokemon') {
+        gameCornerPrizeConfirmationPending = true;
+        renderGameCornerPrizes();
+        let confirmed = false;
+        try {
+          confirmed = await confirmGameCornerPrizePurchase(prize);
+        } finally {
+          gameCornerPrizeConfirmationPending = false;
+          renderGameCornerPrizes();
+        }
+        if (!confirmed || !player || battle) return;
+        if (ensureGameCornerWallet() < prize.coins) { showToast('Você não tem fichas suficientes para esse prêmio.', 'error'); return; }
       }
       gameCornerPrizePurchasePending = true;
       renderGameCornerPrizes();
@@ -3647,7 +3726,8 @@
         renderPC();
         updateStatsUI();
         saveGame();
-        showToast(`${prize.name} foi resgatado por ${prize.coins.toLocaleString('pt-BR')} fichas!`);
+        if (prize.kind === 'pokemon') showGameCornerPokemonAcquired(prize);
+        else showToast(`${prize.name} foi resgatado por ${prize.coins.toLocaleString('pt-BR')} fichas!`);
       } catch (error) {
         showToast(error.message || 'Não foi possível concluir a troca.', 'error');
       } finally {
@@ -3739,6 +3819,9 @@
     let onlineUser = null;
     let saveTimer = null;
     let saveChain = Promise.resolve();
+    let adminGrantRealtimeChannel = null;
+    let adminGrantRealtimeUserId = null;
+    const processedAdminGrantEvents = new Set();
     let passwordRecovery = false;
     let accountLogoutMonitor = null;
     let accountLogoutCheckBusy = false;
@@ -3762,6 +3845,7 @@
     async function forceLogoutAfterAdminAction() {
       if (!onlineUser || !supabaseClient || accountLogoutInProgress) return;
       accountLogoutInProgress = true;
+      stopAdminGrantRealtime();
       if (accountLogoutMonitor) clearInterval(accountLogoutMonitor);
       accountLogoutMonitor = null;
       try { await supabaseClient.auth.signOut({ scope: 'local' }); }
@@ -3819,6 +3903,73 @@
         });
       }
       return supabaseInitPromise;
+    }
+
+    function stopAdminGrantRealtime() {
+      if (adminGrantRealtimeChannel && supabaseClient) void supabaseClient.removeChannel(adminGrantRealtimeChannel);
+      adminGrantRealtimeChannel = null;
+      adminGrantRealtimeUserId = null;
+      processedAdminGrantEvents.clear();
+    }
+
+    function applyAdminGrantRealtimeEvent(event) {
+      if (!player || !onlineUser || event?.user_id !== onlineUser.id || !event.id || processedAdminGrantEvents.has(event.id)) return;
+      processedAdminGrantEvents.add(event.id);
+      const payload = event.payload || {};
+      const amount = Math.max(0, Math.floor(Number(payload.amount) || 0));
+      let message = 'Um recurso enviado pelo administrador chegou à sua conta.';
+
+      if (event.kind === 'money' || event.kind === 'pokeCoins' || event.kind === 'battlePoints') {
+        if (!amount) return;
+        player[event.kind] = Math.max(0, Number(player[event.kind]) || 0) + amount;
+      } else if (event.kind === 'item') {
+        const key = String(payload.key || '');
+        if (!/^[a-z0-9_]{1,50}$/.test(key) || !amount) return;
+        ensureBagItems();
+        setItemQty(key, getItemQty(key) + amount);
+        if (document.getElementById('panel-bag')?.classList.contains('active')) renderBag();
+        message = `Você recebeu ${amount} ${amount === 1 ? 'unidade' : 'unidades'} de ${BAG_CATEGORIES.flatMap(category => category.items).find(item => item.key === key)?.name || key}.`;
+      } else if (event.kind === 'pokemon') {
+        const pokemon = payload.pokemon;
+        if (!pokemon || !Number.isInteger(Number(pokemon.id)) || !pokemon.tradeId) return;
+        const alreadyOwned = [...(player.party || []), ...(player.pc?.boxes || []).flat()].some(entry => entry?.tradeId === pokemon.tradeId);
+        if (alreadyOwned) return;
+        if (!Array.isArray(player.party)) player.party = [];
+        if (player.party.length < 6) {
+          player.party.push(pokemon);
+          if (!player.poke) player.poke = pokemon;
+        } else {
+          ensurePC();
+          const box = player.pc.boxes.find(candidate => candidate.some(slot => !slot));
+          if (!box) { showToast('O Pokémon chegou, mas seu PC está cheio. Entre novamente para sincronizar.', 'info'); return; }
+          box[box.findIndex(slot => !slot)] = pokemon;
+        }
+        refreshPartyUI();
+        if (document.getElementById('panel-pc')?.classList.contains('active')) renderPC();
+        message = `Você recebeu ${pokemon.name || 'um Pokémon'} do administrador!`;
+      } else return;
+
+      updateStatsUI();
+      saveGame();
+      showToast(message);
+    }
+
+    function startAdminGrantRealtime() {
+      if (!onlineUser || !supabaseClient || !player) return;
+      if (adminGrantRealtimeChannel && adminGrantRealtimeUserId === onlineUser.id) return;
+      stopAdminGrantRealtime();
+      adminGrantRealtimeUserId = onlineUser.id;
+      adminGrantRealtimeChannel = supabaseClient
+        .channel(`admin-grants-${onlineUser.id}`)
+        .on('postgres_changes', {
+          event: 'INSERT', schema: 'public', table: 'admin_grant_events',
+          filter: `user_id=eq.${onlineUser.id}`
+        }, payload => applyAdminGrantRealtimeEvent(payload.new))
+        .subscribe(status => {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            console.warn('[Admin] Não foi possível conectar à sincronização de recompensas.');
+          }
+        });
     }
 
     function getAuthRedirectUrl() {
@@ -5455,7 +5606,7 @@
         const targetIndex = 32;
         const reelEntries = Array.from({ length: targetIndex + 9 }, () => catalog[Math.floor(Math.random() * catalog.length)]);
         reelEntries[targetIndex] = selected;
-        reel.innerHTML = reelEntries.map(entry => `<span class="flamebox-reel-tile"><img src="${SPRITE_FB(entry.id)}" alt="${escapeHTML(entry.name)}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FRONT(entry.id)}'"></span>`).join('');
+        reel.innerHTML = reelEntries.map(entry => `<span class="flamebox-reel-tile"><img src="${SPRITE(entry.id)}" alt="${escapeHTML(entry.name)}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FB(entry.id)}'"></span>`).join('');
         reel.style.transform = 'translateX(0)';
         void reel.offsetWidth;
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -5490,9 +5641,9 @@
         status.textContent = `${FLAME_BOX_ODDS.find(tier => tier.id === selected.rarity.id)?.label || 'Pokémon'} encontrado!`;
         const prizeDialog = document.getElementById('flameBoxPrizeDialog');
         const prizeSprite = document.getElementById('flameBoxPrizeSprite');
-        prizeSprite.src = SPRITE_FB(pokemon.id);
+        prizeSprite.src = SPRITE(pokemon.id);
         prizeSprite.alt = pokemon.name;
-        prizeSprite.onerror = () => { prizeSprite.onerror = null; prizeSprite.src = SPRITE_FRONT(pokemon.id); };
+        prizeSprite.onerror = () => { prizeSprite.onerror = null; prizeSprite.src = SPRITE_FB(pokemon.id); };
         document.getElementById('flameBoxPrizeRarity').textContent = FLAME_BOX_ODDS.find(tier => tier.id === selected.rarity.id)?.label || 'Pokémon';
         document.getElementById('flameBoxPrizeName').textContent = pokemon.name;
         document.getElementById('flameBoxPrizeDestination').textContent = `Nv. ${pokemon.level} · Adicionado à ${destination}.`;
@@ -5520,7 +5671,7 @@
       }
       document.getElementById('bagPokemonTargetDescription').textContent = `${item.name}: ${item.desc || 'Selecione um Pokémon para receber este item.'}`;
       document.getElementById('bagPokemonTargetBanner').innerHTML = `${itemIcon(item.sprite || item.key, '', item.icon || '🎒')}<div><strong>${escapeHTML(item.name)}</strong><small>${escapeHTML(item.desc || 'Escolha quem receberá o item.')}</small></div>`;
-      document.getElementById('bagPokemonTargetList').innerHTML = `<div class="social-trade-grid">${targets.map(({ pokemon, index }) => `<button type="button" class="social-trade-option bag-target-pokemon-option" onclick="selectBagPokemonTarget('${itemKey}',${index})"><img src="${SPRITE_FB(pokemon.id)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_POKEMON(pokemon)}'"><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${Math.max(0, Math.round(pokemon.hp))}/${pokemon.maxHp} HP</small></button>`).join('')}</div>`;
+      document.getElementById('bagPokemonTargetList').innerHTML = `<div class="social-trade-grid">${targets.map(({ pokemon, index }) => `<button type="button" class="social-trade-option bag-target-pokemon-option" onclick="selectBagPokemonTarget('${itemKey}',${index})"><img src="${SPRITE_POKEMON(pokemon)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'"><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${Math.max(0, Math.round(pokemon.hp))}/${pokemon.maxHp} HP</small></button>`).join('')}</div>`;
       if (!dialog.open) dialog.showModal();
     }
 
@@ -5772,7 +5923,7 @@
       document.getElementById('goldBottleCapPokemonList').innerHTML = `<div class="social-trade-grid">${targets.map(({ pokemon, index }) => {
         ensurePokemonTraits(pokemon);
         const perfectIVs = ['hp','attack','defense','specialAttack','specialDefense','speed'].filter(stat => pokemon.ivs[stat] === 31).length;
-        return `<button type="button" class="social-trade-option goldcap-pokemon-option" onclick="selectGoldBottleCapPokemon(${index})"><img src="${SPRITE_FB(pokemon.id)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_POKEMON(pokemon)}'"><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${perfectIVs}/6 IVs no máximo</small></button>`;
+        return `<button type="button" class="social-trade-option goldcap-pokemon-option" onclick="selectGoldBottleCapPokemon(${index})"><img src="${SPRITE_POKEMON(pokemon)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'"><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${perfectIVs}/6 IVs no máximo</small></button>`;
       }).join('')}</div>`;
       dialog.showModal();
     }
@@ -5797,7 +5948,7 @@
         dialog.addEventListener('click', event => { if (event.target === dialog) closeEVCapPokemonPicker(); });
         dialog.addEventListener('cancel', () => cancelBagItemUse());
       }
-      document.getElementById('evCapPokemonList').innerHTML = `<div class="social-trade-grid">${targets.map(({ pokemon, index }) => `<button type="button" class="social-trade-option evcap-pokemon-option" onclick="selectEVCapPokemon(${index})"><img src="${SPRITE_FB(pokemon.id)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_POKEMON(pokemon)}'"><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${Math.max(0, Math.round(pokemon.hp))}/${pokemon.maxHp} HP</small></button>`).join('')}</div>`;
+      document.getElementById('evCapPokemonList').innerHTML = `<div class="social-trade-grid">${targets.map(({ pokemon, index }) => `<button type="button" class="social-trade-option evcap-pokemon-option" onclick="selectEVCapPokemon(${index})"><img src="${SPRITE_POKEMON(pokemon)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'"><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${Math.max(0, Math.round(pokemon.hp))}/${pokemon.maxHp} HP</small></button>`).join('')}</div>`;
       dialog.showModal();
     }
 
@@ -5830,7 +5981,7 @@
       }
       dialog.dataset.partyIndex = String(partyIndex);
       dialog.dataset.evCapSelected = '[]';
-      document.getElementById('evCapStatsContent').innerHTML = `<div class="evcap-stat-hero"><img src="${SPRITE_FB(pokemon.id)}" alt="" onerror="this.onerror=null;this.src='${SPRITE_POKEMON(pokemon)}'"><div><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${total}/510 EVs atuais · ${remainingAfterUse} EVs ficarão livres após redistribuir</small></div></div><p id="evCapStatsSelectionStatus" class="evcap-stat-selection">Selecione dois atributos. A distribuição atual será substituída e ${remainingAfterUse} EVs ficarão livres.</p><div class="evcap-stat-grid">${stats.map(stat => `<button type="button" class="evcap-stat-card" data-ev-cap-stat="${stat}" aria-pressed="false" onclick="toggleEVCapStat(${partyIndex},'${stat}')"><span class="evcap-stat-card-top"><strong>${labels[stat]}</strong><small>${pokemon.evs[stat]} → 252</small></span><span class="evcap-stat-track"><i style="width:${Math.min(100, pokemon.evs[stat] / EV_LIMIT_STAT * 100)}%"></i></span></button>`).join('')}</div>`;
+      document.getElementById('evCapStatsContent').innerHTML = `<div class="evcap-stat-hero"><img src="${SPRITE_POKEMON(pokemon)}" alt="" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'"><div><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${total}/510 EVs atuais · ${remainingAfterUse} EVs ficarão livres após redistribuir</small></div></div><p id="evCapStatsSelectionStatus" class="evcap-stat-selection">Selecione dois atributos. A distribuição atual será substituída e ${remainingAfterUse} EVs ficarão livres.</p><div class="evcap-stat-grid">${stats.map(stat => `<button type="button" class="evcap-stat-card" data-ev-cap-stat="${stat}" aria-pressed="false" onclick="toggleEVCapStat(${partyIndex},'${stat}')"><span class="evcap-stat-card-top"><strong>${labels[stat]}</strong><small>${pokemon.evs[stat]} → 252</small></span><span class="evcap-stat-track"><i style="width:${Math.min(100, pokemon.evs[stat] / EV_LIMIT_STAT * 100)}%"></i></span></button>`).join('')}</div>`;
       dialog.showModal();
     }
 
@@ -7091,6 +7242,7 @@
         if (error) throw error;
         const { error: signOutError } = await supabaseClient.auth.signOut();
         if (signOutError) throw signOutError;
+        stopAdminGrantRealtime();
         onlineUser = null;
         player = null;
         document.getElementById('dashboard').classList.remove('active');
@@ -7809,6 +7961,7 @@
     function enterDashboard() {
       document.getElementById('authFlow').style.display = 'none';
       document.getElementById('dashboard').classList.add('active');
+      startAdminGrantRealtime();
       processVipBenefits();
       scheduleVipBenefits();
       document.getElementById('dashName').textContent = player.name;
@@ -8303,7 +8456,7 @@
           button.textContent = 'Enviando recurso...';
         }
         if (grantingToCurrentUser) await flushGameSave();
-        const { data, error } = await supabaseClient.rpc('admin_grant_trainer_asset', {
+        const { data, error } = await supabaseClient.rpc('admin_grant_trainer_asset_notify', {
           p_target: selectedTrainer.user_id, p_kind: kind, p_payload: payload
         });
         if (error) throw error;
@@ -8441,8 +8594,14 @@
       return [...pvpSelectedIndices].sort((a,b)=>a-b).map(index=>player.party[index]).filter(Boolean);
     }
 
-    async function pvpBuildTeamSnapshot() {
+    function pvpServerType(type) {
+      const normalized = normalizeBattleType(type);
+      return normalized === 'Elétrico' ? 'Eletrico' : normalized === 'Psíquico' ? 'Psiquico' : normalized;
+    }
+
+    async function pvpBuildTeamSnapshot(includeTrainerAvatar = false) {
       const selected = pvpGetSelectedTeam();
+      const trainerAvatarId = trainerAvatarConfig(false).id;
       const baseStats = await Promise.all(selected.map(async pokemon => {
         const id = Number(pokemon.id);
         if (pvpBaseStatsCache.has(id)) return pvpBaseStatsCache.get(id);
@@ -8475,7 +8634,7 @@
         const calculatedStats = pvpCalculateStats(baseStats[pokemonIndex], pokemon, ivs, evs);
         const maxHp = calculatedStats.hp;
         const moves = (pokemon.moves || []).slice(0,4).map(move => ({
-          name: String(move.name || 'Golpe'), type: getCurrentMoveType(move), category: move.category || (isPhysicalMove(move) ? 'physical' : 'special'),
+          name: String(move.name || 'Golpe'), type: pvpServerType(getCurrentMoveType(move)), category: move.category || (isPhysicalMove(move) ? 'physical' : 'special'),
           power: Math.max(0, Math.min(250, Math.floor(Number(move.power) || 0))),
           accuracy: move.accuracy !== null && move.accuracy !== undefined && Number.isFinite(Number(move.accuracy)) ? Math.max(1, Math.min(100, Number(move.accuracy))) : 100,
           priority: isProtectMove(move) ? (['wide guard','quick guard'].includes(String(move.name||'').trim().toLowerCase()) ? 3 : 4) : Math.max(-7,Math.min(7,Math.floor(Number(move.priority ?? ({'quick attack':1,'mach punch':1,'extreme speed':1,'follow me':2,'helping hand':5,'counter':-5,'mirror coat':-5,'vital throw':-1,'focus punch':-3}[String(move.name||'').toLowerCase()] ?? 0))||0))),
@@ -8488,10 +8647,11 @@
         }));
         return {
           id: Number(pokemon.id) || 1, name: String(pokemon.name || 'Pokémon').slice(0,32),
+          ...(includeTrainerAvatar ? { trainerAvatarId } : {}),
           partyIndex: player.party.indexOf(pokemon), tradeId: String(pokemon.tradeId || ''),
           gender: pokemon.gender || '', level: Math.max(1, Math.min(100, Math.floor(Number(pokemon.level) || 1))), maxHp,
           sourceMaxHp: Math.max(1, Number(pokemon.maxHp) || maxHp),
-          types: getTypes(pokemon.id), stats: calculatedStats,
+          types: getTypes(pokemon.id).map(pvpServerType), stats: calculatedStats,
           hp: Math.round(maxHp * Math.max(0, Math.min(1, (Number(pokemon.hp) || 0) / Math.max(1, Number(pokemon.maxHp) || maxHp)))), ability: ABILITY_INFO[pokemon.ability] ? pokemon.ability : '',
           heldItem: String(pokemon.heldItem || ''),
           nature: String(pokemon.natureMint || pokemon.nature || ''), ivs, evs, moves
@@ -8835,8 +8995,8 @@
       const moveButtons = (active?.moves || []).map((move,index)=>{
         const pp = Number(localPp[localActive]?.[index]) || 0;
         const disabled = pp<=0 || myActionPending || activeHp<=0;
-        return `<button class="move-btn" data-move-type="${escapeHTML(normalizeBattleType(move.type))}" style="--move-color:${pvpTypeColor(move.type)}" ${disabled?'disabled':''} onclick="pvpSubmitAction({type:'move',index:${index}})">
-          <span>${escapeHTML(move.name)}${pp<=0?' (sem PP)':''}</span><span><span class="move-category ${getMoveCategoryClass(move)}">${escapeHTML(getMoveCategory(move))}</span><span class="move-power"> PWR ${move.power} · PP ${pp}/${move.maxPp}</span>${renderMoveEffectiveness(move, foeTeam[foeActive])}</span></button>`;
+        return `<button class="move-btn battle-move-choice" data-move-type="${escapeHTML(normalizeBattleType(move.type))}" style="--move-color:${pvpTypeColor(move.type)}" ${disabled?'disabled':''} onclick="pvpSubmitAction({type:'move',index:${index}})">
+          <span class="battle-move-heading"><span class="move-type" style="--move-color:${pvpTypeColor(move.type)}">${escapeHTML(move.type)}</span><strong>${escapeHTML(move.name)}${pp<=0?' (sem PP)':''}</strong></span><span class="battle-move-details"><span class="move-category ${getMoveCategoryClass(move)}">${escapeHTML(getMoveCategory(move))}</span><span class="battle-move-pp">PP ${pp}/${move.maxPp}</span>${renderMoveEffectiveness(move, foeTeam[foeActive])}</span></button>`;
       }).join('');
       const struggleButton = !hasPpMove ? `<button class="move-btn" ${myActionPending||activeHp<=0?'disabled':''} onclick="pvpSubmitAction({type:'struggle',index:-1})"><span>Struggle</span><span class="move-power">PWR 50 · PP —</span></button>` : '';
       const switchButtons = localTeam.map((pokemon,index)=>{
@@ -8990,14 +9150,14 @@
     }
     async function coopBossCreate(){
       if(coopBossBusy)return; coopBossBusy=true;
-      try{const team=await pvpBuildTeamSnapshot(); if(!team.length)throw new Error('Selecione pelo menos um Pokémon.');if(!coopBossHasHealthyPokemon(team)){coopBossShowFaintedModal();return;} let room,error;
+      try{const team=await pvpBuildTeamSnapshot(true); if(!team.length)throw new Error('Selecione pelo menos um Pokémon.');if(!coopBossHasHealthyPokemon(team)){coopBossShowFaintedModal();return;} let room,error;
         for(let i=0;i<4;i++){const res=await supabaseClient.rpc('coop_boss_create',{p_code:pvpMakeCode(),p_trainer:player.name,p_team:team});room=res.data;error=res.error;if(!error)break;if(!/duplicate|unique/i.test(error.message||'')||i===3)throw error;}
         await coopBossAttach(room);showToast('Sala do Big Boss criada. Compartilhe o código com os outros treinadores.');
       }catch(e){showToast('Não foi possível criar a sala: '+e.message,'error');}finally{coopBossBusy=false;}
     }
     async function coopBossJoin(){
       if(coopBossBusy)return;const code=String(document.getElementById('coopBossCodeInput')?.value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);if(code.length!==6){showToast('Digite o código de 6 caracteres.','error');return;}coopBossBusy=true;
-      try{const team=await pvpBuildTeamSnapshot();if(!team.length)throw new Error('Selecione pelo menos um Pokémon.');if(!coopBossHasHealthyPokemon(team)){coopBossShowFaintedModal();return;}const {data,error}=await supabaseClient.rpc('coop_boss_join',{p_code:code,p_trainer:player.name,p_team:team});if(error)throw error;await coopBossAttach(data);}
+      try{const team=await pvpBuildTeamSnapshot(true);if(!team.length)throw new Error('Selecione pelo menos um Pokémon.');if(!coopBossHasHealthyPokemon(team)){coopBossShowFaintedModal();return;}const {data,error}=await supabaseClient.rpc('coop_boss_join',{p_code:code,p_trainer:player.name,p_team:team});if(error)throw error;await coopBossAttach(data);}
       catch(e){showToast('Não foi possível entrar na raid: '+e.message,'error');}finally{coopBossBusy=false;}
     }
     async function coopBossAttach(room){
@@ -9197,7 +9357,7 @@
       if(room.status==='won'&&me&&myState)onMissionEvent('coop_raid_win',room.id);
       if(room.status==='waiting'){
         const boss={id:150,name:'Mewtwo',level:100,maxHp:30000},bossSprite=SPRITE_ANIM_POKEMON(boss),bossFallback=SPRITE(150);
-        const memberCards=members.map((member,index)=>{const lead=member.team?.[0],isYou=member.user_id===onlineUser.id;return `<div class="coop-waiting-member ${index===0?'host':''}"><img src="${SPRITE_FRONT(lead?.id||150)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FB(lead?.id||150)}'"><div class="coop-waiting-member-copy"><strong>${escapeHTML(member.name)}${isYou?' (voc&ecirc;)':''}</strong><span>${member.team?.length||0} Pok&#233;mon preparados para a raid</span></div>${index===0?'<span class="coop-waiting-role">Anfitri&atilde;o</span>':''}</div>`}).join('');
+        const memberCards=members.map((member,index)=>{const lead=member.team?.[0],isYou=member.user_id===onlineUser.id,avatar=TRAINER_AVATARS.find(item=>item.id===lead?.trainerAvatarId)||(isYou?trainerAvatarConfig(false):TRAINER_AVATARS[0]);return `<div class="coop-waiting-member ${index===0?'host':''}"><img class="coop-waiting-trainer-avatar" src="https://play.pokemonshowdown.com/sprites/trainers/${avatar.id}.png" alt="Treinador ${escapeHTML(avatar.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://play.pokemonshowdown.com/sprites/trainers/red.png'"><div class="coop-waiting-member-copy"><strong>${escapeHTML(member.name)}${isYou?' (voc&ecirc;)':''}</strong><span>${member.team?.length||0} Pok&#233;mon preparados para a raid</span></div>${index===0?'<span class="coop-waiting-role">Anfitri&atilde;o</span>':''}</div>`}).join('');
         root.innerHTML=`<div class="coop-waiting"><section class="coop-waiting-hero"><div class="coop-waiting-copy"><span class="coop-waiting-kicker">Lobby da raid · Kanto</span><h2>Reúna sua equipe</h2><p>Compartilhe o código da sala. Quando todos estiverem prontos, o anfitrião pode iniciar o confronto contra Mewtwo.</p><span class="coop-waiting-state">Aguardando treinadores</span></div><div class="coop-waiting-boss"><img src="${bossSprite}" alt="Mewtwo" decoding="async" onerror="this.onerror=null;this.src='${bossFallback}'"></div></section><div class="coop-waiting-body"><section class="coop-waiting-section"><div class="coop-waiting-section-head"><h3>Treinadores na sala</h3><span class="coop-waiting-count">${members.length} / 5</span></div><div class="coop-waiting-members">${memberCards}</div></section><section class="coop-waiting-section"><div class="coop-waiting-section-head"><h3>Código da sala</h3><span class="coop-waiting-count">6 caracteres</span></div><div class="coop-waiting-room-code"><div><small>Compartilhe para convidar</small><strong>${escapeHTML(room.room_code)}</strong></div><button type="button" onclick="coopBossCopyCode()">⧉ Copiar</button></div><div class="coop-waiting-actions">${coopBossIsHost()?`<button class="btn" onclick="coopBossStart()">⚔ Iniciar raid</button><p class="coop-waiting-host-note">Você é o anfitrião e pode iniciar a batalha quando quiser.</p>`:`<p class="coop-waiting-host-note">Aguardando o anfitrião iniciar a raid. Deixe esta tela aberta para entrar na batalha assim que começar.</p>`}<button class="btn btn-secondary" onclick="coopBossClose()">Sair da sala</button></div></section></div></div>`;
         return;
       }      const hp=Math.max(0,Number(room.battle?.mewtwo_hp)||0),maxHp=Number(room.battle?.mewtwo_max_hp)||30000,displayBossHp=coopBossAnimating&&coopBossVisualHp?.roomId===room.id?coopBossVisualHp.boss:hp,percent=Math.max(0,Math.min(100,displayBossHp/maxHp*100)),turnDeadline=Date.parse(room.turn_deadline||''),turnSecondsLeft=Number.isFinite(turnDeadline)?Math.max(0,Math.ceil((turnDeadline-Date.now())/1000)):0;
@@ -9217,9 +9377,8 @@
       const activeMoveOffset=myTeam.slice(0,active).reduce((total,pokemon)=>total+(pokemon.moves||[]).length,0),hasRaidPp=Array.isArray(myState?.pp),activePp=(activePokemon?.moves||[]).map((move,index)=>hasRaidPp?Math.max(0,Number(myState.pp[activeMoveOffset+index])||0):Math.max(1,Number(move.pp)||10));
       const availableMoves=(activePokemon?.moves||[]).map((move,index)=>({move,index,pp:activePp[index]}));
       const moveBtns=availableMoves.map(({move,index,pp})=>{
-        const damaging=Number(move.power)>0,disabled=coopBossAnimating||myAction||activeHp<=0||pp<=0;
-        const detail=pp<=0?'Sem PP':damaging?`${escapeHTML(move.type)} · PWR ${move.power} · PP ${pp}`:'Suporte · PP '+pp;
-        return `<button class="move-btn" onclick="coopBossAct({type:'move',index:${index}})" ${disabled?'disabled':''}><span>${escapeHTML(move.name)}${pp<=0?' (sem PP)':''}</span><span><span class="move-power">${detail}</span>${renderMoveEffectiveness(move,{id:150})}</span></button>`;
+        const disabled=coopBossAnimating||myAction||activeHp<=0||pp<=0;
+        return `<button class="move-btn battle-move-choice" data-move-type="${escapeHTML(normalizeBattleType(move.type))}" style="--move-color:${pvpTypeColor(move.type)}" onclick="coopBossAct({type:'move',index:${index}})" ${disabled?'disabled':''}><span class="battle-move-heading"><span class="move-type" style="--move-color:${pvpTypeColor(move.type)}">${escapeHTML(move.type)}</span><strong>${escapeHTML(move.name)}${pp<=0?' (sem PP)':''}</strong></span><span class="battle-move-details"><span class="move-category ${getMoveCategoryClass(move)}">${escapeHTML(getMoveCategory(move))}</span><span class="battle-move-pp">PP ${pp}/${move.maxPp||pp}</span>${renderMoveEffectiveness(move,{id:150})}</span></button>`;
       }).join('');
       const hasUsableDamage=availableMoves.some(({move,pp})=>Number(move.power)>0&&pp>0);
       const switchBtns=myTeam.map((pokemon,index)=>`<button class="move-btn coop-switch-btn" onclick="coopBossAct({type:'switch',index:${index}})" ${coopBossAnimating||myAction||index===active||Number(myHp[index])<=0?'disabled':''}><span class="coop-switch-sprite"><img src="${SPRITE_ANIM_POKEMON(pokemon)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FRONT(pokemon.id)}'" /></span><span class="coop-switch-copy"><strong>${escapeHTML(pokemon.name)}</strong><span class="move-power">HP ${Math.max(0,Number(myHp[index])||0)}/${pokemon.maxHp}</span></span></button>`).join('');
@@ -9937,13 +10096,12 @@
       const menu = document.getElementById('movesMenu');
       const hasMovesWithPp = player.poke.moves.some(move => move.pp > 0);
       menu.innerHTML = player.poke.moves.map((m, i) => `
-        <button class="move-btn" data-move-type="${normalizeBattleType(m.type)}" style="--move-color:${pvpTypeColor(m.type)}" title="${m.type} · ${getMoveCategory(m)}" ${m.pp <= 0 ? 'disabled' : ''} onclick="playerAttack(${i})">
-          <span>${m.name}${m.pp <= 0 ? ' (sem PP)' : ''}</span>
-          <span><span class="move-category ${getMoveCategoryClass(m)}">${getMoveCategory(m)}</span>
-          <span class="move-power"> PWR ${m.power} · PP ${m.pp}/${m.maxPp}</span>${renderMoveEffectiveness(m, battle?.enemy, getBattleMoveType(m))}</span>
+        <button class="move-btn battle-move-choice" data-move-type="${normalizeBattleType(m.type)}" style="--move-color:${pvpTypeColor(m.type)}" title="${m.type} · ${getMoveCategory(m)}" ${m.pp <= 0 ? 'disabled' : ''} onclick="playerAttack(${i})">
+          <span class="battle-move-heading"><span class="move-type" style="--move-color:${pvpTypeColor(m.type)}">${escapeHTML(m.type)}</span><strong>${escapeHTML(m.name)}${m.pp <= 0 ? ' (sem PP)' : ''}</strong></span>
+          <span class="battle-move-details"><span class="move-category ${getMoveCategoryClass(m)}">${getMoveCategory(m)}</span><span class="battle-move-pp">PP ${m.pp}/${m.maxPp}</span>${renderMoveEffectiveness(m, battle?.enemy, getBattleMoveType(m))}</span>
         </button>`).join('') + (hasMovesWithPp ? '' : `
-        <button class="move-btn" onclick="playerAttack(-1)">
-          <span>Struggle</span><span class="move-power"> PWR 50 · PP —</span>
+        <button class="move-btn battle-move-choice" onclick="playerAttack(-1)">
+          <span class="battle-move-heading"><strong>Struggle</strong></span><span class="battle-move-details"><span class="battle-move-pp">PP —</span></span>
         </button>`) + `
         <button class="move-btn" onclick="backToMenu()" style="grid-column:1/-1;text-align:center;justify-content:center;">← Voltar</button>`;
       document.getElementById('battleMenu').style.display = 'none';
