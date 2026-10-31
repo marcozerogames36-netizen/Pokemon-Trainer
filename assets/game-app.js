@@ -1614,7 +1614,7 @@
     // Generation 5 static and animated sprites from PokémonDB for National Dex #1–649.
     // Keep the existing sources as fallbacks for later Pokémon and custom sprites.
     // Annihilape fan sprite by RetroNC: https://www.deviantart.com/retronc/art/Annihilape-Sprite-977387918
-    const SPRITE_FRONT = id => Number(id) === 667 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/667.gif' : id === 979 ? 'assets/annihilape-retronc.gif' : Number(id) <= 649 && pokeSlug(Number(id)) ? `https://img.pokemondb.net/sprites/black-white/normal/${pokeSlug(Number(id))}.png` : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+    const SPRITE_FRONT = id => Number(id) === 716 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/716.gif' : Number(id) === 723 ? 'https://assets.pokestats.gg/pokeapi/orig/pokemon/versions/generation-vii/ultra-sun-ultra-moon/723.gif' : Number(id) === 653 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/653.gif' : Number(id) === 684 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/684.gif' : Number(id) === 655 ? 'assets/delphox-front.gif' : Number(id) === 654 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/654.gif' : Number(id) === 682 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/682.gif' : Number(id) === 906 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/906.gif' : Number(id) === 667 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/667.gif' : id === 979 ? 'assets/annihilape-retronc.gif' : Number(id) <= 649 && pokeSlug(Number(id)) ? `https://img.pokemondb.net/sprites/black-white/normal/${pokeSlug(Number(id))}.png` : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
     const SPRITE_FB = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     const SPRITE = SPRITE_FRONT;
 
@@ -1670,8 +1670,15 @@
 
     // Animated battle sprites (Black/White GIFs — pokemondb)
     const SPRITE_BACK = id => {
+      if (Number(id) === 723) return 'https://assets.pokestats.gg/pokeapi/orig/pokemon/versions/generation-vii/ultra-sun-ultra-moon/back/723.gif';
+      if (Number(id) === 653) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/653.gif';
+      if (Number(id) === 684) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/684.gif';
+      if (Number(id) === 655) return 'assets/delphox-back.gif';
+      if (Number(id) === 654) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/654.gif';
+      if (Number(id) === 906) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/906.gif';
       if (Number(id) === 667) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/667.gif';
       if (Number(id) === 682) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/682.gif';
+      if (Number(id) === 309) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/309.gif';
       if (Number(id) === 685) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/685.gif';
       if (id === 810) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/810.gif';
       if (id === 811) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/811.gif';
@@ -1682,6 +1689,14 @@
       return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`;
     };
     const SPRITE_ANIM = id => {
+      if (Number(id) === 716) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/716.gif';
+      if (Number(id) === 723) return 'https://assets.pokestats.gg/pokeapi/orig/pokemon/versions/generation-vii/ultra-sun-ultra-moon/723.gif';
+      if (Number(id) === 653) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/653.gif';
+      if (Number(id) === 684) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/684.gif';
+      if (Number(id) === 655) return 'assets/delphox-front.gif';
+      if (Number(id) === 654) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/654.gif';
+      if (Number(id) === 682) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/682.gif';
+      if (Number(id) === 906) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/906.gif';
       if (Number(id) === 667) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/667.gif';
       if (id === 979) return 'assets/annihilape-retronc.gif';
       if (id === 810) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/810.gif';
@@ -8010,11 +8025,13 @@
     let currentUserIsAdmin = false;
     let currentUserCanManageAdmins = false;
     let adminSelectedTrainer = null;
+    let adminBulkSelectedTrainers = [];
     let adminSearchVersion = 0;
     let adminTrainerDetailsVersion = 0;
     let adminPokemonCatalog = null;
     let adminPokemonCatalogRequest = null;
-    let adminSelectedPokemon = null;
+    let adminSelectedPokemon = [];
+    let adminSelectedItems = [];
     let adminPokemonSearchVersion = 0;
     let adminSupporterCodesVersion = 0;
     function isAdminAccount() {
@@ -8049,16 +8066,14 @@
         event.preventDefault();
         adminCreateSupporterCode();
       };
-      const itemSelect = document.getElementById('adminGrantItem');
-      const previousItemKey = itemSelect.value;
-      const itemList = getCurrentAdminItemList();
-      itemSelect.innerHTML = itemList.map(item => `<option value="${escapeHTML(item.key)}">${escapeHTML(item.name)}</option>`).join('');
-      if (itemList.some(item => item.key === previousItemKey)) itemSelect.value = previousItemKey;
+      document.getElementById('adminGrantItemSearch').oninput = adminSearchItemCatalog;
+      adminRenderItemCatalog();
       document.getElementById('adminTrainerSearch').oninput = adminSearchTrainers;
       document.getElementById('adminGrantType').onchange = adminUpdateGrantFields;
       document.getElementById('adminPokemonSearch').oninput = adminSearchPokemonCatalog;
-      document.getElementById('adminGrantButton').disabled = !adminSelectedTrainer;
+      adminSearchPokemonCatalog();
       adminUpdateGrantFields();
+      adminUpdateGrantButtonState();
       adminLoadSupporterCodes();
     }
     async function adminLoadSupporterCodes() {
@@ -8160,39 +8175,80 @@
       const version = ++adminSearchVersion;
       adminSelectedTrainer = null;
       adminClearTrainerDetails();
-      const selectedNode = document.getElementById('adminSelectedTrainer');
-      selectedNode.classList.remove('has-trainer');
-      selectedNode.innerHTML = '<span class="admin-selected-avatar">?</span><span>Selecione um treinador para continuar.</span>';
-      document.getElementById('adminGrantButton').disabled = true;
+      adminRenderRecipientSelection();
       if (query.length < 2) { resultsNode.innerHTML = '<div class="admin-search-message">Digite pelo menos 2 caracteres para buscar.</div>'; return; }
       resultsNode.innerHTML = '<div class="admin-search-message">Buscando treinadores...</div>';
       const { data, error } = await supabaseClient.rpc('admin_search_trainers', { p_query: query });
       if (version !== adminSearchVersion) return;
-      if (error) { resultsNode.innerHTML = '<div class="admin-search-message">Falha na busca. Aplique a migração SQL do painel de administrador.</div>'; return; }
+      if (error) { resultsNode.innerHTML = '<div class="admin-search-message">Falha na busca. Aplique a migra\u00e7\u00e3o SQL do painel de administrador.</div>'; return; }
       resultsNode.replaceChildren();
       for (const trainer of data || []) {
+        const row = document.createElement('div');
+        row.className = 'admin-trainer-result-row';
         const button = document.createElement('button');
         button.type = 'button'; button.className = 'admin-trainer-option';
         const name = document.createElement('span'); name.textContent = trainer.trainer_name;
-        const id = document.createElement('small'); id.textContent = `${trainer.user_id.slice(0, 8)}…`;
+        const id = document.createElement('small'); id.textContent = `${trainer.user_id.slice(0, 8)}...`;
         button.append(name, id);
         button.addEventListener('click', () => {
           adminSelectedTrainer = trainer;
-          const selectedNode = document.getElementById('adminSelectedTrainer');
-          selectedNode.classList.add('has-trainer');
-          selectedNode.replaceChildren();
-          const avatar = document.createElement('span'); avatar.className = 'admin-selected-avatar'; avatar.textContent = trainer.trainer_name.slice(0, 1).toUpperCase();
-          const details = document.createElement('span');
-          details.innerHTML = `<span class="admin-selected-caption">DESTINATÁRIO SELECIONADO</span><strong>${escapeHTML(trainer.trainer_name)}</strong>`;
-          selectedNode.append(avatar, details);
-          document.getElementById('adminGrantButton').disabled = false;
+          adminRenderRecipientSelection();
           adminLoadTrainerDetails();
-          [...resultsNode.children].forEach(child => child.classList.remove('selected'));
+          resultsNode.querySelectorAll('.admin-trainer-option').forEach(option => option.classList.remove('selected'));
           button.classList.add('selected');
         });
-        resultsNode.append(button);
+        const checkboxLabel = document.createElement('label');
+        checkboxLabel.className = 'admin-trainer-multi-check';
+        checkboxLabel.title = `Incluir ${trainer.trainer_name} no envio para v\u00e1rios treinadores`;
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = adminBulkSelectedTrainers.some(entry => entry.user_id === trainer.user_id);
+        checkbox.setAttribute('aria-label', `Selecionar ${trainer.trainer_name} para envio em grupo`);
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            if (!adminBulkSelectedTrainers.some(entry => entry.user_id === trainer.user_id)) adminBulkSelectedTrainers.push(trainer);
+          } else {
+            adminBulkSelectedTrainers = adminBulkSelectedTrainers.filter(entry => entry.user_id !== trainer.user_id);
+          }
+          adminRenderRecipientSelection();
+        });
+        checkboxLabel.append(checkbox);
+        row.append(button, checkboxLabel);
+        resultsNode.append(row);
       }
       if (!resultsNode.children.length) resultsNode.innerHTML = '<div class="admin-search-message">Nenhum treinador encontrado com save.</div>';
+    }
+    function adminRenderRecipientSelection() {
+      const selectedNode = document.getElementById('adminSelectedTrainer');
+      const grantButton = document.getElementById('adminGrantButton');
+      if (!selectedNode) return;
+      selectedNode.replaceChildren();
+      if (adminBulkSelectedTrainers.length) {
+        selectedNode.classList.add('has-trainer');
+        const avatar = document.createElement('span'); avatar.className = 'admin-selected-avatar'; avatar.textContent = String(adminBulkSelectedTrainers.length);
+        const summary = document.createElement('span'); summary.className = 'admin-selected-count';
+        summary.innerHTML = `<span class="admin-selected-caption">ENVIO EM GRUPO</span><strong>${adminBulkSelectedTrainers.length} treinador${adminBulkSelectedTrainers.length === 1 ? '' : 'es'} selecionado${adminBulkSelectedTrainers.length === 1 ? '' : 's'}</strong>`;
+        const clearButton = document.createElement('button'); clearButton.type = 'button'; clearButton.className = 'admin-clear-multi'; clearButton.textContent = 'Limpar';
+        clearButton.addEventListener('click', () => {
+          adminBulkSelectedTrainers = [];
+          adminSelectedTrainer = null;
+          adminClearTrainerDetails();
+          document.querySelectorAll('#adminTrainerResults .admin-trainer-multi-check input').forEach(input => { input.checked = false; });
+          document.querySelectorAll('#adminTrainerResults .admin-trainer-option').forEach(option => option.classList.remove('selected'));
+          adminRenderRecipientSelection();
+        });
+        selectedNode.append(avatar, summary, clearButton);
+      } else if (adminSelectedTrainer) {
+        selectedNode.classList.add('has-trainer');
+        const avatar = document.createElement('span'); avatar.className = 'admin-selected-avatar'; avatar.textContent = adminSelectedTrainer.trainer_name.slice(0, 1).toUpperCase();
+        const summary = document.createElement('span');
+        summary.innerHTML = `<span class="admin-selected-caption">DESTINAT\u00c1RIO SELECIONADO</span><strong>${escapeHTML(adminSelectedTrainer.trainer_name)}</strong>`;
+        selectedNode.append(avatar, summary);
+      } else {
+        selectedNode.classList.remove('has-trainer');
+        selectedNode.innerHTML = '<span class="admin-selected-avatar">?</span><span>Selecione um treinador ou marque v\u00e1rios para envio em grupo.</span>';
+      }
+      adminUpdateGrantButtonState();
     }
     function adminClearTrainerDetails() {
       adminTrainerDetailsVersion++;
@@ -8328,6 +8384,44 @@
       [...BAG_FIELD_ITEMS, ...BATTLE_BAG_ITEMS, ...SHOP_ITEMS].forEach(add);
       return [...items.values()].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
     }
+    function adminRenderSelectedItemCount() {
+      const summary = document.getElementById('adminSelectedItems');
+      if (!summary) return;
+      summary.replaceChildren();
+      const text = document.createElement('span');
+      text.textContent = adminSelectedItems.length
+        ? `${adminSelectedItems.length} item${adminSelectedItems.length === 1 ? '' : 's'} marcado${adminSelectedItems.length === 1 ? '' : 's'}.`
+        : 'Nenhum item marcado.';
+      summary.append(text);
+      if (adminSelectedItems.length) {
+        const clear = document.createElement('button'); clear.type = 'button'; clear.className = 'admin-clear-multi'; clear.textContent = 'Limpar';
+        clear.addEventListener('click', () => { adminSelectedItems = []; adminRenderItemCatalog(document.getElementById('adminGrantItemSearch').value.trim().toLocaleLowerCase('pt-BR')); });
+        summary.append(clear);
+      }
+      adminUpdateGrantButtonState();
+    }
+    function adminSearchItemCatalog() { adminRenderItemCatalog(document.getElementById('adminGrantItemSearch').value.trim().toLocaleLowerCase('pt-BR')); }
+    function adminRenderItemCatalog(query = '') {
+      const results = document.getElementById('adminItemResults');
+      if (!results) return;
+      const matches = getCurrentAdminItemList().filter(item => !query || item.name.toLocaleLowerCase('pt-BR').includes(query) || item.key.toLocaleLowerCase('pt-BR').includes(query)).slice(0, 100);
+      results.replaceChildren();
+      for (const item of matches) {
+        const label = document.createElement('label'); label.className = 'admin-asset-checkbox-row';
+        const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = adminSelectedItems.some(entry => entry.key === item.key);
+        checkbox.setAttribute('aria-label', `Selecionar ${item.name}`);
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            if (!adminSelectedItems.some(entry => entry.key === item.key)) adminSelectedItems.push(item);
+          } else adminSelectedItems = adminSelectedItems.filter(entry => entry.key !== item.key);
+          adminRenderSelectedItemCount();
+        });
+        const name = document.createElement('span'); name.textContent = item.name;
+        label.append(checkbox, name); results.append(label);
+      }
+      if (!results.children.length) results.innerHTML = '<div class="admin-search-message">Nenhum item encontrado.</div>';
+      adminRenderSelectedItemCount();
+    }
     async function adminPromptRemoveCurrency(field,label,balance) {
       const amount=Number(window.prompt(`Quantidade de ${label} para remover (m\u00e1ximo ${balance}):`,String(balance)));
       if (!Number.isInteger(amount)||amount<1||amount>balance) { if (amount) showToast('Informe uma quantidade dentro do saldo atual.','error'); return; }
@@ -8357,22 +8451,45 @@
       document.getElementById('adminItemField').hidden = kind !== 'item';
       document.getElementById('adminPokemonField').hidden = kind !== 'pokemon';
       document.getElementById('adminAmountField').hidden = kind === 'pokemon';
-      if (kind !== 'pokemon') adminSelectedPokemon = null;
-      const labels = { item: 'unidades', money: 'Pokédollars', pokeCoins: 'PokeCoins', battlePoints: 'BP' };
-      document.getElementById('adminAmountHint').textContent = `Até 1.000.000 ${labels[kind] || 'unidades'}`;
+      const labels = { item: 'unidades', money: 'Pok\u00e9dollars', pokeCoins: 'PokeCoins', battlePoints: 'BP' };
+      document.getElementById('adminAmountHint').textContent = `At\u00e9 1.000.000 ${labels[kind] || 'unidades'}${kind === 'item' ? ' por item marcado' : ''}`;
+      adminUpdateGrantButtonState();
+    }
+    function adminHasSelectedAssets() {
+      const kind = document.getElementById('adminGrantType')?.value;
+      if (kind === 'item') return adminSelectedItems.length > 0;
+      if (kind === 'pokemon') return adminSelectedPokemon.length > 0;
+      return true;
+    }
+    function adminUpdateGrantButtonState() {
+      const button = document.getElementById('adminGrantButton');
+      if (button) button.disabled = (!adminSelectedTrainer && !adminBulkSelectedTrainers.length) || !adminHasSelectedAssets();
+    }
+    function adminRenderSelectedPokemonCount() {
+      const summary = document.getElementById('adminSelectedPokemon');
+      if (!summary) return;
+      summary.replaceChildren();
+      const text = document.createElement('span');
+      text.textContent = adminSelectedPokemon.length
+        ? `${adminSelectedPokemon.length} Pok\u00e9mon marcado${adminSelectedPokemon.length === 1 ? '' : 's'}.`
+        : 'Nenhum Pok\u00e9mon marcado.';
+      summary.append(text);
+      if (adminSelectedPokemon.length) {
+        const clear = document.createElement('button'); clear.type = 'button'; clear.className = 'admin-clear-multi'; clear.textContent = 'Limpar';
+        clear.addEventListener('click', () => { adminSelectedPokemon = []; adminSearchPokemonCatalog(); });
+        summary.append(clear);
+      }
+      adminUpdateGrantButtonState();
     }
     async function adminSearchPokemonCatalog() {
       const query = document.getElementById('adminPokemonSearch').value.trim().toLowerCase();
       const results = document.getElementById('adminPokemonResults');
       const version = ++adminPokemonSearchVersion;
-      adminSelectedPokemon = null;
-      document.getElementById('adminSelectedPokemon').innerHTML = '<span>Selecione um Pokémon do catálogo.</span>';
-      if (!query) { results.innerHTML = '<div class="admin-search-message">Digite para buscar no catálogo.</div>'; return; }
-      results.innerHTML = '<div class="admin-search-message">Carregando catálogo...</div>';
+      results.innerHTML = '<div class="admin-search-message">Carregando cat\u00e1logo...</div>';
       try {
         if (!adminPokemonCatalog) {
           adminPokemonCatalogRequest ||= fetch('https://pokeapi.co/api/v2/pokemon?limit=1025').then(response => {
-            if (!response.ok) throw new Error('Não foi possível carregar o catálogo.');
+            if (!response.ok) throw new Error('N\u00e3o foi poss\u00edvel carregar o cat\u00e1logo.');
             return response.json();
           }).then(data => adminPokemonCatalog = data.results.map(entry => {
             const id = Number(entry.url.match(/\/(\d+)\/$/)?.[1]);
@@ -8382,24 +8499,28 @@
         }
         if (version !== adminPokemonSearchVersion) return;
         const normalized = query.replace(/^#/, '');
-        const matches = adminPokemonCatalog.filter(pokemon => String(pokemon.id) === normalized || pokemon.name.toLowerCase().includes(query) || pokemon.slug.includes(query)).slice(0, 20);
+        const matches = adminPokemonCatalog.filter(pokemon => !query || String(pokemon.id) === normalized || pokemon.name.toLowerCase().includes(query) || pokemon.slug.includes(query));
         results.replaceChildren();
         for (const pokemon of matches) {
-          const option = document.createElement('button'); option.type = 'button'; option.className = 'admin-trainer-option';
+          const label = document.createElement('label'); label.className = 'admin-asset-checkbox-row';
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = adminSelectedPokemon.some(entry => entry.id === pokemon.id);
+          checkbox.setAttribute('aria-label', `Selecionar ${pokemon.name}`);
+          checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+              if (!adminSelectedPokemon.some(entry => entry.id === pokemon.id)) adminSelectedPokemon.push(pokemon);
+            } else adminSelectedPokemon = adminSelectedPokemon.filter(entry => entry.id !== pokemon.id);
+            adminRenderSelectedPokemonCount();
+          });
           const name = document.createElement('span'); name.textContent = pokemon.name;
           const number = document.createElement('small'); number.textContent = `#${pokemon.id}`;
-          option.append(name, number);
-          option.addEventListener('click', () => {
-            adminSelectedPokemon = pokemon;
-            document.getElementById('adminSelectedPokemon').innerHTML = `<span class="admin-selected-avatar">${pokemon.id}</span><span><span class="admin-selected-caption">POKÉMON SELECIONADO</span><strong>${escapeHTML(pokemon.name)} · #${pokemon.id}</strong></span>`;
-            [...results.children].forEach(child => child.classList.remove('selected'));
-            option.classList.add('selected');
-          });
-          results.append(option);
+          label.append(checkbox, name, number); results.append(label);
         }
-        if (!results.children.length) results.innerHTML = '<div class="admin-search-message">Nenhum Pokémon encontrado no catálogo.</div>';
+        if (!results.children.length) results.innerHTML = '<div class="admin-search-message">Nenhum Pok\u00e9mon encontrado no cat\u00e1logo.</div>';
+        adminRenderSelectedPokemonCount();
       } catch (error) {
-        if (version === adminPokemonSearchVersion) results.innerHTML = `<div class="admin-search-message">${escapeHTML(error.message || 'Falha ao carregar o catálogo.')}</div>`;
+        if (version === adminPokemonSearchVersion) results.innerHTML = `<div class="admin-search-message">${escapeHTML(error.message || 'Falha ao carregar o cat\u00e1logo.')}</div>`;
       }
     }
     async function adminBuildPokemonFromCatalog(selection, level) {
@@ -8431,51 +8552,74 @@
       return pokemon;
     }
     async function adminGrantSelectedAsset() {
-      if (!isAdminAccount() || !adminSelectedTrainer || !supabaseClient) return;
-      const selectedTrainer = adminSelectedTrainer;
+      if (!isAdminAccount() || (!adminSelectedTrainer && !adminBulkSelectedTrainers.length) || !supabaseClient) return;
+      const recipients = adminBulkSelectedTrainers.length ? [...adminBulkSelectedTrainers] : [adminSelectedTrainer];
       const kind = document.getElementById('adminGrantType').value;
       const amount = Number(document.getElementById('adminGrantAmount').value);
-      if (kind !== 'pokemon' && (!Number.isInteger(amount) || amount < 1 || amount > 1000000)) {
+      if (kind !== 'pokemon' && kind !== 'item' && (!Number.isInteger(amount) || amount < 1 || amount > 1000000)) {
         showToast('Informe uma quantidade entre 1 e 1.000.000.', 'error'); return;
       }
-      let payload = kind === 'item' ? { key: document.getElementById('adminGrantItem').value, amount } : { amount };
-      if (kind === 'pokemon') {
-        const level = Number(document.getElementById('adminPokemonLevel').value);
-        if (!adminSelectedPokemon) { showToast('Escolha um Pok\u00e9mon do cat\u00e1logo.', 'error'); return; }
-        if (!Number.isInteger(level) || level < 1 || level > 100) { showToast('Informe um n\u00edvel entre 1 e 100.', 'error'); return; }
+      if (kind === 'item' && (!Number.isInteger(amount) || amount < 1 || amount > 1000000)) {
+        showToast('Informe uma quantidade entre 1 e 1.000.000.', 'error'); return;
       }
+      if (kind === 'item' && !adminSelectedItems.length) { showToast('Marque um ou mais itens para enviar.', 'error'); return; }
+      const level = Number(document.getElementById('adminPokemonLevel').value);
+      if (kind === 'pokemon' && !adminSelectedPokemon.length) { showToast('Marque um ou mais Pok\u00e9mon para enviar.', 'error'); return; }
+      if (kind === 'pokemon' && (!Number.isInteger(level) || level < 1 || level > 100)) { showToast('Informe um n\u00edvel entre 1 e 100.', 'error'); return; }
       const button = document.getElementById('adminGrantButton');
-      const grantingToCurrentUser = selectedTrainer.user_id === onlineUser?.id;
+      const currentUserIsRecipient = recipients.some(trainer => trainer.user_id === onlineUser?.id);
       button.disabled = true;
-      button.textContent = 'Enviando recurso...';
+      const assets = [];
       try {
-        if (kind === 'pokemon') {
-          const level = Number(document.getElementById('adminPokemonLevel').value);
-          button.textContent = 'Criando Pok\u00e9mon...';
-          payload = { pokemon: await adminBuildPokemonFromCatalog(adminSelectedPokemon, level) };
-          button.textContent = 'Enviando recurso...';
+        if (kind === 'item') {
+          for (const item of adminSelectedItems) assets.push({ kind, payload: { key: item.key, amount }, name: item.name });
+        } else if (kind === 'pokemon') {
+          for (const selection of adminSelectedPokemon) {
+            button.textContent = `Preparando ${selection.name}...`;
+            assets.push({ kind, payload: { pokemon: await adminBuildPokemonFromCatalog(selection, level) }, name: selection.name });
+          }
+        } else assets.push({ kind, payload: { amount }, name: kind });
+
+        if (currentUserIsRecipient) await flushGameSave();
+        button.textContent = 'Enviando recursos...';
+        const succeeded = [];
+        const failed = [];
+        for (const recipient of recipients) {
+          for (const asset of assets) {
+            try {
+              const { error } = await supabaseClient.rpc('admin_grant_trainer_asset_notify', {
+                p_target: recipient.user_id, p_kind: asset.kind, p_payload: asset.payload
+              });
+              if (error) throw error;
+              succeeded.push({ recipient, asset });
+            } catch (error) {
+              failed.push({ recipient, asset, error });
+            }
+          }
         }
-        if (grantingToCurrentUser) await flushGameSave();
-        const { data, error } = await supabaseClient.rpc('admin_grant_trainer_asset_notify', {
-          p_target: selectedTrainer.user_id, p_kind: kind, p_payload: payload
-        });
-        if (error) throw error;
-        let syncMessage = '';
-        if (grantingToCurrentUser) {
+        if (currentUserIsRecipient && succeeded.some(entry => entry.recipient.user_id === onlineUser?.id)) {
           try {
             const latestSave = await loadGame();
             if (!latestSave) throw new Error('Save atualizado n\u00e3o encontrado.');
             restorePlayer(latestSave);
           } catch (syncError) {
-            console.error('[Admin] Recurso enviado, mas a tela n\u00e3o sincronizou automaticamente:', syncError);
-            syncMessage = ' Recarregue a p\u00e1gina para atualizar a conta.';
+            console.error('[Admin] Recursos enviados, mas a tela n\u00e3o sincronizou automaticamente:', syncError);
+            showToast('Recursos enviados para sua conta. Recarregue a p\u00e1gina para atualizar a tela.', 'info');
           }
         }
-        showToast(`${data?.trainer_name || selectedTrainer.trainer_name} recebeu o recurso.${syncMessage}`, syncMessage ? 'info' : undefined);
-        await adminLoadTrainerDetails();
+        const successfulRecipients = new Set(succeeded.map(entry => entry.recipient.user_id)).size;
+        if (succeeded.length) showToast(`${succeeded.length} recurso${succeeded.length === 1 ? '' : 's'} enviado${succeeded.length === 1 ? '' : 's'} para ${successfulRecipients} treinador${successfulRecipients === 1 ? '' : 'es'}.`);
+        if (failed.length) {
+          const failedSummary = failed.slice(0, 3).map(entry => `${entry.asset.name} (${entry.recipient.trainer_name})`).join(', ');
+          showToast(`Falha em ${failed.length} envio${failed.length === 1 ? '' : 's'}: ${failedSummary}${failed.length > 3 ? ' e outros' : ''}. ${failed[0].error.message}`, 'error');
+        }
+        if (adminSelectedTrainer) await adminLoadTrainerDetails();
       } catch (error) {
-        showToast('Falha ao enviar recurso: ' + error.message, 'error');
-      } finally { button.disabled = !adminSelectedTrainer; button.textContent = 'Enviar recurso'; }
+        showToast('Falha ao enviar recursos: ' + error.message, 'error');
+      } finally {
+        adminUpdateGrantButtonState();
+        button.textContent = 'Enviar recursos selecionados';
+      }
     }
     const panelReturnTargets = { admin: 'home', social: 'home' };
     function returnFromPanel(id) {
@@ -9013,6 +9157,7 @@
             ? `<div class="battle-actions moves-view">${switchButtons}</div>`
             : `<div class="battle-actions"><button class="battle-btn fight" ${activeHp<=0?'disabled':''} onclick="pvpSetBattleMenu('moves')">⚔️ Lutar</button><button class="battle-btn pokemon" onclick="pvpSetBattleMenu('switch')">🔄 Trocar Pokémon</button></div>`;
       const latestLog = (state.log || []).slice(-1)[0] || 'A batalha começou!';
+      const displayLog = latestLog.replace(/\bCrático!/g, 'Crítico!');
       const local = localTeam[localActive], opponent = foeTeam[foeActive];
       const localFainted = (Number(localHp[localActive]) || 0) <= 0;
       const foeFainted = (Number(foeHp[foeActive]) || 0) <= 0;
@@ -9026,7 +9171,7 @@
           <div class="battle-enemy"><div class="enemy-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.guest_name:room.host_name)}</div>${pvpBattleInfo(opponent,foeHp[foeActive],'enemy-info',null,null,foeStatus[foeActive])}</div><div class="sprite-stage enemy-stage ${foeFainted?'pvp-fainted-stage':''}" ${foeFainted?'aria-hidden="true"':''}>${foeFainted?'':'<div class="sprite-shadow"></div>'}${foeFainted?'':`<img class="enemy-sprite${opponent.id===812?' rillaboom-battle-sprite':opponent.id===979?' annihilape-battle-sprite':''}" src="${SPRITE_ANIM_POKEMON(opponent)}" alt="${escapeHTML(opponent.name)}" onerror="this.onerror=null;this.src='${SPRITE_FRONT(opponent.id)}'" />`}</div></div>
           <div class="battle-player"><div class="sprite-stage player-stage ${localFainted?'pvp-fainted-stage':''}" ${localFainted?'aria-hidden="true"':''}>${localFainted?'':'<div class="sprite-shadow"></div>'}${localFainted?'':`<img class="player-sprite${local.id===812?' rillaboom-battle-sprite':local.id===979?' annihilape-battle-sprite':''}" src="${SPRITE_BACK_POKEMON(local)}" alt="${escapeHTML(local.name)}" onerror="this.onerror=null;this.src='${SPRITE_FB(local.id)}'" />`}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(myHost?room.host_name:room.guest_name)} (você)</div>${pvpBattleInfo(local,localHp[localActive],'player-info',localTeam,localHp,localStatus[localActive])}</div></div>
         </div>
-        <div class="battle-ui"><div class="battle-log" aria-live="polite" style="margin:0">${escapeHTML(latestLog)}</div><div class="pvp-turn-prompt">${myActionPending?'':activeHp<=0?'Seu Pokémon desmaiou. Escolha quem entrará na batalha.':pvpBattleMenu==='moves'?'Escolha um golpe.':pvpBattleMenu==='switch'?'Escolha um Pokémon para trocar.':'Escolha sua ação.'}</div>${actionMenu}</div>
+        <div class="battle-ui"><div class="battle-log" aria-live="polite" style="margin:0">${escapeHTML(displayLog)}</div><div class="pvp-turn-prompt">${myActionPending?'':activeHp<=0?'Seu Pokémon desmaiou. Escolha quem entrará na batalha.':pvpBattleMenu==='moves'?'Escolha um golpe.':pvpBattleMenu==='switch'?'Escolha um Pokémon para trocar.':'Escolha sua ação.'}</div>${actionMenu}</div>
       </div>`;
       pvpAnimateProtectActions(room);
       pvpTimerTick();
@@ -9036,13 +9181,22 @@
       if (!pvpRoom || pvpRoom.status !== 'battle' || pvpSubmitting) return;
       const field = pvpIsHost() ? 'host_action' : 'guest_action';
       if (pvpRoom[field]) return;
+      const myHost=pvpIsHost();
+      const state=pvpRoom.battle||{};
+      const activeIndex=Number(state[myHost?'hostActive':'guestActive'])||0;
+      const hp=state[myHost?'hostHp':'guestHp']||[];
+      const forcedSwitch=action.type==='switch'&&(Number(hp[activeIndex])||0)<=0;
       pvpSubmitting = true;
       try {
-        const { data, error } = await supabaseClient.rpc('pvp_submit_action', { p_code:pvpRoom.room_code, p_action:action });
+        const { data, error } = await supabaseClient.rpc(
+          forcedSwitch?'pvp_forced_switch':'pvp_submit_action',
+          forcedSwitch?{p_code:pvpRoom.room_code,p_index:action.index}:{p_code:pvpRoom.room_code,p_action:action}
+        );
         if (error) throw error;
         pvpRoom = data;
+        if (forcedSwitch) pvpBattleMenu='main';
         renderPvpPanel();
-        pvpMaybeResolveTurn();
+        if (!forcedSwitch) pvpMaybeResolveTurn();
       } catch (error) { showToast('Não foi possível enviar sua ação: ' + error.message, 'error'); }
       finally { pvpSubmitting = false; }
     }
@@ -13000,10 +13154,18 @@
         const preview=item.notificationType==='friend-request'?'Enviou um pedido de amizade.':String(item.body||'').trim();
         const sentAt=new Date(item.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
         const unread=socialUnreadMessageIds.has(item.readKey);
-        return `<button type="button" class="message-notification-item ${unread?'unread':'read'}" aria-label="${unread?'Não lida':'Lida'}: ${escapeHTML(sender)}" onclick="socialOpenNotification('${item.notificationType}','${item.id}')"><strong><span>${escapeHTML(sender)}</span><small>${unread?'Nova':'Lida'} · ${escapeHTML(sentAt)}</small></strong><span class="message-notification-preview">${escapeHTML(preview)}</span></button>`;
+        return `<div class="message-notification-item ${unread?'unread':'read'}"><button type="button" class="message-notification-open" aria-label="${unread?'Nao lida':'Lida'}: ${escapeHTML(sender)}" onclick="socialOpenNotification('${item.notificationType}','${item.id}')"><strong><span>${escapeHTML(sender)}</span><small>${unread?'Nova':'Lida'} \u00b7 ${escapeHTML(sentAt)}</small></strong><span class="message-notification-preview">${escapeHTML(preview)}</span></button>${unread?`<button type="button" class="message-notification-mark-read" onclick="socialMarkNotificationRead('${item.notificationType}','${item.id}')">Marcar como lido</button>`:''}</div>`;
       }).join('');
     }
 
+    function socialMarkNotificationRead(type,id) {
+      const readKey=type==='friend-request'?`friend-request:${id}`:id;
+      const readIds=socialGetReadMessageIds();
+      readIds.add(readKey);
+      socialSaveReadMessageIds(readIds);
+      socialUnreadMessageIds.delete(readKey);
+      socialRenderMessageNotifications();
+    }
     function socialToggleNotifications() {
       const button=document.getElementById('messageNotificationButton');
       const menu=document.getElementById('messageNotificationMenu');
@@ -13041,10 +13203,11 @@
           const activePokemon = player.poke || player.party?.find(pokemon => Number(pokemon?.hp) > 0) || player.party?.[0] || player.starter;
           let heartbeat;
           if (socialPokemonPresenceSupported !== false && activePokemon?.id) {
-            heartbeat = await supabaseClient.rpc('social_presence_with_pokemon', {
+            heartbeat = await supabaseClient.rpc('social_presence_with_trainer', {
               p_name:player.name,
               p_pokemon_id:Number(activePokemon.id),
-              p_pokemon_name:activePokemon.name
+              p_pokemon_name:activePokemon.name,
+              p_trainer_avatar_id:trainerAvatarConfig(false).id
             });
             if (heartbeat.error && ['PGRST202','42883'].includes(heartbeat.error.code)) {
               socialPokemonPresenceSupported = false;
@@ -13066,7 +13229,7 @@
         let profiles = [];
         if (allIds.length) {
           const [profileResult,pokemonResult] = await Promise.all([
-            supabaseClient.from('trainer_profiles').select('user_id,trainer_name,last_seen').in('user_id',allIds),
+            supabaseClient.from('trainer_profiles').select('user_id,trainer_name,last_seen,trainer_avatar_id').in('user_id',allIds),
             friendIds.length
               ? supabaseClient.rpc('social_friend_pokemon',{p_friend_ids:friendIds})
               : Promise.resolve({data:[],error:null})
@@ -13109,11 +13272,10 @@
         const activePokemonId=Math.floor(Number(friend.active_pokemon_id)||0);
         const activePokemonName=String(friend.active_pokemon_name||'').trim();
         const hasPokemonPreview=activePokemonId>0&&activePokemonName;
-        const pokemonPreview=hasPokemonPreview
-          ? `<img class="social-friend-pokemon" src="${SPRITE_FRONT(activePokemonId)}" alt="${escapeHTML(activePokemonName)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FB(activePokemonId)}'">`
-          : '<span class="social-friend-pokemon-placeholder" aria-hidden="true">?</span>';
+        const trainerAvatar=TRAINER_AVATARS.find(avatar=>avatar.id===friend.trainer_avatar_id)||TRAINER_AVATARS[0];
+        const trainerPreview=`<img class="social-friend-trainer" src="https://play.pokemonshowdown.com/sprites/trainers/${trainerAvatar.id}.png" alt="Treinador ${escapeHTML(trainerAvatar.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://play.pokemonshowdown.com/sprites/trainers/red.png'">`;
         return `<article class="social-friend-row">
-          <div class="social-friend-main"><span class="social-friend-presence ${online?'online':'offline'}" role="img" aria-label="${online?'Online':'Offline'}" title="${online?'Online':'Offline'}"></span>${pokemonPreview}<div class="social-friend-copy"><strong>${escapeHTML(friend.trainer_name)}</strong><small>${online?'Online agora':'Offline'}</small></div><div class="social-friend-active"><small>Pok\u00e9mon ativo</small><strong>${hasPokemonPreview?escapeHTML(activePokemonName):'Aguardando dados'}</strong></div></div>
+          <div class="social-friend-main"><span class="social-friend-presence ${online?'online':'offline'}" role="img" aria-label="${online?'Online':'Offline'}" title="${online?'Online':'Offline'}"></span>${trainerPreview}<div class="social-friend-copy"><strong>${escapeHTML(friend.trainer_name)}</strong><small>${online?'Online agora':'Offline'}</small></div><div class="social-friend-active"><small>Pok\u00e9mon ativo</small><strong>${hasPokemonPreview?escapeHTML(activePokemonName):'Aguardando dados'}</strong></div></div>
           <div class="social-friend-actions"><button type="button" class="btn btn-secondary social-chat-button" onclick="socialOpenChat('${friend.user_id}')">Conversar</button><button type="button" class="btn btn-secondary social-trade-button" onclick="socialSendTrade('${friend.user_id}')">Trocar</button><button type="button" class="btn social-battle-button" onclick="socialChallenge('${friend.user_id}')">Batalhar</button></div>
         </article>`;
       }).join('');

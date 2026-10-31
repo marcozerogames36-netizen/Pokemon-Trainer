@@ -144,10 +144,10 @@
     <div class="main">
       <header class="topbar">
         <div class="topbar-left">
-          <div class="topbar-brand" aria-label="Poke Flame">
+          <a class="topbar-brand" href="#home" aria-label="Poke Flame — página inicial" onclick="switchPanel('home'); return false;">
             <span class="topbar-brand-mark"><img class="trainer-logo-image" src="assets/pokemon-trainer-logo.png" alt="Poke Flame" /></span>
             <span class="topbar-brand-name">Poke Flame</span>
-          </div>
+          </a>
           <div class="location-badge">📍 Região atual: Kanto</div>
         </div>
         <div class="topbar-actions">
@@ -276,20 +276,20 @@
             </div>
             <div class="admin-panel-grid">
               <section class="admin-panel-card" aria-labelledby="adminStepTrainer">
-                <div class="admin-step-heading"><span class="admin-step-number">01</span><div><h3 id="adminStepTrainer">Escolha o treinador</h3><p>Busque pelo nome e confirme o destinatário antes de enviar.</p></div></div>
+                <div class="admin-step-heading"><span class="admin-step-number">01</span><div><h3 id="adminStepTrainer">Escolha os treinadores</h3><p>Busque pelo nome. Use as caixas de seleção para enviar o mesmo recurso a várias pessoas.</p></div></div>
                 <div class="admin-search-field"><span class="admin-search-icon" aria-hidden="true">⌕</span><div class="form-group"><label for="adminTrainerSearch">Nome do treinador</label><input id="adminTrainerSearch" type="search" maxlength="40" placeholder="Digite pelo menos 2 caracteres" autocomplete="off" /></div></div>
                 <div id="adminTrainerResults" class="admin-trainer-results" aria-live="polite"><div class="admin-search-message">Os treinadores encontrados aparecerão aqui.</div></div>
-                <div id="adminSelectedTrainer" class="admin-selected-trainer"><span class="admin-selected-avatar">?</span><span>Selecione um treinador para continuar.</span></div>
+                <div id="adminSelectedTrainer" class="admin-selected-trainer"><span class="admin-selected-avatar">?</span><span>Selecione um treinador ou marque vários para envio em grupo.</span></div>
                 <div id="adminTrainerDetails" class="admin-trainer-details" hidden><div id="adminTrainerDetailsContent"></div></div>
               </section>
               <section class="admin-panel-card" aria-labelledby="adminStepResource">
                 <div class="admin-step-heading"><span class="admin-step-number">02</span><div><h3 id="adminStepResource">Configure o envio</h3><p>Selecione o recurso e a quantidade que será adicionada.</p></div></div>
                 <div class="admin-resource-fields">
                   <div class="form-group"><label for="adminGrantType">Tipo de recurso</label><select id="adminGrantType"><option value="item">Item</option><option value="pokemon">Pokémon do catálogo</option><option value="money">Pokédollar</option><option value="pokeCoins">PokeCoin</option><option value="battlePoints">BP</option></select></div>
-                  <div class="form-group" id="adminItemField"><label for="adminGrantItem">Item para enviar</label><select id="adminGrantItem"></select></div>
-                  <div id="adminPokemonField" hidden><div class="form-group"><label for="adminPokemonSearch">Buscar Pokémon por nome ou número</label><input id="adminPokemonSearch" type="search" maxlength="40" placeholder="Ex.: Pikachu ou 25" autocomplete="off" /></div><div id="adminPokemonResults" class="admin-trainer-results" aria-live="polite"><div class="admin-search-message">Digite para buscar no catálogo.</div></div><div id="adminSelectedPokemon" class="admin-selected-trainer"><span>Selecione um Pokémon do catálogo.</span></div><div class="form-group" style="margin-top:12px"><label for="adminPokemonLevel">Nível do Pokémon</label><input id="adminPokemonLevel" type="number" min="1" max="100" step="1" value="5" /></div></div>
+                  <div id="adminItemField" hidden><div class="form-group"><label for="adminGrantItemSearch">Buscar itens</label><input id="adminGrantItemSearch" type="search" maxlength="40" placeholder="Digite o nome de um item" autocomplete="off" /></div><div id="adminItemResults" class="admin-asset-results" aria-live="polite"></div><div id="adminSelectedItems" class="admin-selected-count-note">Nenhum item marcado.</div></div>
+                  <div id="adminPokemonField" hidden><div class="form-group"><label for="adminPokemonSearch">Buscar Pokémon por nome ou número</label><input id="adminPokemonSearch" type="search" maxlength="40" placeholder="Ex.: Pikachu ou 25" autocomplete="off" /></div><div id="adminPokemonResults" class="admin-asset-results" aria-live="polite"><div class="admin-search-message">Carregando catálogo...</div></div><div id="adminSelectedPokemon" class="admin-selected-count-note">Nenhum Pokémon marcado.</div><div class="form-group" style="margin-top:12px"><label for="adminPokemonLevel">Nível dos Pokémon</label><input id="adminPokemonLevel" type="number" min="1" max="100" step="1" value="5" /></div></div>
                   <div id="adminAmountField"><div class="admin-amount-wrap"><div class="form-group"><label for="adminGrantAmount">Quantidade</label><input id="adminGrantAmount" type="number" min="1" max="1000000" step="1" value="1" /></div><span class="admin-amount-hint" id="adminAmountHint">Máximo: 1.000.000</span></div></div>
-                  <button type="button" class="btn admin-grant-button" id="adminGrantButton" onclick="adminGrantSelectedAsset()">Enviar recurso</button>
+                  <button type="button" class="btn admin-grant-button" id="adminGrantButton" onclick="adminGrantSelectedAsset()">Enviar recursos selecionados</button>
                 </div>
               </section>
             </div>
