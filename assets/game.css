@@ -606,7 +606,10 @@
     .pvp-log { display:grid; gap:5px; margin:14px 0; padding:12px; max-height:170px; overflow:auto; border-radius:10px; background:#0d0d12; color:var(--text-muted); font-size:.85rem; }
     .pvp-arena { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; min-height:min(76vh,720px); overflow:hidden; border:1px solid var(--border); border-radius:18px; background:#0a1628; }
     .coop-boss-arena { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; max-width:1500px; min-height:min(90vh,900px); overflow:hidden; border:1px solid rgba(249,115,22,.35); border-radius:20px; background:#160f25; box-shadow:0 18px 48px #0005; }
-    .coop-boss-arena .battle-bg { background:linear-gradient(180deg,#191327 0%,#382151 48%,#26143f 100%); }
+    .coop-boss-arena .battle-bg {
+      background-image:linear-gradient(180deg,rgba(12,9,22,.48),rgba(16,9,26,.62)),url('mewtwo-black-hole.gif');
+      background-position:center; background-size:cover; background-repeat:no-repeat;
+    }
     .coop-boss-arena .battle-sky { background:radial-gradient(ellipse at 70% 22%,rgba(251,146,60,.24),transparent 52%),linear-gradient(180deg,rgba(255,255,255,.05),transparent); }
     .coop-boss-arena .battle-ground { bottom:30%; height:28%; background:radial-gradient(ellipse at 50% 65%,rgba(234,88,12,.28),transparent 70%),linear-gradient(180deg,transparent,rgba(9,5,18,.6)); }
     .coop-boss-arena .battle-field { width:100%; max-width:1440px; min-height:600px; padding:74px 30px 8px; }
@@ -841,6 +844,7 @@
     .admin-detail-row span { min-width:0;overflow:hidden;text-overflow:ellipsis; }
     .admin-remove-button { width:auto;margin:0;padding:5px 8px;border:1px solid rgba(248,113,113,.3);border-radius:8px;background:rgba(127,29,29,.18);color:#fca5a5;font-size:.7rem; }
     .admin-remove-button:hover { border-color:#ef4444;background:rgba(127,29,29,.35); }
+    .admin-remove-all-pokemon { width:100%;margin:0 0 12px;padding:9px 12px; }
     .admin-detail-balance-button { width:auto;margin:0;padding:5px 8px;font-size:.7rem; }
     .admin-selected-avatar { width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#252532;color:#fed7aa;font-weight:800; }
     .admin-selected-caption { display:block;color:var(--text-muted);font-size:.7rem;margin-bottom:3px; }
@@ -875,6 +879,8 @@
     .game-card.dungeon-locked:hover { transform:none; box-shadow:none; border-color:var(--border); }
     .dungeon-lock-reason { margin-top:8px; color:var(--text-muted); font-size:.78rem; }
     .game-card-header { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; border-radius: 15px 15px 0 0; }
+    #raidBossHomeCard .game-card-header { position:relative; overflow:hidden; background-image:linear-gradient(135deg,rgba(22,12,38,.38),rgba(12,8,24,.52)),url('raid-boss-card-bg.gif'); background-size:cover; background-position:center; }
+    #raidBossHomeCard .game-card-header img { position:relative; z-index:1; }
     #gameCornerHomeCard .game-card-header, #ssAnneHomeCard .game-card-header, #silphCoHomeCard .game-card-header, #battleTowerHomeCard .game-card-header { height:auto; aspect-ratio:1.91; overflow:hidden; padding:0; background:#e7a32d; }
     #gameCornerHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:contain; }
     #ssAnneHomeCard .game-card-header img { display:block; width:100%; height:100%; object-fit:cover; object-position:center 68%; }
@@ -1069,6 +1075,7 @@
       display: flex; justify-content: space-between; align-items: flex-start;
       gap: 20px; padding: 0 6% 0 2%;
     }
+    #battleOverlay .enemy-info-column { display:flex; flex:0 1 auto; flex-direction:column; align-items:flex-start; min-width:0; }
     .battle-enemy .enemy-info, .battle-player .player-info {
       background: rgba(12,14,22,0.88); border: 2px solid rgba(255,255,255,0.12);
       border-radius: 14px; padding: 12px 16px; min-width: 200px;
@@ -1213,7 +1220,7 @@
       background: var(--input-bg); border: 1px solid var(--border);
       border-radius: 10px; padding: 12px 14px; min-height: 52px;
       font-size: 0.9rem; line-height: 1.4; margin-bottom: 14px;
-      color: var(--text); display: flex; align-items: center;
+      color: var(--text); display: flex; align-items: center; white-space: pre-line;
     }
     .battle-volume-control { display:flex; align-items:center; gap:5px; flex:0 0 116px; color:var(--text-muted); font-size:.65rem; }
     .battle-volume-control input { width:66px; height:20px; margin:0; accent-color:var(--primary); cursor:pointer; }
@@ -1463,6 +1470,76 @@
     }
     .player-sprite.protect-glow, .enemy-sprite.protect-glow { animation: protectGlow 1s ease-in-out; }
     .player-sprite.stat-boost-glow, .enemy-sprite.stat-boost-glow { animation: statBoostGlow 1.05s ease-in-out; }
+    .battle-move-fx {
+      --move-fx-color: #f8fafc;
+      position:absolute; z-index:5; width:1px; height:1px; pointer-events:none;
+      color:var(--move-fx-color); filter:drop-shadow(0 0 8px var(--move-fx-color));
+    }
+    .battle-move-fx-core, .battle-move-fx-particle { position:absolute; display:block; left:0; top:0; }
+    .battle-move-fx-core {
+      width:30px; height:30px; border-radius:50%;
+      background:radial-gradient(circle, #fff 0 8%, var(--move-fx-color) 25%, transparent 72%);
+      transform:translate(-50%,-50%) scale(.15); opacity:0;
+      animation:moveFxCore .48s ease-out both;
+    }
+    .battle-move-fx-core::before, .battle-move-fx-core::after {
+      content:""; position:absolute; left:50%; top:50%; width:52px; height:52px;
+      border:2px solid currentColor; border-radius:50%; transform:translate(-50%,-50%) scale(.35); opacity:0;
+      animation:moveFxRing .55s ease-out both;
+    }
+    .battle-move-fx-core::after { width:72px; height:72px; animation-delay:55ms; }
+    .battle-move-fx-particle {
+      width:8px; height:14px; border-radius:70% 20% 70% 20%;
+      background:linear-gradient(145deg,#fff,var(--move-fx-color) 62%,transparent);
+      opacity:0; transform:translate(-50%,-50%) scale(.25) rotate(0deg);
+      animation:moveFxParticle .58s cubic-bezier(.16,.7,.28,1) var(--move-delay,0ms) both;
+    }
+    .fx-impact .battle-move-fx-core { width:38px; height:38px; }
+    .fx-impact .battle-move-fx-particle { width:7px; height:22px; border-radius:3px; }
+    .fx-projectile .battle-move-fx-core { width:44px; height:44px; }
+    .fx-projectile .battle-move-fx-particle { width:11px; height:18px; }
+    .fx-status .battle-move-fx-core, .fx-boost .battle-move-fx-core, .fx-heal .battle-move-fx-core { width:42px; height:42px; }
+    .fx-boost .battle-move-fx-core::before, .fx-heal .battle-move-fx-core::before { width:58px; height:58px; }
+    .fx-fire { --move-fx-color:#ff6b35; }
+    .fx-water { --move-fx-color:#38bdf8; }
+    .fx-grass { --move-fx-color:#84cc16; }
+    .fx-electric { --move-fx-color:#fde047; }
+    .fx-ice { --move-fx-color:#a5f3fc; }
+    .fx-fighting { --move-fx-color:#fb7185; }
+    .fx-poison { --move-fx-color:#c084fc; }
+    .fx-ground, .fx-rock { --move-fx-color:#d6a75d; }
+    .fx-flying { --move-fx-color:#c4b5fd; }
+    .fx-psychic { --move-fx-color:#fb7185; }
+    .fx-bug { --move-fx-color:#bef264; }
+    .fx-ghost, .fx-dark { --move-fx-color:#a78bfa; }
+    .fx-dragon { --move-fx-color:#818cf8; }
+    .fx-steel { --move-fx-color:#cbd5e1; }
+    .fx-fairy { --move-fx-color:#f9a8d4; }
+    .fx-normal { --move-fx-color:#f8fafc; }
+    .fx-heal { --move-fx-color:#4ade80; }
+    .fx-electric .battle-move-fx-particle { width:7px; height:24px; border-radius:1px; clip-path:polygon(45% 0,100% 0,62% 42%,100% 42%,18% 100%,38% 55%,0 55%); }
+    .fx-water .battle-move-fx-particle { width:10px; height:10px; border:1px solid currentColor; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff,currentColor 55%,transparent 75%); }
+    .fx-grass .battle-move-fx-particle { width:10px; height:18px; border-radius:0 100% 0 100%; }
+    .fx-ice .battle-move-fx-particle { width:9px; height:18px; border-radius:1px; clip-path:polygon(50% 0,100% 45%,60% 45%,70% 100%,0 42%,40% 48%); }
+    .fx-psychic .battle-move-fx-particle, .fx-ghost .battle-move-fx-particle, .fx-fairy .battle-move-fx-particle { width:8px; height:8px; border-radius:50%; }
+    .fx-rock .battle-move-fx-particle, .fx-ground .battle-move-fx-particle { width:11px; height:10px; border-radius:2px; }
+    @keyframes moveFxCore {
+      0% { opacity:0; transform:translate(-50%,-50%) scale(.12); }
+      28% { opacity:.96; transform:translate(-50%,-50%) scale(1.18); }
+      100% { opacity:0; transform:translate(-50%,-50%) scale(.48); }
+    }
+    @keyframes moveFxRing {
+      0% { opacity:.9; transform:translate(-50%,-50%) scale(.3); }
+      100% { opacity:0; transform:translate(-50%,-50%) scale(1.35); }
+    }
+    @keyframes moveFxParticle {
+      0% { opacity:0; transform:translate(-50%,-50%) scale(.2) rotate(-25deg); }
+      22% { opacity:1; }
+      100% { opacity:0; transform:translate(calc(-50% + var(--move-x)),calc(-50% + var(--move-y))) scale(.08) rotate(150deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .battle-move-fx-core, .battle-move-fx-core::before, .battle-move-fx-core::after, .battle-move-fx-particle { animation-duration:.18s; }
+    }
     @keyframes protectGlow {
       0%, 100% { filter: drop-shadow(0 6px 12px rgba(0,0,0,.45)) brightness(1); }
       35%, 70% { filter: drop-shadow(0 0 18px #fdba74) drop-shadow(0 0 7px #fff) brightness(1.65); }
@@ -1603,7 +1680,7 @@
     /* Evolution */
     #evoOverlay {
       display: none; position: fixed; inset: 0; z-index: 150;
-      background: radial-gradient(circle at 50% 40%, #2a1a4a 0%, #0b0b0f 70%);
+      background: linear-gradient(rgba(10, 8, 6, 0.38), rgba(10, 8, 6, 0.48)), url('evolution-background.gif') center center / cover no-repeat;
       flex-direction: column; align-items: center; justify-content: center;
       padding: 24px;
     }
@@ -1859,7 +1936,7 @@
       background: transparent;
     }
     .summary-name { font-size: 1.35rem; font-weight: 700; }
-    .gender-symbol { display: inline-block; margin-left: 2px; font-weight: 800; line-height: 1; }
+    .gender-symbol { display: inline-block; margin-left: 2px; font-size: 1.7em; font-weight: 800; line-height: 1; vertical-align: -0.12em; }
     .gender-symbol-male { color: #60a5fa; }
     .gender-symbol-female { color: #f472b6; }
     .gender-symbol-neutral { color: #a1a1aa; }
@@ -2092,16 +2169,21 @@
 
 
     .exploration-folder-list[hidden] { display:none; }
-    .exploration-folder-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),296px)); gap:14px; margin:18px 0 24px; }
-    .exploration-folder-card { display:flex; flex-direction:column; min-width:0; min-height:280px; padding:0; overflow:hidden; border:1px solid var(--border); border-radius:16px; background:var(--card); color:var(--text); text-align:left; font:inherit; cursor:pointer; box-shadow:0 12px 30px rgba(0,0,0,.18); transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease; }
+    .exploration-folder-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr)); gap:16px; margin:18px 0 24px; }
+    .exploration-folder-card { display:flex; flex-direction:column; min-width:0; min-height:320px; padding:0; overflow:hidden; border:1px solid var(--border); border-radius:16px; background:var(--card); color:var(--text); text-align:left; font:inherit; cursor:pointer; box-shadow:0 12px 30px rgba(0,0,0,.18); transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease; }
     .exploration-folder-card:hover { transform:translateY(-2px); border-color:var(--primary); box-shadow:0 14px 32px rgba(0,0,0,.25); }
-    .exploration-folder-cover { display:block; flex:0 0 120px; height:120px; overflow:hidden; background:var(--input-bg); }
+    .exploration-folder-cover { display:block; flex:0 0 156px; height:156px; overflow:hidden; background:var(--input-bg); }
     .exploration-folder-cover img { display:block; width:100%; height:100%; object-fit:cover; image-rendering:pixelated; }
     .exploration-folder-cover-johto { display:grid; place-items:center; background:radial-gradient(ellipse at 75% 25%,rgba(251,146,60,.32),transparent 35%),linear-gradient(135deg,#21160f,#101114 68%,#25180f); }
-    .exploration-folder-cover-johto span { font-size:3.2rem; filter:drop-shadow(0 8px 12px rgba(0,0,0,.45)); }
-    .exploration-folder-copy { display:grid; align-content:start; gap:5px; min-width:0; padding:14px 18px 18px; }
+    .exploration-folder-cover-johto span { font-size:3.6rem; filter:drop-shadow(0 8px 12px rgba(0,0,0,.45)); }
+    .exploration-folder-copy { display:grid; align-content:start; gap:5px; min-width:0; padding:12px 14px 14px; }
     .exploration-folder-copy strong { font-size:1rem; }
     .exploration-folder-copy small { color:var(--text-muted); line-height:1.4; }
+    .exploration-folder-meta { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:7px; }
+    .exploration-folder-status { display:inline-flex; align-items:center; padding:3px 8px; border-radius:6px; font-size:.7rem; font-weight:700; }
+    .exploration-folder-status.available { color:#4ade80; background:#22c55e22; }
+    .exploration-folder-status.upcoming { color:#fbbf24; background:#fbbf2422; }
+    .exploration-folder-note { color:#fbbf24; font-size:.75rem; font-weight:700; }
     .exploration-folder-view[hidden] { display:none; }
     .exploration-folder-view { margin:18px 0 24px; }
     .exploration-folder-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
@@ -2653,6 +2735,8 @@
     .trainer-card-vip-benefits[hidden] { display:none; }
     .trainer-card-vip-benefits li { position:relative; padding-left:14px; }
     .trainer-card-vip-benefits li::before { position:absolute; left:0; color:#fbbf24; content:"✦"; }
+    .trainer-card-vip-benefits .dex-analitic-toggle { padding:0; border:0; background:transparent; color:#fde68a; font:inherit; font-weight:800; cursor:pointer; }
+    .trainer-card-vip-benefits .dex-analitic-toggle:hover { color:#fff7cc; text-decoration:underline; }
     .trainer-card-identity-panel .trainer-card-vip-benefits { grid-column:1/-1; }
     .vip-profile-name { color:#fbbf24 !important; text-shadow:0 0 12px rgba(251,191,36,.35); }
 
@@ -2676,19 +2760,27 @@
     .season-pass-progress-track i { display:block; height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,#f97316,#fdba74); transition:width .25s; }
     .season-pass-track-grid { display:grid; gap:14px; }
     .season-pass-track { min-width:0; overflow:hidden; padding:16px; border:1px solid var(--border); border-radius:16px; background:var(--card); }
+    .season-pass-premium { border-color:#d4a72c88; background:linear-gradient(115deg,#30230f,#171318 66%); }
+    .season-pass-free { border-color:#64748b88; }
     .season-pass-track header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
     .season-pass-track header h3 { margin:0 0 3px; }
     .season-pass-track header p { margin:0; color:var(--text-muted); font-size:.8rem; }
     .season-pass-medal { position:relative; display:block; flex:0 0 90px; width:90px; height:42px; overflow:hidden; }
     .season-pass-medal img { position:absolute; top:-53px; left:-30px; width:150px; height:150px; max-width:none; object-fit:fill; image-rendering:pixelated; }
-    .season-pass-rewards { display:grid; grid-template-columns:repeat(30,minmax(105px,1fr)); grid-template-rows:repeat(2,minmax(104px,auto)); gap:9px; overflow-x:auto; padding:3px 1px 8px; }
-    .season-pass-reward { position:relative; display:grid; min-height:104px; align-content:center; justify-items:center; gap:8px; padding:14px 8px 9px; border:1px solid #38343f; border-radius:10px; background:#0d0d12; text-align:center; }
+    .season-pass-rewards { display:grid; grid-auto-flow:column; grid-auto-columns:150px; grid-template-rows:150px; gap:9px; overflow-x:auto; padding:10px 1px 8px; scroll-snap-type:x proximity; }
+    .season-pass-reward { position:relative; display:block; width:150px; height:150px; min-height:150px; box-sizing:border-box; padding:0; border:1px solid #38343f; border-radius:10px; background:#0d0d12; text-align:center; scroll-snap-align:start; }
     .season-pass-reward.unlocked { border-color:#f9731688; background:linear-gradient(145deg,#462515,#171318); }
     .season-pass-reward.claimed { border-color:#256c48; background:linear-gradient(145deg,#153323,#111519); }
     .season-pass-level { position:absolute; top:-7px; left:calc(50% - 14px); display:grid; width:28px; height:28px; place-items:center; border-radius:50%; color:#171318; background:#fdba74; font-weight:900; }
-    .season-pass-reward strong { margin-top:8px; font-size:.84rem; }
-    .season-pass-reward button { width:100%; min-height:31px; border:1px solid #f97316; border-radius:7px; color:#fff; background:#c64b0b; font:inherit; font-size:.7rem; font-weight:800; cursor:pointer; }
+    .season-pass-reward-icon { display:block; width:60px; height:60px; object-fit:contain; image-rendering:pixelated; }
+    .season-pass-reward:has(.season-pass-reward-icon) .season-pass-reward-icon { position:absolute; top:22px; left:50%; transform:translateX(-50%); }
+    .season-pass-reward-visual { position:absolute; top:22px; left:50%; transform:translateX(-50%); font-size:48px; line-height:60px; }
+    .season-pass-reward strong { position:absolute; right:5px; bottom:46px; left:5px; width:auto; min-width:0; margin:0; font-size:.78rem; line-height:1.2; white-space:normal; overflow-wrap:anywhere; }
+    .season-pass-reward button { width:100%; min-width:0; min-height:28px; box-sizing:border-box; padding:4px 3px; border:1px solid #f97316; border-radius:7px; color:#fff; background:#c64b0b; font:inherit; font-size:.66rem; line-height:1.1; font-weight:800; white-space:normal; overflow-wrap:anywhere; cursor:pointer; }
+    .season-pass-reward button { position:absolute; right:7px; bottom:6px; left:7px; width:calc(100% - 14px); }
     .season-pass-reward button:disabled { border-color:#34323a; color:#85828d; background:#24232a; cursor:default; }
+    .season-pass-premium .season-pass-level { color:#241a08; background:#fbbf24; }
+    .season-pass-free .season-pass-level { color:#0f172a; background:#cbd5e1; }
     @media(max-width:720px) { .season-pass-hero { grid-template-columns:1fr; gap:16px; padding:19px; } .season-pass-track { padding:13px; } }
 
     .game-corner-page { display:grid; gap:14px; }
@@ -2836,6 +2928,99 @@
       .coop-boss-arena .enemy-sprite { width:clamp(112px,34vw,160px); height:clamp(112px,34vw,160px); }
     }
 
+    /* Raid battle follows the wild battle composition, with raid controls kept in flow. */
+    .coop-boss-arena { min-height:min(82vh,760px); justify-content:flex-end; }
+    .coop-boss-arena .coop-boss-toolbar {
+      position:relative; inset:auto; z-index:3; width:100%; min-height:48px; flex:0 0 auto;
+      padding:7px 14px; border-bottom:1px solid #ffffff18; background:rgba(9,13,24,.55);
+    }
+    .coop-boss-arena .coop-boss-toolbar-meta { margin-left:auto; }
+    .coop-boss-arena .coop-boss-turn-timer { position:static; min-width:52px; transform:none; }
+    .coop-boss-arena .battle-field { flex:1 1 auto; min-height:0; gap:12px; justify-content:space-between; }
+    .coop-boss-arena .battle-enemy { align-self:stretch; }
+    .coop-boss-arena .battle-player { align-self:stretch; margin-top:auto; }
+    .coop-boss-arena .coop-boss-info-wrap { width:min(440px,62vw); }
+    .coop-boss-arena .enemy-info.daily-boss-info.coop-mewtwo-info { width:100%; max-width:100%; }
+    .coop-boss-arena .battle-ui { flex:0 0 auto; }
+    @media(max-width:700px) {
+      .coop-boss-arena { min-height:calc(100dvh - 120px); }
+      .coop-boss-arena .coop-boss-toolbar { min-height:44px; gap:6px; padding:6px 9px; font-size:.72rem; }
+      .coop-boss-arena .coop-boss-toolbar span { padding:5px 7px; }
+      .coop-boss-arena .coop-boss-turn-timer { min-width:44px; }
+      .coop-boss-arena .battle-field { width:100%; min-height:clamp(390px,58vh,560px); flex:1 1 auto; gap:8px; padding:14px 10px 6px; justify-content:space-between; }
+      .coop-boss-arena .battle-enemy { display:grid; grid-template-columns:minmax(0,1fr) clamp(104px,31vw,150px); align-items:start; gap:6px; padding:0 2%; }
+      .coop-boss-arena .coop-boss-info-wrap { grid-column:1; grid-row:1; align-self:start; }
+      .coop-boss-arena .enemy-stage { grid-column:2; grid-row:1; align-self:start; }
+      .coop-boss-arena .coop-boss-info-wrap { width:100%; min-width:0; }
+      .coop-boss-arena .enemy-info.daily-boss-info.coop-mewtwo-info { width:100%; min-width:0; max-width:none; padding:8px 10px; }
+      .coop-boss-arena .enemy-stage { width:100%; height:clamp(100px,29vw,140px); flex:0 0 auto; }
+      .coop-boss-arena .enemy-sprite { width:clamp(100px,29vw,140px); height:clamp(100px,29vw,140px); }
+      .coop-boss-arena .battle-player { width:100%; min-height:0; gap:6px; margin:0; padding:0 2% 0 4%; }
+      .coop-boss-arena .battle-player { margin-top:auto; }
+      .coop-boss-arena .player-stage { width:38%; flex:0 0 38%; justify-content:center; }
+      .coop-boss-arena .player-sprite { width:clamp(90px,26vw,118px); height:clamp(90px,26vw,118px); }
+      .coop-boss-arena .player-info { width:min(60%,240px); min-width:0; max-width:none; padding:8px 9px; }
+      .coop-boss-arena .battle-ui { width:100%; max-width:none; padding:10px 10px calc(12px + env(safe-area-inset-bottom)); border-radius:16px 16px 0 0; }
+      .coop-boss-arena .coop-raid-roster { display:flex; justify-content:flex-start; overflow-x:auto; margin:0 0 8px; padding:0 0 4px; }
+      .coop-boss-arena .coop-raid-member { flex:0 0 112px; min-height:86px; padding:5px; }
+      .coop-boss-arena .coop-raid-member img { width:30px; height:30px; flex-basis:30px; }
+    }
+    .coop-boss-arena .coop-raid-pokemon-card {
+      min-width:0; padding:8px 10px; border:3px solid #11131a; border-radius:4px;
+      background-color:rgba(0,0,0,.3);
+      background-image:linear-gradient(160deg,rgba(255,255,255,.08),rgba(0,0,0,.18));
+      color:#f4f4f5; box-shadow:3px 3px 0 #08090d,inset 0 0 0 2px rgba(255,255,255,.24);
+      -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px);
+    }
+    .coop-boss-arena .coop-raid-pokemon-heading,
+    .coop-boss-arena .coop-raid-hp-label,
+    .coop-boss-arena .coop-raid-exp-label {
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      color:#f4f4f5; font-family:"Courier New",monospace; font-size:.68rem; font-weight:900;
+    }
+    .coop-boss-arena .coop-raid-pokemon-heading { margin-bottom:4px; }
+    .coop-boss-arena .coop-raid-pokemon-heading strong { min-width:0; overflow:hidden; color:#fff; font-size:.82rem; text-overflow:ellipsis; white-space:nowrap; }
+    .coop-boss-arena .coop-raid-pokemon-heading > span { flex:0 0 auto; }
+    .coop-boss-arena .coop-raid-hp-label,
+    .coop-boss-arena .coop-raid-exp-label { margin:2px 0; font-size:.6rem; }
+    .coop-boss-arena .coop-raid-hp-bar,
+    .coop-boss-arena .coop-raid-exp-bar { height:9px; overflow:hidden; border:2px solid #11131a; border-radius:2px; background:#20212a; box-shadow:inset 0 0 0 1px #08090d; }
+    .coop-boss-arena .coop-raid-hp-bar i,
+    .coop-boss-arena .coop-raid-exp-bar i { display:block; height:100%; background:linear-gradient(180deg,#7dff59,#27d83c); }
+    .coop-boss-arena .coop-raid-hp-bar i.yellow { background:linear-gradient(180deg,#ffe85c,#edbc22); }
+    .coop-boss-arena .coop-raid-hp-bar i.red { background:linear-gradient(180deg,#ff6d61,#e52732); }
+    .coop-boss-arena .coop-raid-exp { margin-top:4px; }
+    .coop-boss-arena .coop-raid-exp-bar { height:6px; }
+    .coop-boss-arena .coop-raid-exp-bar i { background:linear-gradient(180deg,#ffd166,#f97316); }
+    @media(max-width:700px) {
+      .coop-boss-arena .coop-raid-pokemon-card { width:min(56vw,230px); padding:7px 9px; }
+      .coop-boss-arena .enemy-info.daily-boss-info.coop-raid-pokemon-card { width:100%; max-width:none; }
+    }
+
+    /* Daily boss status card uses the same compact pixel layout as the raid. */
+    #battleOverlay .battle-enemy .enemy-info.daily-boss-info {
+      width:min(230px,62vw); min-width:210px; max-width:100%; padding:8px 10px;
+      border:3px solid #11131a; border-radius:4px;
+      background-color:rgba(0,0,0,.3);
+      background-image:linear-gradient(160deg,rgba(255,255,255,.08),rgba(0,0,0,.18));
+      color:#f4f4f5; box-shadow:3px 3px 0 #08090d,inset 0 0 0 2px rgba(255,255,255,.24);
+      -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px);
+    }
+    #battleOverlay .daily-boss-info .battle-pokemon-name-row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px; }
+    #battleOverlay .daily-boss-info .battle-pokemon-name-row .poke-name { min-width:0; overflow:hidden; color:#fff; font-family:"Courier New",monospace; font-size:.82rem; font-weight:900; text-overflow:ellipsis; white-space:nowrap; }
+    #battleOverlay .daily-boss-info .battle-pokemon-name-row .poke-level { flex:0 0 auto; margin:0; color:#f4f4f5; font-family:"Courier New",monospace; font-size:.68rem; font-weight:900; }
+    #battleOverlay .daily-boss-info .battle-level-type-row { display:none; }
+    #battleOverlay .daily-boss-info .hp-label { margin:2px 0; color:#f4f4f5; font-family:"Courier New",monospace; font-size:.6rem; font-weight:900; }
+    #battleOverlay .daily-boss-info .hp-bar { height:10px; border:2px solid #11131a; border-radius:2px; background:#20212a; box-shadow:inset 0 0 0 1px #08090d; }
+    #battleOverlay .daily-boss-info .hp-fill { border-radius:0; background:linear-gradient(180deg,#7dff59,#27d83c); }
+    #battleOverlay .daily-boss-info .daily-boss-shield-wrap { margin-top:4px; }
+    #battleOverlay .daily-boss-info .daily-boss-shield-bar { height:10px; border:2px solid #11131a; border-radius:2px; background:#20212a; box-shadow:inset 0 0 0 1px #08090d; }
+    #battleOverlay .daily-boss-info .daily-boss-shield-fill { border-radius:0; background:linear-gradient(180deg,#e2e8f0,#94a3b8); }
+    @media(max-width:600px) {
+      #battleOverlay .battle-enemy .enemy-info.daily-boss-info { width:min(56vw,230px); min-width:0; max-width:100%; padding:7px 9px; }
+      #battleOverlay .daily-boss-info .battle-pokemon-name-row .poke-name { font-size:.76rem; }
+    }
+
     /* Compact pixel-style Pokémon status panels in the main battle screen. */
     #battleOverlay .battle-enemy .enemy-info:not(.daily-boss-info),
     #battleOverlay .battle-player .player-info {
@@ -2857,6 +3042,34 @@
     #battleOverlay .hp-fill.red { background:linear-gradient(180deg,#ff6d61,#e52732); }
     #battleOverlay .xp-bar { height:6px; margin-top:3px; border:1px solid #11131a; border-radius:2px; background:#20212a; }
     #battleOverlay .xp-fill { border-radius:0; background:linear-gradient(180deg,#ffd166,#f97316); }
+    #battleOverlay .dex-analitic-panel { width:min(260px,66vw); margin-top:9px; padding:8px 9px; border:3px solid #11131a; border-radius:4px; background-color:rgba(0,0,0,.3); background-image:linear-gradient(160deg,rgba(255,255,255,.08),rgba(0,0,0,.18)); color:#f4f4f5; box-shadow:3px 3px 0 #08090d,inset 0 0 0 2px rgba(255,255,255,.18); -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px); font-family:system-ui,sans-serif; }
+    #battleOverlay .dex-analitic-panel[hidden] { display:none; }
+    #battleOverlay .dex-analitic-panel.is-collapsed { width:38px; height:38px; padding:4px; }
+    .dex-analitic-header { display:flex; align-items:center; gap:6px; min-height:23px; }
+    #battleOverlay .dex-analitic-panel.is-collapsed .dex-analitic-header { justify-content:center; min-height:28px; }
+    #battleOverlay .dex-analitic-panel.is-collapsed .dex-analitic-header > :not(.dex-analitic-collapse) { display:none; }
+    .dex-analitic-icon { display:none; }
+    .dex-analitic-header strong { flex:1; font-size:.58rem; letter-spacing:.06em; }
+    .dex-analitic-collapse { order:-1; display:grid; place-items:center; flex:0 0 22px; width:22px; height:22px; padding:0; border:0; border-radius:0; background:transparent; color:#e9d5ff; font-size:.82rem; font-weight:900; line-height:1; cursor:pointer; }
+    #battleOverlay .dex-analitic-panel.is-collapsed .dex-analitic-collapse { flex-basis:28px; width:28px; height:28px; border:0; background:transparent; font-size:1.05rem; }
+    .dex-analitic-collapse:hover { color:#fff; }
+    .dex-analitic-collapse:focus-visible { outline:2px solid #d8b4fe; outline-offset:2px; }
+    .dex-analitic-content[hidden] { display:none !important; }
+    .dex-analitic-score { padding:3px 6px; border:1px solid #52627e; border-radius:7px; background:#26344d; font-size:.56rem; font-weight:800; }
+    .dex-analitic-nature { display:flex; align-items:center; gap:5px; margin:6px 0; padding:5px 6px; border:1px solid #534878; border-radius:7px; background:#28213f; font-size:.56rem; }
+    .dex-analitic-nature small { color:#95a4c4; font-size:.48rem; font-weight:800; letter-spacing:.1em; }
+    .dex-analitic-nature strong { flex:1; font-size:.64rem; }
+    .dex-nature-up { color:#6dc7ff; font-weight:800; white-space:nowrap; }
+    .dex-nature-down { color:#ff777e; font-weight:800; white-space:nowrap; }
+    .dex-analitic-stats { display:grid; gap:3px; }
+    .dex-analitic-stat { display:grid; grid-template-columns:46px minmax(0,1fr) 18px; align-items:center; gap:5px; font-size:.55rem; }
+    .dex-analitic-stat-label { color:#99a9c9; font-weight:700; }
+    .dex-analitic-stat-bar { height:6px; overflow:hidden; border-radius:6px; background:#263249; }
+    .dex-analitic-stat-bar i { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#c08457,#7dd3fc); }
+    .dex-analitic-stat-value { color:#e6edfa; text-align:right; font-weight:800; }
+    .dex-analitic-ability { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; padding-top:5px; border-top:1px solid #33415b; font-size:.55rem; }
+    .dex-analitic-ability span { color:#8fa2c5; font-size:.48rem; font-weight:800; letter-spacing:.1em; }
+    .dex-analitic-ability strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     @media(max-width:600px) {
       #battleOverlay .battle-enemy .enemy-info:not(.daily-boss-info),
       #battleOverlay .battle-player .player-info { min-width:0; width:min(56vw,230px); padding:7px 9px; }
@@ -2889,4 +3102,66 @@
       .pvp-arena .enemy-sprite, .pvp-arena .player-sprite { width:clamp(76px,23vw,108px); height:clamp(76px,23vw,108px); }
       .pvp-arena .enemy-sprite.rillaboom-battle-sprite, .pvp-arena .enemy-sprite.annihilape-battle-sprite, .pvp-arena .player-sprite.rillaboom-battle-sprite, .pvp-arena .player-sprite.annihilape-battle-sprite { width:clamp(90px,26vw,126px); height:clamp(90px,26vw,126px); }
       .pvp-arena .pvp-trainer-name { font-size:.6rem; }
+    }
+
+    /* Move selection cards use the framed, two-row layout from the battle reference. */
+    .move-btn.battle-move-choice {
+      display:grid;grid-template-columns:minmax(78px,1fr) 30px auto;grid-template-rows:minmax(30px,1fr) 25px;align-items:center;gap:4px 8px;
+      min-height:78px;padding:6px 10px;border:4px solid color-mix(in srgb,var(--move-color,#a8a878) 54%,#8d4b52);border-radius:5px;
+      background:linear-gradient(180deg,color-mix(in srgb,var(--move-color,#a8a878) 22%,#f8dfe0) 0%,color-mix(in srgb,var(--move-color,#a8a878) 28%,#f2c9cb) 100%);color:#69363d;
+      box-shadow:inset 0 0 0 2px #e7a9ad,0 3px 0 #613239;text-align:center;
+    }
+    .move-btn.battle-move-choice:hover:not(:disabled) { border-color:color-mix(in srgb,var(--move-color,#a8a878) 70%,#a75c63);background:linear-gradient(180deg,color-mix(in srgb,var(--move-color,#a8a878) 27%,#ffe9e9) 0%,color-mix(in srgb,var(--move-color,#a8a878) 33%,#f5d1d3) 100%); }
+    .battle-move-heading,.battle-move-details { display:contents; }
+    .battle-move-name,.battle-move-heading strong { grid-column:1/-1;grid-row:1;justify-self:center;max-width:100%;overflow:hidden;color:#713940;font-family:"Courier New",monospace;font-size:clamp(.88rem,2vw,1.08rem);font-weight:900;letter-spacing:.015em;text-overflow:ellipsis;text-shadow:1px 1px 0 #fff3;white-space:nowrap; }
+    .battle-move-footer { display:contents; }
+    .battle-move-type-tag { grid-column:1;grid-row:2;display:flex;align-items:center;justify-content:center;min-width:0;height:24px;padding:0 8px;border-radius:2px;background:var(--move-color,#a1a1aa);color:#fff;font-family:"Courier New",monospace;font-size:.78rem;font-weight:900;letter-spacing:.04em;text-shadow:1px 1px #542f36; }
+    .battle-move-heading .move-type { grid-column:1;grid-row:2;display:flex;align-items:center;justify-content:center;min-width:0;height:24px;margin:0;padding:0 8px;border-radius:2px;background:var(--move-color,#a1a1aa);color:transparent;font-size:0; }
+    .battle-move-heading .move-type::after { color:#fff;font-family:"Courier New",monospace;font-size:.78rem;font-weight:900;letter-spacing:.04em;text-shadow:1px 1px #542f36; }
+    .battle-move-choice[data-move-type="Normal"] .move-type::after { content:"NORMAL"; }
+    .battle-move-choice[data-move-type="Fogo"] .move-type::after { content:"FIRE"; }
+    .battle-move-choice[data-move-type="Agua"] .move-type::after { content:"WATER"; }
+    .battle-move-choice[data-move-type="Planta"] .move-type::after { content:"GRASS"; }
+    .battle-move-choice[data-move-type="Elétrico"] .move-type::after { content:"ELECTRIC"; }
+    .battle-move-choice[data-move-type="Gelo"] .move-type::after { content:"ICE"; }
+    .battle-move-choice[data-move-type="Lutador"] .move-type::after { content:"FIGHT"; }
+    .battle-move-choice[data-move-type="Veneno"] .move-type::after { content:"POISON"; }
+    .battle-move-choice[data-move-type="Terra"] .move-type::after { content:"GROUND"; }
+    .battle-move-choice[data-move-type="Voador"] .move-type::after { content:"FLYING"; }
+    .battle-move-choice[data-move-type="Psíquico"] .move-type::after { content:"PSYCHIC"; }
+    .battle-move-choice[data-move-type="Inseto"] .move-type::after { content:"BUG"; }
+    .battle-move-choice[data-move-type="Pedra"] .move-type::after { content:"ROCK"; }
+    .battle-move-choice[data-move-type="Fantasma"] .move-type::after { content:"GHOST"; }
+    .battle-move-choice[data-move-type="Dragao"] .move-type::after { content:"DRAGON"; }
+    .battle-move-choice[data-move-type="Sombrio"] .move-type::after { content:"DARK"; }
+    .battle-move-choice[data-move-type="Aço"] .move-type::after { content:"STEEL"; }
+    .battle-move-choice[data-move-type="Fada"] .move-type::after { content:"FAIRY"; }
+    .battle-move-choice[data-move-type-label="NORMAL"] .move-type::after { content:"NORMAL"; }
+    .battle-move-choice[data-move-type-label="FIRE"] .move-type::after { content:"FIRE"; }
+    .battle-move-choice[data-move-type-label="WATER"] .move-type::after { content:"WATER"; }
+    .battle-move-choice[data-move-type-label="GRASS"] .move-type::after { content:"GRASS"; }
+    .battle-move-choice[data-move-type-label="ELECTRIC"] .move-type::after { content:"ELECTRIC"; }
+    .battle-move-choice[data-move-type-label="ICE"] .move-type::after { content:"ICE"; }
+    .battle-move-choice[data-move-type-label="FIGHT"] .move-type::after { content:"FIGHT"; }
+    .battle-move-choice[data-move-type-label="POISON"] .move-type::after { content:"POISON"; }
+    .battle-move-choice[data-move-type-label="GROUND"] .move-type::after { content:"GROUND"; }
+    .battle-move-choice[data-move-type-label="FLYING"] .move-type::after { content:"FLYING"; }
+    .battle-move-choice[data-move-type-label="PSYCHIC"] .move-type::after { content:"PSYCHIC"; }
+    .battle-move-choice[data-move-type-label="BUG"] .move-type::after { content:"BUG"; }
+    .battle-move-choice[data-move-type-label="ROCK"] .move-type::after { content:"ROCK"; }
+    .battle-move-choice[data-move-type-label="GHOST"] .move-type::after { content:"GHOST"; }
+    .battle-move-choice[data-move-type-label="DRAGON"] .move-type::after { content:"DRAGON"; }
+    .battle-move-choice[data-move-type-label="DARK"] .move-type::after { content:"DARK"; }
+    .battle-move-choice[data-move-type-label="STEEL"] .move-type::after { content:"STEEL"; }
+    .battle-move-choice[data-move-type-label="FAIRY"] .move-type::after { content:"FAIRY"; }
+    .battle-move-details .move-category { grid-column:2;grid-row:2;justify-self:center;width:22px;height:22px; }
+    .battle-move-pp { grid-column:3;grid-row:2;justify-self:end;color:#fff;font-family:"Courier New",monospace;font-size:1rem;font-weight:900;letter-spacing:-.04em;-webkit-text-stroke:.55px #633940;text-shadow:1px 1px 0 #633940,-1px -1px 0 #633940; }
+    .battle-move-details .move-effectiveness { display:none; }
+    @media(max-width:520px) {
+      .move-btn.battle-move-choice { grid-template-columns:minmax(58px,1fr) 23px auto;min-height:68px;padding:5px 6px;border-width:3px;gap:3px 5px; }
+      .battle-move-heading .move-type { height:22px;padding:0 4px; }
+      .battle-move-type-tag { height:22px;padding:0 4px;font-size:.66rem; }
+      .battle-move-heading .move-type::after { font-size:.66rem; }
+      .battle-move-details .move-category { width:19px;height:19px; }
+      .battle-move-pp { font-size:.84rem; }
     }

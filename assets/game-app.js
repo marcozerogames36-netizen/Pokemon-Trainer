@@ -102,6 +102,7 @@
       Levitate:'É imune a golpes Terra.',
       Intimidate:'Reduz em 25% o dano de golpes físicos recebido.',
       'Thick Fat':'Reduz em 50% o dano de golpes Fogo e Gelo.',
+      'Liquid Ooze':'Golpes de dreno causam ao atacante o HP que ele recuperaria.',
       Guts:'Com status, causa 50% mais dano físico e ignora a penalidade de queimadura.',
       'Flash Fire':'É imune a Fogo; após isso, golpes Fogo ficam 50% mais fortes.'
     };
@@ -114,7 +115,7 @@
     ABILITY_INFO.Defiant = 'Aumenta muito o Ataque quando um oponente reduz seus atributos.';
     const ABILITY_BY_ID = {
       1:'Overgrow',2:'Overgrow',3:'Overgrow',4:'Blaze',5:'Blaze',6:'Blaze',7:'Torrent',8:'Torrent',9:'Torrent',10:'Swarm',11:'Swarm',12:'Swarm',
-      25:'Static',26:'Static',29:'Poison Point',30:'Poison Point',31:'Poison Point',32:'Poison Point',33:'Poison Point',34:'Poison Point',
+      25:'Static',26:'Static',29:'Poison Point',30:'Poison Point',31:'Poison Point',32:'Poison Point',33:'Poison Point',34:'Poison Point',72:'Liquid Ooze',73:'Liquid Ooze',316:'Liquid Ooze',317:'Liquid Ooze',
       24:'Intimidate',58:'Intimidate',59:'Intimidate',130:'Intimidate',66:'Guts',67:'Guts',68:'Guts',
       92:'Levitate',93:'Levitate',94:'Levitate',133:'Adaptabilidade',134:'Water Absorb',135:'Volt Absorb',136:'Flash Fire',143:'Thick Fat',150:'Adaptabilidade',807:'Volt Absorb'
     };
@@ -276,6 +277,12 @@
       const accuracy = Number(rawAccuracy);
       return Number.isFinite(accuracy) ? Math.max(1, Math.min(100, accuracy)) : 100;
     }
+    function isHealBlocked(pokemon) {
+      return Boolean(pokemon?.healBlocked || Number(pokemon?.healBlockTurns) > 0 || pokemon?.volatileStatuses?.includes?.('heal-block'));
+    }
+    function isMegaDrainMove(move) {
+      return ['megadrain','megadreno'].includes(String(move?.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''));
+    }
     function isSelfTargetingStatusMove(move) {
       const power = Number(move?.power);
       const selfTargets = ['user','user-or-ally','user-and-allies','users-and-allies','users-field','user-side','ally','allies','ally-side','ally-team'];
@@ -295,7 +302,8 @@
       const gained = {};
       for (const [stat,amount] of Object.entries(yieldByStat)) {
         const trainingMultiplier = pokemon.heldItem === 'macho_brace' ? 2 : 1;
-        let remaining = Math.min(amount * trainingMultiplier, EV_LIMIT_TOTAL - Object.values(pokemon.evs).reduce((sum,value)=>sum+value,0), EV_LIMIT_STAT - pokemon.evs[stat]);
+        const boosterMultiplier = Number(player?.evBoostExpiresAt) > Date.now() ? 2 : 1;
+        let remaining = Math.min(amount * trainingMultiplier * boosterMultiplier, EV_LIMIT_TOTAL - Object.values(pokemon.evs).reduce((sum,value)=>sum+value,0), EV_LIMIT_STAT - pokemon.evs[stat]);
         if (remaining<=0) continue;
         pokemon.evs[stat]+=remaining;
         gained[stat]=remaining;
@@ -534,6 +542,25 @@
       });
       if (messages.length) renderBattleStatusIndicators();
       return messages.join(' ');
+    }
+
+    function applyMoveSecondaryStatEffect(attacker, defender, move, damage = 0, blocked = false, attackerIsPlayer = attacker === player?.poke) {
+      const moveSlug = String(move?.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const regularMessage = moveSlug === 'ancientpower' ? '' : applyMoveStatChanges(attacker, defender, move, damage);
+      if (blocked || damage <= 0 || moveSlug !== 'ancientpower' || Math.random() >= 0.1) return regularMessage;
+      // Select the battle side explicitly so the boost cannot be assigned to the target.
+      const stageKey = attackerIsPlayer ? 'playerStatStages' : 'enemyStatStages';
+      const stages = battle[stageKey] || (battle[stageKey] = {});
+      const labels = { attack: 'Ataque', defense: 'Defesa', specialAttack: 'Ataque Especial', specialDefense: 'Defesa Especial', speed: 'Velocidade' };
+      const raised = [];
+      Object.entries(labels).forEach(([stat, label]) => {
+        const previous = Number(stages[stat]) || 0;
+        stages[stat] = Math.min(6, previous + 1);
+        if (stages[stat] > previous) raised.push(label);
+      });
+      if (raised.length) renderBattleStatusIndicators();
+      const boostMessage = raised.length ? `${attacker.name} aumentou ${raised.join(', ')}!` : '';
+      return [regularMessage, boostMessage].filter(Boolean).join(' ');
     }
 
     function tickGuardSpecTurn() {
@@ -976,7 +1003,7 @@
         const statusEffect = statusNames[ailment] ? { status: statusNames[ailment], chance: Math.max(0, Number(data.meta?.ailment_chance) || Number(data.effect_chance) || 0) / 100 } : undefined;
         const statNames = { attack: 'attack', defense: 'defense', 'special-attack': 'specialAttack', 'special-defense': 'specialDefense', speed: 'speed', accuracy: 'accuracy', evasion: 'evasion' };
         const changesTargetUser = ['user', 'users-field', 'user-and-allies'].includes(data.target?.name) || slug === 'close-combat';
-        const statChanges = slug === 'swords-dance'
+        const statChanges = slug === 'ancient-power' ? [] : slug === 'swords-dance'
           ? [{ target: 'self', stat: 'attack', stages: 2 }]
           : (data.stat_changes || []).map(change => ({
               target: changesTargetUser ? 'self' : 'target',
@@ -986,8 +1013,8 @@
         const move = {
           name: data.name.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' '),
           type: getCurrentMoveType(data),
-          power: Number(data.power) || 0,
-          accuracy: data.accuracy,
+          power: slug === 'mega-drain' ? 40 : Number(data.power) || 0,
+          accuracy: slug === 'mega-drain' ? 100 : data.accuracy,
           priority: Number(data.priority) || 0,
           target: data.target?.name || '',
           healing: Math.max(0,Number(data.meta?.healing)||0),
@@ -997,12 +1024,13 @@
           maxHits: Math.max(1,Number(data.meta?.max_hits)||1),
           critRate: Math.max(0,Number(data.meta?.crit_rate)||0),
           flinchChance: Math.max(0,Number(data.meta?.flinch_chance)||0)/100,
-          pp: Number(data.pp) || 20,
-          basePp: Number(data.pp) || 20,
-          maxPp: Number(data.pp) || 20,
-          category: data.damage_class?.name || 'status',
+          pp: slug === 'mega-drain' ? 15 : Number(data.pp) || 20,
+          basePp: slug === 'mega-drain' ? 15 : Number(data.pp) || 20,
+          maxPp: slug === 'mega-drain' ? 15 : Number(data.pp) || 20,
+          category: slug === 'mega-drain' ? 'special' : data.damage_class?.name || 'status',
           statusEffect,
           statChanges: statChanges.length ? statChanges : undefined,
+          ...(slug === 'mega-drain' ? { drain: 50, contact: false } : {}),
           ppUps: 0
         };
         return move;
@@ -1016,17 +1044,31 @@
       const forceRefresh = player?.moveMetadataVersion !== 'raid-move-effects-v2';
       const targets = (pokemonList || []).filter(pokemon => Array.isArray(pokemon?.moves));
       await Promise.all(targets.flatMap(pokemon => pokemon.moves.map(async move => {
-        if (!forceRefresh && move.raidEffectsVersion === 2 && ['physical','special','status'].includes(move.category)) return;
+        const normalizedName = String(move.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!forceRefresh && move.raidEffectsVersion === 2 && ['physical','special','status'].includes(move.category) && !['megadrain','megadreno'].includes(normalizedName)) return;
         const slug = getOriginalMoveName(move.name).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
           .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         if (!slug) return;
         try {
           const canonical = await getMoveDataForBattle(slug);
           if (!['physical','special','status'].includes(canonical.category)) return;
-          move.category = canonical.category;
-          move.type = canonical.type;
+          move.category = slug === 'mega-drain' ? 'special' : canonical.category;
+          move.type = slug === 'mega-drain' ? 'Planta' : canonical.type;
           for (const key of ['power','accuracy','priority','target','healing','drain','recoil','minHits','maxHits','critRate','flinchChance','statusEffect','statChanges']) {
             if (canonical[key] !== undefined) move[key] = canonical[key];
+          }
+          if (slug === 'mega-drain') {
+            move.power = 40; move.accuracy = 100; move.drain = 50; move.statChanges = undefined; move.contact = false;
+            const ppUps = Math.max(0, Math.min(3, Math.floor(Number(move.ppUps) || 0)));
+            const nextMaxPp = Math.floor(15 * (1 + ppUps * 0.2));
+            const previousMaxPp = Math.max(1, Number(move.maxPp) || Number(move.basePp) || 15);
+            const previousPp = Number.isFinite(Number(move.pp)) ? Number(move.pp) : previousMaxPp;
+            if (move.basePp !== 15 || move.maxPp !== nextMaxPp) {
+              move.pp = Math.min(nextMaxPp, Math.floor(previousPp * nextMaxPp / previousMaxPp));
+              move.basePp = 15;
+              move.maxPp = nextMaxPp;
+              changed = true;
+            }
           }
           move.raidEffectsVersion = 2;
           changed = true;
@@ -1130,7 +1172,7 @@
       hipnose:'Hypnosis', 'raio de gelo':'Ice Beam', nevasca:'Blizzard', 'po do sono':'Sleep Powder',
       'esporo paralisante':'Stun Spore', toxico:'Toxic', 'fogo fatuo':'Will-O-Wisp',
       terremoto:'Earthquake', escavacao:'Dig', 'chute baixo':'Low Kick', soco:'Karate Chop',
-      'soco dinamico':'Dynamic Punch', lodo:'Sludge', corte:'Cut', enrolar:'Wrap',
+      'soco dinamico':'Dynamic Punch', lodo:'Sludge', corte:'Cut', enrolar:'Wrap', megadreno:'Mega Drain',
       metronomo:'Metronome', 'hiper-raio':'Hyper Beam', 'onda de dragao':'Dragon Rage'
     };
     function getOriginalMoveName(name) {
@@ -1336,6 +1378,7 @@
 
     function applyVipPresentation() {
       const active = isVipActive();
+      if (player && typeof player.dexAnaliticEnabled !== 'boolean') player.dexAnaliticEnabled = true;
       ['dashName', 'welcomeName'].forEach(id => document.getElementById(id)?.classList.toggle('vip-profile-name', active));
       document.querySelectorAll('.trainer-card-name').forEach(node => node.classList.toggle('vip-profile-name', active));
       const status = document.getElementById('trainerVipStatus');
@@ -1348,6 +1391,72 @@
           : '';
       }
       if (benefits) benefits.hidden = !active;
+      const dexToggle = document.getElementById('dexAnaliticToggle');
+      if (dexToggle) dexToggle.textContent = `Dex Analitic: ${player?.dexAnaliticEnabled === false ? 'Desativado' : 'Ativado'}`;
+      updateDexAnaliticPanel(battle?.enemy, Boolean(battle?.dungeon));
+    }
+
+    function toggleDexAnalitic() {
+      if (!player || !isVipActive()) {
+        showToast('O Dex Analitic é um benefício exclusivo VIP.', 'error');
+        return;
+      }
+      player.dexAnaliticEnabled = player.dexAnaliticEnabled === false;
+      applyVipPresentation();
+      saveGame();
+      showToast(`Dex Analitic ${player.dexAnaliticEnabled ? 'ativado' : 'desativado'}.`);
+    }
+
+    let dexAnaliticCollapsed = true;
+
+    function toggleDexAnaliticCollapse() {
+      const panel = document.getElementById('dexAnaliticPanel');
+      if (!panel || panel.hidden) return;
+      dexAnaliticCollapsed = !dexAnaliticCollapsed;
+      const content = document.getElementById('dexAnaliticContent');
+      const button = document.getElementById('dexAnaliticCollapse');
+      if (content) content.hidden = dexAnaliticCollapsed;
+      panel.classList.toggle('is-collapsed', dexAnaliticCollapsed);
+      if (button) {
+        button.textContent = '🔍';
+        button.setAttribute('aria-expanded', String(!dexAnaliticCollapsed));
+        button.setAttribute('aria-label', dexAnaliticCollapsed ? 'Expandir Dex Analitic' : 'Recolher Dex Analitic');
+        button.title = dexAnaliticCollapsed ? 'Expandir' : 'Recolher';
+      }
+    }
+
+    function updateDexAnaliticPanel(pokemon, isWildBattle) {
+      const panel = document.getElementById('dexAnaliticPanel');
+      if (!panel) return;
+      const enabled = Boolean(player && isVipActive() && player.dexAnaliticEnabled !== false && isWildBattle && pokemon);
+      panel.hidden = !enabled;
+      if (!enabled) return;
+      const content = document.getElementById('dexAnaliticContent');
+      const collapseButton = document.getElementById('dexAnaliticCollapse');
+      if (content) content.hidden = dexAnaliticCollapsed;
+      panel.classList.toggle('is-collapsed', dexAnaliticCollapsed);
+      if (collapseButton) {
+        collapseButton.textContent = '🔍';
+        collapseButton.setAttribute('aria-expanded', String(!dexAnaliticCollapsed));
+        collapseButton.setAttribute('aria-label', dexAnaliticCollapsed ? 'Expandir Dex Analitic' : 'Recolher Dex Analitic');
+        collapseButton.title = dexAnaliticCollapsed ? 'Expandir' : 'Recolher';
+      }
+      ensurePokemonTraits(pokemon);
+      const statRows = [
+        ['PS','hp'], ['Ataque','attack'], ['Defesa','defense'],
+        ['At.Esp','specialAttack'], ['Def.Esp','specialDefense'], ['Veloc','speed']
+      ];
+      const values = statRows.map(([, stat]) => Math.max(0, Math.min(31, Number(pokemon.ivs?.[stat]) || 0)));
+      const score = Math.round(values.reduce((sum, value) => sum + value, 0) / (31 * values.length) * 100);
+      document.getElementById('dexAnaliticScore').textContent = `IV ${score}%`;
+      document.getElementById('dexAnaliticNature').innerHTML = `<small>NATUREZA</small><strong>${escapeHTML(pokemon.natureMint || pokemon.nature || '—')}</strong>`;
+      document.getElementById('dexAnaliticStats').innerHTML = statRows.map(([label, stat], index) => {
+        const value = values[index];
+        return `<div class="dex-analitic-stat"><span class="dex-analitic-stat-label">${label}</span><span class="dex-analitic-stat-bar"><i style="width:${value / 31 * 100}%"></i></span><strong class="dex-analitic-stat-value">${value}</strong></div>`;
+      }).join('');
+      const ability = document.getElementById('dexAnaliticAbility');
+      ability.textContent = pokemon.ability || 'Desconhecida';
+      ability.title = ABILITY_INFO[pokemon.ability] || '';
     }
 
     function processVipBenefits() {
@@ -1409,6 +1518,21 @@
       showToast(wasActive ? 'VIP renovado por mais 30 dias.' : 'VIP ativado por 30 dias! Seu nome agora é dourado.');
     }
 
+    function activatePremiumPass() {
+      if (!player || getItemQty('premium_pass') <= 0) return;
+      const state = ensureSeasonPassState();
+      if (state.premiumUnlocked) {
+        showToast('A trilha do Passe Premium já está liberada.', 'error');
+        return;
+      }
+      state.premiumUnlocked = true;
+      decItemQty('premium_pass', 1);
+      saveGame();
+      renderBag();
+      renderSeasonPass();
+      showToast('Passe Premium ativado! As 60 recompensas premium foram liberadas.');
+    }
+
     function getBattleExperienceShares(totalExperience, activePokemon) {
       const shares = new Map();
       if (!player || !activePokemon || totalExperience <= 0) return shares;
@@ -1458,10 +1582,77 @@
     }
 
     const SEASON_PASS_LEVELS = 60;
+    const FREE_PASS_REWARDS = [
+      { key:'balls', name:'Bag de Pokebolas', amount:5, icon:'assets/season-pass-pokeball-bag-red.png' },
+      { key:'potions', name:'Poção', amount:2 },
+      { key:'revive', name:'Revive', amount:2 },
+      { key:'antidote', name:'Antídoto', amount:2 },
+      { key:'greatball', name:'Great Ball', amount:3 },
+      { key:'superpotion', name:'Super Poção', amount:2 },
+      { key:'pecha', name:'Pecha Berry', amount:3 },
+      { type:'currency', name:'5 PokéCoins', amount:5, iconText:'💎' },
+      { key:'balls', name:'Pokébola', amount:10, icon:'assets/season-pass-pokeball-bag-red.png' },
+      { key:'rarecandy', name:'Doce Raro', amount:1 },
+      { key:'superpotion', name:'Super Poção', amount:3 },
+      { key:'cherri', name:'Cheri Berry', amount:3 },
+      { key:'antiparalyze', name:'Antiparalisia', amount:2 },
+      { key:'ultraball', name:'Ultra Ball', amount:2 },
+      { key:'revive', name:'Revive', amount:3 },
+      { key:'hyperpotion', name:'Hiper Poção', amount:2 },
+      { key:'rawst', name:'Rawst Berry', amount:3 },
+      { key:'awakener', name:'Despertar', amount:2 },
+      { key:'greatball', name:'Great Ball', amount:5 },
+      { key:'rarecandy', name:'Doce Raro', amount:2 },
+      { key:'oran', name:'Oran Berry', amount:4 },
+      { key:'fullheal', name:'Cura Total', amount:2 },
+      { key:'superpotion', name:'Super Poção', amount:4 },
+      { type:'currency', name:'5 PokéCoins', amount:5, iconText:'💎' },
+      { key:'revive', name:'Revive', amount:4 },
+      { key:'hyperpotion', name:'Hiper Poção', amount:3 },
+      { key:'lum', name:'Lum Berry', amount:2 },
+      { key:'leppa', name:'Leppa Berry', amount:3 },
+      { key:'ultraball', name:'Ultra Ball', amount:4 },
+      { key:'rarecandy', name:'Doce Raro', amount:3 },
+      { key:'maxrevive', name:'Max Revive', amount:1 },
+      { key:'fullrestore', name:'Restaurar Tudo', amount:2 },
+      { key:'ppup', name:'PP Up', amount:1 },
+      { key:'firestone', name:'Pedra do Fogo', amount:1 },
+      { key:'hyperpotion', name:'Hiper Poção', amount:4 },
+      { key:'fullheal', name:'Cura Total', amount:3 },
+      { key:'ppup', name:'PP Up', amount:2 },
+      { key:'sitrus', name:'Sitrus Berry', amount:3 },
+      { key:'fullrestore', name:'Restaurar Tudo', amount:3 },
+      { key:'rarecandy', name:'Doce Raro', amount:4 },
+      { key:'ppmax', name:'PP Max', amount:1 },
+      { key:'maxrevive', name:'Max Revive', amount:2 },
+      { key:'ultraball', name:'Ultra Ball', amount:5 },
+      { key:'waterstone', name:'Pedra da Água', amount:1 },
+      { key:'hyperpotion', name:'Hiper Poção', amount:5 },
+      { key:'lum', name:'Lum Berry', amount:4 },
+      { key:'ppup', name:'PP Up', amount:2 },
+      { key:'fullheal', name:'Cura Total', amount:4 },
+      { key:'maxrevive', name:'Max Revive', amount:3 },
+      { key:'thunderstone', name:'Pedra do Trovão', amount:1 },
+      { key:'rarecandy', name:'Doce Raro', amount:5 },
+      { key:'fullrestore', name:'Restaurar Tudo', amount:5 },
+      { type:'currency', name:'10 PokéCoins', amount:10, iconText:'💎' },
+      { key:'ppmax', name:'PP Max', amount:2 },
+      { key:'focus_sash', name:'Focus Sash', amount:1 },
+      { key:'ultraball', name:'Ultra Ball', amount:10 },
+      { key:'leafstone', name:'Pedra da Folha', amount:1 },
+      { key:'fullrestore', name:'Restaurar Tudo', amount:6 },
+      { key:'rarecandy', name:'Doce Raro', amount:10 },
+      { key:'masterball', name:'Master Ball', amount:1 }
+    ];
     const SEASON_PASS_TRACKS = [
-      { id: 'bronze', name: 'Bronze', icon: 'assets/season-pass-bronze.png', reward: level => ({ label: `₽ ${(level * 500).toLocaleString('pt-BR')}`, type: 'money', amount: level * 500 }) },
-      { id: 'silver', name: 'Prata', icon: 'assets/season-pass-silver.png', reward: level => ({ label: `${level} BP`, type: 'battlePoints', amount: level }) },
-      { id: 'gold', name: 'Gold', icon: 'assets/season-pass-gold.png', reward: level => ({ label: `${level * 5} PokéCoins`, type: 'pokeCoins', amount: level * 5 }) }
+      { id: 'premium', name: 'Passe Premium', description: 'Recompensas Premium', icon: 'assets/season-pass-gold.png', reward: level => ({ label: `${level * 5} PokéCoins`, type: 'pokeCoins', amount: level * 5 }) },
+      { id: 'free', name: 'Passe Free', description: 'Recompensas gratuitas', icon: 'assets/season-pass-bronze.png', reward: level => {
+        const item = FREE_PASS_REWARDS[level - 1];
+        if (item.type === 'currency') return { label: item.name, type: 'pokeCoins', amount: item.amount, iconText: item.iconText };
+        const passItemIcons = { ultraball:'assets/season-pass-ultraball-bag.png', greatball:'assets/season-pass-greatball-bag.png' };
+        const icon = item.icon || passItemIcons[item.key] || ITEM_SPRITE[item.key] || ITEM_SPRITE_FB[item.key];
+        return { label: level === 1 ? item.name : `${item.amount}x ${item.name}`, type: 'item', key: item.key, amount: item.amount, icon, fallbackIcon: ITEM_SPRITE_FB[item.key] || ITEM_SPRITE_FB.balls };
+      } }
     ];
 
     function ensureSeasonPassState() {
@@ -1470,10 +1661,14 @@
       const state = player.seasonPass;
       state.xp = Math.max(0, Math.floor(Number(state.xp) || 0));
       if (!state.claimed || typeof state.claimed !== 'object') state.claimed = {};
-      SEASON_PASS_TRACKS.forEach(track => {
-        if (!Array.isArray(state.claimed[track.id])) state.claimed[track.id] = [];
-        state.claimed[track.id] = [...new Set(state.claimed[track.id].map(Number).filter(level => Number.isInteger(level) && level >= 1 && level <= SEASON_PASS_LEVELS))];
+      ['premium', 'free', 'bronze', 'silver', 'gold'].forEach(trackId => {
+        if (!Array.isArray(state.claimed[trackId])) state.claimed[trackId] = [];
+        state.claimed[trackId] = [...new Set(state.claimed[trackId].map(Number).filter(level => Number.isInteger(level) && level >= 1 && level <= SEASON_PASS_LEVELS))];
       });
+      if (typeof state.premiumUnlocked !== 'boolean') state.premiumUnlocked = state.claimed.premium.length > 0 || state.claimed.gold.length > 0;
+      state.claimed.premium = [...new Set([...state.claimed.premium, ...state.claimed.gold])];
+      const legacyFreeLevels = state.claimed.bronze.filter(level => state.claimed.silver.includes(level) && level > 2);
+      state.claimed.free = [...new Set([...state.claimed.free, ...legacyFreeLevels])];
       return state;
     }
 
@@ -1487,12 +1682,13 @@
       document.getElementById('seasonPassXp').textContent = `${state.xp.toLocaleString('pt-BR')} XP`;
       document.getElementById('seasonPassNext').textContent = currentLevel >= SEASON_PASS_LEVELS ? 'Todas as etapas liberadas' : `Faltam ${xpToNext.toLocaleString('pt-BR')} XP para a etapa ${currentLevel + 1}`;
       document.getElementById('seasonPassProgressFill').style.width = `${progress}%`;
-      root.innerHTML = SEASON_PASS_TRACKS.map(track => `<section class="season-pass-track season-pass-${track.id}"><header><span class="season-pass-medal" aria-hidden="true"><img src="${track.icon}" alt="" /></span><div><h3>${track.name}</h3><p>${track.id === 'bronze' ? 'Recompensas de jornada' : track.id === 'silver' ? 'Recursos de batalha' : 'Moeda especial'}</p></div></header><div class="season-pass-rewards">${Array.from({ length: SEASON_PASS_LEVELS }, (_, index) => {
+      root.innerHTML = SEASON_PASS_TRACKS.map(track => `<section class="season-pass-track season-pass-${track.id}"><header><span class="season-pass-medal" aria-hidden="true"><img src="${track.icon}" alt="" /></span><div><h3>${track.name}</h3><p>${track.description}</p></div></header><div class="season-pass-rewards" aria-label="Níveis de ${track.name}">${Array.from({ length: SEASON_PASS_LEVELS }, (_, index) => {
         const level = index + 1;
         const reward = track.reward(level);
         const claimed = state.claimed[track.id].includes(level);
         const unlocked = currentLevel >= level;
-        return `<article class="season-pass-reward ${unlocked ? 'unlocked' : ''} ${claimed ? 'claimed' : ''}"><span class="season-pass-level">${level}</span><strong>${reward.label}</strong><button type="button" onclick="claimSeasonPassReward('${track.id}',${level})" ${!unlocked || claimed ? 'disabled' : ''}>${claimed ? 'Resgatado' : unlocked ? 'Resgatar' : 'Bloqueado'}</button></article>`;
+        const premiumLocked = track.id === 'premium' && !state.premiumUnlocked;
+        return `<article class="season-pass-reward ${unlocked ? 'unlocked' : ''} ${claimed ? 'claimed' : ''}"><span class="season-pass-level">${level}</span>${reward.icon ? `<img class="season-pass-reward-icon" src="${reward.icon}" data-fallback-src="${reward.fallbackIcon || ITEM_SPRITE_FB.balls}" alt="${reward.label}" onerror="handleItemIconError(this)" />` : reward.iconText ? `<span class="season-pass-reward-visual" aria-hidden="true">${reward.iconText}</span>` : ''}<strong>${reward.label}</strong><button type="button" onclick="claimSeasonPassReward('${track.id}',${level})" ${!unlocked || claimed || premiumLocked ? 'disabled' : ''}>${premiumLocked ? 'Requer Passe Premium' : claimed ? 'Resgatado' : unlocked ? 'Resgatar' : 'Bloqueado'}</button></article>`;
       }).join('')}</div></section>`).join('');
     }
 
@@ -1501,9 +1697,24 @@
       const track = SEASON_PASS_TRACKS.find(entry => entry.id === trackId);
       const state = ensureSeasonPassState();
       const rewardLevel = Math.floor(Number(level));
+      if (trackId === 'premium' && !state.premiumUnlocked) {
+        showToast('Use o item Passe Premium da mochila para liberar esta trilha.', 'error');
+        return;
+      }
       if (!track || rewardLevel < 1 || rewardLevel > SEASON_PASS_LEVELS || state.xp < rewardLevel * 1000 || state.claimed[trackId].includes(rewardLevel)) return;
       const reward = track.reward(rewardLevel);
-      player[reward.type] = Math.max(0, Number(player[reward.type]) || 0) + reward.amount;
+      if (reward.type === 'item') {
+        ensureBagItems();
+        setItemQty(reward.key, getItemQty(reward.key) + reward.amount);
+      } else if (reward.type === 'freeBundle') {
+        if (!state.claimed.bronze.includes(rewardLevel)) player.money = Math.max(0, Number(player.money) || 0) + reward.money;
+        if (!state.claimed.silver.includes(rewardLevel)) player.battlePoints = Math.max(0, Number(player.battlePoints) || 0) + reward.battlePoints;
+        if (!state.claimed.bronze.includes(rewardLevel)) state.claimed.bronze.push(rewardLevel);
+        if (!state.claimed.silver.includes(rewardLevel)) state.claimed.silver.push(rewardLevel);
+      } else {
+        player[reward.type] = Math.max(0, Number(player[reward.type]) || 0) + reward.amount;
+        if (trackId === 'premium' && !state.claimed.gold.includes(rewardLevel)) state.claimed.gold.push(rewardLevel);
+      }
       state.claimed[trackId].push(rewardLevel);
       updateStatsUI();
       saveGame();
@@ -1614,7 +1825,7 @@
     // Generation 5 static and animated sprites from PokémonDB for National Dex #1–649.
     // Keep the existing sources as fallbacks for later Pokémon and custom sprites.
     // Annihilape fan sprite by RetroNC: https://www.deviantart.com/retronc/art/Annihilape-Sprite-977387918
-    const SPRITE_FRONT = id => Number(id) === 716 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/716.gif' : Number(id) === 723 ? 'https://assets.pokestats.gg/pokeapi/orig/pokemon/versions/generation-vii/ultra-sun-ultra-moon/723.gif' : Number(id) === 653 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/653.gif' : Number(id) === 684 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/684.gif' : Number(id) === 655 ? 'assets/delphox-front.gif' : Number(id) === 654 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/654.gif' : Number(id) === 682 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/682.gif' : Number(id) === 906 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/906.gif' : Number(id) === 667 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/667.gif' : id === 979 ? 'assets/annihilape-retronc.gif' : Number(id) <= 649 && pokeSlug(Number(id)) ? `https://img.pokemondb.net/sprites/black-white/normal/${pokeSlug(Number(id))}.png` : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+    const SPRITE_FRONT = id => Number(id) === 1025 ? 'assets/pecharunt-front.gif' : Number(id) === 920 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/920.gif' : Number(id) === 996 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/996.gif' : Number(id) === 997 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/997.gif' : Number(id) === 998 ? 'assets/baxcalibur-front.gif' : Number(id) === 912 ? 'assets/quaxly-front.gif' : Number(id) === 913 ? 'assets/quaxwell-front.gif' : Number(id) === 914 ? 'assets/quaquaval-front.gif' : Number(id) === 898 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/898.gif' : Number(id) === 848 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/848.gif' : Number(id) === 849 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/849.gif' : Number(id) === 748 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/748.gif' : Number(id) === 779 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/779.gif' : Number(id) === 796 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/796.gif' : Number(id) === 716 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/716.gif' : Number(id) === 723 ? 'https://assets.pokestats.gg/pokeapi/orig/pokemon/versions/generation-vii/ultra-sun-ultra-moon/723.gif' : Number(id) === 653 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/653.gif' : Number(id) === 684 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/684.gif' : Number(id) === 655 ? 'assets/delphox-front.gif' : Number(id) === 654 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/654.gif' : Number(id) === 682 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/682.gif' : Number(id) === 906 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/906.gif' : Number(id) === 667 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/667.gif' : id === 979 ? 'assets/annihilape-retronc.gif' : Number(id) <= 649 && pokeSlug(Number(id)) ? `https://img.pokemondb.net/sprites/black-white/normal/${pokeSlug(Number(id))}.png` : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
     const SPRITE_FB = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     const SPRITE = SPRITE_FRONT;
 
@@ -1670,6 +1881,21 @@
 
     // Animated battle sprites (Black/White GIFs — pokemondb)
     const SPRITE_BACK = id => {
+      if (Number(id) === 979) return 'assets/annihilape-back-animated.gif';
+      if (Number(id) === 658) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/658.gif';
+      if (Number(id) === 920) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/920.gif';
+      if (Number(id) === 996) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/996.gif';
+      if (Number(id) === 997) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/997.gif';
+      if (Number(id) === 998) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/998.gif';
+      if (Number(id) === 912) return 'assets/quaxly-back.gif';
+      if (Number(id) === 913) return 'assets/quaxwell-back.gif';
+      if (Number(id) === 914) return 'assets/quaquaval-back.gif';
+      if (Number(id) === 898) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/898.gif';
+      if (Number(id) === 848) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/848.gif';
+      if (Number(id) === 849) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/849.gif';
+      if (Number(id) === 748) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/748.gif';
+      if (Number(id) === 779) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/779.gif';
+      if (Number(id) === 796) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/796.gif';
       if (Number(id) === 723) return 'https://assets.pokestats.gg/pokeapi/orig/pokemon/versions/generation-vii/ultra-sun-ultra-moon/back/723.gif';
       if (Number(id) === 653) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/653.gif';
       if (Number(id) === 684) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/684.gif';
@@ -1689,6 +1915,20 @@
       return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`;
     };
     const SPRITE_ANIM = id => {
+      if (Number(id) === 1025) return 'assets/pecharunt-front.gif';
+      if (Number(id) === 920) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/920.gif';
+      if (Number(id) === 996) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/996.gif';
+      if (Number(id) === 997) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/997.gif';
+      if (Number(id) === 998) return 'assets/baxcalibur-front.gif';
+      if (Number(id) === 912) return 'assets/quaxly-front.gif';
+      if (Number(id) === 913) return 'assets/quaxwell-front.gif';
+      if (Number(id) === 914) return 'assets/quaquaval-front.gif';
+      if (Number(id) === 898) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/898.gif';
+      if (Number(id) === 848) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/848.gif';
+      if (Number(id) === 849) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/849.gif';
+      if (Number(id) === 748) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/748.gif';
+      if (Number(id) === 779) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/779.gif';
+      if (Number(id) === 796) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/796.gif';
       if (Number(id) === 716) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/716.gif';
       if (Number(id) === 723) return 'https://assets.pokestats.gg/pokeapi/orig/pokemon/versions/generation-vii/ultra-sun-ultra-moon/723.gif';
       if (Number(id) === 653) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/653.gif';
@@ -1709,6 +1949,7 @@
     };
     const SPRITE_SHINY = id => Number(id) === 667 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/shiny/667.gif' : Number(id) <= 649 && pokeSlug(Number(id)) ? `https://img.pokemondb.net/sprites/black-white/shiny/${pokeSlug(Number(id))}.png` : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`;
     const SPRITE_BACK_SHINY = id => {
+      if (Number(id) === 658) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/back/shiny/658.gif';
       if (Number(id) === 667) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/shiny/667.gif';
       if (id === 807) return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/shiny/807.gif';
       const slug = pokeSlug(id);
@@ -1721,13 +1962,36 @@
       const slug = pokeSlug(id);
       return Number(id) <= 649 && slug ? `https://img.pokemondb.net/sprites/black-white/anim/shiny/${slug}.gif` : SPRITE_SHINY(id);
     };
-    const SPRITE_POKEMON = pokemon => pokemon?.shiny ? SPRITE_SHINY(pokemon.id) : SPRITE(pokemon.id);
-    const SPRITE_BACK_POKEMON = pokemon => Number(pokemon?.id) === 318
+    // Pyroar has visibly different male and female forms. Showdown provides
+    // matching animated sprites for the front and back battle views.
+    const SPRITE_PYROAR = (pokemon, view = 'front') => {
+      const female = pokemon?.gender === 'female';
+      if (female && view === 'back' && !pokemon?.shiny) {
+        return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/back/female/668.gif';
+      }
+      if (female && view === 'front' && !pokemon?.shiny) {
+        return 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/female/668.gif';
+      }
+      const shiny = !!pokemon?.shiny;
+      const back = view === 'back';
+      const folder = back
+        ? (shiny ? 'gen5ani-back-shiny' : 'gen5ani-back')
+        : (shiny ? 'gen5ani-shiny' : 'gen5ani');
+      return `https://play.pokemonshowdown.com/sprites/${folder}/pyroar${female ? '-f' : ''}.gif`;
+    };
+    const SPRITE_POKEMON = pokemon => Number(pokemon?.id) === 668
+      ? SPRITE_PYROAR(pokemon)
+      : pokemon?.shiny ? SPRITE_SHINY(pokemon.id) : SPRITE(pokemon.id);
+    const SPRITE_BACK_POKEMON = pokemon => Number(pokemon?.id) === 668
+      ? SPRITE_PYROAR(pokemon, 'back')
+      : Number(pokemon?.id) === 318
       ? pokemon.shiny
         ? 'https://img.pokemondb.net/sprites/black-white/anim/back-shiny/carvanha.gif'
         : 'https://img.pokemondb.net/sprites/black-white/anim/back-normal/carvanha.gif'
       : pokemon?.shiny ? SPRITE_BACK_SHINY(pokemon.id) : SPRITE_BACK(pokemon.id);
-    const SPRITE_ANIM_POKEMON = pokemon => pokemon?.shiny ? SPRITE_ANIM_SHINY(pokemon.id) : SPRITE_ANIM(pokemon.id);
+    const SPRITE_ANIM_POKEMON = pokemon => Number(pokemon?.id) === 668
+      ? SPRITE_PYROAR(pokemon)
+      : pokemon?.shiny ? SPRITE_ANIM_SHINY(pokemon.id) : SPRITE_ANIM(pokemon.id);
 
     function renderEffortReward(effortText) {
       return `<div class="reward-row reward-ev"><span class="reward-label">Treino (EVs)</span><strong class="reward-value">${effortText}</strong></div>`;
@@ -1759,6 +2023,49 @@
       el.style.top = target === 'enemy' ? '30%' : '20%';
       container.appendChild(el);
       setTimeout(() => el.remove(), 900);
+    }
+
+    function playBattleMoveEffect(move, attackerSprite, targetSprite) {
+      const field = document.querySelector('.battle-field');
+      if (!field || !attackerSprite || !targetSprite || isProtectMove(move)) return;
+      const normalizedName = String(move?.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const moveType = normalizeBattleType(getBattleMoveType(move));
+      const normalizedType = moveType.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const typeClass = {
+        fogo:'fire', agua:'water', planta:'grass', eletrico:'electric', gelo:'ice', lutador:'fighting', veneno:'poison',
+        terra:'ground', voador:'flying', psiquico:'psychic', inseto:'bug', pedra:'rock', fantasma:'ghost', dragao:'dragon',
+        sombrio:'dark', aco:'steel', fada:'fairy', normal:'normal'
+      }[normalizedType] || 'normal';
+      const healing = isSelfHealingMove(move);
+      const selfTarget = healing || move?.target === 'user' || isSelfStatBoostMove(move) || ['swordsdance','nastyplot','calmmind','agility','harden','withdraw','growl','leer','tailwhip','howl','dragondance','bulkup'].includes(normalizedName);
+      const recipient = selfTarget ? attackerSprite : targetSprite;
+      const recipientRect = recipient.getBoundingClientRect();
+      const fieldRect = field.getBoundingClientRect();
+      if (!recipientRect.width || !recipientRect.height || !fieldRect.width) return;
+
+      const effect = document.createElement('div');
+      const physical = isPhysicalMove(move);
+      const shape = healing ? 'heal' : selfTarget ? 'boost' : move?.power > 0 ? (physical ? 'impact' : 'projectile') : 'status';
+      effect.className = `battle-move-fx fx-${typeClass} fx-${shape}`;
+      effect.setAttribute('aria-hidden', 'true');
+      effect.style.left = `${recipientRect.left - fieldRect.left + recipientRect.width / 2}px`;
+      effect.style.top = `${recipientRect.top - fieldRect.top + recipientRect.height / 2}px`;
+      const core = document.createElement('span');
+      core.className = 'battle-move-fx-core';
+      effect.append(core);
+      const particleCount = shape === 'impact' ? 7 : 9;
+      for (let index = 0; index < particleCount; index += 1) {
+        const particle = document.createElement('i');
+        const angle = (Math.PI * 2 * index / particleCount) + (Math.random() * 0.22);
+        const distance = 28 + Math.random() * (shape === 'projectile' ? 42 : 36);
+        particle.className = 'battle-move-fx-particle';
+        particle.style.setProperty('--move-x', `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty('--move-y', `${Math.sin(angle) * distance}px`);
+        particle.style.setProperty('--move-delay', `${Math.random() * 70}ms`);
+        effect.append(particle);
+      }
+      field.append(effect);
+      window.setTimeout(() => effect.remove(), 850);
     }
 
     function showCaptureBall(shakeCount, onDone, ballKey = 'balls') {
@@ -1904,6 +2211,7 @@
       651:{ to: 652, name: 'Chesnaught', level: 36 },
       653:{ to: 654, name: 'Braixen',    level: 16 },
       654:{ to: 655, name: 'Delphox',    level: 36 },
+      667:{ to: 668, name: 'Pyroar',     level: 35 },
       656:{ to: 657, name: 'Frogadier',  level: 16 },
       657:{ to: 658, name: 'Greninja',   level: 36 },
       722:{ to: 723, name: 'Dartrix',    level: 17 },
@@ -1984,7 +2292,7 @@
         sprite.classList.add('flash');
         setTimeout(() => {
           sprite.classList.remove('flash', 'glow');
-          sprite.src = SPRITE(evo.to);
+          sprite.src = SPRITE_POKEMON({ id: evo.to, gender: poke.gender, shiny: poke.shiny });
           sprite.onerror = function(){ this.src = SPRITE_FB(evo.to); };
           sprite.classList.add('glow');
           title.textContent = 'Parabéns!';
@@ -3836,6 +4144,7 @@
     let saveChain = Promise.resolve();
     let adminGrantRealtimeChannel = null;
     let adminGrantRealtimeUserId = null;
+    let adminGrantRealtimeHadError = false;
     const processedAdminGrantEvents = new Set();
     let passwordRecovery = false;
     let accountLogoutMonitor = null;
@@ -3924,6 +4233,7 @@
       if (adminGrantRealtimeChannel && supabaseClient) void supabaseClient.removeChannel(adminGrantRealtimeChannel);
       adminGrantRealtimeChannel = null;
       adminGrantRealtimeUserId = null;
+      adminGrantRealtimeHadError = false;
       processedAdminGrantEvents.clear();
     }
 
@@ -3934,9 +4244,52 @@
       const amount = Math.max(0, Math.floor(Number(payload.amount) || 0));
       let message = 'Um recurso enviado pelo administrador chegou à sua conta.';
 
-      if (event.kind === 'money' || event.kind === 'pokeCoins' || event.kind === 'battlePoints') {
+      if (event.kind === 'remove') {
+        const operation = payload.operation || {};
+        const data = operation.payload || {};
+        const removeAmount = Math.max(0, Math.floor(Number(data.amount) || 0));
+        if (operation.kind === 'currency') {
+          const field = String(data.field || '');
+          if (!['money', 'pokeCoins', 'battlePoints'].includes(field) || !removeAmount) return;
+          player[field] = Math.max(0, (Number(player[field]) || 0) - removeAmount);
+          message = `${removeAmount.toLocaleString('pt-BR')} ${field === 'money' ? 'Pokédollars' : field === 'pokeCoins' ? 'PokeCoins' : 'BP'} removidos pelo administrador.`;
+        } else if (operation.kind === 'item') {
+          const key = String(data.key || '');
+          if (!/^[a-z0-9_]{1,50}$/.test(key) || !removeAmount) return;
+          ensureBagItems();
+          setItemQty(key, Math.max(0, getItemQty(key) - removeAmount));
+          message = `${removeAmount.toLocaleString('pt-BR')} ${adminGetItemLabel(key)} removidos pelo administrador.`;
+        } else if (operation.kind === 'pokemon') {
+          const expected = data.expected;
+          const matches = pokemon => pokemon && (
+            (expected?.tradeId && pokemon.tradeId === expected.tradeId) ||
+            (Number(pokemon.id) === Number(expected?.id) && pokemon.name === expected?.name && Number(pokemon.level) === Number(expected?.level))
+          );
+          if (data.location === 'party') {
+            const index = Number(data.index);
+            const actualIndex = matches(player.party?.[index]) ? index : player.party?.findIndex(matches) ?? -1;
+            if (actualIndex < 0 || player.party.length <= 1) return;
+            const removed = player.party.splice(actualIndex, 1)[0];
+            if (matches(player.poke)) player.poke = player.party[0];
+            message = `${removed.name || 'Pokémon'} removido da sua equipe pelo administrador.`;
+          } else if (data.location === 'pc') {
+            const slot = player.pc?.boxes?.[Number(data.box_index)]?.[Number(data.slot_index)];
+            if (!matches(slot)) return;
+            player.pc.boxes[Number(data.box_index)][Number(data.slot_index)] = null;
+            message = `${slot.name || 'Pokémon'} removido do seu PC pelo administrador.`;
+          } else return;
+        } else return;
+      } else if (event.kind === 'removeAllPokemon') {
+        const removedCount = Math.max(0, Number(payload.party_count) || 0) + Math.max(0, Number(payload.pc_count) || 0);
+        player.party = [];
+        if (player.pc && Array.isArray(player.pc.boxes)) player.pc.boxes = player.pc.boxes.map(box => Array.isArray(box) ? box.map(() => null) : box);
+        delete player.poke;
+        message = `${removedCount} Pokémon removidos da equipe e do PC pelo administrador.`;
+      } else if (event.kind === 'money' || event.kind === 'pokeCoins' || event.kind === 'battlePoints') {
         if (!amount) return;
         player[event.kind] = Math.max(0, Number(player[event.kind]) || 0) + amount;
+        const label = event.kind === 'money' ? 'Pokédollars' : event.kind === 'pokeCoins' ? 'PokeCoins' : 'BP';
+        message = `Você recebeu ${amount.toLocaleString('pt-BR')} ${label} do administrador.`;
       } else if (event.kind === 'item') {
         const key = String(payload.key || '');
         if (!/^[a-z0-9_]{1,50}$/.test(key) || !amount) return;
@@ -3950,6 +4303,7 @@
         const alreadyOwned = [...(player.party || []), ...(player.pc?.boxes || []).flat()].some(entry => entry?.tradeId === pokemon.tradeId);
         if (alreadyOwned) return;
         if (!Array.isArray(player.party)) player.party = [];
+        let destination = 'equipe';
         if (player.party.length < 6) {
           player.party.push(pokemon);
           if (!player.poke) player.poke = pokemon;
@@ -3958,13 +4312,27 @@
           const box = player.pc.boxes.find(candidate => candidate.some(slot => !slot));
           if (!box) { showToast('O Pokémon chegou, mas seu PC está cheio. Entre novamente para sincronizar.', 'info'); return; }
           box[box.findIndex(slot => !slot)] = pokemon;
+          destination = 'PC';
         }
-        refreshPartyUI();
-        if (document.getElementById('panel-pc')?.classList.contains('active')) renderPC();
-        message = `Você recebeu ${pokemon.name || 'um Pokémon'} do administrador!`;
+        message = `Você recebeu ${pokemon.name || 'um Pokémon'} do administrador. Foi adicionado ${destination === 'PC' ? 'ao PC' : 'à equipe'}.`;
       } else return;
 
       updateStatsUI();
+      refreshPartyUI();
+      const welcomePoke = document.getElementById('welcomePoke');
+      const welcomePokemon = player.party?.[0];
+      if (welcomePoke) {
+        if (welcomePokemon?.id) {
+          welcomePoke.hidden = false;
+          welcomePoke.src = SPRITE(welcomePokemon.id);
+          welcomePoke.onerror = function() { this.onerror = null; this.src = SPRITE_FB(welcomePokemon.id); };
+        } else {
+          welcomePoke.removeAttribute('src');
+          welcomePoke.hidden = true;
+        }
+      }
+      if (document.getElementById('panel-bag')?.classList.contains('active')) renderBag();
+      if (document.getElementById('panel-pc')?.classList.contains('active')) renderPC();
       saveGame();
       showToast(message);
     }
@@ -3981,14 +4349,20 @@
           filter: `user_id=eq.${onlineUser.id}`
         }, payload => applyAdminGrantRealtimeEvent(payload.new))
         .subscribe(status => {
-          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-            console.warn('[Admin] Não foi possível conectar à sincronização de recompensas.');
+          if (status === 'SUBSCRIBED') {
+            if (adminGrantRealtimeHadError) showToast('Sincronização em tempo real restabelecida.');
+            adminGrantRealtimeHadError = false;
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            const wasUnavailable = adminGrantRealtimeHadError;
+            adminGrantRealtimeHadError = true;
+            console.warn(`[Admin] Sincronização em tempo real indisponível (${status}).`);
+            if (!wasUnavailable) showToast('A atualização em tempo real foi interrompida. Os dados continuam salvos; aguarde a reconexão.', 'info');
           }
         });
     }
 
     function getAuthRedirectUrl() {
-      return `${window.location.origin}/`;
+      return `${window.location.origin}${window.location.pathname}${window.location.search}${window.location.hash}`;
     }
 
     function setAuthStatus(message) {
@@ -4519,6 +4893,15 @@
       goldbottlecap: 'assets/gold-bottle-cap.png',
       evcap: 'assets/ev-cap.png',
       flamebox: 'assets/flame-box.svg',
+      gb_item_box: 'assets/gb-item-box.png',
+      b_item_box: 'assets/b-item-box.png',
+      technique_book: 'assets/technique-book.png',
+      ev_booster: 'assets/ev-booster.png',
+      poison_stone: 'assets/poison-stone.png',
+      heart_stone: 'assets/heart-stone.png',
+      berry_pots: 'assets/berry-pots.png',
+      squirt_bottle: 'assets/squirt-bottle.png',
+      shiny_stone: 'assets/shiny-stone.png',
       vip: 'assets/vip-emblem.png'
     };
     const ITEM_SPRITE_FB = {
@@ -4591,6 +4974,15 @@
       goldbottlecap: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/gold-bottle-cap.png',
       evcap: 'assets/ev-cap.png',
       flamebox: 'assets/flame-box.svg',
+      gb_item_box: 'assets/gb-item-box.png',
+      b_item_box: 'assets/b-item-box.png',
+      technique_book: 'assets/technique-book.png',
+      ev_booster: 'assets/ev-booster.png',
+      poison_stone: 'assets/poison-stone.png',
+      heart_stone: 'assets/heart-stone.png',
+      berry_pots: 'assets/berry-pots.png',
+      squirt_bottle: 'assets/squirt-bottle.png',
+      shiny_stone: 'assets/shiny-stone.png',
       vip: 'assets/vip-emblem.png'
     };
     function itemIcon(key, cls, fallbackIcon = '🎒') {
@@ -4658,7 +5050,10 @@
           { key: 'waterstone', name: 'Pedra da Água', sprite: 'waterstone', desc: 'Evolui certos Pokémon de Água' },
           { key: 'thunderstone', name: 'Pedra do Trovão', sprite: 'thunderstone', desc: 'Evolui certos Pokémon Elétricos' },
           { key: 'leafstone', name: 'Pedra da Folha', sprite: 'leafstone', desc: 'Evolui certos Pokémon de Planta' },
-          { key: 'moonstone', name: 'Pedra da Lua', sprite: 'moonstone', desc: 'Evolui Clefairy, Nidorina...' }
+          { key: 'moonstone', name: 'Pedra da Lua', sprite: 'moonstone', desc: 'Evolui Clefairy, Nidorina...' },
+          { key: 'poison_stone', name: 'Poison Stone', sprite: 'poison_stone', desc: 'Evolui espécies específicas de Pokémon Venenoso.' },
+          { key: 'heart_stone', name: 'Heart Stone', sprite: 'heart_stone', desc: 'Evolui espécies específicas ligadas a afeto e amizade.' },
+          { key: 'shiny_stone', name: 'Shiny Stone', sprite: 'shiny_stone', desc: 'Transforma um Pokémon em Shiny e aumenta cada IV em 5, até o limite de 31.' }
         ]
       },
       {
@@ -4713,7 +5108,14 @@
           { key: 'goldbottlecap', name: 'Gold Bottle Cap', sprite: 'goldbottlecap', desc: 'Maximiza os seis IVs do Pokémon para 31.' },
           { key: 'evcap', name: 'EV Cap', sprite: 'evcap', desc: 'Redistribui os EVs atuais: define dois atributos em 252 e zera os demais.' },
           { key: 'flamebox', name: 'Flame Box', sprite: 'flamebox', desc: 'Abra para receber um Pokémon aleatório de qualquer geração. Pokémon lendários e míticos não podem sair.' },
+          { key: 'gb_item_box', name: 'G. B. Item Box', sprite: 'gb_item_box', desc: 'Abra para escolher um item segurado competitivo de alto tier.' },
+          { key: 'b_item_box', name: 'B. Item Box', sprite: 'b_item_box', desc: 'Abra para receber um item segurado competitivo aleatÃ³rio de alto tier.' },
+          { key: 'technique_book', name: 'Livro de Técnicas', sprite: 'technique_book', desc: 'Ensina um movimento compatível aprendido por nível, tutor ou ovo.' },
+          { key: 'ev_booster', name: 'EV Booster', sprite: 'ev_booster', desc: 'Dobra os EVs recebidos em batalhas por 20 minutos.' },
+          { key: 'berry_pots', name: 'Berry Pots', sprite: 'berry_pots', desc: 'Recipientes reutilizáveis para cultivar Berries em qualquer lugar.' },
+          { key: 'squirt_bottle', name: 'Squirt Bottle', sprite: 'squirt_bottle', desc: 'Regue uma Berry plantada para reduzir pela metade o tempo restante de crescimento.' },
           { key: 'vip', name: 'VIP', sprite: 'vip', desc: 'Adiciona à sua conta todos os benefícios que o VIP proporciona.' },
+          { key: 'reset_lv', name: 'Reset Lv', sprite: 'reset_lv', desc: 'Redefine um Pokémon da equipe para o nível 1 e zera sua EXP.' },
           { key: 'parcelbox', name: 'Caixa da Parcel', desc: 'Encomenda do Professor Carvalho' }
         ]
       }
@@ -4782,7 +5184,7 @@
         silk_scarf: 0, silver_powder: 0, hard_stone: 0, sharp_beak: 0, poison_barb: 0,
         spell_tag: 0, dragon_fang: 0, never_melt_ice: 0, metal_coat: 0, black_glasses: 0,
         amulet_coin: 0, shell_bell: 0, macho_brace: 0,
-        rarecandy: 0, naturebox: 0, shiny_charm: 0, bottlecap: 0, goldbottlecap: 0, evcap: 0, flamebox: 0, vip: 0, parcelbox: 0, ss_ticket: 0
+        rarecandy: 0, naturebox: 0, shiny_charm: 0, bottlecap: 0, goldbottlecap: 0, evcap: 0, flamebox: 0, gb_item_box: 0, b_item_box: 0, technique_book: 0, ev_booster: 0, poison_stone: 0, heart_stone: 0, shiny_stone: 0, berry_pots: 0, squirt_bottle: 0, vip: 0, parcelbox: 0, ss_ticket: 0
       };
       [...EXTRA_MEDICINE_ITEMS, ...EXTRA_BATTLE_ITEMS, ...(EXTRA_TM_ITEMS || [])].forEach(item => { if (defaults[item.key] === undefined) defaults[item.key] = 0; });
       Object.keys(HELD_ITEM_INFO).forEach(key => { if (defaults[key] === undefined) defaults[key] = 0; });
@@ -4851,6 +5253,7 @@
       black_glasses: { name: 'Black Glasses', desc: 'Aumenta em 10% o poder de golpes Sombrios.', type: 'Sombrio' },
       amulet_coin: { name: 'Amulet Coin', desc: 'Dobra o dinheiro recebido em batalhas.', type: '' },
       shell_bell: { name: 'Shell Bell', desc: 'Recupera 1/8 do dano causado.', type: '' },
+      big_root: { name: 'Big Root', desc: 'Aumenta em 30% a recuperação de HP causada por golpes de dreno.', type: '' },
       macho_brace: { name: 'Macho Brace', desc: 'Dobra os EVs recebidos e reduz a Velocidade do portador pela metade.', type: '' },
       choice_band: { name: 'Choice Band', desc: 'Aumenta o Ataque em 50% e prende o portador ao primeiro golpe escolhido.', type: '' },
       choice_scarf: { name: 'Choice Scarf', desc: 'Aumenta a Velocidade em 50% e prende o portador ao primeiro golpe escolhido.', type: '' },
@@ -4873,7 +5276,7 @@
       smoke_ball: { name: 'Smoke Ball', desc: 'Permite fugir de batalhas selvagens quando equipada.', type: '' },
     };
 
-    const EXTRA_HELD_ITEM_KEYS = ['choice_band','choice_scarf','choice_specs','quick_claw','focus_band','scope_lens','white_herb','wise_glasses','muscle_band','life_orb','light_clay','rocky_helmet','assault_vest','heavy_duty_boots','covert_cloak','fairy_feather','flame_orb','toxic_orb','smoke_ball'];
+    const EXTRA_HELD_ITEM_KEYS = ['choice_band','choice_scarf','choice_specs','quick_claw','focus_band','scope_lens','white_herb','wise_glasses','muscle_band','life_orb','light_clay','rocky_helmet','assault_vest','heavy_duty_boots','covert_cloak','fairy_feather','flame_orb','toxic_orb','smoke_ball','big_root'];
     EXTRA_HELD_ITEM_KEYS.forEach(key => {
       const item = HELD_ITEM_INFO[key];
       const id = key.replace(/_/g, '-');
@@ -4881,6 +5284,8 @@
       ITEM_SPRITE_FB[key] = `https://img.pokemondb.net/sprites/items/${id}.png`;
       BAG_CATEGORIES.find(category => category.id === 'held')?.items.push({ key, name: item.name, sprite: key, desc: item.desc });
     });
+
+    const COMPETITIVE_ITEM_BOX_REWARDS = ['choice_band','choice_scarf','choice_specs','life_orb','focus_sash','leftovers','assault_vest','rocky_helmet','heavy_duty_boots','covert_cloak'];
 
     function renderSummaryHeldItem(idx) {
       const root = document.getElementById('summaryHeldItem');
@@ -5034,6 +5439,53 @@
       return `${pokemon.name} recuperou ${restored} HP com Leftovers.`;
     }
 
+    function isLeechSeedMove(move) {
+      const name = String(move?.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      return name === 'leechseed';
+    }
+
+    function applyLeechSeed(attacker, target, move) {
+      if (!battle || !isLeechSeedMove(move)) return '';
+      if (getTypes(target?.id).includes('Planta')) return `${target.name} é imune ao Leech Seed.`;
+      const targetSide = target === player?.poke ? 'player' : 'enemy';
+      if (battle.leechSeededSide === targetSide) return `${target.name} já está sob efeito do Leech Seed.`;
+      battle.leechSeededSide = targetSide;
+      return `${target.name} foi semeado pelo Leech Seed!`;
+    }
+
+    function applyLeechSeedAtTurnEnd() {
+      const targetSide = battle?.leechSeededSide;
+      if (!targetSide || !battle) return '';
+      const target = targetSide === 'player' ? player?.poke : battle.enemy;
+      const source = targetSide === 'player' ? battle.enemy : player?.poke;
+      if (!target || !source) return '';
+      const targetHpKey = getBattleHpKey(target);
+      const sourceHpKey = getBattleHpKey(source);
+      if (target[targetHpKey] <= 0 || source[sourceHpKey] <= 0) return '';
+
+      const requestedDrain = Math.floor((Number(target.maxHp) || 0) / 8);
+      if (requestedDrain <= 0) return '';
+      let drained;
+      if (target === battle.enemy) {
+        const availableHp = Math.max(0, Number(target.currentHp) || 0) + (battle.isDailyBoss ? Math.max(0, Number(target.shieldHp) || 0) : 0);
+        const result = applyEnemyDamage(Math.min(requestedDrain, availableHp));
+        drained = result.shieldDamage + result.hpDamage;
+      } else {
+        drained = Math.min(requestedDrain, target[targetHpKey]);
+        target[targetHpKey] = Math.max(0, target[targetHpKey] - drained);
+        battle.playerHp = target.hp;
+      }
+      if (drained <= 0) return '';
+
+      const restored = Math.min(Math.max(0, source.maxHp - source[sourceHpKey]), drained);
+      source[sourceHpKey] += restored;
+      if (source === player?.poke) battle.playerHp = source.hp;
+      if (source === battle.enemy) updateEnemyHpBar();
+      showDamageNumber(targetSide, drained, 'normal');
+      if (restored > 0) showDamageNumber(targetSide === 'player' ? 'enemy' : 'player', restored, 'heal');
+      return `${target.name} perdeu ${drained} HP pelo Leech Seed${restored > 0 ? `; ${source.name} recuperou ${restored} HP` : ''}.`;
+    }
+
     function applyBattleHeldItemsAtTurnEnd() {
       const messages = [];
       // Orbs inflict their status at this turn's end, before that status deals residual damage.
@@ -5045,6 +5497,8 @@
       const enemyResidual = applyResidualStatus(battle?.enemy);
       if (playerResidual) messages.push(playerResidual);
       if (enemyResidual) messages.push(enemyResidual);
+      const leechSeedMessage = applyLeechSeedAtTurnEnd();
+      if (leechSeedMessage) messages.push(leechSeedMessage);
       const playerMessage = applyHeldItemEndTurn(player?.poke);
       const enemyMessage = applyHeldItemEndTurn(battle?.enemy);
       if (playerMessage) messages.push(playerMessage);
@@ -5164,10 +5618,22 @@
       return `${pokemon.name} recuperou ${restored} HP com Shell Bell.`;
     }
 
-    function applyMoveDrain(pokemon, move, damage) {
+    function applyMoveDrain(pokemon, move, damage, target) {
       if (!pokemon || !move?.drain || damage <= 0) return '';
       const hpKey = getBattleHpKey(pokemon);
-      const restored = Math.min(pokemon.maxHp - pokemon[hpKey], Math.max(1, Math.floor(damage * move.drain / 100)));
+      const drainMultiplier = pokemon.heldItem === 'big_root' ? 1.3 : 1;
+      const drainAmount = Math.max(1, Math.floor(damage * move.drain / 100 * drainMultiplier));
+      const targetAbility = String(target?.ability || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      if (targetAbility === 'liquid ooze' || targetAbility === 'lodo liquido') {
+        const lost = Math.min(Math.max(0, pokemon[hpKey]), drainAmount);
+        if (!lost) return '';
+        pokemon[hpKey] = Math.max(0, pokemon[hpKey] - lost);
+        if (pokemon === player?.poke) battle.playerHp = pokemon.hp;
+        if (pokemon === battle?.enemy) updateEnemyHpBar();
+        if (pokemon === player?.poke) updatePlayerHpBar();
+        return `${pokemon.name} perdeu ${lost} HP por causa de Lodo Líquido de ${target.name}.`;
+      }
+      const restored = Math.min(Math.max(0, pokemon.maxHp - pokemon[hpKey]), drainAmount);
       if (restored <= 0) return '';
       pokemon[hpKey] += restored;
       if (pokemon === player?.poke) battle.playerHp = pokemon.hp;
@@ -5275,11 +5741,20 @@
       { key: 'thunderstone', name: 'Pedra do Trovão', kind: 'evolution' },
       { key: 'leafstone', name: 'Pedra da Folha', kind: 'evolution' },
       { key: 'moonstone', name: 'Pedra da Lua', kind: 'evolution' },
+      { key: 'poison_stone', name: 'Poison Stone', sprite: 'poison_stone', kind: 'evolution' },
+      { key: 'heart_stone', name: 'Heart Stone', sprite: 'heart_stone', kind: 'evolution' },
+      { key: 'shiny_stone', name: 'Shiny Stone', sprite: 'shiny_stone', kind: 'shinyStone' },
+      { key: 'berry_pots', name: 'Berry Pots', sprite: 'berry_pots', kind: 'berryPots' },
+      { key: 'squirt_bottle', name: 'Squirt Bottle', sprite: 'squirt_bottle', kind: 'squirtBottle' },
       { key: 'naturebox', name: 'Caixa de Nature', sprite: 'naturebox', kind: 'natureBox' },
       { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', kind: 'ivMax' },
       { key: 'goldbottlecap', name: 'Gold Bottle Cap', sprite: 'goldbottlecap', kind: 'ivMaxAll' },
       { key: 'evcap', name: 'EV Cap', sprite: 'evcap', kind: 'evMax' },
       { key: 'flamebox', name: 'Flame Box', sprite: 'flamebox', kind: 'flameBox' },
+      { key: 'gb_item_box', name: 'G. B. Item Box', sprite: 'gb_item_box', kind: 'competitiveItemBox' },
+      { key: 'b_item_box', name: 'B. Item Box', sprite: 'b_item_box', kind: 'randomCompetitiveItemBox' },
+      { key: 'technique_book', name: 'Livro de Técnicas', sprite: 'technique_book', kind: 'techniqueBook' },
+      { key: 'ev_booster', name: 'EV Booster', sprite: 'ev_booster', kind: 'evBoost' },
       { key: 'vip', name: 'VIP', sprite: 'vip', kind: 'vipActivate' }
     ];
 
@@ -5308,11 +5783,22 @@
         33: { to: 34, name: 'Nidoking' },
         35: { to: 36, name: 'Clefable' },
         39: { to: 40, name: 'Wigglytuff' }
+      },
+      poison_stone: {
+        23: { to: 24, name: 'Arbok' },
+        88: { to: 89, name: 'Muk' },
+        109: { to: 110, name: 'Weezing' }
+      },
+      heart_stone: {
+        440: { to: 113, name: 'Chansey' },
+        113: { to: 242, name: 'Blissey' },
+        175: { to: 176, name: 'Togetic' }
       }
     };
 
     function canUseItemOnPokemon(item, pokemon) {
       if (!item || !pokemon) return false;
+      if (item.kind === 'levelReset') return Number(pokemon.level) > 1;
       if (item.kind === 'tm') return !pokemon.moves.some(move => move.name.toLowerCase() === item.move.name.toLowerCase());
       if (item.kind === 'revive' || item.kind === 'maxRevive') return pokemon.hp <= 0;
       if (item.kind === 'level') return pokemon.hp > 0 && pokemon.level < MAX_POKEMON_LEVEL;
@@ -5329,6 +5815,10 @@
       if (item.kind === 'ppMax') return pokemon.hp > 0 && pokemon.moves.some(move => (move.ppUps || 0) < 3);
       if (item.kind === 'mint') return pokemon.hp > 0 && pokemon.nature !== item.nature && pokemon.natureMint !== item.nature;
       if (item.kind === 'natureBox') return pokemon.hp > 0;
+      if (item.kind === 'shinyStone') {
+        ensurePokemonTraits(pokemon);
+        return pokemon.hp > 0 && (!pokemon.shiny || ['hp','attack','defense','specialAttack','specialDefense','speed'].some(stat => pokemon.ivs[stat] < 31));
+      }
       if (item.kind === 'ivMax' || item.kind === 'ivMaxAll') { ensurePokemonTraits(pokemon); return pokemon.hp > 0 && ['hp','attack','defense','specialAttack','specialDefense','speed'].some(stat => pokemon.ivs[stat] < 31); }
       if (item.kind === 'statusCure') return pokemon.hp > 0 && itemCuresStatus(item.key, pokemon);
       if (item.key === 'fullrestore' || item.kind === 'fullHeal') {
@@ -5459,6 +5949,21 @@
         : 'Exp. Charm usado! +50% de EXP nas batalhas por 1 hora.');
     }
 
+    function useEvBooster() {
+      if (!player || battle || getItemQty('ev_booster') <= 0) return;
+      const now = Date.now();
+      const currentExpiry = Number(player.evBoostExpiresAt) || 0;
+      const wasActive = currentExpiry > now;
+      player.evBoostExpiresAt = Math.max(now, currentExpiry) + 20 * 60 * 1000;
+      decItemQty('ev_booster', 1);
+      cancelBagItemUse();
+      saveGame();
+      renderBag();
+      showToast(wasActive
+        ? 'EV Booster ativado! O dobro de EVs foi estendido por mais 20 minutos.'
+        : 'EV Booster ativado! Você receberá o dobro de EVs por 20 minutos.');
+    }
+
     function chooseBagItemTarget(key) {
       if (!player || battle) return;
       const item = BAG_FIELD_ITEMS.find(entry => entry.key === key);
@@ -5467,8 +5972,16 @@
         useExperienceCharm();
         return;
       }
+      if (item.kind === 'evBoost') {
+        useEvBooster();
+        return;
+      }
       if (item.kind === 'vipActivate') {
         activateVip();
+        return;
+      }
+      if (item.kind === 'premiumPassUnlock') {
+        activatePremiumPass();
         return;
       }
       if (item.kind === 'flameBox') {
@@ -5485,6 +5998,26 @@
       }
       if (item.kind === 'natureBox') {
         renderNatureBoxMintPicker();
+        return;
+      }
+      if (item.kind === 'competitiveItemBox') {
+        renderCompetitiveItemBoxPicker();
+        return;
+      }
+      if (item.kind === 'randomCompetitiveItemBox') {
+        openRandomCompetitiveItemBox();
+        return;
+      }
+      if (item.kind === 'techniqueBook') {
+        renderTechniqueBookTargets();
+        return;
+      }
+      if (item.kind === 'berryPots') {
+        renderBerryPots();
+        return;
+      }
+      if (item.kind === 'squirtBottle') {
+        renderBerryPots(true);
         return;
       }
       const targets = player.party
@@ -5511,6 +6044,8 @@
       if (!targets.length) {
         showToast(item.kind === 'revive' || item.kind === 'maxRevive'
           ? 'Nenhum Pokémon desmaiado pode receber Revive.'
+          : item.kind === 'levelReset'
+            ? 'Todos os Pokémon da equipe já estão no nível 1.'
           : ['pp', 'maxPp', 'allPp', 'allMaxPp', 'ppUp', 'ppMax'].includes(item.kind)
             ? 'Nenhum Pokémon tem golpes que precisem recuperar PP.'
             : item.kind === 'statusCure'
@@ -5751,6 +6286,42 @@
       if (targetRoot) targetRoot.innerHTML = '';
     }
 
+    async function applyResetLv(itemKey, partyIndex) {
+      if (!player || battle || getItemQty(itemKey) <= 0) return;
+      const pokemon = player.party[partyIndex];
+      if (!pokemon || Number(pokemon.level) <= 1) return;
+      const oldLevel = Math.max(1, Math.floor(Number(pokemon.level) || 1));
+      if (!window.confirm(`Usar Reset Lv em ${pokemon.name}? O nível voltará de ${oldLevel} para 1 e a EXP será zerada. Essa ação não pode ser desfeita.`)) {
+        cancelBagItemUse();
+        return;
+      }
+      cancelBagItemUse();
+      const oldMaxHp = Math.max(1, Number(pokemon.maxHp) || 1);
+      const wasFainted = Number(pokemon.hp) <= 0;
+      const hpRatio = Math.max(0, Math.min(1, (Number(pokemon.hp) || 0) / oldMaxHp));
+      try {
+        await ensurePokemonBaseStats(pokemon);
+        ensurePokemonTraits(pokemon);
+        const resetPokemon = { ...pokemon, level: 1 };
+        const stats = pvpCalculateStats(normalizeBaseStats(pokemon.baseStats), resetPokemon, pokemon.ivs, pokemon.evs);
+        pokemon.level = 1;
+        pokemon.exp = getExperienceForLevel(1, pokemon.growthRate);
+        pokemon.stats = stats;
+        pokemon.maxHp = stats.hp;
+        pokemon.hp = wasFainted ? 0 : Math.max(1, Math.min(pokemon.maxHp, Math.round(pokemon.maxHp * hpRatio)));
+        decItemQty(itemKey, 1);
+        renderBag();
+        refreshPartyUI();
+        refreshCenterUI();
+        updateStatsUI();
+        saveGame();
+        showToast(`${pokemon.name} voltou do nível ${oldLevel} para o nível 1. A EXP foi zerada.`);
+      } catch (error) {
+        console.error('[Reset Lv] Falha ao redefinir o nível:', error);
+        showToast('Não foi possível usar Reset Lv. Tente novamente.', 'error');
+      }
+    }
+
     function useBagItemOnPokemon(key, partyIndex) {
       if (!player || battle) return;
       ensureBagItems();
@@ -5760,6 +6331,10 @@
       if (!canUseItemOnPokemon(item, pokemon)) {
         showToast(`${pokemon.name} não pode receber esse item agora.`, 'error');
         cancelBagItemUse();
+        return;
+      }
+      if (item.kind === 'levelReset') {
+        applyResetLv(key, partyIndex);
         return;
       }
       if (item.kind === 'tm') {
@@ -5785,6 +6360,15 @@
       if (item.kind === 'natureBox') {
         const root = document.getElementById('bagUseTarget');
         root.innerHTML = `<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;"><div style="font-weight:700;margin-bottom:8px;">Escolha a nova natureza para ${escapeHTML(pokemon.name)}:</div><div style="display:flex;flex-wrap:wrap;gap:7px;">${NATURES.map(nature=>`<button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="applyNatureBox(${partyIndex},'${nature.name}')">${nature.name}${nature.up?` · +${nature.up}`:''}${nature.down?` / −${nature.down}`:''}</button>`).join('')}<button type="button" class="btn btn-secondary" onclick="cancelBagItemUse()">Cancelar</button></div></div>`;
+        return;
+      }
+      if (item.kind === 'shinyStone') {
+        ensurePokemonTraits(pokemon);
+        const stats = ['hp','attack','defense','specialAttack','specialDefense','speed'];
+        pokemon.shiny = true;
+        stats.forEach(stat => { pokemon.ivs[stat] = Math.min(31, pokemon.ivs[stat] + 5); });
+        decItemQty(key, 1); cancelBagItemUse(); renderBag(); refreshPartyUI(); saveGame();
+        showToast(`${pokemon.name} tornou-se Shiny e recebeu +5 IVs em cada atributo (máximo 31).`);
         return;
       }
       if (item.kind === 'ivMax') {
@@ -6114,7 +6698,7 @@
       { id: 'goldbottlecap', name: 'Gold Bottle Cap', icon: '✨', sprite: 'goldbottlecap', desc: 'Maximiza os seis IVs do Pokémon para 31.', price: 50, key: 'goldbottlecap' },
       { id: 'evcap', name: 'EV Cap', icon: '🧢', sprite: 'evcap', desc: 'Redistribui os EVs atuais: define dois atributos em 252 e zera os demais.', price: 20, key: 'evcap' },
       { id: 'flamebox', name: 'Flame Box', icon: '🔥', sprite: 'flamebox', desc: 'Abra para receber um Pokémon aleatório de qualquer geração, exceto lendários e míticos. Chances: 55% comum, 28% incomum, 13% rara e 4% muito rara.', price: 500, key: 'flamebox', kind: 'flameBox' },
-      { id: 'vip', name: 'VIP', icon: '👑', sprite: 'vip', desc: 'Ative por 30 dias: nome dourado, 1,5x de EXP, 1,5x de chance Shiny e uma Flame Box toda sexta às 18h (horário de Brasília).', price: 50, key: 'vip' },
+      { id: 'vip', name: 'VIP', icon: '👑', sprite: 'vip', desc: 'Ative por 30 dias: nome dourado, 1,5x de EXP, 1,5x de chance Shiny, uma Flame Box toda sexta às 18h e Dex Analitic em batalhas selvagens.', price: 30, key: 'vip' },
       { id: 'shiny_charm', name: 'Shiny Charm', icon: '\u2728', sprite: 'shiny_charm', desc: 'Triplica a chance de encontrar um Pok\u00e9mon Shiny selvagem.', price: 20, key: 'shiny_charm' },
       { id: 'focus_sash', name: 'Focus Sash', icon: '🛡️', sprite: 'focus_sash', desc: 'Com HP cheio, sobrevive a um golpe fatal com 1 HP. Consome-se ao ativar.', price: 5000, key: 'focus_sash' },
       { id: 'silk_scarf', name: 'Silk Scarf', icon: '🧣', sprite: 'silk_scarf', desc: 'Fortalece golpes Normais em 10%', price: 980, key: 'silk_scarf' },
@@ -6156,6 +6740,7 @@
       { id: 'max-ether', key: 'max_ether', name: 'Max Ether', desc: 'Recupera todo o PP de um golpe.', category: 'pp', kind: 'maxPp', price: 2000 },
       { id: 'elixir', key: 'elixir', name: 'Elixir', desc: 'Recupera 10 PP de todos os golpes.', category: 'pp', kind: 'allPp', amount: 10, price: 3000 },
       { id: 'max-elixir', key: 'max_elixir', name: 'Max Elixir', desc: 'Recupera todo o PP de todos os golpes.', category: 'pp', kind: 'allMaxPp', price: 5000 },
+      { id: 'reset-lv', key: 'reset_lv', name: 'Reset Lv', desc: 'Redefine um Pokémon da equipe para o nível 1 e zera sua EXP.', category: 'other', kind: 'levelReset', price: 5 },
       { id: 'hp-up', key: 'hp_up', name: 'HP Up', desc: 'Aumenta 10 EVs de HP.', category: 'medicine', kind: 'ev', stat: 'hp', amount: 10, price: 9800 },
       { id: 'protein', key: 'protein', name: 'Protein', desc: 'Aumenta 10 EVs de Ataque.', category: 'medicine', kind: 'ev', stat: 'attack', amount: 10, price: 9800 },
       { id: 'iron', key: 'iron', name: 'Iron', desc: 'Aumenta 10 EVs de Defesa.', category: 'medicine', kind: 'ev', stat: 'defense', amount: 10, price: 9800 },
@@ -6166,6 +6751,7 @@
       { id: 'exp-charm', key: 'exp_charm', name: 'Exp. Charm', desc: 'Consumível: aumenta em 50% a experiência recebida em batalhas por 1 hora.', category: 'medicine', kind: 'expCharm', price: 10 }
     ];
     const EXTRA_SPECIAL_ITEMS = [
+      { id: 'premium-pass', key: 'premium_pass', name: 'Passe Premium', desc: 'Use para liberar permanentemente as 60 recompensas da trilha Premium do Passe da Temporada.', category: 'other', kind: 'premiumPassUnlock', price: 50 },
       { id: 'heal-powder', key: 'heal_powder', name: 'Heal Powder', desc: 'Cura qualquer problema de status.', category: 'medicine', kind: 'statusCure', price: 450 },
       { id: 'yellow-flute', key: 'yellow_flute', name: 'Yellow Flute', desc: 'Cura a confusão de um Pokémon.', category: 'medicine', kind: 'statusCure', price: 0, gameCornerRewardOnly: true },
       { id: 'figy-berry', key: 'figy', name: 'Figy Berry', desc: 'Recupera 1/8 do HP abaixo da metade.', category: 'medicine', kind: 'heal', amount: 0.125, price: 200 },
@@ -6180,16 +6766,16 @@
     ];
     EXTRA_MEDICINE_ITEMS.push(...EXTRA_SPECIAL_ITEMS);
     EXTRA_MEDICINE_ITEMS.forEach(item => {
-      const iconUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.id}.png`;
+      const iconUrl = item.key === 'reset_lv' ? 'assets/reset-lv.png' : item.key === 'premium_pass' ? 'assets/season-pass-premium.png' : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.id}.png`;
       ITEM_SPRITE[item.key] = iconUrl;
-      ITEM_SPRITE_FB[item.key] = `https://img.pokemondb.net/sprites/items/${item.id}.png`;
+      ITEM_SPRITE_FB[item.key] = item.key === 'reset_lv' || item.key === 'premium_pass' ? iconUrl : `https://img.pokemondb.net/sprites/items/${item.id}.png`;
       const itemCategory = item.id.endsWith('-berry') ? 'berries' : item.category === 'pp' ? 'medicine' : item.category;
       const catalogCategory = BAG_CATEGORIES.find(category => category.id === itemCategory);
       if (catalogCategory && !BAG_CATEGORIES.some(category => category.items.some(entry => entry.key === item.key))) {
         catalogCategory.items.push({ key: item.key, name: item.name, sprite: item.key, desc: item.desc });
       }
       BAG_FIELD_ITEMS.push({ key: item.key, name: item.key === 'rarecandy' ? 'Rare Candy' : item.name, sprite: item.key, kind: item.kind, amount: item.amount, stat: item.stat });
-      if (!['ev', 'level', 'mint', 'tm', 'expCharm'].includes(item.kind)) BATTLE_BAG_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount });
+      if (!['ev', 'level', 'levelReset', 'mint', 'tm', 'expCharm', 'premiumPassUnlock'].includes(item.kind)) BATTLE_BAG_ITEMS.push({ key: item.key, name: item.name, sprite: item.key, kind: item.kind, amount: item.amount });
       if (!['mint'].includes(item.kind) && !item.gameCornerRewardOnly && !SHOP_ITEMS.some(entry => entry.key === item.key)) {
         SHOP_ITEMS.push({ id: item.key, name: item.name, icon: item.kind === 'ev' ? '💊' : item.kind === 'level' ? '🍬' : '🧪', sprite: item.key, desc: item.desc, price: item.price, key: item.key, kind: item.kind, qty: item.qty });
       }
@@ -6756,7 +7342,7 @@
           'fairy_feather', 'flame_orb', 'toxic_orb'].includes(item?.id);
     }
     function marketItemUsesPokeCoins(item) {
-      return ['rarecandy', 'exp_charm', 'masterball', 'lucky_egg', 'exp_share', 'macho_brace', 'shiny_charm', 'naturebox', 'bottlecap', 'goldbottlecap', 'evcap', 'vip'].includes(item?.key) || ['rarecandy', 'rare-candy', 'masterball', 'lucky_egg', 'exp_share', 'macho_brace', 'shiny_charm', 'naturebox', 'bottlecap', 'goldbottlecap', 'evcap', 'vip'].includes(item?.id);
+      return ['rarecandy', 'exp_charm', 'masterball', 'lucky_egg', 'exp_share', 'macho_brace', 'shiny_charm', 'naturebox', 'bottlecap', 'goldbottlecap', 'evcap', 'vip', 'reset_lv', 'premium_pass'].includes(item?.key) || ['rarecandy', 'rare-candy', 'masterball', 'lucky_egg', 'exp_share', 'macho_brace', 'shiny_charm', 'naturebox', 'bottlecap', 'goldbottlecap', 'evcap', 'vip', 'reset-lv', 'premium-pass'].includes(item?.id);
     }
     function normalizeMarketText(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
@@ -7105,16 +7691,14 @@
         .maybeSingle();
       if (error) throw error;
       if (!data) return null;
-      const hasStoredPokemon = Array.isArray(data.player?.pc?.boxes) && data.player.pc.boxes.some(box => Array.isArray(box) && box.some(Boolean));
-      if (!data.player || !Array.isArray(data.player.party) || (!data.player.party.length && !hasStoredPokemon)) {
+      if (!data.player || typeof data.player !== 'object' || !Array.isArray(data.player.party)) {
         throw new Error('O save online está incompleto e não pode ser carregado.');
       }
       return data.player;
     }
 
     function restorePlayer(saved) {
-      const hasStoredPokemon = Array.isArray(saved?.pc?.boxes) && saved.pc.boxes.some(box => Array.isArray(box) && box.some(Boolean));
-      if (!saved || !Array.isArray(saved.party) || (!saved.party.length && !hasStoredPokemon)) {
+      if (!saved || typeof saved !== 'object' || !Array.isArray(saved.party)) {
         throw new Error('O save não contém uma equipe válida.');
       }
       const reopenLegacyOakIntro = !!(
@@ -7357,6 +7941,7 @@
       if (saved) {
         restorePlayer(saved);
         showWelcomePopup(player.name);
+        player.party.forEach(pokemon => queueAutomaticEvolution(pokemon));
         return;
       }
       if (await migrateLegacySaveIfRequested()) return;
@@ -7986,8 +8571,16 @@
       document.getElementById('adminProfileCard').style.display = isAdminAccount() ? '' : 'none';
       document.getElementById('itemCatalogHomeCard').style.display = isAdminAccount() ? '' : 'none';
       document.getElementById('welcomeName').textContent = player.name;
-      document.getElementById('welcomePoke').src = SPRITE(player.starter.id);
-      document.getElementById('welcomePoke').onerror = function() { this.src = SPRITE_FB(player.starter.id); };
+      const welcomePoke=document.getElementById('welcomePoke');
+      const welcomePokemon=player.party?.[0]||null;
+      if (welcomePokemon?.id) {
+        welcomePoke.hidden=false;
+        welcomePoke.src=SPRITE(welcomePokemon.id);
+        welcomePoke.onerror=function(){this.onerror=null;this.src=SPRITE_FB(welcomePokemon.id);};
+      } else {
+        welcomePoke.removeAttribute('src');
+        welcomePoke.hidden=true;
+      }
       updateStatsUI();
       socialStart();
 
@@ -8009,7 +8602,7 @@
         </div>` : `
         <div class="game-card"><div class="game-card-body">
           <div class="game-card-title">Equipe vazia</div>
-          <div class="game-card-desc">Retire um Pokémon do PC para continuar sua jornada e participar de batalhas.</div>
+          <div class="game-card-desc">Sua equipe e seu PC estão vazios. Peça a um administrador para adicionar um Pokémon.</div>
         </div></div>`;
 
       document.getElementById('dungeonsGrid').innerHTML = DUNGEONS.map(dungeonCardHTML).join('');
@@ -8277,6 +8870,7 @@
       if (!content) return;
       const party=Array.isArray(details.party)?details.party:[];
       const pc=Array.isArray(details.pc)?details.pc:[];
+      const totalPokemon=party.length+pc.length;
       const items=details.items&&typeof details.items==='object'?Object.entries(details.items).filter(([,qty])=>Number(qty)>0):[];
       const currencies=[
         {field:'money',label:'Pok\u00e9dollar',value:Number(details.money)||0,prefix:'\u20bd'},
@@ -8291,10 +8885,11 @@
       };
       const currencyRows=currencies.map(currency=>`<div class="admin-detail-row"><span>${currency.label}: <strong>${currency.prefix} ${currency.value.toLocaleString('pt-BR')}</strong></span>${currency.value?`<button type="button" class="btn btn-secondary admin-detail-balance-button" data-admin-currency="${currency.field}" data-admin-label="${currency.label}" data-admin-balance="${currency.value}">Remover quantidade</button>`:'<small>Saldo zero</small>'}</div>`).join('');
       const itemRows=items.map(([key,qty])=>`<div class="admin-detail-row"><span>${escapeHTML(adminGetItemLabel(key))} <small style="color:var(--text-muted);">(${escapeHTML(key)})</small>: <strong>${Number(qty).toLocaleString('pt-BR')}</strong></span><button type="button" class="admin-remove-button" data-admin-item="${escapeHTML(key)}" data-admin-label="${escapeHTML(adminGetItemLabel(key))}" data-admin-quantity="${Number(qty)}">Remover</button></div>`).join('');
-      content.innerHTML=`<h3 class="admin-detail-heading">Dados de ${escapeHTML(details.trainer_name||adminSelectedTrainer?.trainer_name||'treinador')}</h3><div class="admin-detail-section"><h4 class="admin-detail-heading">Moedas</h4><div class="admin-detail-list">${currencyRows}</div></div><div class="admin-detail-section"><h4 class="admin-detail-heading">Equipe (${party.length})</h4><div class="admin-detail-pokemon-grid">${party.length?party.map(entry=>pokemonCard(entry,'party')).join(''):'<small>Nenhum Pok\u00e9mon na equipe.</small>'}</div></div><div class="admin-detail-section"><h4 class="admin-detail-heading">PC (${pc.length})</h4><div class="admin-detail-pokemon-grid">${pc.length?pc.map(entry=>pokemonCard(entry,'pc')).join(''):'<small>Nenhum Pok\u00e9mon guardado no PC.</small>'}</div></div><div class="admin-detail-section"><h4 class="admin-detail-heading">Mochila (${items.length} tipos de item)</h4><div class="admin-detail-list">${itemRows||'<small>A mochila est\u00e1 vazia.</small>'}</div></div>`;
-      content.querySelectorAll('[data-admin-remove]').forEach(button=>button.addEventListener('click',()=>adminRemoveTrainerAsset(JSON.parse(button.dataset.adminRemove))));
-      content.querySelectorAll('[data-admin-currency]').forEach(button=>button.addEventListener('click',()=>adminPromptRemoveCurrency(button.dataset.adminCurrency,button.dataset.adminLabel,Number(button.dataset.adminBalance))));
-      content.querySelectorAll('[data-admin-item]').forEach(button=>button.addEventListener('click',()=>adminPromptRemoveItem(button.dataset.adminItem,button.dataset.adminLabel,Number(button.dataset.adminQuantity))));
+      content.innerHTML=`<h3 class="admin-detail-heading">Dados de ${escapeHTML(details.trainer_name||adminSelectedTrainer?.trainer_name||'treinador')}</h3><div class="admin-detail-section"><h4 class="admin-detail-heading">Moedas</h4><div class="admin-detail-list">${currencyRows}</div></div><div class="admin-detail-section"><h4 class="admin-detail-heading">Pokémon do treinador (${totalPokemon})</h4>${totalPokemon?'<button type="button" class="admin-remove-button admin-remove-all-pokemon" id="adminRemoveAllTrainerPokemon">Remover todos os Pokémon</button>':''}<h4 class="admin-detail-heading">Equipe (${party.length})</h4><div class="admin-detail-pokemon-grid">${party.length?party.map(entry=>pokemonCard(entry,'party')).join(''):'<small>Nenhum Pok\u00e9mon na equipe.</small>'}</div><h4 class="admin-detail-heading">PC (${pc.length})</h4><div class="admin-detail-pokemon-grid">${pc.length?pc.map(entry=>pokemonCard(entry,'pc')).join(''):'<small>Nenhum Pok\u00e9mon guardado no PC.</small>'}</div></div><div class="admin-detail-section"><h4 class="admin-detail-heading">Mochila (${items.length} tipos de item)</h4><div class="admin-detail-list">${itemRows||'<small>A mochila est\u00e1 vazia.</small>'}</div></div>`;
+      content.querySelectorAll('[data-admin-remove]').forEach(button=>button.addEventListener('click',()=>adminRemoveTrainerAsset(JSON.parse(button.dataset.adminRemove),button)));
+      content.querySelectorAll('[data-admin-currency]').forEach(button=>button.addEventListener('click',()=>adminPromptRemoveCurrency(button.dataset.adminCurrency,button.dataset.adminLabel,Number(button.dataset.adminBalance),button)));
+      content.querySelectorAll('[data-admin-item]').forEach(button=>button.addEventListener('click',()=>adminPromptRemoveItem(button.dataset.adminItem,button.dataset.adminLabel,Number(button.dataset.adminQuantity),button)));
+      content.querySelector('#adminRemoveAllTrainerPokemon')?.addEventListener('click',adminRemoveAllTrainerPokemon);
       if (currentUserCanManageAdmins) {
         const accountControls=document.createElement('section');
         accountControls.className='admin-detail-section';
@@ -8422,28 +9017,238 @@
       if (!results.children.length) results.innerHTML = '<div class="admin-search-message">Nenhum item encontrado.</div>';
       adminRenderSelectedItemCount();
     }
-    async function adminPromptRemoveCurrency(field,label,balance) {
+    async function adminPromptRemoveCurrency(field,label,balance,button) {
       const amount=Number(window.prompt(`Quantidade de ${label} para remover (m\u00e1ximo ${balance}):`,String(balance)));
       if (!Number.isInteger(amount)||amount<1||amount>balance) { if (amount) showToast('Informe uma quantidade dentro do saldo atual.','error'); return; }
-      await adminRemoveTrainerAsset({kind:'currency',field,amount,label});
+      await adminRemoveTrainerAsset({kind:'currency',field,amount,label},button);
     }
-    async function adminPromptRemoveItem(key,label,quantity) {
+    async function adminPromptRemoveItem(key,label,quantity,button) {
       const amount=Number(window.prompt(`Quantidade de ${label} para remover (m\u00e1ximo ${quantity}):`,String(quantity)));
       if (!Number.isInteger(amount)||amount<1||amount>quantity) { if (amount) showToast('Informe uma quantidade dentro do estoque atual.','error'); return; }
-      await adminRemoveTrainerAsset({kind:'item',key,amount,label});
+      await adminRemoveTrainerAsset({kind:'item',key,amount,label},button);
     }
-    async function adminRemoveTrainerAsset(payload) {
+
+    function renderCompetitiveItemBoxPicker() {
+      const root = document.getElementById('bagUseTarget');
+      if (!root || getItemQty('gb_item_box') <= 0) return;
+      root.innerHTML = `<section class="nature-box-picker"><strong>G. B. Item Box</strong><div style="margin-top:4px;color:var(--text-muted);font-size:.82rem;">Escolha um item segurado competitivo. A caixa será consumida ao escolher.</div><div class="nature-mint-grid">${COMPETITIVE_ITEM_BOX_REWARDS.map(key => {
+        const item = HELD_ITEM_INFO[key];
+        return `<button type="button" class="nature-mint-choice" onclick="selectCompetitiveItemBoxReward('${key}')">${itemIcon(key, '', '🎁')}<span><strong>${escapeHTML(item.name)}</strong><small>${escapeHTML(item.description || 'Item segurado competitivo')}</small></span></button>`;
+      }).join('')}</div><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 0 0;" onclick="cancelBagItemUse()">Cancelar</button></section>`;
+      root.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function selectCompetitiveItemBoxReward(key) {
+      const item = HELD_ITEM_INFO[key];
+      if (!player || battle || getItemQty('gb_item_box') < 1 || !COMPETITIVE_ITEM_BOX_REWARDS.includes(key) || !item) return;
+      decItemQty('gb_item_box', 1);
+      setItemQty(key, getItemQty(key) + 1);
+      cancelBagItemUse();
+      renderBag();
+      saveGame();
+      showToast(`G. B. Item Box aberta: você recebeu ${item.name}.`);
+    }
+    function openRandomCompetitiveItemBox() {
+      if (!player || battle || getItemQty('b_item_box') < 1) return;
+      const key = COMPETITIVE_ITEM_BOX_REWARDS[Math.floor(Math.random() * COMPETITIVE_ITEM_BOX_REWARDS.length)];
+      const item = HELD_ITEM_INFO[key];
+      if (!item) return;
+      decItemQty('b_item_box', 1);
+      setItemQty(key, getItemQty(key) + 1);
+      renderBag();
+      saveGame();
+      showToast(`B. Item Box aberta: você recebeu ${item.name}.`);
+    }
+
+    const techniqueBookMoveCache = new Map();
+    async function getTechniqueBookMoves(pokemon) {
+      const id = Number(pokemon?.id);
+      if (!id) return [];
+      if (techniqueBookMoveCache.has(id)) return techniqueBookMoveCache.get(id);
+      const request = (async () => {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`);
+        if (!response.ok) throw new Error('Não foi possível consultar os movimentos compatíveis.');
+        const species = await response.json();
+        return species.moves.map(entry => {
+          const methods = new Map();
+          entry.version_group_details.forEach(detail => {
+            const method = detail.move_learn_method?.name;
+            if (!['level-up', 'egg', 'tutor'].includes(method)) return;
+            const label = method === 'level-up' ? `Nível ${detail.level_learned_at}` : method === 'egg' ? 'Ovo' : 'Tutor';
+            if (!methods.has(method) || (method === 'level-up' && detail.level_learned_at < methods.get(method).level)) {
+              methods.set(method, { label, level: Number(detail.level_learned_at) || 0 });
+            }
+          });
+          return methods.size ? { slug: entry.move.name, methods: [...methods.values()] } : null;
+        }).filter(Boolean);
+      })();
+      techniqueBookMoveCache.set(id, request);
+      try { return await request; } catch (error) { techniqueBookMoveCache.delete(id); throw error; }
+    }
+
+    async function renderTechniqueBookTargets() {
+      const root = document.getElementById('bagUseTarget');
+      if (!player || battle || !root || getItemQty('technique_book') < 1) return;
+      root.innerHTML = `<section class="nature-box-picker"><strong>Livro de Técnicas</strong><div style="margin:4px 0 12px;color:var(--text-muted);font-size:.82rem;">Escolha um Pokémon para consultar movimentos que ele pode aprender por nível, tutor ou ovo.</div><div class="nature-mint-grid">${player.party.map((pokemon, index) => `<button type="button" class="nature-mint-choice" onclick="renderTechniqueBookMoves(${index})"><img src="${SPRITE_POKEMON(pokemon)}" alt="" style="width:44px;height:44px;object-fit:contain;image-rendering:pixelated" onerror="this.onerror=null;this.src='${SPRITE_FB(pokemon.id)}'"><span><strong>${escapeHTML(pokemon.name)}</strong><small>Nv. ${pokemon.level} · ${pokemon.moves.length}/4 movimentos</small></span></button>`).join('') || '<small>Sua equipe está vazia.</small>'}</div><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 0 0;" onclick="cancelBagItemUse()">Cancelar</button></section>`;
+      root.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function renderTechniqueBookMoves(partyIndex) {
+      const pokemon = player?.party?.[partyIndex];
+      const root = document.getElementById('bagUseTarget');
+      if (!pokemon || !root || getItemQty('technique_book') < 1) return;
+      root.innerHTML = '<section class="nature-box-picker"><strong>Consultando movimentos compatíveis…</strong></section>';
+      try {
+        const moveKey = name => getOriginalMoveName(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const known = new Set((pokemon.moves || []).map(move => moveKey(move.name)));
+        const moves = (await getTechniqueBookMoves(pokemon)).filter(entry => !known.has(moveKey(entry.slug)));
+        const rows = await Promise.all(moves.map(async entry => ({ ...entry, move: await getMoveDataForBattle(entry.slug) })));
+        root.innerHTML = `<section class="nature-box-picker"><strong>Movimentos para ${escapeHTML(pokemon.name)}</strong><div style="margin:4px 0 12px;color:var(--text-muted);font-size:.82rem;">Selecione um movimento. O livro será consumido ao concluir o aprendizado.</div><div class="nature-mint-grid">${rows.map(entry => `<button type="button" class="nature-mint-choice" onclick="teachTechniqueBookMove(${partyIndex},'${entry.slug}')"><span><strong>${escapeHTML(entry.move.name)}</strong><small>${escapeHTML(entry.methods.map(method => method.label).join(' · '))} · ${escapeHTML(entry.move.type)} · Poder ${entry.move.power || '—'}</small></span></button>`).join('') || '<small>Nenhum movimento novo compatível encontrado.</small>'}</div><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 6px 0 0;" onclick="renderTechniqueBookTargets()">Voltar</button><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 0 0;" onclick="cancelBagItemUse()">Cancelar</button></section>`;
+      } catch (error) {
+        root.innerHTML = `<section class="nature-box-picker"><strong>Não foi possível carregar os movimentos.</strong><div style="margin-top:5px;color:var(--text-muted);">${escapeHTML(error.message || 'Tente novamente mais tarde.')}</div><button type="button" class="btn btn-secondary" style="width:auto;margin-top:12px;" onclick="renderTechniqueBookTargets()">Voltar</button></section>`;
+      }
+    }
+
+    async function teachTechniqueBookMove(partyIndex, slug, slotIndex = null) {
+      const pokemon = player?.party?.[partyIndex];
+      const root = document.getElementById('bagUseTarget');
+      if (!pokemon || !root || battle || getItemQty('technique_book') < 1) return;
+      try {
+        const eligible = await getTechniqueBookMoves(pokemon);
+        const moveKey = name => getOriginalMoveName(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!eligible.some(entry => entry.slug === slug) || pokemon.moves.some(move => moveKey(move.name) === moveKey(slug))) return;
+        if (pokemon.moves.length >= 4 && slotIndex === null) {
+          root.innerHTML = `<section class="nature-box-picker"><strong>Escolha um movimento para substituir</strong><div class="nature-mint-grid">${pokemon.moves.map((move, index) => `<button type="button" class="nature-mint-choice" onclick="teachTechniqueBookMove(${partyIndex},'${slug}',${index})"><span><strong>${escapeHTML(move.name)}</strong><small>PP ${move.pp}/${move.maxPp}</small></span></button>`).join('')}</div><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 0 0;" onclick="renderTechniqueBookMoves(${partyIndex})">Voltar</button></section>`;
+          return;
+        }
+        const move = await getMoveDataForBattle(slug);
+        const learnAt = slotIndex === null ? pokemon.moves.length : slotIndex;
+        if (learnAt < 0 || learnAt > 3) return;
+        if (learnAt === pokemon.moves.length) pokemon.moves.push(move); else pokemon.moves[learnAt] = move;
+        decItemQty('technique_book', 1);
+        cancelBagItemUse(); renderBag(); refreshPartyUI(); saveGame();
+        showToast(`${pokemon.name} aprendeu ${move.name}!`);
+      } catch (error) {
+        showToast(error.message || 'Não foi possível ensinar este movimento.', 'error');
+      }
+    }
+
+    const BERRY_POT_GROWTH_MS = 30 * 60 * 1000;
+    const BERRY_POT_HARVEST_AMOUNT = 2;
+
+    function ensureBerryPotState() {
+      if (!Array.isArray(player.berryPotPlants)) player.berryPotPlants = [];
+      const capacity = Math.max(0, Math.floor(getItemQty('berry_pots')));
+      while (player.berryPotPlants.length < capacity) player.berryPotPlants.push(null);
+      return player.berryPotPlants;
+    }
+
+    function renderBerryPots(wateringMode = false) {
+      const root = document.getElementById('bagUseTarget');
+      if (!player || battle || !root || (!wateringMode && getItemQty('berry_pots') < 1)) return;
+      const plants = ensureBerryPotState();
+      root.innerHTML = `<section class="nature-box-picker"><strong>${wateringMode ? 'Squirt Bottle · Berry Pots' : 'Berry Pots'}</strong><div style="margin:4px 0 12px;color:var(--text-muted);font-size:.82rem;">${wateringMode ? 'Regue uma planta para reduzir pela metade o tempo restante de crescimento. Cada planta pode ser regada uma vez.' : 'Plante uma Berry em cada recipiente. Após 30 minutos, colha 2 unidades. Os recipientes são reutilizáveis.'}</div><div class="nature-mint-grid">${plants.map((plant, index) => {
+        if (!plant) return `<button type="button" class="nature-mint-choice" onclick="renderBerryPotBerryPicker(${index})"><span><strong>Vaso ${index + 1} · vazio</strong><small>Escolha uma Berry para plantar</small></span></button>`;
+        const berry = HELD_ITEM_INFO[plant.berryKey];
+        const remaining = Math.max(0, Number(plant.readyAt) - Date.now());
+        const ready = remaining <= 0;
+        const timer = ready ? 'Pronta para colher' : `Pronta em ${Math.ceil(remaining / 60000)} min`;
+        const canWater = getItemQty('squirt_bottle') > 0 && !plant.watered && !ready;
+        return `<div class="nature-mint-choice">${itemIcon(plant.berryKey, '', '🫐')}<span><strong>Vaso ${index + 1} · ${escapeHTML(berry?.name || plant.berryKey)}</strong><small>${timer}${plant.watered ? ' · Regada' : ''}</small></span>${canWater ? `<button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="waterBerryPot(${index})">Regar</button>` : ''}${ready ? `<button type="button" class="btn btn-secondary" style="width:auto;margin:0;" onclick="harvestBerryPot(${index})">Colher</button>` : ''}</div>`;
+      }).join('')}</div><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 0 0;" onclick="cancelBagItemUse()">Fechar</button></section>`;
+      root.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function waterBerryPot(slotIndex) {
+      if (!player || battle || getItemQty('squirt_bottle') < 1) return;
+      const plant = ensureBerryPotState()[slotIndex];
+      const now = Date.now();
+      if (!plant || plant.watered || Number(plant.readyAt) <= now) return;
+      plant.readyAt = now + Math.ceil((Number(plant.readyAt) - now) / 2);
+      plant.watered = true;
+      saveGame();
+      renderBerryPots(true);
+      showToast(`${HELD_ITEM_INFO[plant.berryKey]?.name || 'Berry'} regada! O crescimento foi acelerado.`);
+    }
+
+    function renderBerryPotBerryPicker(slotIndex) {
+      const root = document.getElementById('bagUseTarget');
+      const plants = player ? ensureBerryPotState() : [];
+      if (!root || slotIndex < 0 || slotIndex >= plants.length || plants[slotIndex] !== null) return;
+      const choices = Object.entries(HELD_ITEM_INFO).filter(([key, info]) => info.berry && getItemQty(key) > 0);
+      root.innerHTML = `<section class="nature-box-picker"><strong>Escolha uma Berry</strong><div style="margin:4px 0 12px;color:var(--text-muted);font-size:.82rem;">Uma unidade será plantada; a colheita rende ${BERRY_POT_HARVEST_AMOUNT}.</div><div class="nature-mint-grid">${choices.map(([key, berry]) => `<button type="button" class="nature-mint-choice" onclick="plantBerryInPot(${slotIndex},'${key}')">${itemIcon(key, '', '🫐')}<span><strong>${escapeHTML(berry.name)}</strong><small>Disponível: ${getItemQty(key)}</small></span></button>`).join('') || '<small>Você não tem Berries para plantar.</small>'}</div><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 6px 0 0;" onclick="renderBerryPots()">Voltar</button><button type="button" class="btn btn-secondary" style="width:auto;margin:12px 0 0;" onclick="cancelBagItemUse()">Fechar</button></section>`;
+    }
+
+    function plantBerryInPot(slotIndex, berryKey) {
+      if (!player || battle || getItemQty('berry_pots') < 1 || !HELD_ITEM_INFO[berryKey]?.berry || getItemQty(berryKey) < 1) return;
+      const plants = ensureBerryPotState();
+      if (slotIndex < 0 || slotIndex >= plants.length || plants[slotIndex]) return;
+      decItemQty(berryKey, 1);
+      const plantedAt = Date.now();
+      plants[slotIndex] = { berryKey, plantedAt, readyAt: plantedAt + BERRY_POT_GROWTH_MS };
+      saveGame(); renderBag(); renderBerryPots();
+      showToast(`${HELD_ITEM_INFO[berryKey].name} plantada no Berry Pot.`);
+    }
+
+    function harvestBerryPot(slotIndex) {
+      if (!player || battle) return;
+      const plants = ensureBerryPotState();
+      const plant = plants[slotIndex];
+      if (!plant || Number(plant.readyAt) > Date.now() || !HELD_ITEM_INFO[plant.berryKey]?.berry) return;
+      const berryName = HELD_ITEM_INFO[plant.berryKey].name;
+      setItemQty(plant.berryKey, getItemQty(plant.berryKey) + BERRY_POT_HARVEST_AMOUNT);
+      plants[slotIndex] = null;
+      saveGame(); renderBag(); renderBerryPots();
+      showToast(`Colheita concluída: ${BERRY_POT_HARVEST_AMOUNT} ${berryName}.`);
+    }
+
+    async function adminRemoveTrainerAsset(payload,button=null) {
       if (!isAdminAccount()||!adminSelectedTrainer||!supabaseClient) return;
+      const trainer=adminSelectedTrainer;
       const label=payload.kind==='pokemon'?payload.expected?.name||'Pok\u00e9mon':payload.label||payload.field;
       const amount=payload.amount?`${Number(payload.amount).toLocaleString('pt-BR')}`:'';
-      const message=payload.kind==='pokemon'?`Remover ${label} do save de ${adminSelectedTrainer.trainer_name}?`:`Remover ${amount} de ${label} do save de ${adminSelectedTrainer.trainer_name}?`;
+      const message=payload.kind==='pokemon'?`Remover ${label} do save de ${trainer.trainer_name}?`:`Remover ${amount} de ${label} do save de ${trainer.trainer_name}?`;
       if (!window.confirm(message)) return;
+      const buttonLabel=button?.textContent||'Remover';
+      if (button) { button.disabled=true; button.textContent='Removendo...'; }
       try {
-        const {error}=await supabaseClient.rpc('admin_remove_trainer_asset',{p_target:adminSelectedTrainer.user_id,p_kind:payload.kind,p_payload:payload});
+        const {data,error}=await supabaseClient.rpc('admin_remove_trainer_asset_notify',{p_target:trainer.user_id,p_kind:payload.kind,p_payload:payload});
         if (error) throw error;
-        showToast(`${label} removido do save de ${adminSelectedTrainer.trainer_name}.`);
+        if (!data?.event_id || data.user_id!==trainer.user_id) throw new Error('O servidor não confirmou a remoção e o aviso em tempo real.');
+        const detail=payload.kind==='pokemon'
+          ? `${label} removido da ${payload.location==='party'?'equipe':'PC'} de ${trainer.trainer_name}.`
+          : `${amount} ${label} removidos do save de ${trainer.trainer_name}.`;
+        showToast(detail);
+        if (adminSelectedTrainer?.user_id===trainer.user_id) await adminLoadTrainerDetails();
+      } catch(error) {
+        const migrationMissing=/admin_remove_trainer_asset_notify|schema cache|could not find the function/i.test(error.message||'');
+        showToast(migrationMissing
+          ? 'Aplique a migration admin_asset_removal_realtime no Supabase para ativar a sincronização das remoções.'
+          : 'Falha ao remover '+label+' de '+trainer.trainer_name+': '+error.message,'error');
+        if (button?.isConnected) { button.disabled=false; button.textContent=buttonLabel; }
+      }
+    }
+
+    async function adminRemoveAllTrainerPokemon() {
+      if (!isAdminAccount()||!adminSelectedTrainer||!supabaseClient) return;
+      const trainer=adminSelectedTrainer;
+      const button=document.getElementById('adminRemoveAllTrainerPokemon');
+      if (!window.confirm(`Remover todos os Pok\u00e9mon da equipe e do PC de ${trainer.trainer_name}? Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.`)) return;
+      if (button) { button.disabled=true; button.textContent='Removendo...'; }
+      try {
+        const {data,error}=await supabaseClient.rpc('admin_remove_all_trainer_pokemon_notify',{p_target:trainer.user_id});
+        if (error) throw error;
+        if (!data?.event_id || data.user_id!==trainer.user_id) throw new Error('O servidor não confirmou a remoção e o aviso em tempo real.');
+        const removed=(Number(data?.party_count)||0)+(Number(data?.pc_count)||0);
+        showToast(`${removed} Pok\u00e9mon removidos de ${trainer.trainer_name}.`);
         await adminLoadTrainerDetails();
-      } catch(error) { showToast('Falha ao remover recurso: '+error.message,'error'); }
+      } catch(error) {
+        const migrationMissing=/admin_remove_all_trainer_pokemon_notify|schema cache|could not find the function/i.test(error.message||'');
+        showToast(migrationMissing
+          ? 'Aplique a migration admin_asset_removal_realtime no Supabase para ativar a sincronização das remoções.'
+          : 'Falha ao remover os Pok\u00e9mon: '+error.message,'error');
+        if (button?.isConnected) { button.disabled=false; button.textContent='Remover todos os Pok\u00e9mon'; }
+      }
     }
 
     function adminUpdateGrantFields() {
@@ -8471,7 +9276,7 @@
       summary.replaceChildren();
       const text = document.createElement('span');
       text.textContent = adminSelectedPokemon.length
-        ? `${adminSelectedPokemon.length} Pok\u00e9mon marcado${adminSelectedPokemon.length === 1 ? '' : 's'}.`
+        ? `${adminSelectedPokemon.length} vers${adminSelectedPokemon.length === 1 ? 'ão' : 'ões'} de Pok\u00e9mon marcadas.`
         : 'Nenhum Pok\u00e9mon marcado.';
       summary.append(text);
       if (adminSelectedPokemon.length) {
@@ -8505,17 +9310,29 @@
           const label = document.createElement('label'); label.className = 'admin-asset-checkbox-row';
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
-          checkbox.checked = adminSelectedPokemon.some(entry => entry.id === pokemon.id);
-          checkbox.setAttribute('aria-label', `Selecionar ${pokemon.name}`);
+          checkbox.checked = adminSelectedPokemon.some(entry => entry.id === pokemon.id && !entry.shiny);
+          checkbox.setAttribute('aria-label', `Selecionar ${pokemon.name} normal`);
           checkbox.addEventListener('change', () => {
-            if (checkbox.checked) {
-              if (!adminSelectedPokemon.some(entry => entry.id === pokemon.id)) adminSelectedPokemon.push(pokemon);
-            } else adminSelectedPokemon = adminSelectedPokemon.filter(entry => entry.id !== pokemon.id);
+            if (checkbox.checked) adminSelectedPokemon.push({ ...pokemon, shiny: false });
+            else adminSelectedPokemon = adminSelectedPokemon.filter(entry => !(entry.id === pokemon.id && !entry.shiny));
             adminRenderSelectedPokemonCount();
           });
           const name = document.createElement('span'); name.textContent = pokemon.name;
           const number = document.createElement('small'); number.textContent = `#${pokemon.id}`;
           label.append(checkbox, name, number); results.append(label);
+          const shinyLabel = document.createElement('label'); shinyLabel.className = 'admin-asset-checkbox-row';
+          const shinyCheckbox = document.createElement('input');
+          shinyCheckbox.type = 'checkbox';
+          shinyCheckbox.checked = adminSelectedPokemon.some(entry => entry.id === pokemon.id && entry.shiny);
+          shinyCheckbox.setAttribute('aria-label', `Selecionar ${pokemon.name} Shiny`);
+          shinyCheckbox.addEventListener('change', () => {
+            if (shinyCheckbox.checked) adminSelectedPokemon.push({ ...pokemon, shiny: true });
+            else adminSelectedPokemon = adminSelectedPokemon.filter(entry => !(entry.id === pokemon.id && entry.shiny));
+            adminRenderSelectedPokemonCount();
+          });
+          const shinyName = document.createElement('span'); shinyName.textContent = `✨ ${pokemon.name} (Shiny)`;
+          const shinyNumber = document.createElement('small'); shinyNumber.textContent = `#${pokemon.id}`;
+          shinyLabel.append(shinyCheckbox, shinyName, shinyNumber); results.append(shinyLabel);
         }
         if (!results.children.length) results.innerHTML = '<div class="admin-search-message">Nenhum Pok\u00e9mon encontrado no cat\u00e1logo.</div>';
         adminRenderSelectedPokemonCount();
@@ -8531,7 +9348,7 @@
       const baseStats = Object.fromEntries(data.stats.map(stat => [statKeys[stat.stat.name], stat.base_stat]));
       const types = data.types.sort((a,b) => a.slot - b.slot).map(entry => normalizeBattleType(entry.type.name));
       const pokemon = {
-        id: selection.id, name: selection.name, level, shiny: false,
+        id: selection.id, name: selection.name, level, shiny: Boolean(selection.shiny),
         type: typeLabel(types), typeClass: typeClass(types), types,
         nature: NATURES[Math.floor(Math.random() * NATURES.length)].name,
         ability: 'Adaptabilidade',
@@ -8572,13 +9389,16 @@
       const assets = [];
       try {
         if (kind === 'item') {
-          for (const item of adminSelectedItems) assets.push({ kind, payload: { key: item.key, amount }, name: item.name });
+          for (const item of adminSelectedItems) assets.push({ kind, payload: { key: item.key, amount }, name: `${amount.toLocaleString('pt-BR')}× ${item.name}` });
         } else if (kind === 'pokemon') {
           for (const selection of adminSelectedPokemon) {
             button.textContent = `Preparando ${selection.name}...`;
-            assets.push({ kind, payload: { pokemon: await adminBuildPokemonFromCatalog(selection, level) }, name: selection.name });
+            assets.push({ kind, payload: { pokemon: await adminBuildPokemonFromCatalog(selection, level) }, name: `${selection.shiny ? '✨ ' : ''}${selection.name}${selection.shiny ? ' (Shiny)' : ''} Nv. ${level}` });
           }
-        } else assets.push({ kind, payload: { amount }, name: kind });
+        } else {
+          const labels = { money: 'Pokédollars', pokeCoins: 'PokeCoins', battlePoints: 'BP' };
+          assets.push({ kind, payload: { amount }, name: `${amount.toLocaleString('pt-BR')} ${labels[kind] || kind}` });
+        }
 
         if (currentUserIsRecipient) await flushGameSave();
         button.textContent = 'Enviando recursos...';
@@ -8587,11 +9407,12 @@
         for (const recipient of recipients) {
           for (const asset of assets) {
             try {
-              const { error } = await supabaseClient.rpc('admin_grant_trainer_asset_notify', {
+              const { data, error } = await supabaseClient.rpc('admin_grant_trainer_asset_notify', {
                 p_target: recipient.user_id, p_kind: asset.kind, p_payload: asset.payload
               });
               if (error) throw error;
-              succeeded.push({ recipient, asset });
+              if (!data?.event_id || data.user_id!==recipient.user_id) throw new Error('O servidor não confirmou o envio e a sincronização.');
+              succeeded.push({ recipient, asset, result:data });
             } catch (error) {
               failed.push({ recipient, asset, error });
             }
@@ -8608,7 +9429,11 @@
           }
         }
         const successfulRecipients = new Set(succeeded.map(entry => entry.recipient.user_id)).size;
-        if (succeeded.length) showToast(`${succeeded.length} recurso${succeeded.length === 1 ? '' : 's'} enviado${succeeded.length === 1 ? '' : 's'} para ${successfulRecipients} treinador${successfulRecipients === 1 ? '' : 'es'}.`);
+        if (succeeded.length) {
+          const preview = succeeded.slice(0, 3).map(entry => `${entry.recipient.trainer_name}: ${entry.asset.name}`).join(' · ');
+          const remaining = succeeded.length > 3 ? ` · +${succeeded.length - 3} envio${succeeded.length - 3 === 1 ? '' : 's'}` : '';
+          showToast(`Envio confirmado: ${succeeded.length} recurso${succeeded.length === 1 ? '' : 's'} para ${successfulRecipients} treinador${successfulRecipients === 1 ? '' : 'es'}. ${preview}${remaining}`);
+        }
         if (failed.length) {
           const failedSummary = failed.slice(0, 3).map(entry => `${entry.asset.name} (${entry.recipient.trainer_name})`).join(', ');
           showToast(`Falha em ${failed.length} envio${failed.length === 1 ? '' : 's'}: ${failedSummary}${failed.length > 3 ? ' e outros' : ''}. ${failed[0].error.message}`, 'error');
@@ -8778,14 +9603,14 @@
         const calculatedStats = pvpCalculateStats(baseStats[pokemonIndex], pokemon, ivs, evs);
         const maxHp = calculatedStats.hp;
         const moves = (pokemon.moves || []).slice(0,4).map(move => ({
-          name: String(move.name || 'Golpe'), type: pvpServerType(getCurrentMoveType(move)), category: move.category || (isPhysicalMove(move) ? 'physical' : 'special'),
-          power: Math.max(0, Math.min(250, Math.floor(Number(move.power) || 0))),
-          accuracy: move.accuracy !== null && move.accuracy !== undefined && Number.isFinite(Number(move.accuracy)) ? Math.max(1, Math.min(100, Number(move.accuracy))) : 100,
+          name: String(move.name || 'Golpe'), type: pvpServerType(isMegaDrainMove(move) ? 'Planta' : getCurrentMoveType(move)), category: isMegaDrainMove(move) ? 'special' : move.category || (isPhysicalMove(move) ? 'physical' : 'special'),
+          power: isMegaDrainMove(move) ? 40 : Math.max(0, Math.min(250, Math.floor(Number(move.power) || 0))),
+          accuracy: isMegaDrainMove(move) ? 100 : move.accuracy !== null && move.accuracy !== undefined && Number.isFinite(Number(move.accuracy)) ? Math.max(1, Math.min(100, Number(move.accuracy))) : 100,
           priority: isProtectMove(move) ? (['wide guard','quick guard'].includes(String(move.name||'').trim().toLowerCase()) ? 3 : 4) : Math.max(-7,Math.min(7,Math.floor(Number(move.priority ?? ({'quick attack':1,'mach punch':1,'extreme speed':1,'follow me':2,'helping hand':5,'counter':-5,'mirror coat':-5,'vital throw':-1,'focus punch':-3}[String(move.name||'').toLowerCase()] ?? 0))||0))),
-          target: String(move.target||''), healing: Math.max(0,Math.min(100,Number(move.healing)||0)), drain: Math.max(0,Math.min(100,Number(move.drain)||0)),
+          target: String(move.target||''), healing: Math.max(0,Math.min(100,Number(move.healing)||0)), drain: isMegaDrainMove(move) ? 50 : Math.max(0,Math.min(100,Number(move.drain)||0)),
           recoil: Math.max(0,Math.min(100,Number(move.recoil)||0)), minHits: Math.max(1,Math.min(10,Math.floor(Number(move.minHits)||1))), maxHits: Math.max(1,Math.min(10,Math.floor(Number(move.maxHits)||1))), critRate: Math.max(0,Math.min(3,Math.floor(Number(move.critRate)||0))), flinchChance: Math.max(0,Math.min(1,Number(move.flinchChance)||0)),
           statusEffect: (()=>{const effect=getStatusMoveEffect(move);return effect&&['burn','paralysis','poison','sleep','freeze','confusion'].includes(effect.status)?{status:effect.status,chance:Math.max(0,Math.min(1,Number(effect.chance)||0))}:isProtectMove(move)?{status:'protect',chance:1}:null})(), protect:isProtectMove(move),
-          statChanges: Array.isArray(move.statChanges) ? move.statChanges.filter(change=>['self','target','attacker'].includes(change.target)&&['attack','defense','specialAttack','specialDefense','speed','accuracy','evasion'].includes(change.stat)).map(change=>({target:change.target,stat:change.stat,stages:Math.max(-6,Math.min(6,Number(change.stages)||0))})) : [],
+          statChanges: String(move.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '') === 'ancientpower' ? [] : Array.isArray(move.statChanges) ? move.statChanges.filter(change=>['self','target','attacker'].includes(change.target)&&['attack','defense','specialAttack','specialDefense','speed','accuracy','evasion'].includes(change.stat)).map(change=>({target:change.target,stat:change.stat,stages:Math.max(-6,Math.min(6,Number(change.stages)||0))})) : [],
           pp: Math.max(1, Math.floor(Number(move.maxPp) || Number(move.pp) || 10)),
           maxPp: Math.max(1, Math.floor(Number(move.maxPp) || Number(move.pp) || 10))
         }));
@@ -9062,6 +9887,15 @@
       return ({Normal:'#a8a878',Fogo:'#f08030',Agua:'#6890f0',Planta:'#78c850',Elétrico:'#f8d030',Gelo:'#98d8d8',Lutador:'#c03028',Veneno:'#a040a0',Terra:'#e0c068',Voador:'#a890f0',Psíquico:'#f85888',Inseto:'#a8b820',Pedra:'#b8a038',Fantasma:'#705898',Dragao:'#7038f8',Sombrio:'#705848','Aço':'#b8b8d0',Fada:'#ee99ac'})[normalizeBattleType(type)] || '#a8a878';
     }
 
+    function pvpTypeColor(type) {
+      const key = String(normalizeBattleType(type)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+      return ({normal:'#a8a878',fogo:'#f08030',agua:'#6890f0',planta:'#78c850',eletrico:'#f8d030',gelo:'#98d8d8',lutador:'#c03028',veneno:'#a040a0',terra:'#e0c068',voador:'#a890f0',psiquico:'#f85888',inseto:'#a8b820',pedra:'#b8a038',fantasma:'#705898',dragao:'#7038f8',sombrio:'#705848',aco:'#b8b8d0',fada:'#ee99ac'})[key] || '#a8a878';
+    }
+    function getMoveTypeTag(type) {
+      const key = String(normalizeBattleType(type)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+      return ({normal:'NORMAL',fogo:'FIRE',agua:'WATER',planta:'GRASS',eletrico:'ELECTRIC',gelo:'ICE',lutador:'FIGHT',veneno:'POISON',terra:'GROUND',voador:'FLYING',psiquico:'PSYCHIC',inseto:'BUG',pedra:'ROCK',fantasma:'GHOST',dragao:'DRAGON',sombrio:'DARK',aco:'STEEL',fada:'FAIRY'})[key] || key.toUpperCase();
+    }
+
     function pvpBattleInfo(pokemon, hp, className, party = null, partyHp = null, majorStatus = null) {
       const maxHp = Math.max(1, Number(pokemon.maxHp) || 1);
       const currentHp = Math.max(0, Math.min(maxHp, Number(hp) || 0));
@@ -9076,6 +9910,21 @@
         ${currentHp<=0?'<div class="battle-status-indicators"><span class="battle-stat-stage negative">Desmaiado</span></div>':''}
         <div class="hp-bar-wrap"><div class="hp-label"><span>HP</span><span>${currentHp}/${maxHp}</span></div><div class="hp-bar"><div class="hp-fill ${healthTone}" style="width:${percent}%"></div></div></div>
       </div>`;
+    }
+
+    function coopRaidPokemonInfo(pokemon, hp, showExperience = false) {
+      const maxHp = Math.max(1, Number(pokemon?.maxHp) || 1);
+      const currentHp = Math.max(0, Math.min(maxHp, Number(hp) || 0));
+      const percent = Math.round(currentHp / maxHp * 100);
+      const healthTone = percent <= 20 ? 'red' : percent <= 50 ? 'yellow' : '';
+      let experience = '';
+      if (showExperience) {
+        const progress = getPokemonExperienceProgress(pokemon);
+        const atMaxLevel = Number(pokemon.level) >= MAX_POKEMON_LEVEL;
+        const expPercent = atMaxLevel || progress.required <= 0 ? 100 : Math.min(100, Math.max(0, progress.current / progress.required * 100));
+        experience = `<div class="coop-raid-exp"><div class="coop-raid-exp-label"><span>EXP</span><span>${atMaxLevel ? 'Nível máximo' : `${progress.current.toLocaleString('pt-BR')} / ${progress.required.toLocaleString('pt-BR')}`}</span></div><div class="coop-raid-exp-bar"><i style="width:${expPercent}%"></i></div></div>`;
+      }
+      return `<div class="coop-raid-pokemon-heading"><strong>${getPokemonDisplayNameHTML(pokemon)}</strong><span>Nv. ${Number(pokemon.level) || 1}</span></div><div class="coop-raid-hp-label"><span>HP</span><span>${currentHp}/${maxHp}</span></div><div class="coop-raid-hp-bar"><i class="${healthTone}" style="width:${percent}%"></i></div>${experience}`;
     }
 
     function pvpSetBattleMenu(menu) {
@@ -9139,8 +9988,8 @@
       const moveButtons = (active?.moves || []).map((move,index)=>{
         const pp = Number(localPp[localActive]?.[index]) || 0;
         const disabled = pp<=0 || myActionPending || activeHp<=0;
-        return `<button class="move-btn battle-move-choice" data-move-type="${escapeHTML(normalizeBattleType(move.type))}" style="--move-color:${pvpTypeColor(move.type)}" ${disabled?'disabled':''} onclick="pvpSubmitAction({type:'move',index:${index}})">
-          <span class="battle-move-heading"><span class="move-type" style="--move-color:${pvpTypeColor(move.type)}">${escapeHTML(move.type)}</span><strong>${escapeHTML(move.name)}${pp<=0?' (sem PP)':''}</strong></span><span class="battle-move-details"><span class="move-category ${getMoveCategoryClass(move)}">${escapeHTML(getMoveCategory(move))}</span><span class="battle-move-pp">PP ${pp}/${move.maxPp}</span>${renderMoveEffectiveness(move, foeTeam[foeActive])}</span></button>`;
+        return `<button class="move-btn battle-move-choice" data-move-type="${escapeHTML(normalizeBattleType(move.type))}" style="--move-color:${pvpTypeColor(move.type)}" title="${escapeHTML(move.type)} · ${escapeHTML(getMoveCategory(move))}" ${disabled?'disabled':''} onclick="pvpSubmitAction({type:'move',index:${index}})">
+          <span class="battle-move-name">${escapeHTML(move.name)}</span><span class="battle-move-footer"><span class="battle-move-type-tag">${getMoveTypeTag(move.type)}</span><span class="move-category ${getMoveCategoryClass(move)}" title="${escapeHTML(getMoveCategory(move))}">${escapeHTML(getMoveCategory(move))}</span><span class="battle-move-pp">${pp}/${move.maxPp}</span></span></button>`;
       }).join('');
       const struggleButton = !hasPpMove ? `<button class="move-btn" ${myActionPending||activeHp<=0?'disabled':''} onclick="pvpSubmitAction({type:'struggle',index:-1})"><span>Struggle</span><span class="move-power">PWR 50 · PP —</span></button>` : '';
       const switchButtons = localTeam.map((pokemon,index)=>{
@@ -9532,7 +10381,7 @@
       const availableMoves=(activePokemon?.moves||[]).map((move,index)=>({move,index,pp:activePp[index]}));
       const moveBtns=availableMoves.map(({move,index,pp})=>{
         const disabled=coopBossAnimating||myAction||activeHp<=0||pp<=0;
-        return `<button class="move-btn battle-move-choice" data-move-type="${escapeHTML(normalizeBattleType(move.type))}" style="--move-color:${pvpTypeColor(move.type)}" onclick="coopBossAct({type:'move',index:${index}})" ${disabled?'disabled':''}><span class="battle-move-heading"><span class="move-type" style="--move-color:${pvpTypeColor(move.type)}">${escapeHTML(move.type)}</span><strong>${escapeHTML(move.name)}${pp<=0?' (sem PP)':''}</strong></span><span class="battle-move-details"><span class="move-category ${getMoveCategoryClass(move)}">${escapeHTML(getMoveCategory(move))}</span><span class="battle-move-pp">PP ${pp}/${move.maxPp||pp}</span>${renderMoveEffectiveness(move,{id:150})}</span></button>`;
+        return `<button class="move-btn battle-move-choice" data-move-type="${escapeHTML(normalizeBattleType(move.type))}" data-move-type-label="${getMoveTypeTag(move.type)}" style="--move-color:${pvpTypeColor(move.type)}" onclick="coopBossAct({type:'move',index:${index}})" ${disabled?'disabled':''}><span class="battle-move-heading"><span class="move-type" style="--move-color:${pvpTypeColor(move.type)}">${escapeHTML(move.type)}</span><strong>${escapeHTML(move.name)}${pp<=0?' (sem PP)':''}</strong></span><span class="battle-move-details"><span class="move-category ${getMoveCategoryClass(move)}">${escapeHTML(getMoveCategory(move))}</span><span class="battle-move-pp">${pp}/${move.maxPp||pp}</span>${renderMoveEffectiveness(move,{id:150})}</span></button>`;
       }).join('');
       const hasUsableDamage=availableMoves.some(({move,pp})=>Number(move.power)>0&&pp>0);
       const switchBtns=myTeam.map((pokemon,index)=>`<button class="move-btn coop-switch-btn" onclick="coopBossAct({type:'switch',index:${index}})" ${coopBossAnimating||myAction||index===active||Number(myHp[index])<=0?'disabled':''}><span class="coop-switch-sprite"><img src="${SPRITE_ANIM_POKEMON(pokemon)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FRONT(pokemon.id)}'" /></span><span class="coop-switch-copy"><strong>${escapeHTML(pokemon.name)}</strong><span class="move-power">HP ${Math.max(0,Number(myHp[index])||0)}/${pokemon.maxHp}</span></span></button>`).join('');
@@ -9551,7 +10400,7 @@
         return `<button class="move-btn" onclick="coopBossAct({type:'item',key:'${selectedRaidItem.key}',index:${index}})" ${coopBossAnimating||myAction?'disabled':''}><span>${escapeHTML(pokemon.name)}</span><span class="move-power">HP ${currentHp}/${maxPokemonHp}</span></button>`;
       }).join(''):'';
       const waitingForTeam=allFainted&&!myAction&&!['bag','item_targets'].includes(coopBossMenu);
-      const actions=(coopBossMenu==='switch'&&!allFainted||['bag','item_targets'].includes(coopBossMenu))&&!myAction?'':waitingForTeam?`<div class="pvp-waiting-action">Sua equipe caiu. Use um Revive ou aguarde os outros treinadores.</div><div class="battle-actions"><button class="battle-btn bag" onclick="coopBossMenu='bag';renderCoopBossPanel()">Mochila</button><button class="battle-btn" onclick="coopBossAct({type:'wait'})" ${coopBossAnimating?'disabled':''}>Aguardar equipe</button></div>`:myAction?`<div class="pvp-waiting-action">Ação enviada · aguardando o grupo (${Object.keys(room.actions||{}).length}/${members.length})</div>`:coopBossMenu==='bag'?`<div class="battle-actions moves-view">${bagButtons||'<div class="pvp-waiting-action">Nenhum item de cura disponível.</div>'}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='item_targets'?`<div class="battle-actions moves-view">${itemTargets||'<div class="pvp-waiting-action">Nenhum Pokémon pode usar este item agora.</div>'}<button class="move-btn" onclick="coopBossMenu='bag';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='switch'?`<div class="battle-actions moves-view">${switchBtns}<button class="move-btn" onclick="coopBossMenu='bag';renderCoopBossPanel()">Mochila</button><button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='moves'?`<div class="battle-actions moves-view">${moveBtns}${hasUsableDamage?'':`<button class="move-btn" onclick="coopBossAct({type:'struggle'})" ${coopBossAnimating?'disabled':''}>Esforço · PWR 60</button>`}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:`<div class="battle-actions coop-main-actions"><button class="battle-btn fight" onclick="coopBossMenu='moves';renderCoopBossPanel()">Lutar</button><button class="battle-btn pokemon" onclick="coopBossMenu='switch';renderCoopBossPanel()">Equipe</button><button class="battle-btn bag" onclick="coopBossMenu='bag';renderCoopBossPanel()">Mochila</button><button class="battle-btn run" onclick="coopBossConfirmExit=true;renderCoopBossPanel()">Sair</button></div>`;
+      const actions=(coopBossMenu==='switch'&&!allFainted||['bag','item_targets'].includes(coopBossMenu))&&!myAction?'':waitingForTeam?`<div class="pvp-waiting-action">Sua equipe caiu. Use um Revive ou aguarde os outros treinadores.</div><div class="battle-actions"><button class="battle-btn bag" onclick="coopBossMenu='bag';renderCoopBossPanel()">Mochila</button><button class="battle-btn" onclick="coopBossAct({type:'wait'})" ${coopBossAnimating?'disabled':''}>Aguardar equipe</button></div>`:myAction?`<div class="pvp-waiting-action">Ação enviada · aguardando o grupo (${Object.keys(room.actions||{}).length}/${members.length})</div>`:coopBossMenu==='bag'?`<div class="battle-actions moves-view">${bagButtons||'<div class="pvp-waiting-action">Nenhum item de cura disponível.</div>'}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='item_targets'?`<div class="battle-actions moves-view">${itemTargets||'<div class="pvp-waiting-action">Nenhum Pokémon pode usar este item agora.</div>'}<button class="move-btn" onclick="coopBossMenu='bag';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='switch'?`<div class="battle-actions moves-view">${switchBtns}<button class="move-btn" onclick="coopBossMenu='bag';renderCoopBossPanel()">Mochila</button><button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:coopBossMenu==='moves'?`<div class="battle-actions moves-view">${moveBtns}${hasUsableDamage?'':`<button class="move-btn" onclick="coopBossAct({type:'struggle'})" ${coopBossAnimating?'disabled':''}>Esforço · PWR 60</button>`}<button class="move-btn" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button></div>`:`<div class="battle-actions coop-main-actions"><button class="battle-btn fight" onclick="coopBossMenu='moves';renderCoopBossPanel()">Lutar</button><button class="battle-btn bag" onclick="coopBossMenu='bag';renderCoopBossPanel()">Mochila</button><button class="battle-btn pokemon" onclick="coopBossMenu='switch';renderCoopBossPanel()">Pokémon</button><button class="battle-btn run" onclick="coopBossConfirmExit=true;renderCoopBossPanel()">Sair</button></div>`;
       const boss={id:150,name:'Mewtwo Boss',level:100,maxHp};
       const raidCrySession=`raid:${room.id}`;
       playPokemonCry(activePokemon,`raid-player:${raidCrySession}`,raidCrySession);
@@ -9576,8 +10425,8 @@
       const bagModal=showBagModal?`<div class="coop-faint-switch-overlay"><section class="coop-faint-switch-dialog" role="dialog" aria-modal="true" aria-labelledby="coopBagTitle"><h2 id="coopBagTitle">${coopBossMenu==='item_targets'?'Escolha um Pokémon':'Mochila'}</h2><p>${coopBossMenu==='item_targets'?'Escolha quem receberá '+escapeHTML(selectedRaidItem?.name||'o item')+'.':'Selecione um item para usar na raid.'}</p>${coopBossMenu==='item_targets'?`<div class="coop-faint-switch-grid">${itemTargetCards||'<div class="pvp-waiting-action" style="grid-column:1/-1">Nenhum Pokémon pode usar este item agora.</div>'}</div><button class="move-btn" style="width:100%;justify-content:center;margin-top:12px" onclick="coopBossMenu='bag';renderCoopBossPanel()">Voltar</button>`:`<div class="coop-bag-grid">${bagModalOptions||'<div class="pvp-waiting-action" style="grid-column:1/-1">Nenhum item de cura disponível.</div>'}</div><button class="move-btn" style="width:100%;justify-content:center;margin-top:12px" onclick="coopBossMenu='main';renderCoopBossPanel()">Voltar</button>`}</section></div>`:'';
       root.innerHTML=`<div class="coop-boss-arena"><div class="battle-bg"></div><div class="battle-sky"></div><div class="battle-ground"></div>
         <div class="coop-boss-toolbar"><div class="coop-boss-toolbar-meta"><span>Rodada ${Number(room.turn)||1}</span><span>Sala <strong class="pvp-code" style="font-size:.95rem">${escapeHTML(room.room_code)}</strong></span><button type="button" class="coop-boss-sound-btn" id="coopBossMuteSfx" onclick="toggleBattleSfx()" title="Alternar som" aria-label="${SFX.isMuted()?'Ativar':'Desativar'} som">${SFX.isMuted()?'\u{1F507}':'\u{1F50A}'}</button></div><span class="coop-boss-turn-timer${turnSecondsLeft<=10?' urgent':''}" id="coopBossTurnTimer" aria-label="Tempo restante do turno">${turnSecondsLeft}s</span></div>
-        <div class="battle-field"><div class="battle-enemy"><div class="coop-boss-info-wrap"><div class="enemy-info daily-boss-info coop-mewtwo-info">${pvpBattleInfo(boss,displayBossHp,'enemy-info')}${bossEffects}</div>${coopBossAttackNotice?`<div class="coop-boss-attack-banner" role="status" aria-live="assertive">${escapeHTML(coopBossAttackNotice)}</div>`:''}</div><div class="sprite-stage enemy-stage"><div class="sprite-shadow"></div><img class="enemy-sprite" src="${enemySprite}" alt="Mewtwo" decoding="async" onerror="this.onerror=null;this.src='${enemyFallback}'" /></div></div>
-          <div class="battle-player"><div class="sprite-stage player-stage ${displayPlayerFainted?'pvp-fainted-stage':''}"><div class="sprite-shadow"></div>${activePokemon?`<img class="player-sprite${displayPlayerFainted?' faint':''}" src="${playerSprite}" alt="${escapeHTML(activePokemon.name)}" decoding="async" onerror="this.onerror=null;this.src='${playerFallback}'" />`:''}</div><div class="player-info"><div class="pvp-trainer-name">${escapeHTML(player.name)} · SUA EQUIPE</div>${activePokemon?pvpBattleInfo(activePokemon,displayActiveHp,'player-info',myTeam,myHp):''}${trainerEffects}</div></div>
+        <div class="battle-field"><div class="battle-enemy"><div class="coop-boss-info-wrap"><div class="enemy-info daily-boss-info coop-mewtwo-info coop-raid-pokemon-card">${coopRaidPokemonInfo(boss,displayBossHp)}${bossEffects}</div>${coopBossAttackNotice?`<div class="coop-boss-attack-banner" role="status" aria-live="assertive">${escapeHTML(coopBossAttackNotice)}</div>`:''}</div><div class="sprite-stage enemy-stage"><div class="sprite-shadow"></div><img class="enemy-sprite" src="${enemySprite}" alt="Mewtwo" decoding="async" onerror="this.onerror=null;this.src='${enemyFallback}'" /></div></div>
+          <div class="battle-player"><div class="sprite-stage player-stage ${displayPlayerFainted?'pvp-fainted-stage':''}"><div class="sprite-shadow"></div>${activePokemon?`<img class="player-sprite${displayPlayerFainted?' faint':''}" src="${playerSprite}" alt="${escapeHTML(activePokemon.name)}" decoding="async" onerror="this.onerror=null;this.src='${playerFallback}'" />`:''}</div><div class="player-info coop-raid-pokemon-card">${activePokemon?coopRaidPokemonInfo(activePokemon,displayActiveHp,true):''}${trainerEffects}</div></div>
         </div><div class="battle-ui"><div class="coop-raid-roster" aria-label="Treinadores da raid">${rosterHTML}</div><div class="pvp-turn-prompt">${showSwitchModal||showBagModal?'':coopBossAnimating?(coopBossAttackNotice?'':'Ataques da rodada em andamento.'):myAction?'Ação registrada.':allFainted?'Sua equipe está sem Pokémon consciente.':coopBossMenu==='moves'?'Escolha um golpe.':coopBossMenu==='switch'||activeFainted?'Escolha quem entrará na batalha.':''}</div>${actions}</div></div>${faintSwitchModal}${bagModal}${exitConfirmModal}`;
     }
     document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => switchPanel(i.dataset.panel)));
@@ -10124,6 +10973,7 @@
       ensurePokemonTraits(wild);
       ensurePokemonTraits(player.poke);
 
+      dexAnaliticCollapsed = true;
       battle = {
         dungeon: dungeonName,
         isGym: false,
@@ -10152,6 +11002,7 @@
       document.getElementById('enemyHpText').textContent = `${wild.currentHp}/${wild.maxHp}`;
       document.getElementById('enemyHpBar').style.width = '100%';
       document.getElementById('enemyHpBar').className = 'hp-fill';
+      updateDexAnaliticPanel(wild, true);
       document.getElementById('dailyBossShieldWrap').hidden = !battle.isDailyBoss;
       updateEnemyHpBar();
       const eSprite = document.getElementById('enemySprite');
@@ -10242,7 +11093,12 @@
       } else if (shieldWrap) shieldWrap.hidden = true;
     }
 
-    function setLog(msg) { document.getElementById('battleLog').textContent = msg; }
+    function setLog(msg) {
+      const log = document.getElementById('battleLog');
+      // Keep end-of-turn damage on its own line so it is easy to distinguish
+      // from the move's damage and effectiveness message.
+      log.textContent = String(msg ?? '').replace(/(sofreu )(\d+ de dano por )/gi, '$1\n$2');
+    }
 
     function showMoves() {
       if (battle.busy) return;
@@ -10250,9 +11106,9 @@
       const menu = document.getElementById('movesMenu');
       const hasMovesWithPp = player.poke.moves.some(move => move.pp > 0);
       menu.innerHTML = player.poke.moves.map((m, i) => `
-        <button class="move-btn battle-move-choice" data-move-type="${normalizeBattleType(m.type)}" style="--move-color:${pvpTypeColor(m.type)}" title="${m.type} · ${getMoveCategory(m)}" ${m.pp <= 0 ? 'disabled' : ''} onclick="playerAttack(${i})">
+        <button class="move-btn battle-move-choice" data-move-type="${normalizeBattleType(m.type)}" data-move-type-label="${getMoveTypeTag(m.type)}" style="--move-color:${pvpTypeColor(m.type)}" title="${m.type} · ${getMoveCategory(m)}" ${m.pp <= 0 ? 'disabled' : ''} onclick="playerAttack(${i})">
           <span class="battle-move-heading"><span class="move-type" style="--move-color:${pvpTypeColor(m.type)}">${escapeHTML(m.type)}</span><strong>${escapeHTML(m.name)}${m.pp <= 0 ? ' (sem PP)' : ''}</strong></span>
-          <span class="battle-move-details"><span class="move-category ${getMoveCategoryClass(m)}">${getMoveCategory(m)}</span><span class="battle-move-pp">PP ${m.pp}/${m.maxPp}</span>${renderMoveEffectiveness(m, battle?.enemy, getBattleMoveType(m))}</span>
+          <span class="battle-move-details"><span class="move-category ${getMoveCategoryClass(m)}">${getMoveCategory(m)}</span><span class="battle-move-pp">${m.pp}/${m.maxPp}</span>${renderMoveEffectiveness(m, battle?.enemy, getBattleMoveType(m))}</span>
         </button>`).join('') + (hasMovesWithPp ? '' : `
         <button class="move-btn battle-move-choice" onclick="playerAttack(-1)">
           <span class="battle-move-heading"><strong>Struggle</strong></span><span class="battle-move-details"><span class="battle-move-pp">PP —</span></span>
@@ -10418,6 +11274,11 @@
         showMoves();
         return;
       }
+      if (isHealBlocked(player.poke) && Number(move.drain) > 0) {
+        setLog(`${player.poke.name} não pode usar ${move.name} durante Bloqueio de Cura.`);
+        showMoves();
+        return;
+      }
       if (player.poke.heldItem === 'assault_vest' && move.power <= 0) {
         setLog('Assault Vest impede o uso de golpes de status.'); showMoves(); return;
       }
@@ -10429,7 +11290,7 @@
       }
       const actionWasOrderedAfterEnemy = Boolean(battle.skipInitiativeOnce);
       if (!actionWasOrderedAfterEnemy) {
-        const enemyMoves = (battle.enemy.moves || []).filter(candidate => candidate.power > 0 || candidate.statusEffect || candidate.statChanges || isSelfHealingMove(candidate) || isProtectMove(candidate) || getStatusMoveEffect(candidate)).filter(candidate => battle.enemy.heldItem !== 'assault_vest' || candidate.power > 0);
+        const enemyMoves = (battle.enemy.moves || []).filter(candidate => candidate.power > 0 || candidate.statusEffect || candidate.statChanges || isSelfHealingMove(candidate) || isProtectMove(candidate) || isLeechSeedMove(candidate) || getStatusMoveEffect(candidate)).filter(candidate => battle.enemy.heldItem !== 'assault_vest' || candidate.power > 0).filter(candidate => !isHealBlocked(battle.enemy) || Number(candidate.drain) <= 0);
         const enemyMove = chooseBestEnemyMove(enemyMoves);
         if (!battlePokemonActsFirst(player.poke, move, battle.enemy, enemyMove)) {
           battle.pendingPlayerMoveIdx = moveIdx;
@@ -10490,6 +11351,7 @@
       let dmg = dreamEaterBlocked ? 0 : rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(player.poke, moveType, physical) * (critical ? 1.5 : 1))) : 0;
 
       const pSprite = document.getElementById('playerSprite');
+      const eSprite = document.getElementById('enemySprite');
       const healingMove = isSelfHealingMove(move);
       if (isProtectMove(move)) playProtectGlow(pSprite);
       else if (isSelfStatBoostMove(move)) playStatBoostGlow(pSprite);
@@ -10498,6 +11360,7 @@
         SFX.attack();
         setTimeout(() => pSprite.classList.remove('attack-anim'), 450);
       }
+      playBattleMoveEffect(move, pSprite, eSprite);
 
       setLog(`${player.poke.name} usou ${move.name}!`);
       setTimeout(() => {
@@ -10518,7 +11381,6 @@
           recoilMessage = `${player.poke.name} sofreu ${recoil} de Rocky Helmet.`;
         }
         updateEnemyHpBar();
-        const eSprite = document.getElementById('enemySprite');
         if (!protectBlocked && dmg > 0) {
           eSprite.classList.add('hit');
           setTimeout(() => eSprite.classList.remove('hit'), 350);
@@ -10559,13 +11421,14 @@
         if (abilityStatus) abilityMessage = `${abilityMessage} ${abilityStatus}`.trim();
         const targetEffectBlocked = evaded || protectBlocked || dreamEaterBlocked || (move.power > 0 && (Boolean(immunity) || mult === 0));
         const statusMessage = targetEffectBlocked ? '' : applyMoveStatus(player.poke, battle.enemy, move);
-        const statChangeMessage = targetEffectBlocked ? '' : applyMoveStatChanges(player.poke, battle.enemy, move, dmg);
+        const leechSeedMessage = targetEffectBlocked ? '' : applyLeechSeed(player.poke, battle.enemy, move);
+        const statChangeMessage = applyMoveSecondaryStatEffect(player.poke, battle.enemy, move, dmg, targetEffectBlocked, true);
         const fieldMessage = targetEffectBlocked ? '' : applyBattleFieldMove(player.poke, move);
         const selfKnockoutMessage = targetEffectBlocked ? '' : applyMoveSelfKnockout(player.poke, battle.enemy, move);
         const heldMessage = applyHeldItemTrigger(battle.enemy, mult >= 2 && !protectBlocked && !evaded && !dreamEaterBlocked && !immunity);
         const playerHeldMessage = applyHeldItemTrigger(player.poke);
         const shellBellMessage = applyShellBell(player.poke, dmg);
-        const drainMessage = applyMoveDrain(player.poke, move, dmg);
+        const drainMessage = applyMoveDrain(player.poke, move, dmg, battle.enemy);
         battle.playerHp = player.poke.hp;
         if (healingMove && fieldMessage) msg = fieldMessage;
         if (String(move.name || '').trim().toLowerCase() === 'plasma fists' && !protectBlocked && !evaded && !dreamEaterBlocked) {
@@ -10574,6 +11437,7 @@
         }
         if (abilityMessage) msg += ` ${abilityMessage}`;
         if (statusMessage) msg += ` ${statusMessage}`;
+        if (leechSeedMessage) msg += ` ${leechSeedMessage}`;
         if (statChangeMessage) msg += ` ${statChangeMessage}`;
         if (fieldMessage) msg += ` ${fieldMessage}`;
         if (selfKnockoutMessage) msg += ` ${selfKnockoutMessage}`;
@@ -10700,6 +11564,11 @@
           }
         }
 
+        if (isLeechSeedMove(move)) {
+          if (battle.leechSeededSide === 'player' || getTypes(playerPokemon.id).includes('Planta')) return -1;
+          score += Math.max(8, Number(playerPokemon.maxHp) / 4);
+        }
+
         const statusEffect = getStatusMoveEffect(move);
         if (statusEffect && statusEffect.status !== 'protect' && String(move.name || '').trim().toLowerCase() !== 'rest') {
           const recipient = move.target === 'user' ? enemy : playerPokemon;
@@ -10741,7 +11610,7 @@
           if (!battle.enemyProtected && incomingThreat >= enemyHp * 0.35 && streak < 2) score += Math.min(incomingThreat, enemyHp) * 0.8;
           else return -1;
         }
-        if (power <= 0 && !isSelfHealingMove(move) && !statusEffect && !changes.length && !isProtectMove(move) && !['reflect','light screen'].includes(name)) return -1;
+        if (power <= 0 && !isSelfHealingMove(move) && !statusEffect && !changes.length && !isProtectMove(move) && !isLeechSeedMove(move) && !['reflect','light screen'].includes(name)) return -1;
         return score;
       };
 
@@ -10827,7 +11696,7 @@
         }
         return;
       }
-      const moves = (battle.enemy.moves || []).filter(move => move.power > 0 || move.statusEffect || move.statChanges || isSelfHealingMove(move) || isProtectMove(move) || getStatusMoveEffect(move)).filter(move => battle.enemy.heldItem !== 'assault_vest' || move.power > 0);
+      const moves = (battle.enemy.moves || []).filter(move => move.power > 0 || move.statusEffect || move.statChanges || isSelfHealingMove(move) || isProtectMove(move) || isLeechSeedMove(move) || getStatusMoveEffect(move)).filter(move => battle.enemy.heldItem !== 'assault_vest' || move.power > 0).filter(move => !isHealBlocked(battle.enemy) || Number(move.drain) <= 0);
       const move = battle.enemyMoveForTurn || chooseBestEnemyMove(moves);
       battle.enemyMoveForTurn = null;
       const enemyHealingMove = isSelfHealingMove(move);
@@ -10859,6 +11728,7 @@
       let dmg = dreamEaterBlocked ? 0 : rawDamage > 0 ? Math.max(1, Math.floor(rawDamage * burnMultiplier * traitMultiplier * heldItemDamageMultiplier(battle.enemy, moveType, physical) * (critical ? 1.5 : 1))) : 0;
 
       const eSprite = document.getElementById('enemySprite');
+      const pSprite = document.getElementById('playerSprite');
       if (enemyUsedProtect) playProtectGlow(eSprite);
       else if (isSelfStatBoostMove(move)) playStatBoostGlow(eSprite);
       else if (!enemyHealingMove) {
@@ -10866,6 +11736,7 @@
         SFX.attack();
         setTimeout(() => eSprite.classList.remove('attack-anim'), 450);
       }
+      playBattleMoveEffect(move, eSprite, pSprite);
 
       setLog(`${battle.enemy.name} usou ${move.name}!`);
       setTimeout(() => {
@@ -10894,7 +11765,6 @@
           rockyHelmetMessage = `${battle.enemy.name} sofreu ${recoil} de dano do Rocky Helmet.`;
         }
         updatePlayerHpBar();
-        const pSprite = document.getElementById('playerSprite');
         if (!protectionBlocked && dmg > 0) {
           pSprite.classList.add('hit');
           setTimeout(() => pSprite.classList.remove('hit'), 350);
@@ -10936,18 +11806,20 @@
         if (abilityStatus) abilityMessage = `${abilityMessage} ${abilityStatus}`.trim();
         const moveBlocked = evaded || protectionBlocked || dreamEaterBlocked || (move.power > 0 && (Boolean(immunity) || mult === 0));
         const statusMessage = moveBlocked ? '' : applyMoveStatus(battle.enemy, player.poke, move);
-        const statChangeMessage = moveBlocked ? '' : applyMoveStatChanges(battle.enemy, player.poke, move, dmg);
+        const leechSeedMessage = moveBlocked ? '' : applyLeechSeed(battle.enemy, player.poke, move);
+        const statChangeMessage = applyMoveSecondaryStatEffect(battle.enemy, player.poke, move, dmg, moveBlocked, false);
         const fieldMessage = moveBlocked ? '' : applyBattleFieldMove(battle.enemy, move);
         const selfKnockoutMessage = moveBlocked ? '' : applyMoveSelfKnockout(battle.enemy, player.poke, move);
         tickGuardSpecTurn();
         const heldMessage = applyHeldItemTrigger(player.poke, mult >= 2 && !protectionBlocked);
         const enemyHeldMessage = applyHeldItemTrigger(battle.enemy);
         const shellBellMessage = applyShellBell(battle.enemy, dmg);
-        const drainMessage = applyMoveDrain(battle.enemy, move, dmg);
+        const drainMessage = applyMoveDrain(battle.enemy, move, dmg, player.poke);
         battle.playerHp = player.poke.hp;
         if (enemyHealingMove && fieldMessage) msg = fieldMessage;
         if (abilityMessage) msg += ` ${abilityMessage}`;
         if (statusMessage) msg += ` ${statusMessage}`;
+        if (leechSeedMessage) msg += ` ${leechSeedMessage}`;
         if (statChangeMessage) msg += ` ${statChangeMessage}`;
         if (fieldMessage) msg += ` ${fieldMessage}`;
         if (selfKnockoutMessage) msg += ` ${selfKnockoutMessage}`;
@@ -12250,6 +13122,7 @@
       ensurePokemonGender(player.poke);
       ensurePokemonTraits(e);
       ensurePokemonTraits(player.poke);
+      updateDexAnaliticPanel(e, Boolean(battle.dungeon));
       document.getElementById('enemyName').innerHTML = getPokemonDisplayNameHTML(e) + (battle.isGym ? ` (${escapeHTML(battle.gym.leader)})` : battle.isDojo ? ` (${escapeHTML(battle.dojoTrainer.name)})` : battle.isSSAnne ? ` (${escapeHTML(battle.ssAnneTrainer.name)})` : battle.isSilphCo ? ` (${escapeHTML(battle.silphCoTrainer.name)})` : battle.isEliteFour ? ` (${escapeHTML(battle.eliteTrainer.name)})` : '');
       updateEnemyCaughtBadge(e.id, !battle.isGym && !battle.isTower && !battle.isDojo && !battle.isSSAnne && !battle.isSilphCo && !battle.isEliteFour && !battle.isDailyBoss);
       document.getElementById('enemyLevel').textContent = `Nv. ${e.level}`;
@@ -12453,7 +13326,7 @@
       const el = document.getElementById('pokemonTeam');
       if (!el) return;
       if (!player.party.length) {
-        el.innerHTML = `<div class="game-card"><div class="game-card-body"><div class="game-card-title">Equipe vazia</div><div class="game-card-desc">Retire um Pokémon do PC para continuar sua jornada e participar de batalhas.</div></div></div>`;
+        el.innerHTML = `<div class="game-card"><div class="game-card-body"><div class="game-card-title">Equipe vazia</div><div class="game-card-desc">Sua equipe e seu PC estão vazios. Peça a um administrador para adicionar um Pokémon.</div></div></div>`;
         return;
       }
       el.innerHTML = player.party.map((p, idx) => `
@@ -12913,6 +13786,8 @@
               <li>1,5× mais XP</li>
               <li>1,5× mais chance de Shiny</li>
               <li>1 Flame Box toda sexta-feira, às 18h (horário de Brasília)</li>
+              <li>Revela IVs, natureza e habilidade de Pokémon selvagens</li>
+              <li><button type="button" id="dexAnaliticToggle" class="dex-analitic-toggle" onclick="toggleDexAnalitic()">Dex Analitic: Ativado</button></li>
             </ul>
           </section>
           <section class="trainer-card-panel" aria-label="Ins\u00edgnias de Kanto">
@@ -13418,6 +14293,68 @@
     async function socialAcceptTrade(request) {
       socialOpenTradePicker('', 'accept', request);
     }
+    const gamepadButtonState = new Map();
+    let gamepadLastDirectionAt = 0;
+    function getVisibleGamepadTargets() {
+      const selectors = 'button:not(:disabled),a[href],[role="button"],input:not(:disabled),select:not(:disabled),summary,[tabindex]:not([tabindex="-1"])';
+      return [...document.querySelectorAll(selectors)].filter(element => {
+        if (!element.getClientRects().length || element.closest('[hidden],[aria-hidden="true"]')) return false;
+        const style = getComputedStyle(element);
+        return style.visibility !== 'hidden' && style.display !== 'none' && !element.disabled;
+      });
+    }
+    function focusGamepadTarget(direction) {
+      const targets = getVisibleGamepadTargets();
+      if (!targets.length) return;
+      let index = targets.indexOf(document.activeElement);
+      if (index < 0) index = direction > 0 ? -1 : 0;
+      index = (index + direction + targets.length) % targets.length;
+      targets[index].focus({ preventScroll: true });
+      targets[index].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+    function gamepadCancelAction() {
+      const dialog = [...document.querySelectorAll('dialog[open]')].at(-1);
+      if (dialog) {
+        if (typeof dialog.requestClose === 'function') dialog.requestClose();
+        else dialog.close();
+        return;
+      }
+      const targets = getVisibleGamepadTargets();
+      const cancel = targets.filter(element => /^(voltar|cancelar|fechar|sair|n[aã]o|×)$/i.test((element.innerText || element.getAttribute('aria-label') || element.title || '').trim())).at(-1);
+      if (cancel) cancel.click();
+      else if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    }
+    function pollGamepad() {
+      const pads = typeof navigator.getGamepads === 'function' ? navigator.getGamepads() : [];
+      const pad = [...pads].find(entry => entry?.connected);
+      if (pad) {
+        const pressed = index => Boolean(pad.buttons[index]?.pressed);
+        const edge = (index, action) => {
+          const id = `${pad.index}:${index}`;
+          const current = pressed(index);
+          const previous = gamepadButtonState.get(id) || false;
+          gamepadButtonState.set(id, current);
+          if (current && !previous) action();
+        };
+        const axisX = Number(pad.axes?.[0]) || 0;
+        const axisY = Number(pad.axes?.[1]) || 0;
+        const up = pressed(12) || axisY < -0.55;
+        const down = pressed(13) || axisY > 0.55;
+        const left = pressed(14) || axisX < -0.55;
+        const right = pressed(15) || axisX > 0.55;
+        const direction = up || left ? -1 : down || right ? 1 : 0;
+        if (direction && Date.now() - gamepadLastDirectionAt > 220) {
+          focusGamepadTarget(direction);
+          gamepadLastDirectionAt = Date.now();
+        }
+        edge(0, () => document.activeElement?.click?.());
+        edge(1, gamepadCancelAction);
+        edge(8, gamepadCancelAction);
+      }
+      requestAnimationFrame(pollGamepad);
+    }
+    requestAnimationFrame(pollGamepad);
+
     async function socialChallenge(target) {
       const {data,error}=await supabaseClient.from('trainer_profiles').select('trainer_name').eq('user_id',target).maybeSingle();
       if (error) { showToast('Não foi possível carregar o perfil do amigo.','error'); return; }
