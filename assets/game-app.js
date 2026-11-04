@@ -748,6 +748,7 @@
     function applyEnemyDamage(damage) {
       const remaining = Math.max(0, Number(damage) || 0);
       if (!battle?.enemy || remaining <= 0) return {shieldDamage:0,hpDamage:0};
+      const hpBeforeHit = Number(battle.enemy.currentHp) || 0;
       let hpDamage = remaining;
       let shieldDamage = 0;
       if (battle.isDailyBoss && (battle.enemy.shieldHp || 0) > 0) {
@@ -756,6 +757,7 @@
         hpDamage -= shieldDamage;
       }
       if (hpDamage > 0) battle.enemy.currentHp = Math.max(0, battle.enemy.currentHp - hpDamage);
+      if (hpBeforeHit > 0 && battle.enemy.currentHp <= 0) recordSeasonPassMissionEvent('pass_enemy_defeated');
       updateEnemyHpBar();
       return {shieldDamage,hpDamage};
     }
@@ -1644,8 +1646,57 @@
       { key:'rarecandy', name:'Doce Raro', amount:10 },
       { key:'masterball', name:'Master Ball', amount:1 }
     ];
+    const PREMIUM_PASS_MILESTONES = [
+      { key:'rarecandy', name:'Doce Raro', amount:5 },
+      { key:'goldbottlecap', name:'Gold Bottle Cap', amount:1 },
+      { key:'gb_item_box', name:'G. B. Item Box', amount:2 },
+      { key:'shiny_stone', name:'Shiny Stone', amount:1 },
+      { key:'vip', name:'VIP (30 dias)', amount:1 },
+      { key:'masterball', name:'Master Ball', amount:1 }
+    ];
+    const PREMIUM_PASS_REPLACEMENTS = [
+      { key:'naturebox', name:'Mint Box', amount:1 },
+      { key:'bottlecap', name:'Bottle Cap', amount:1 },
+      { key:'evcap', name:'EV Cap', amount:1 },
+      { key:'reset_lv', name:'Reset Lv', amount:1 },
+      { key:'technique_book', name:'Livro de Técnicas', amount:1 },
+      { type:'money', name:'Pokédollar', amount:15000 },
+      { key:'b_item_box', name:'B. Item Box', amount:1 },
+      { key:'ev_booster', name:'EV Booster', amount:1 },
+      { key:'exp_charm', name:'Exp. Charm', amount:1 },
+      { key:'ability_capsule', name:'Ability Capsule', amount:1 },
+      { key:'poison_stone', name:'Poison Stone', amount:1 },
+      { key:'heart_stone', name:'Heart Stone', amount:1 },
+      { key:'berry_pots', name:'Berry Pots', amount:1 },
+      { key:'squirt_bottle', name:'Squirt Bottle', amount:1 },
+      { type:'money', name:'Pokédollar', amount:30000 },
+      { key:'shiny_flamebox', name:'Shiny Flame Box', amount:1 },
+      { key:'flamebox', name:'Flame Box', amount:1 },
+      { key:'shiny_charm', name:'Shiny Charm', amount:1 }
+    ];
+    function getPremiumPassReward(level) {
+      const block = Math.floor((level - 1) / 10);
+      const position = (level - 1) % 10;
+      const itemReward = (key, name, amount) => ({ label:`${amount}x ${name}`, type:'item', key, amount, icon:ITEM_SPRITE[key] || ITEM_SPRITE_FB[key], fallbackIcon:ITEM_SPRITE_FB[key] || ITEM_SPRITE_FB.balls });
+      if (position === 9) return itemReward(PREMIUM_PASS_MILESTONES[block].key, PREMIUM_PASS_MILESTONES[block].name, PREMIUM_PASS_MILESTONES[block].amount);
+      const replacementPositions = block === 2 ? { 1:0, 4:1, 8:2 } : { 1:0, 4:1, 7:2 };
+      if (Object.prototype.hasOwnProperty.call(replacementPositions, position)) {
+        const replacementIndex = block * 3 + replacementPositions[position];
+        const replacement = PREMIUM_PASS_REPLACEMENTS[replacementIndex];
+        if (replacement.type === 'money') return { label:`₽ ${replacement.amount.toLocaleString('pt-BR')} ${replacement.name}`, type:'money', amount:replacement.amount, iconText:'₽' };
+        return itemReward(replacement.key, replacement.name, replacement.amount);
+      }
+      if (position === 1) return itemReward('rarecandy','Doce Raro',2 + Math.floor(block / 2));
+      if (position === 2) return itemReward('ppup','PP Up',1 + (block >= 3 ? 1 : 0));
+      if (position === 3) return itemReward('ultraball','Ultra Ball',5 + block);
+      if (position === 5) return itemReward('maxrevive','Max Revive',1 + Math.floor(block / 3));
+      if (position === 6) return itemReward('focus_sash','Focus Sash',1);
+      if (position === 7) return itemReward('ppmax','PP Max',1);
+      return itemReward('rarecandy','Doce Raro',2 + block);
+    }
+
     const SEASON_PASS_TRACKS = [
-      { id: 'premium', name: 'Passe Premium', description: 'Recompensas Premium', icon: 'assets/season-pass-gold.png', reward: level => ({ label: `${level * 5} PokéCoins`, type: 'pokeCoins', amount: level * 5 }) },
+      { id: 'premium', name: 'Passe Premium', description: 'Mint Box, itens competitivos e recompensas raras', icon: 'assets/season-pass-gold.png', reward: getPremiumPassReward },
       { id: 'free', name: 'Passe Free', description: 'Recompensas gratuitas', icon: 'assets/season-pass-bronze.png', reward: level => {
         const item = FREE_PASS_REWARDS[level - 1];
         if (item.type === 'currency') return { label: item.name, type: 'pokeCoins', amount: item.amount, iconText: item.iconText };
@@ -1655,12 +1706,41 @@
       } }
     ];
 
+    const SEASON_PASS_MISSION_TYPES = ['Normal','Fire','Water','Grass','Electric','Ice','Fighting','Poison','Ground','Flying','Psychic','Bug','Rock','Ghost','Dragon','Dark','Steel','Fairy'];
+    const SEASON_PASS_MISSIONS = {
+      free: [
+        { id:'free_defeats', title:'Caçador de Pokémon', metric:'enemyDefeats', targets:[5,10,18,28,42,60,82,108,138,175], xp:120, stepXp:20, detail:'Derrote Pokémon em batalha.' },
+        { id:'free_wins', title:'Treinador persistente', metric:'wins', targets:[2,5,9,15,23,34,48,66,90,120], xp:140, stepXp:20, detail:'Vença batalhas contra adversários.' },
+        { id:'free_type_damage', title:'Especialista de tipos', metric:'damageByType', targets:[250,600,1200,2200,3600,5500,8000,11200,15200,20000], xp:150, stepXp:25, detail:'Cause dano usando golpes do tipo indicado.' },
+        { id:'free_damage', title:'Força de ataque', metric:'damage', targets:[800,2000,4200,7600,12200,18200,25800,35200,46600,60200], xp:130, stepXp:25, detail:'Cause dano total em batalhas.' }
+      ],
+      premium: [
+        { id:'premium_defeats', title:'Rota de Campeão', metric:'enemyDefeats', targets:[8,16,28,44,64,90,122,162,210,270], xp:150, stepXp:25, detail:'Derrote Pokémon em batalha.' },
+        { id:'premium_wins', title:'Desafiante de elite', metric:'wins', targets:[4,9,16,26,40,58,82,112,150,200], xp:170, stepXp:25, detail:'Vença batalhas contra adversários.' },
+        { id:'premium_type_damage', title:'Domínio elemental', metric:'damageByType', targets:[400,900,1700,3000,4800,7200,10300,14300,19300,25500], xp:180, stepXp:30, detail:'Cause dano usando golpes do tipo indicado.' },
+        { id:'premium_damage', title:'Poder imparável', metric:'damage', targets:[1400,3300,6600,11500,18000,26400,37000,50000,65800,84600], xp:160, stepXp:30, detail:'Cause dano total em batalhas.' }
+      ]
+    };
+    function getSeasonPassMissionType(mission, stage) {
+      return mission.metric === 'damageByType' ? normalizeBattleType(SEASON_PASS_MISSION_TYPES[stage % SEASON_PASS_MISSION_TYPES.length]) : '';
+    }
+
     function ensureSeasonPassState() {
       if (!player) return { xp: 0, claimed: {} };
       if (!player.seasonPass || typeof player.seasonPass !== 'object') player.seasonPass = { xp: 0, claimed: {} };
       const state = player.seasonPass;
       state.xp = Math.max(0, Math.floor(Number(state.xp) || 0));
       if (!state.claimed || typeof state.claimed !== 'object') state.claimed = {};
+      if (!state.missions || typeof state.missions !== 'object') state.missions = {};
+      ['free','premium'].forEach(trackId => {
+        if (!state.missions[trackId] || typeof state.missions[trackId] !== 'object') state.missions[trackId] = {};
+        SEASON_PASS_MISSIONS[trackId].forEach(mission => {
+          if (!state.missions[trackId][mission.id] || typeof state.missions[trackId][mission.id] !== 'object') state.missions[trackId][mission.id] = { stage:0, progress:0 };
+          const entry = state.missions[trackId][mission.id];
+          entry.stage = Math.max(0, Math.min(mission.targets.length, Math.floor(Number(entry.stage) || 0)));
+          entry.progress = Math.max(0, Math.floor(Number(entry.progress) || 0));
+        });
+      });
       ['premium', 'free', 'bronze', 'silver', 'gold'].forEach(trackId => {
         if (!Array.isArray(state.claimed[trackId])) state.claimed[trackId] = [];
         state.claimed[trackId] = [...new Set(state.claimed[trackId].map(Number).filter(level => Number.isInteger(level) && level >= 1 && level <= SEASON_PASS_LEVELS))];
@@ -1679,9 +1759,14 @@
       const currentLevel = Math.min(SEASON_PASS_LEVELS, Math.floor(state.xp / 1000));
       const xpToNext = currentLevel >= SEASON_PASS_LEVELS ? 0 : (currentLevel + 1) * 1000 - state.xp;
       const progress = currentLevel >= SEASON_PASS_LEVELS ? 100 : Math.max(0, (state.xp - currentLevel * 1000) / 10);
-      document.getElementById('seasonPassXp').textContent = `${state.xp.toLocaleString('pt-BR')} XP`;
-      document.getElementById('seasonPassNext').textContent = currentLevel >= SEASON_PASS_LEVELS ? 'Todas as etapas liberadas' : `Faltam ${xpToNext.toLocaleString('pt-BR')} XP para a etapa ${currentLevel + 1}`;
-      document.getElementById('seasonPassProgressFill').style.width = `${progress}%`;
+      const seasonPassXp = document.getElementById('seasonPassXp');
+      const seasonPassNext = document.getElementById('seasonPassNext');
+      const seasonPassProgressFill = document.getElementById('seasonPassProgressFill');
+      if (seasonPassXp) seasonPassXp.textContent = `${state.xp.toLocaleString('pt-BR')} XP`;
+      if (seasonPassNext) seasonPassNext.textContent = currentLevel >= SEASON_PASS_LEVELS ? 'Todas as etapas liberadas' : `Faltam ${xpToNext.toLocaleString('pt-BR')} XP para a etapa ${currentLevel + 1}`;
+      if (seasonPassProgressFill) seasonPassProgressFill.style.width = `${progress}%`;
+      renderSeasonPassMissions(state);
+      root.classList.toggle('premium-locked', !state.premiumUnlocked);
       root.innerHTML = SEASON_PASS_TRACKS.map(track => `<section class="season-pass-track season-pass-${track.id}"><header><span class="season-pass-medal" aria-hidden="true"><img src="${track.icon}" alt="" /></span><div><h3>${track.name}</h3><p>${track.description}</p></div></header><div class="season-pass-rewards" aria-label="Níveis de ${track.name}">${Array.from({ length: SEASON_PASS_LEVELS }, (_, index) => {
         const level = index + 1;
         const reward = track.reward(level);
@@ -1690,6 +1775,58 @@
         const premiumLocked = track.id === 'premium' && !state.premiumUnlocked;
         return `<article class="season-pass-reward ${unlocked ? 'unlocked' : ''} ${claimed ? 'claimed' : ''}"><span class="season-pass-level">${level}</span>${reward.icon ? `<img class="season-pass-reward-icon" src="${reward.icon}" data-fallback-src="${reward.fallbackIcon || ITEM_SPRITE_FB.balls}" alt="${reward.label}" onerror="handleItemIconError(this)" />` : reward.iconText ? `<span class="season-pass-reward-visual" aria-hidden="true">${reward.iconText}</span>` : ''}<strong>${reward.label}</strong><button type="button" onclick="claimSeasonPassReward('${track.id}',${level})" ${!unlocked || claimed || premiumLocked ? 'disabled' : ''}>${premiumLocked ? 'Requer Passe Premium' : claimed ? 'Resgatado' : unlocked ? 'Resgatar' : 'Bloqueado'}</button></article>`;
       }).join('')}</div></section>`).join('');
+    }
+
+    function renderSeasonPassMissions(state = ensureSeasonPassState()) {
+      const root = document.getElementById('seasonPassMissions');
+      if (!root || !state) return;
+      root.innerHTML = ['free','premium'].map(trackId => SEASON_PASS_MISSIONS[trackId].map(mission => {
+        const entry = state.missions[trackId][mission.id];
+        const complete = entry.stage >= mission.targets.length;
+        const target = mission.targets[Math.min(entry.stage, mission.targets.length - 1)];
+        const type = getSeasonPassMissionType(mission, entry.stage);
+        const current = complete ? target : Math.min(target, entry.progress);
+        const xp = mission.xp + entry.stage * mission.stepXp;
+        const locked = trackId === 'premium' && !state.premiumUnlocked;
+        const pct = complete ? 100 : target ? Math.min(100, current / target * 100) : 100;
+        const progressText = complete ? 'Todas as etapas concluídas' : `${current.toLocaleString('pt-BR')} / ${target.toLocaleString('pt-BR')}${mission.metric.includes('damage') ? ' de dano' : ''}`;
+        return `<article class="season-pass-mission-card ${trackId} ${locked ? 'locked' : ''}"><div class="season-pass-mission-top"><span>${trackId === 'premium' ? 'PREMIUM' : 'GRÁTIS'} · ETAPA ${complete ? mission.targets.length : entry.stage + 1}/${mission.targets.length}</span><strong>+${xp} XP</strong></div><h4>${mission.title}</h4><p>${locked ? 'Desbloqueie o Passe Premium para iniciar esta missão.' : `${mission.detail}${type ? ` Tipo: ${type}.` : ''}`}</p><div class="season-pass-mission-progress"><i style="width:${pct}%"></i></div><div class="season-pass-mission-bottom"><span>${locked ? 'Bloqueada' : progressText}</span><span>${complete ? 'Concluída' : 'Em andamento'}</span></div></article>`;
+      }).join('')).join('');
+    }
+
+    function recordSeasonPassMissionEvent(event, detail) {
+      if (!player) return;
+      const state = ensureSeasonPassState();
+      let changed = false;
+      ['free','premium'].forEach(trackId => {
+        if (trackId === 'premium' && !state.premiumUnlocked) return;
+        SEASON_PASS_MISSIONS[trackId].forEach(mission => {
+          const entry = state.missions[trackId][mission.id];
+          if (entry.stage >= mission.targets.length) return;
+          let amount = 0;
+          if (mission.metric === 'enemyDefeats' && event === 'pass_enemy_defeated') amount = 1;
+          if (mission.metric === 'wins' && event === 'battle_win') amount = 1;
+          if (mission.metric === 'damage' && event === 'pass_damage') amount = Math.max(0, Math.floor(Number(detail?.amount) || 0));
+          if (mission.metric === 'damageByType' && event === 'pass_damage' && normalizeBattleType(detail?.type) === getSeasonPassMissionType(mission, entry.stage)) amount = Math.max(0, Math.floor(Number(detail?.amount) || 0));
+          if (!amount) return;
+          let remaining = amount;
+          while (remaining > 0 && entry.stage < mission.targets.length) {
+            const needed = mission.targets[entry.stage] - entry.progress;
+            if (remaining < needed) { entry.progress += remaining; remaining = 0; }
+            else {
+              remaining -= needed;
+              entry.stage++;
+              entry.progress = 0;
+              state.xp += mission.xp + (entry.stage - 1) * mission.stepXp;
+            }
+          }
+          changed = true;
+        });
+      });
+      if (changed) {
+        if (document.getElementById('panel-season-pass')?.classList.contains('active')) renderSeasonPass();
+        saveGame();
+      }
     }
 
     function claimSeasonPassReward(trackId, level) {
@@ -3465,6 +3602,7 @@
 
     function onMissionEvent(type, detail) {
       if (!player) return;
+      recordSeasonPassMissionEvent(type, detail);
       onDailyMissionEvent(type, detail);
       if (!player.missions) player.missions = { completed: [], progress: {}, active: [] };
       MISSIONS.forEach(m => {
@@ -4888,11 +5026,14 @@
       cherri: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/cheri.png',
       rarecandy: 'https://raw.githubusercontent.com/msikma/pokesprite/master/items/medicine/rare-candy.png',
       naturebox: 'https://pokestop.io/img/item/apricorn-box-160x160.webp',
+      exp_charm: 'assets/exp-charm.png',
+      ability_capsule: 'https://img.pokemondb.net/sprites/items/ability-capsule.png',
       shiny_charm: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/shiny-charm.png',
       bottlecap: 'assets/bottle-cap.png',
       goldbottlecap: 'assets/gold-bottle-cap.png',
       evcap: 'assets/ev-cap.png',
       flamebox: 'assets/flame-box.svg',
+      shiny_flamebox: 'assets/shiny-flame-box.svg',
       gb_item_box: 'assets/gb-item-box.png',
       b_item_box: 'assets/b-item-box.png',
       technique_book: 'assets/technique-book.png',
@@ -4969,11 +5110,14 @@
       cherri: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/cheri-berry.png',
       rarecandy: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png',
       naturebox: 'assets/mint-box.svg',
+      ability_capsule: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ability-capsule.png',
+      exp_charm: 'assets/exp-charm.png',
       shiny_charm: 'https://img.pokemondb.net/sprites/items/shiny-charm.png',
       bottlecap: 'assets/bottle-cap.png',
       goldbottlecap: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/gold-bottle-cap.png',
       evcap: 'assets/ev-cap.png',
       flamebox: 'assets/flame-box.svg',
+      shiny_flamebox: 'assets/shiny-flame-box.svg',
       gb_item_box: 'assets/gb-item-box.png',
       b_item_box: 'assets/b-item-box.png',
       technique_book: 'assets/technique-book.png',
@@ -5103,6 +5247,7 @@
           { key: 'ss_ticket', name: 'S.S. TICKET', desc: 'Ingresso para embarcar no navio de luxo S.S. Anne, em Vermilion.' },
           { key: 'rarecandy', name: 'Rare Candy', sprite: 'rarecandy', desc: 'Unidade individual. Sobe 1 nível.' },
           { key: 'naturebox', name: 'Caixa de Nature', sprite: 'naturebox', desc: 'Escolha uma natureza para alterar os efeitos de um Pokémon.' },
+          { key: 'ability_capsule', name: 'Ability Capsule', sprite: 'ability_capsule', desc: 'Recompensa resgatável pelo Passe Premium.' },
           { key: 'shiny_charm', name: 'Shiny Charm', sprite: 'shiny_charm', desc: 'Triplica a chance de encontrar um Pok\u00e9mon Shiny selvagem enquanto estiver na mochila.' },
           { key: 'bottlecap', name: 'Bottle Cap', sprite: 'bottlecap', desc: 'Escolha um atributo para maximizar seu IV para 31.' },
           { key: 'goldbottlecap', name: 'Gold Bottle Cap', sprite: 'goldbottlecap', desc: 'Maximiza os seis IVs do Pokémon para 31.' },
@@ -5184,7 +5329,7 @@
         silk_scarf: 0, silver_powder: 0, hard_stone: 0, sharp_beak: 0, poison_barb: 0,
         spell_tag: 0, dragon_fang: 0, never_melt_ice: 0, metal_coat: 0, black_glasses: 0,
         amulet_coin: 0, shell_bell: 0, macho_brace: 0,
-        rarecandy: 0, naturebox: 0, shiny_charm: 0, bottlecap: 0, goldbottlecap: 0, evcap: 0, flamebox: 0, gb_item_box: 0, b_item_box: 0, technique_book: 0, ev_booster: 0, poison_stone: 0, heart_stone: 0, shiny_stone: 0, berry_pots: 0, squirt_bottle: 0, vip: 0, parcelbox: 0, ss_ticket: 0
+        rarecandy: 0, naturebox: 0, ability_capsule: 0, shiny_charm: 0, bottlecap: 0, goldbottlecap: 0, evcap: 0, flamebox: 0, shiny_flamebox: 0, gb_item_box: 0, b_item_box: 0, technique_book: 0, ev_booster: 0, poison_stone: 0, heart_stone: 0, shiny_stone: 0, berry_pots: 0, squirt_bottle: 0, vip: 0, parcelbox: 0, ss_ticket: 0
       };
       [...EXTRA_MEDICINE_ITEMS, ...EXTRA_BATTLE_ITEMS, ...(EXTRA_TM_ITEMS || [])].forEach(item => { if (defaults[item.key] === undefined) defaults[item.key] = 0; });
       Object.keys(HELD_ITEM_INFO).forEach(key => { if (defaults[key] === undefined) defaults[key] = 0; });
@@ -5751,12 +5896,14 @@
       { key: 'goldbottlecap', name: 'Gold Bottle Cap', sprite: 'goldbottlecap', kind: 'ivMaxAll' },
       { key: 'evcap', name: 'EV Cap', sprite: 'evcap', kind: 'evMax' },
       { key: 'flamebox', name: 'Flame Box', sprite: 'flamebox', kind: 'flameBox' },
+      { key: 'shiny_flamebox', name: 'Shiny Flame Box', sprite: 'shiny_flamebox', kind: 'shinyFlameBox', desc: 'Garante um Pokémon Shiny aleatório de qualquer geração. Lendários e míticos não podem sair.' },
       { key: 'gb_item_box', name: 'G. B. Item Box', sprite: 'gb_item_box', kind: 'competitiveItemBox' },
       { key: 'b_item_box', name: 'B. Item Box', sprite: 'b_item_box', kind: 'randomCompetitiveItemBox' },
       { key: 'technique_book', name: 'Livro de Técnicas', sprite: 'technique_book', kind: 'techniqueBook' },
       { key: 'ev_booster', name: 'EV Booster', sprite: 'ev_booster', kind: 'evBoost' },
       { key: 'vip', name: 'VIP', sprite: 'vip', kind: 'vipActivate' }
     ];
+    BAG_CATEGORIES.find(category => category.id === 'other')?.items.push({ key:'shiny_flamebox', name:'Shiny Flame Box', sprite:'shiny_flamebox', desc:'Garante um Pokémon Shiny aleatório de qualquer geração, exceto lendários e míticos.' });
 
     const STONE_EVOLUTIONS = {
       firestone: {
@@ -5988,6 +6135,10 @@
         openFlameBox();
         return;
       }
+      if (item.kind === 'shinyFlameBox') {
+        openShinyFlameBox();
+        return;
+      }
       if (item.kind === 'tm') {
         renderTechnicalMachineTargets(key, false);
         return;
@@ -6130,14 +6281,27 @@
       document.getElementById('flameBoxPrizeDialog')?.close();
     }
 
-    async function openFlameBox() {
-      if (!player || battle || flameBoxOpening || getItemQty('flamebox') < 1) return;
+    function openShinyFlameBox() {
+      return openFlameBox('shiny_flamebox', 'Shiny Flame Box', true);
+    }
+
+    async function openFlameBox(boxKey = 'flamebox', boxName = 'Flame Box', shiny = false) {
+      if (!player || battle || flameBoxOpening || getItemQty(boxKey) < 1) return;
       ensurePC();
       if (player.party.length >= 6 && !player.pc.boxes.some(box => box.some(slot => !slot))) {
-        showToast('Sua equipe e o PC estão cheios. Libere um espaço antes de abrir a Flame Box.', 'error');
+        showToast(`Sua equipe e o PC estão cheios. Libere um espaço antes de abrir a ${boxName}.`, 'error');
         return;
       }
       const dialog = ensureFlameBoxDialog();
+      dialog.classList.toggle('shiny-flamebox', shiny);
+      dialog.querySelector('.flamebox-kicker').textContent = shiny ? 'CAIXA SHINY · TODAS AS GERAÇÕES' : 'CAIXA ESPECIAL · TODAS AS GERAÇÕES';
+      document.getElementById('flameBoxTitle').textContent = boxName;
+      dialog.querySelector('.flamebox-heading p').textContent = shiny ? 'O Pokémon sorteado será Shiny. Lendários e míticos não podem ser sorteados.' : 'Pokémon lendários e míticos não podem ser sorteados.';
+      const prizeDialog = document.getElementById('flameBoxPrizeDialog');
+      prizeDialog?.classList.toggle('shiny-flamebox', shiny);
+      prizeDialog?.querySelector('.flamebox-kicker') && (prizeDialog.querySelector('.flamebox-kicker').textContent = `PRÊMIO DA ${boxName.toUpperCase()}`);
+      const prizeTitle = document.getElementById('flameBoxPrizeTitle');
+      if (prizeTitle) prizeTitle.textContent = shiny ? 'Pokémon Shiny conquistado!' : 'Pokémon conquistado!';
       const status = document.getElementById('flameBoxStatus');
       const reel = document.getElementById('flameBoxReel');
       const closeButton = dialog.querySelector('.flamebox-close');
@@ -6150,13 +6314,13 @@
       try {
         const catalog = await getFlameBoxSpeciesCatalog();
         const selected = selectFlameBoxPokemon(catalog);
-        status.textContent = 'A Flame Box está se abrindo...';
+        status.textContent = `A ${boxName} está se abrindo...`;
         const pokemonPromise = adminBuildPokemonFromCatalog({ id: selected.id, name: selected.name }, 10)
-          .then(pokemon => ({ pokemon }), error => ({ error }));
+          .then(pokemon => { pokemon.shiny = shiny; return { pokemon }; }, error => ({ error }));
         const targetIndex = 32;
         const reelEntries = Array.from({ length: targetIndex + 9 }, () => catalog[Math.floor(Math.random() * catalog.length)]);
         reelEntries[targetIndex] = selected;
-        reel.innerHTML = reelEntries.map(entry => `<span class="flamebox-reel-tile"><img src="${SPRITE(entry.id)}" alt="${escapeHTML(entry.name)}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FB(entry.id)}'"></span>`).join('');
+        reel.innerHTML = reelEntries.map((entry, index) => `<span class="flamebox-reel-tile"><img src="${shiny && index === targetIndex ? SPRITE_SHINY(entry.id) : SPRITE(entry.id)}" alt="${escapeHTML(entry.name)}${shiny && index === targetIndex ? ' Shiny' : ''}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${SPRITE_FB(entry.id)}'"></span>`).join('');
         reel.style.transform = 'translateX(0)';
         void reel.offsetWidth;
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -6177,24 +6341,24 @@
           onMissionEvent('party_changed', player.party.length);
         } else {
           const boxIndex = depositToPC(pokemon);
-          if (boxIndex < 0) throw new Error('Não foi possível guardar o Pokémon. A Flame Box não foi consumida.');
+          if (boxIndex < 0) throw new Error(`Não foi possível guardar o Pokémon. A ${boxName} não foi consumida.`);
           destination = `Box ${boxIndex + 1} do PC`;
         }
         markPokedex(pokemon.id, true);
         onMissionEvent('capture', pokemon.id);
-        decItemQty('flamebox', 1);
+        decItemQty(boxKey, 1);
         renderBag();
         refreshPartyUI();
         renderPC();
         updateStatsUI();
         saveGame();
-        status.textContent = `${FLAME_BOX_ODDS.find(tier => tier.id === selected.rarity.id)?.label || 'Pokémon'} encontrado!`;
+        status.textContent = `${FLAME_BOX_ODDS.find(tier => tier.id === selected.rarity.id)?.label || 'Pokémon'} encontrado pela ${boxName}!`;
         const prizeDialog = document.getElementById('flameBoxPrizeDialog');
         const prizeSprite = document.getElementById('flameBoxPrizeSprite');
-        prizeSprite.src = SPRITE(pokemon.id);
-        prizeSprite.alt = pokemon.name;
+        prizeSprite.src = shiny ? SPRITE_SHINY(pokemon.id) : SPRITE(pokemon.id);
+        prizeSprite.alt = `${pokemon.name}${shiny ? ' Shiny' : ''}`;
         prizeSprite.onerror = () => { prizeSprite.onerror = null; prizeSprite.src = SPRITE_FB(pokemon.id); };
-        document.getElementById('flameBoxPrizeRarity').textContent = FLAME_BOX_ODDS.find(tier => tier.id === selected.rarity.id)?.label || 'Pokémon';
+        document.getElementById('flameBoxPrizeRarity').textContent = `${FLAME_BOX_ODDS.find(tier => tier.id === selected.rarity.id)?.label || 'Pokémon'}${shiny ? ' · Shiny garantido' : ''}`;
         document.getElementById('flameBoxPrizeName').textContent = pokemon.name;
         document.getElementById('flameBoxPrizeDestination').textContent = `Nv. ${pokemon.level} · Adicionado à ${destination}.`;
         const confetti = document.getElementById('flameBoxConfetti');
@@ -6721,6 +6885,7 @@
       { id: 'leafstone', name: 'Pedra da Folha', icon: '🍃', sprite: 'leafstone', desc: 'Pedra de evolução', price: 5000, key: 'leafstone' }
     ];
 
+    SHOP_ITEMS.push({ id:'shiny-flamebox', key:'shiny_flamebox', name:'Shiny Flame Box', icon:'✨', sprite:'shiny_flamebox', desc:'Garante um Pokémon Shiny aleatório de qualquer geração, exceto lendários e míticos.', price:5000, kind:'shinyFlameBox' });
     EXTRA_HELD_ITEM_KEYS.forEach(key => {
       const item = HELD_ITEM_INFO[key];
       if (!SHOP_ITEMS.some(entry => entry.key === key)) SHOP_ITEMS.push({ id: key, name: item.name, icon: '🎒', sprite: key, desc: item.desc, price: 4500, key });
@@ -6766,9 +6931,9 @@
     ];
     EXTRA_MEDICINE_ITEMS.push(...EXTRA_SPECIAL_ITEMS);
     EXTRA_MEDICINE_ITEMS.forEach(item => {
-      const iconUrl = item.key === 'reset_lv' ? 'assets/reset-lv.png' : item.key === 'premium_pass' ? 'assets/season-pass-premium.png' : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.id}.png`;
+      const iconUrl = item.key === 'reset_lv' ? 'assets/reset-lv.png' : item.key === 'premium_pass' ? 'assets/season-pass-premium.png' : item.key === 'exp_charm' ? 'assets/exp-charm.png' : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.id}.png`;
       ITEM_SPRITE[item.key] = iconUrl;
-      ITEM_SPRITE_FB[item.key] = item.key === 'reset_lv' || item.key === 'premium_pass' ? iconUrl : `https://img.pokemondb.net/sprites/items/${item.id}.png`;
+      ITEM_SPRITE_FB[item.key] = item.key === 'reset_lv' || item.key === 'premium_pass' || item.key === 'exp_charm' ? iconUrl : `https://img.pokemondb.net/sprites/items/${item.id}.png`;
       const itemCategory = item.id.endsWith('-berry') ? 'berries' : item.category === 'pp' ? 'medicine' : item.category;
       const catalogCategory = BAG_CATEGORIES.find(category => category.id === itemCategory);
       if (catalogCategory && !BAG_CATEGORIES.some(category => category.items.some(entry => entry.key === item.key))) {
@@ -6948,6 +7113,82 @@
     let centerHealingPulseFrame = null;
     let centerHealingTimelineFrame = null;
     let centerHealingFallbackTimer = null;
+    let centerAmbientAudio = null;
+    let centerAmbientFadeTimer = null;
+    let centerAmbientPreference = false;
+    let centerAmbientVolume = 0.35;
+    try { centerAmbientPreference = localStorage.getItem('pokemonTrainerCenterAmbient') === '1'; } catch {}
+    try { centerAmbientVolume = Math.max(0,Math.min(1,Number(localStorage.getItem('pokemonTrainerCenterAmbientVolume') ?? 0.35))); } catch {}
+
+    function syncCenterAmbientButton() {
+      const button=document.getElementById('profileAmbientToggle');
+      const slider=document.getElementById('profileAmbientVolume');
+      const output=document.getElementById('profileAmbientVolumeValue');
+      if(button){
+        button.setAttribute('aria-pressed',String(centerAmbientPreference));
+        button.innerHTML=centerAmbientPreference?'&#128266;':'&#128263;';
+        button.setAttribute('aria-label',centerAmbientPreference?'Desativar m\u00fasica ambiente':'Ativar m\u00fasica ambiente');
+      }
+      if(slider)slider.value=String(Math.round(centerAmbientVolume*100));
+      if(output)output.value=`${Math.round(centerAmbientVolume*100)}%`;
+    }
+
+    async function startCenterAmbient() {
+      if(!centerAmbientPreference)return false;
+      try {
+        if(!centerAmbientAudio) {
+          centerAmbientAudio=new Audio('assets/audio/pokemon-center.mp3');
+          centerAmbientAudio.loop=true;
+          centerAmbientAudio.preload='none';
+          centerAmbientAudio.volume=centerAmbientVolume;
+        }
+        if(centerAmbientFadeTimer){clearInterval(centerAmbientFadeTimer);centerAmbientFadeTimer=null;}
+        if(!centerAmbientAudio.paused)return true;
+        centerAmbientAudio.volume=centerAmbientVolume;
+        await centerAmbientAudio.play();
+        if(!centerAmbientPreference){stopCenterAmbient();return false;}
+        return true;
+      } catch(error) {
+        console.warn('[Audio] Não foi possível iniciar a música do Centro Pokémon:',error);
+        return false;
+      }
+    }
+
+    function stopCenterAmbient() {
+      if(centerAmbientFadeTimer){clearInterval(centerAmbientFadeTimer);centerAmbientFadeTimer=null;}
+      if(!centerAmbientAudio||centerAmbientAudio.paused)return;
+      const fadeStartVolume=centerAmbientAudio.volume;
+      const fadeStart=Date.now();
+      centerAmbientFadeTimer=setInterval(()=>{
+        const progress=Math.min(1,(Date.now()-fadeStart)/250);
+        centerAmbientAudio.volume=fadeStartVolume*(1-progress);
+        if(progress>=1){
+          clearInterval(centerAmbientFadeTimer);
+          centerAmbientFadeTimer=null;
+          centerAmbientAudio.pause();
+          centerAmbientAudio.currentTime=0;
+          centerAmbientAudio.volume=centerAmbientVolume;
+        }
+      },25);
+    }
+
+    async function toggleCenterAmbient() {
+      centerAmbientPreference=!centerAmbientPreference;
+      try { localStorage.setItem('pokemonTrainerCenterAmbient',centerAmbientPreference?'1':'0'); } catch {}
+      syncCenterAmbientButton();
+      if(centerAmbientPreference) {
+        const started=await startCenterAmbient();
+        if(!started)showToast('Este navegador não conseguiu iniciar o áudio ambiente.','error');
+      } else stopCenterAmbient();
+    }
+
+    function setCenterAmbientVolume(value) {
+      centerAmbientVolume=Math.max(0,Math.min(1,Number(value)/100));
+      try { localStorage.setItem('pokemonTrainerCenterAmbientVolume',String(centerAmbientVolume)); } catch {}
+      if(centerAmbientAudio)centerAmbientAudio.volume=centerAmbientVolume;
+      syncCenterAmbientButton();
+    }
+
     function pokemonNeedsCenterTreatment(pokemon) {
       return Boolean(pokemon && (pokemon.hp < pokemon.maxHp || pokemon.status || (pokemon.moves || []).some(move => move.pp < move.maxPp)));
     }
@@ -7327,7 +7568,7 @@
       renderPokeCoinsPackageCards();
     }
     function marketItemUsesBattlePoints(item) {
-      return ['tm', 'flameBox'].includes(item?.kind) ||
+      return ['tm', 'flameBox', 'shinyFlameBox'].includes(item?.kind) ||
         ['leftovers', 'charcoal', 'miracle_seed', 'mystic_water', 'magnet', 'twisted_spoon', 'black_belt', 'focus_sash',
           'silk_scarf', 'silver_powder', 'hard_stone', 'sharp_beak', 'poison_barb', 'spell_tag', 'dragon_fang',
           'never_melt_ice', 'metal_coat', 'black_glasses', 'amulet_coin', 'shell_bell', 'choice_band', 'choice_scarf',
@@ -9446,6 +9687,43 @@
         button.textContent = 'Enviar recursos selecionados';
       }
     }
+    const MOBILE_MORE_PANEL_IDS = new Set(['market','center','season-pass','missions','gyms','pokedex','social','profile']);
+    function toggleMobileMoreMenu(forceOpen) {
+      const menu = document.getElementById('mobileMoreMenu');
+      const button = document.getElementById('mobileMoreButton');
+      if (!menu || !button) return;
+      const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : menu.hidden;
+      menu.hidden = !shouldOpen;
+      button.setAttribute('aria-expanded', String(shouldOpen));
+    }
+    document.addEventListener('pointerdown', event => {
+      const menu = document.getElementById('mobileMoreMenu');
+      const button = document.getElementById('mobileMoreButton');
+      if (!menu || menu.hidden || menu.contains(event.target) || button?.contains(event.target)) return;
+      toggleMobileMoreMenu(false);
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      const menu = document.getElementById('mobileMoreMenu');
+      if (menu && !menu.hidden) {
+        toggleMobileMoreMenu(false);
+        document.getElementById('mobileMoreButton')?.focus();
+      }
+    });
+    function toggleBattleLog() {
+      const log = document.getElementById('battleLog');
+      if (!log) return;
+      const expanded = log.classList.toggle('is-expanded');
+      log.setAttribute('aria-expanded', String(expanded));
+      log.title = expanded ? 'Toque para recolher o registro' : 'Toque para expandir o registro';
+    }
+    function prepareMobileHomeImages() {
+      if (!window.matchMedia?.('(max-width: 700px)').matches) return;
+      document.querySelectorAll('#panel-home .game-card-header img').forEach(image => {
+        image.loading = 'lazy';
+        image.decoding = 'async';
+      });
+    }
     const panelReturnTargets = { admin: 'home', social: 'home' };
     function returnFromPanel(id) {
       switchPanel(panelReturnTargets[id] || 'home');
@@ -9466,6 +9744,7 @@
       }
       if (id === 'silph-co' && !GameRules.canAccessSilphCo(isAdminAccount(), hasDefeatedSabrinaGym())) { showProgressionNotice('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.'); id = 'home'; }
       const currentPanelId = document.querySelector('.panel.active')?.id.replace('panel-', '') || 'home';
+      if (currentPanelId === 'center' && id !== 'center') stopCenterAmbient();
       if (['admin', 'social'].includes(id) && currentPanelId !== id) panelReturnTargets[id] = currentPanelId;
       for (const panelId of ['admin', 'social']) {
         const backButton = document.querySelector('#panel-' + panelId + ' .panel-back-button');
@@ -9475,13 +9754,35 @@
       const panel = document.getElementById('panel-'+id);
       if (panel) panel.classList.add('active');
       document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.panel === id));
+      toggleMobileMoreMenu(false);
+      document.querySelectorAll('[data-mobile-panel]').forEach(button => {
+        const active = button.dataset.mobilePanel === id;
+        button.classList.toggle('active', active);
+        if (active) button.setAttribute('aria-current', 'page');
+        else button.removeAttribute('aria-current');
+      });
+      const mobileMoreButton = document.getElementById('mobileMoreButton');
+      const moreIsActive = MOBILE_MORE_PANEL_IDS.has(id);
+      mobileMoreButton?.classList.toggle('active', moreIsActive);
+      if (moreIsActive) mobileMoreButton?.setAttribute('aria-current', 'page');
+      else mobileMoreButton?.removeAttribute('aria-current');
+      document.querySelectorAll('[data-mobile-more-panel]').forEach(button => {
+        if (button.dataset.mobileMorePanel === id) button.setAttribute('aria-current', 'page');
+        else button.removeAttribute('aria-current');
+      });
+      prepareMobileHomeImages();
+      window.scrollTo(0, 0);
       const profileLink = document.getElementById('playerProfileLink');
       if (profileLink) {
         profileLink.classList.toggle('active', id === 'profile');
         if (id === 'profile') profileLink.setAttribute('aria-current', 'page');
         else profileLink.removeAttribute('aria-current');
       }
-      if (id === 'center') refreshCenterUI();
+      if (id === 'center') {
+        refreshCenterUI();
+        syncCenterAmbientButton();
+        if (centerAmbientPreference) startCenterAmbient();
+      }
       if (id === 'market') refreshMarketUI();
       if (id === 'game-corner') openGameCorner();
       if (id === 'season-pass') renderSeasonPass();
@@ -9492,7 +9793,7 @@
         player?.party?.forEach(queueAutomaticEvolution);
       }
       if (id === 'pokedex') renderPokedex();
-      if (id === 'profile') { pendingTrainerAvatar = null; refreshProfileUI(); }
+      if (id === 'profile') { pendingTrainerAvatar = null; refreshProfileUI(); syncBattleVolumeControl(); syncMuteButton(); syncCenterAmbientButton(); }
       if (id === 'social') socialRefresh();
       if (id === 'gyms') renderGyms();
       if (id === 'battle-tower') renderBattleTower();
@@ -9915,7 +10216,7 @@
     function coopRaidPokemonInfo(pokemon, hp, showExperience = false) {
       const maxHp = Math.max(1, Number(pokemon?.maxHp) || 1);
       const currentHp = Math.max(0, Math.min(maxHp, Number(hp) || 0));
-      const percent = Math.round(currentHp / maxHp * 100);
+      const percent = currentHp / maxHp * 100;
       const healthTone = percent <= 20 ? 'red' : percent <= 50 ? 'yellow' : '';
       let experience = '';
       if (showExperience) {
@@ -10204,8 +10505,8 @@
           if(selector==='.player-info')coopBossVisualHp.player=Math.max(0,Number(hp)||0);
         }
         const info=document.querySelector(`#coopBossContent ${selector}`);if(!info)return;
-        const current=Math.max(0,Math.min(Number(maxHp)||1,Number(hp)||0)),maximum=Math.max(1,Number(maxHp)||1),percent=Math.round(current/maximum*100);
-        const label=info.querySelector('.hp-label span:nth-child(2)'),fill=info.querySelector('.hp-fill');
+        const current=Math.max(0,Math.min(Number(maxHp)||1,Number(hp)||0)),maximum=Math.max(1,Number(maxHp)||1),percent=current/maximum*100;
+        const label=info.querySelector('.hp-label span:nth-child(2),.coop-raid-hp-label span:nth-child(2)'),fill=info.querySelector('.hp-fill,.coop-raid-hp-bar i');
         if(label)label.textContent=`${current}/${maximum}`;
         if(fill){fill.style.width=`${percent}%`;fill.classList.toggle('yellow',percent<=50&&percent>20);fill.classList.toggle('red',percent<=20);}
       };
@@ -10530,6 +10831,12 @@
       if (slider) slider.value = String(Math.round(volume * 100));
       const output = document.getElementById('battleSfxVolumeValue');
       if (output) output.value = `${Math.round(volume * 100)}%`;
+      const profileSlider = document.getElementById('profileSfxVolume');
+      if (profileSlider) profileSlider.value = String(Math.round(volume * 100));
+      const profileOutput = document.getElementById('profileSfxVolumeValue');
+      if (profileOutput) profileOutput.value = `${Math.round(volume * 100)}%`;
+      const audioToggle = document.getElementById('battleAudioToggle');
+      if (audioToggle) audioToggle.textContent = SFX.isMuted() || volume === 0 ? '\u{1F507}' : volume < 0.5 ? '\u{1F509}' : '\u{1F50A}';
       const button = document.getElementById('btnMuteSfx');
       if (button) {
         button.textContent = SFX.isMuted() || volume === 0 ? '\u{1F507}' : volume < 0.5 ? '\u{1F509}' : '\u{1F50A}';
@@ -10537,11 +10844,27 @@
         button.setAttribute('aria-label', button.title);
         button.setAttribute('aria-pressed', String(SFX.isMuted()));
       }
+      const profileButton=document.getElementById('profileSoundMute');
+      if(profileButton){
+        const isMuted=SFX.isMuted()||volume===0;
+        profileButton.textContent=isMuted?'\u{1F507}':volume<0.5?'\u{1F509}':'\u{1F50A}';
+        profileButton.setAttribute('aria-label',isMuted?'Ativar efeitos sonoros':'Desativar efeitos sonoros');
+        profileButton.setAttribute('aria-pressed',String(isMuted));
+      }
+    }
+    function toggleBattleAudioOptions() {
+      const button = document.getElementById('battleAudioToggle');
+      const options = document.getElementById('battleAudioOptions');
+      if (!button || !options) return;
+      const isOpening = options.hidden;
+      options.hidden = !isOpening;
+      button.setAttribute('aria-expanded', String(isOpening));
+      if (isOpening) document.getElementById('battleSfxVolume')?.focus({ preventScroll: true });
     }
     document.addEventListener('DOMContentLoaded', syncBattleVolumeControl, { once: true });
     function setBattleSfxVolume(value) {
       SFX.setVolume(Number(value) / 100);
-      [battleBgm, wildVictoryBgm, pokemonCaptureSfx, oakIntroBgm, mewtwoRaidBgm, centerHealingAudio, ...pokemonCryAudioByRole.values()]
+      [battleBgm, wildVictoryBgm, pokemonCaptureSfx, oakIntroBgm, mewtwoRaidBgm, centerHealingAudio, viridianExplorationAudio, ...pokemonCryAudioByRole.values()]
         .forEach(applyBattleVolumeToAudio);
       syncMuteButton();
       syncBattleVolumeControl();
@@ -10549,7 +10872,7 @@
     function toggleBattleSfx() {
       const muted = SFX.toggleMute();
       syncMuteButton();
-      if (muted) { stopBattleBgm(); stopOakIntroBgm(); stopMewtwoRaidBgm(); }
+      if (muted) { stopBattleBgm(); stopOakIntroBgm(); stopMewtwoRaidBgm(); if(viridianExplorationAudio){viridianExplorationAudio.pause();viridianExplorationAudio.currentTime=0;} if(viridianExplorationFadeTimer){clearInterval(viridianExplorationFadeTimer);viridianExplorationFadeTimer=null;} }
       else if (coopBossRoom?.status === 'battle') playMewtwoRaidBgm();
       else if (document.getElementById('battleOverlay')?.classList.contains('active')) {
         if (activeBattleBgmTrack === 'wild-victory') playWildVictoryBgm();
@@ -10561,7 +10884,7 @@
     function syncMuteButton() {
       const muted=SFX.isMuted();
       const icon=muted?'\u{1F507}':'\u{1F50A}';
-      ['btnMuteSfx','coopBossMuteSfx'].forEach(id=>{const btn=document.getElementById(id);if(btn){btn.textContent=icon;btn.setAttribute('aria-label',(muted?'Ativar':'Desativar')+' som');}});
+      ['btnMuteSfx','coopBossMuteSfx'].forEach(id=>{const btn=document.getElementById(id);if(btn){btn.textContent=icon;btn.setAttribute('aria-label',(muted?'Ativar':'Desativar')+' som');btn.setAttribute('aria-pressed',String(muted));}});
     }
 
 
@@ -10613,6 +10936,8 @@
     let wildVictoryBgm = null;
     let pokemonCaptureSfx = null;
     let oakIntroBgm = null;
+    let viridianExplorationAudio = null;
+    let viridianExplorationFadeTimer = null;
     let battleBgmTimer = null;
     let battleBgmCtx = null;
     let activeBattleBgmTrack = 'procedural';
@@ -10917,6 +11242,78 @@
       return wild;
     }
 
+    function showViridianExploration(wild) {
+      const overlay=document.getElementById('viridianExplorationOverlay');
+      const scene=overlay?.querySelector('.viridian-exploration-scene');
+      const frame=document.getElementById('viridianExplorationFrame');
+      if(!overlay||!scene||!frame)return Promise.resolve();
+      const foundPokemon=document.getElementById('viridianFoundPokemon');
+      const message=document.getElementById('viridianExplorationText');
+      if(!viridianExplorationAudio){
+        viridianExplorationAudio=new Audio('assets/audio/viridian-forest-search.mp3');
+        viridianExplorationAudio.preload='auto';
+        viridianExplorationAudio.loop=true;
+        viridianExplorationAudio._baseVolume=.3;
+      }
+      if(viridianExplorationFadeTimer){clearInterval(viridianExplorationFadeTimer);viridianExplorationFadeTimer=null;}
+      applyBattleVolumeToAudio(viridianExplorationAudio);
+      if(!SFX.isMuted()){
+        viridianExplorationAudio.currentTime=0;
+        viridianExplorationAudio.play().catch(error=>console.warn('[Audio] N\u00e3o foi poss\u00edvel iniciar a m\u00fasica da Floresta de Viridian:',error));
+      }
+      const stages=[
+        {image:'assets/viridian-encounter/approach.webp',caption:'O treinador se aproxima da grama\u2026'},
+        {image:'assets/viridian-encounter/enter-grass.webp',caption:'O treinador entra na grama alta\u2026'},
+        {image:'assets/viridian-encounter/notice.webp',caption:'Algo se mexeu!'},
+        {image:'assets/viridian-encounter/pokemon-found.webp',caption:`Um ${getPokemonDisplayName(wild)} selvagem apareceu!`}
+      ];
+      if(foundPokemon){
+        foundPokemon.alt=`${getPokemonDisplayName(wild)} selvagem`;
+        foundPokemon.src=SPRITE_ANIM_POKEMON(wild);
+        foundPokemon.onerror=function(){this.onerror=null;this.src=wild.shiny?SPRITE_SHINY(wild.id):SPRITE(wild.id);};
+      }
+      const reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      const durations=reducedMotion?[600,600,500,800]:[2100,2200,1600,4100];
+      overlay.classList.remove('active','found');
+      scene.classList.remove('flash');
+      frame.src=stages[0].image;
+      overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden','false');
+      return new Promise(resolve=>{
+        let index=0;
+        const showStage=()=>{
+          const stage=stages[index];
+          frame.src=stage.image;
+          if(message)message.textContent=stage.caption;
+          overlay.classList.toggle('found',index===stages.length-1);
+          scene.classList.remove('flash');
+          if(index===stages.length-1){void scene.offsetWidth;scene.classList.add('flash');}
+          window.setTimeout(()=>{
+            if(index<stages.length-1){index++;showStage();return;}
+            overlay.classList.remove('active','found');
+            scene.classList.remove('flash');
+            overlay.setAttribute('aria-hidden','true');
+            if(viridianExplorationAudio&&!viridianExplorationAudio.paused){
+              const startVolume=viridianExplorationAudio.volume;
+              const fadeStarted=Date.now();
+              viridianExplorationFadeTimer=setInterval(()=>{
+                const progress=Math.min(1,(Date.now()-fadeStarted)/350);
+                viridianExplorationAudio.volume=startVolume*(1-progress);
+                if(progress>=1){
+                  clearInterval(viridianExplorationFadeTimer);
+                  viridianExplorationFadeTimer=null;
+                  viridianExplorationAudio.pause();
+                  viridianExplorationAudio.currentTime=0;
+                  applyBattleVolumeToAudio(viridianExplorationAudio);
+                }
+              },25);
+            }
+            resolve();
+          },durations[index]);
+        };
+        showStage();
+      });
+    }
     let dungeonBattleStarting = false;
     async function startDungeonBattle(dungeonName) {
       if (dungeonBattleStarting || battle) return;
@@ -10950,18 +11347,22 @@
       const wild = getWildEncounter(encounters);
       if (!wild) return;
       SFX.unlock();
+      dungeonBattleStarting = true;
+      const explorationFinished=dungeonName==='Floresta de Viridian'?showViridianExploration(wild):Promise.resolve();
+      try {
+        try {
+          wild.moves = await getFireRedMovesForLevel(wild.id, wild.level);
+        } catch (_) {
+          wild.moves = wild.moves?.length ? wild.moves : getMovesForLevel(wild.id, wild.level);
+        }
+        await explorationFinished;
+      } finally {
+        dungeonBattleStarting = false;
+      }
       playBattleBgm('wild');
       const battleIntroFinished = new Promise(resolve => {
         showBattleIntro(getPokemonDisplayName(player.poke), getPokemonDisplayName(wild), `Um ${getPokemonDisplayName(wild)} selvagem apareceu!`, resolve, null, 3000);
       });
-      dungeonBattleStarting = true;
-      try {
-        wild.moves = await getFireRedMovesForLevel(wild.id, wild.level);
-      } catch (_) {
-        wild.moves = wild.moves?.length ? wild.moves : getMovesForLevel(wild.id, wild.level);
-      } finally {
-        dungeonBattleStarting = false;
-      }
       // Weezing selvagem não deve receber Memento do moveset carregado pela API.
       if (wild.id === 110) {
         wild.moves = (wild.moves || []).filter(move => String(getOriginalMoveName(move?.name || ''))
@@ -11367,6 +11768,7 @@
         const sash = applyFocusSash(battle.enemy, battle.enemy.currentHp, dmg);
         dmg = sash.damage;
         const bossDamage = applyEnemyDamage(dmg);
+        if (bossDamage.hpDamage > 0) recordSeasonPassMissionEvent('pass_damage', { amount:bossDamage.hpDamage, type:moveType });
         if (dmg > 0 && Number(battle.enemy.id) === 979) battle.enemy.rageFistHits = (battle.enemy.rageFistHits || 0) + 1;
         const shieldDamageMessage = bossDamage.shieldDamage ? `O escudo absorveu ${Math.round(bossDamage.shieldDamage)} de dano.` : '';
         let recoilMessage = '';
@@ -13835,8 +14237,10 @@
     let socialUnreadMessageIds = new Set();
     let socialNotificationInitializedFor = '';
     let socialProfilesById = new Map();
+    let socialAffinityById = new Map();
     let socialPokemonPresenceSupported = null;
     let socialTradeSelection = null;
+    const SOCIAL_TRADE_AFFINITY_REQUIRED = 10;
     const socialKnownStatuses = new Map();
 
     function socialEnsureTradeIds() {
@@ -13877,6 +14281,18 @@
     }
 
     function socialOpenTradePicker(target,mode='offer',requestId='') {
+      if (mode==='offer') {
+        const affinityData=socialAffinityById.get(target);
+        const affinity=GameRules.getTradeAffinityState(affinityData?.affinity_points, SOCIAL_TRADE_AFFINITY_REQUIRED);
+        if (!affinity.unlocked) {
+          const wait=socialAffinityWaitText(affinityData?.next_point_at);
+          const guidance=wait
+            ? `O próximo ponto estará disponível em ${wait}.`
+            : `Conclua ${affinity.remaining} batalha(s) amistosa(s) com pelo menos 5 turnos; só conta 1 ponto a cada 24 horas.`;
+          showToast(`Afinidade ${affinity.points}/${affinity.required}. ${guidance}`, 'error');
+          return;
+        }
+      }
       socialEnsureTradeIds();
       const owned=socialGetOwnedTradePokemon();
       if (!owned.length) { showToast('Você não tem Pokémons disponíveis para trocar.','error'); return; }
@@ -13954,12 +14370,30 @@
     function socialReadMessagesKey() { return `pokemonTrainer.chat.read.${onlineUser?.id || 'guest'}`; }
 
     function socialGetReadMessageIds() {
-      try { const value=JSON.parse(localStorage.getItem(socialReadMessagesKey())||'[]'); return new Set(Array.isArray(value)?value:[]); }
+      try {
+        const value=JSON.parse(localStorage.getItem(socialReadMessagesKey())||'[]');
+        return new Set(Array.isArray(value)?value.map(String):Array.isArray(value?.ids)?value.ids.map(String):[]);
+      }
       catch { return new Set(); }
     }
 
     function socialSaveReadMessageIds(ids) {
-      try { localStorage.setItem(socialReadMessagesKey(),JSON.stringify([...ids].slice(-250))); } catch {}
+      try {
+        const state=socialGetReadNotificationState();
+        localStorage.setItem(socialReadMessagesKey(),JSON.stringify({through:state.through,ids:[...ids].map(String).slice(-250)}));
+      } catch {}
+    }
+
+    function socialGetReadNotificationState() {
+      try {
+        const value=JSON.parse(localStorage.getItem(socialReadMessagesKey())||'null');
+        return {through:Number(value?.through)||0,ids:new Set(Array.isArray(value)?value.map(String):Array.isArray(value?.ids)?value.ids.map(String):[])};
+      } catch { return {through:0,ids:new Set()}; }
+    }
+
+    function socialIsNotificationRead(item) {
+      const state=socialGetReadNotificationState();
+      return state.ids.has(String(item.readKey))||(state.through>0&&new Date(item.created_at).getTime()<=state.through);
     }
 
     async function socialLoadMessageNotifications() {
@@ -13991,15 +14425,9 @@
         if (!initialized) {
           try { localStorage.setItem(initializedKey,'1'); } catch {}
         }
-        messages.forEach(message=>{
-          if (readIds.has(message.id)) socialUnreadMessageIds.delete(message.id);
-          else socialUnreadMessageIds.add(message.id);
-        });
-        const pendingRequestKeys=new Set(requests.map(request=>`friend-request:${request.id}`));
-        for (const key of socialUnreadMessageIds) {
-          if (key.startsWith('friend-request:')&&!pendingRequestKeys.has(key)) socialUnreadMessageIds.delete(key);
-        }
-        requests.forEach(request=>{const key=`friend-request:${request.id}`;if(!readIds.has(key))socialUnreadMessageIds.add(key);});
+        socialUnreadMessageIds=new Set();
+        [...messages.map(message=>({...message,readKey:String(message.id)})),...requests.map(request=>({...request,readKey:`friend-request:${request.id}`}))]
+          .forEach(item=>{if(!socialIsNotificationRead(item))socialUnreadMessageIds.add(item.readKey);});
         socialNotificationInitializedFor=onlineUser.id;
         socialNotificationMessages=messages;
         socialNotificationRequests=requests;
@@ -14013,9 +14441,11 @@
       const badge=document.getElementById('messageNotificationCount');
       const list=document.getElementById('messageNotificationList');
       if (!badge || !list) return;
+      const markAll=document.getElementById('messageNotificationMarkAll');
       const unreadCount=socialUnreadMessageIds.size;
       badge.textContent=unreadCount>99?'99+':String(unreadCount);
       badge.hidden=unreadCount===0;
+      if(markAll)markAll.disabled=unreadCount===0;
       if (!socialNotificationMessages.length&&!socialNotificationRequests.length) {
         list.innerHTML='<div class="message-notification-empty">Nenhuma mensagem recente.</div>';
         return;
@@ -14029,8 +14459,19 @@
         const preview=item.notificationType==='friend-request'?'Enviou um pedido de amizade.':String(item.body||'').trim();
         const sentAt=new Date(item.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
         const unread=socialUnreadMessageIds.has(item.readKey);
-        return `<div class="message-notification-item ${unread?'unread':'read'}"><button type="button" class="message-notification-open" aria-label="${unread?'Nao lida':'Lida'}: ${escapeHTML(sender)}" onclick="socialOpenNotification('${item.notificationType}','${item.id}')"><strong><span>${escapeHTML(sender)}</span><small>${unread?'Nova':'Lida'} \u00b7 ${escapeHTML(sentAt)}</small></strong><span class="message-notification-preview">${escapeHTML(preview)}</span></button>${unread?`<button type="button" class="message-notification-mark-read" onclick="socialMarkNotificationRead('${item.notificationType}','${item.id}')">Marcar como lido</button>`:''}</div>`;
+        return `<div class="message-notification-item ${unread?'unread':'read'}"><button type="button" class="message-notification-open" aria-label="${unread?'Nao lida':'Lida'}: ${escapeHTML(sender)}" onclick="socialOpenNotification('${item.notificationType}','${item.id}')"><strong><span>${escapeHTML(sender)}</span><small>${unread?'Nova':'Lida'} \u00b7 ${escapeHTML(sentAt)}</small></strong><span class="message-notification-preview">${escapeHTML(preview)}</span></button></div>`;
       }).join('');
+    }
+
+    function socialMarkAllNotificationsRead() {
+      const items=[...socialNotificationMessages,...socialNotificationRequests];
+      if(!items.length)return;
+      const through=Math.max(...items.map(item=>new Date(item.created_at).getTime()).filter(Number.isFinite),0);
+      const state=socialGetReadNotificationState();
+      const readIds=new Set([...state.ids,...items.map(item=>String(item.id))]);
+      try { localStorage.setItem(socialReadMessagesKey(),JSON.stringify({through:Math.max(state.through,through),ids:[...readIds].slice(-250)})); } catch {}
+      socialUnreadMessageIds.clear();
+      socialRenderMessageNotifications();
     }
 
     function socialMarkNotificationRead(type,id) {
@@ -14100,6 +14541,15 @@
         if (requestResult.error) throw requestResult.error;
         const friendIds = friendResult.data.map(row=>row.friend_id);
         const requests = requestResult.data || [];
+        if (friendIds.length) {
+          const {data:affinityRows,error:affinityError}=await supabaseClient.rpc('social_get_trade_affinity',{p_friend_ids:friendIds});
+          if (affinityError) {
+            socialAffinityById=new Map();
+            console.warn('[Social] Não foi possível carregar afinidade para trocas:',affinityError.message);
+          } else {
+            socialAffinityById=new Map((affinityRows||[]).map(row=>[row.friend_id,row]));
+          }
+        } else socialAffinityById=new Map();
         const allIds = [...new Set([...friendIds,...requests.map(row=>row.sender_id),...requests.map(row=>row.receiver_id)].filter(id=>id!==onlineUser.id))];
         let profiles = [];
         if (allIds.length) {
@@ -14136,6 +14586,15 @@
       return profile?.last_seen && Date.now()-new Date(profile.last_seen).getTime()<75000;
     }
 
+    function socialAffinityWaitText(nextPointAt) {
+      const remaining=Date.parse(nextPointAt)-Date.now();
+      if (!Number.isFinite(remaining) || remaining<=0) return '';
+      const totalMinutes=Math.max(1,Math.ceil(remaining/60000));
+      const hours=Math.floor(totalMinutes/60);
+      const minutes=totalMinutes%60;
+      return hours ? `${hours}h ${minutes}min` : `${minutes}min`;
+    }
+
     function socialRenderFriends(friends) {
       const root=document.getElementById('socialFriends');
       if (!root) return;
@@ -14144,14 +14603,23 @@
       if (!friends.length) { root.innerHTML='<span style="color:var(--text-muted);font-size:.85rem;">Sua lista est\u00e1 vazia. Busque um treinador pelo nome.</span>'; return; }
       root.innerHTML=friends.map(friend=>{
         const online=socialIsOnline(friend);
+        const affinityData=socialAffinityById.get(friend.user_id);
+        const affinity=GameRules.getTradeAffinityState(affinityData?.affinity_points, SOCIAL_TRADE_AFFINITY_REQUIRED);
+        const affinityPercent=Math.round(affinity.points/affinity.required*100);
         const activePokemonId=Math.floor(Number(friend.active_pokemon_id)||0);
         const activePokemonName=String(friend.active_pokemon_name||'').trim();
         const hasPokemonPreview=activePokemonId>0&&activePokemonName;
         const trainerAvatar=TRAINER_AVATARS.find(avatar=>avatar.id===friend.trainer_avatar_id)||TRAINER_AVATARS[0];
         const trainerPreview=`<img class="social-friend-trainer" src="https://play.pokemonshowdown.com/sprites/trainers/${trainerAvatar.id}.png" alt="Treinador ${escapeHTML(trainerAvatar.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://play.pokemonshowdown.com/sprites/trainers/red.png'">`;
+        const cooldown=socialAffinityWaitText(affinityData?.next_point_at);
+        const affinityStatus=affinity.unlocked?'Trocas liberadas':cooldown
+          ? `Próximo ponto em ${cooldown}`
+          : `Mais ${affinity.remaining} batalha(s), mínimo 5 turnos · 1 ponto/24h`;
+        const tradeTitle=affinity.unlocked?'Trocas liberadas com este treinador':`Afinidade ${affinity.points}/${affinity.required}. ${affinityStatus}.`;
         return `<article class="social-friend-row">
           <div class="social-friend-main"><span class="social-friend-presence ${online?'online':'offline'}" role="img" aria-label="${online?'Online':'Offline'}" title="${online?'Online':'Offline'}"></span>${trainerPreview}<div class="social-friend-copy"><strong>${escapeHTML(friend.trainer_name)}</strong><small>${online?'Online agora':'Offline'}</small></div><div class="social-friend-active"><small>Pok\u00e9mon ativo</small><strong>${hasPokemonPreview?escapeHTML(activePokemonName):'Aguardando dados'}</strong></div></div>
-          <div class="social-friend-actions"><button type="button" class="btn btn-secondary social-chat-button" onclick="socialOpenChat('${friend.user_id}')">Conversar</button><button type="button" class="btn btn-secondary social-trade-button" onclick="socialSendTrade('${friend.user_id}')">Trocar</button><button type="button" class="btn social-battle-button" onclick="socialChallenge('${friend.user_id}')">Batalhar</button></div>
+          <div class="social-affinity" role="progressbar" aria-label="Afinidade com ${escapeHTML(friend.trainer_name)}" aria-valuemin="0" aria-valuemax="${affinity.required}" aria-valuenow="${affinity.points}"><div class="social-affinity-label"><strong>♥ Afinidade ${affinity.points}/${affinity.required}</strong><small>${affinityStatus}</small></div><span class="social-affinity-track"><span style="width:${affinityPercent}%"></span></span></div>
+          <div class="social-friend-actions"><button type="button" class="btn btn-secondary social-chat-button" onclick="socialOpenChat('${friend.user_id}')">Conversar</button><button type="button" class="btn btn-secondary social-trade-button" ${affinity.unlocked?'':'disabled'} title="${escapeHTML(tradeTitle)}" onclick="socialSendTrade('${friend.user_id}')">Trocar</button><button type="button" class="btn social-battle-button" onclick="socialChallenge('${friend.user_id}')">Batalhar</button></div>
         </article>`;
       }).join('');
     }

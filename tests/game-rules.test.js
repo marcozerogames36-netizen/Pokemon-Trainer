@@ -2,6 +2,8 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const GameRules = require('../assets/game-rules.js');
 
 test('gym level cap is set by the leader’s strongest Pokémon', () => {
@@ -54,4 +56,17 @@ test('Silph Co. stays locked until Sabrina is defeated, except for admin testing
   assert.equal(GameRules.canAccessSilphCo(false, false), false);
   assert.equal(GameRules.canAccessSilphCo(false, true), true);
   assert.equal(GameRules.canAccessSilphCo(true, false), true);
+});
+
+test('trade RPC migration validates unique ownership and legal IV/EV bounds server-side', () => {
+  const migrationPath = path.join(__dirname, '..', 'supabase', 'migrations', '20261103060000_validate_traded_pokemon.sql');
+  const sql = fs.readFileSync(migrationPath, 'utf8');
+
+  assert.match(sql, /if v_count <> 1 then/i);
+  assert.match(sql, /v_value not between 0 and 31/i);
+  assert.match(sql, /v_value not between 0 and 252/i);
+  assert.match(sql, /if v_value > 510 then/i);
+  assert.match(sql, /social_get_valid_trade_pokemon\(v_sender,v_offered\)/i);
+  assert.match(sql, /social_get_valid_trade_pokemon\(v_receiver,p_pokemon_id\)/i);
+  assert.match(sql, /revoke execute on function public\.social_get_valid_trade_pokemon\(jsonb,text\) from public, anon, authenticated/i);
 });

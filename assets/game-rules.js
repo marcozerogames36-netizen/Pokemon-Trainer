@@ -61,6 +61,18 @@
     return Boolean(isAdmin || sabrinaDefeated);
   }
 
+  function getTradeAffinityState(points, requiredPoints = 10) {
+    const required = Math.max(1, Math.floor(Number(requiredPoints) || 10));
+    const total = Math.max(0, Number(points) || 0);
+    const current = Math.min(required, Math.floor(total));
+    return Object.freeze({
+      points: current,
+      required,
+      unlocked: current >= required,
+      remaining: Math.max(0, required - current),
+    });
+  }
+
   const rules = Object.freeze({
     getGymLevelCap,
     isPokemonWithinLevelCap,
@@ -70,6 +82,7 @@
     getGymProgressionBlockReason,
     canAccessSSAnne,
     canAccessSilphCo,
+    getTradeAffinityState,
   });
 
   root.GameRules = rules;
