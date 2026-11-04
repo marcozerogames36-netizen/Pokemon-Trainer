@@ -2373,6 +2373,46 @@
 
     let pendingEvolution = null;
     const automaticEvolutionQueue = [];
+    let evolutionMusicAudio = null;
+    let evolutionMusicFadeTimer = null;
+
+    function startEvolutionMusic() {
+      if(SFX.isMuted())return;
+      if(!evolutionMusicAudio){
+        evolutionMusicAudio=new Audio('assets/audio/pokemon-evolution.mp3');
+        evolutionMusicAudio.loop=true;
+        evolutionMusicAudio.preload='auto';
+        evolutionMusicAudio._baseVolume=.35;
+      }
+      if(evolutionMusicFadeTimer){clearInterval(evolutionMusicFadeTimer);evolutionMusicFadeTimer=null;}
+      applyBattleVolumeToAudio(evolutionMusicAudio);
+      evolutionMusicAudio.currentTime=0;
+      evolutionMusicAudio.play().catch(error=>console.warn('[Audio] N\u00e3o foi poss\u00edvel iniciar a m\u00fasica de evolu\u00e7\u00e3o:',error));
+    }
+
+    function stopEvolutionMusic(immediate=false) {
+      if(evolutionMusicFadeTimer){clearInterval(evolutionMusicFadeTimer);evolutionMusicFadeTimer=null;}
+      if(!evolutionMusicAudio||evolutionMusicAudio.paused)return;
+      if(immediate){
+        evolutionMusicAudio.pause();
+        evolutionMusicAudio.currentTime=0;
+        applyBattleVolumeToAudio(evolutionMusicAudio);
+        return;
+      }
+      const startVolume=evolutionMusicAudio.volume;
+      const startedAt=Date.now();
+      evolutionMusicFadeTimer=setInterval(()=>{
+        const progress=Math.min(1,(Date.now()-startedAt)/300);
+        evolutionMusicAudio.volume=startVolume*(1-progress);
+        if(progress>=1){
+          clearInterval(evolutionMusicFadeTimer);
+          evolutionMusicFadeTimer=null;
+          evolutionMusicAudio.pause();
+          evolutionMusicAudio.currentTime=0;
+          applyBattleVolumeToAudio(evolutionMusicAudio);
+        }
+      },25);
+    }
 
     function queueAutomaticEvolution(pokemon) {
       if (!pokemon || !canEvolve(pokemon)) return;
@@ -2404,6 +2444,20 @@
       return null;
     }
 
+    function setEvolutionSprite(pokemon) {
+      const sprite=document.getElementById('evoSprite');
+      if(!sprite)return;
+      const sources=[...new Set([SPRITE_ANIM_POKEMON(pokemon),SPRITE_POKEMON(pokemon),SPRITE_FB(pokemon.id)])];
+      let sourceIndex=0;
+      sprite.onerror=function(){
+        sourceIndex++;
+        if(sourceIndex<sources.length)this.src=sources[sourceIndex];
+        else this.onerror=null;
+      };
+      sprite.alt=`${pokemon.name || getPokemonDisplayName(pokemon)} durante a evolu\u00e7\u00e3o`;
+      sprite.src=sources[0];
+    }
+
     function startEvolution(poke, evolutionOverride) {
       const evo = evolutionOverride || canEvolve(poke);
       if (!evo) return false;
@@ -2419,9 +2473,9 @@
       btn.style.display = 'none';
       title.textContent = 'O quê?';
       sub.textContent = poke.name + ' está evoluindo!';
-      sprite.src = SPRITE_POKEMON(poke);
-      sprite.onerror = function(){ this.src = SPRITE_FB(poke.id); };
+      setEvolutionSprite(poke);
       sprite.className = 'evo-sprite glow';
+      startEvolutionMusic();
       overlay.classList.add('active');
 
       // Animation sequence
@@ -2429,8 +2483,7 @@
         sprite.classList.add('flash');
         setTimeout(() => {
           sprite.classList.remove('flash', 'glow');
-          sprite.src = SPRITE_POKEMON({ id: evo.to, gender: poke.gender, shiny: poke.shiny });
-          sprite.onerror = function(){ this.src = SPRITE_FB(evo.to); };
+          setEvolutionSprite({ id: evo.to, name: evo.name, gender: poke.gender, shiny: poke.shiny });
           sprite.classList.add('glow');
           title.textContent = 'Parabéns!';
           sub.textContent = poke.name + ' evoluiu para ' + evo.name + '!';
@@ -2475,6 +2528,7 @@
 
     function closeEvolution() {
       document.getElementById('evoOverlay').classList.remove('active');
+      stopEvolutionMusic();
       const evolvedPokemon = pendingEvolution?.poke;
       const didEvolve = Boolean(pendingEvolution);
       pendingEvolution = null;
@@ -7115,10 +7169,159 @@
     let centerHealingFallbackTimer = null;
     let centerAmbientAudio = null;
     let centerAmbientFadeTimer = null;
-    let centerAmbientPreference = false;
-    let centerAmbientVolume = 0.35;
-    try { centerAmbientPreference = localStorage.getItem('pokemonTrainerCenterAmbient') === '1'; } catch {}
-    try { centerAmbientVolume = Math.max(0,Math.min(1,Number(localStorage.getItem('pokemonTrainerCenterAmbientVolume') ?? 0.35))); } catch {}
+    let dashboardAmbientAudio = null;
+    let dashboardAmbientFadeTimer = null;
+    let dashboardAmbientPreference = true;
+    let dashboardAmbientVolume = 0.1;
+    try { dashboardAmbientPreference = localStorage.getItem('pokemonTrainerDashboardAmbient') !== '0'; } catch {}
+    try { dashboardAmbientVolume = Math.max(0,Math.min(1,Number(localStorage.getItem('pokemonTrainerDashboardAmbientVolume') ?? 0.1))); } catch {}
+    let marketAmbientAudio = null;
+    let marketAmbientFadeTimer = null;
+    let marketAmbientPreference = true;
+    let marketAmbientVolume = 0.1;
+    try { marketAmbientPreference = localStorage.getItem('pokemonTrainerMarketAmbient') !== '0'; } catch {}
+    try { marketAmbientVolume = Math.max(0,Math.min(1,Number(localStorage.getItem('pokemonTrainerMarketAmbientVolume') ?? 0.1))); } catch {}
+
+    function syncMarketAmbientButton() {
+      const button=document.getElementById('profileMarketAmbientToggle');
+      const slider=document.getElementById('profileMarketAmbientVolume');
+      const output=document.getElementById('profileMarketAmbientVolumeValue');
+      if(button){
+        button.setAttribute('aria-pressed',String(marketAmbientPreference));
+        button.innerHTML=marketAmbientPreference?'&#128266;':'&#128263;';
+        button.setAttribute('aria-label',marketAmbientPreference?'Desativar m\u00fasica do Poke Mart':'Ativar m\u00fasica do Poke Mart');
+      }
+      if(slider)slider.value=String(Math.round(marketAmbientVolume*100));
+      if(output)output.value=`${Math.round(marketAmbientVolume*100)}%`;
+    }
+
+    async function startMarketAmbient() {
+      if(!marketAmbientPreference||!document.getElementById('panel-market')?.classList.contains('active'))return false;
+      try {
+        if(!marketAmbientAudio){
+          marketAmbientAudio=new Audio('assets/audio/poke-mart-ambient.mp3');
+          marketAmbientAudio.loop=true;
+          marketAmbientAudio.preload='none';
+        }
+        if(marketAmbientFadeTimer){clearInterval(marketAmbientFadeTimer);marketAmbientFadeTimer=null;}
+        if(!marketAmbientAudio.paused)return true;
+        marketAmbientAudio.volume=marketAmbientVolume;
+        await marketAmbientAudio.play();
+        if(!marketAmbientPreference||!document.getElementById('panel-market')?.classList.contains('active')){stopMarketAmbient();return false;}
+        return true;
+      } catch(error) {
+        console.warn('[Audio] N\u00e3o foi poss\u00edvel iniciar a m\u00fasica do Poke Mart:',error);
+        return false;
+      }
+    }
+
+    function stopMarketAmbient() {
+      if(marketAmbientFadeTimer){clearInterval(marketAmbientFadeTimer);marketAmbientFadeTimer=null;}
+      if(!marketAmbientAudio||marketAmbientAudio.paused)return;
+      const startVolume=marketAmbientAudio.volume;
+      const startedAt=Date.now();
+      marketAmbientFadeTimer=setInterval(()=>{
+        const progress=Math.min(1,(Date.now()-startedAt)/250);
+        marketAmbientAudio.volume=startVolume*(1-progress);
+        if(progress>=1){
+          clearInterval(marketAmbientFadeTimer);
+          marketAmbientFadeTimer=null;
+          marketAmbientAudio.pause();
+          marketAmbientAudio.currentTime=0;
+          marketAmbientAudio.volume=marketAmbientVolume;
+        }
+      },25);
+    }
+
+    async function toggleMarketAmbient() {
+      marketAmbientPreference=!marketAmbientPreference;
+      try { localStorage.setItem('pokemonTrainerMarketAmbient',marketAmbientPreference?'1':'0'); } catch {}
+      syncMarketAmbientButton();
+      if(marketAmbientPreference&&document.getElementById('panel-market')?.classList.contains('active')){
+        const started=await startMarketAmbient();
+        if(!started)showToast('Este navegador n\u00e3o conseguiu iniciar o \u00e1udio ambiente.','error');
+      } else if(!marketAmbientPreference)stopMarketAmbient();
+    }
+
+    function setMarketAmbientVolume(value) {
+      marketAmbientVolume=Math.max(0,Math.min(1,Number(value)/100));
+      try { localStorage.setItem('pokemonTrainerMarketAmbientVolume',String(marketAmbientVolume)); } catch {}
+      if(marketAmbientAudio)marketAmbientAudio.volume=marketAmbientVolume;
+      syncMarketAmbientButton();
+    }
+
+    function syncDashboardAmbientButton() {
+      const button=document.getElementById('profileDashboardAmbientToggle');
+      const slider=document.getElementById('profileDashboardAmbientVolume');
+      const output=document.getElementById('profileDashboardAmbientVolumeValue');
+      if(button){
+        button.setAttribute('aria-pressed',String(dashboardAmbientPreference));
+        button.innerHTML=dashboardAmbientPreference?'&#128266;':'&#128263;';
+        button.setAttribute('aria-label',dashboardAmbientPreference?'Desativar m\u00fasica do dashboard':'Ativar m\u00fasica do dashboard');
+      }
+      if(slider)slider.value=String(Math.round(dashboardAmbientVolume*100));
+      if(output)output.value=`${Math.round(dashboardAmbientVolume*100)}%`;
+    }
+
+    async function startDashboardAmbient() {
+      if(!dashboardAmbientPreference||!document.getElementById('panel-home')?.classList.contains('active'))return false;
+      try {
+        if(!dashboardAmbientAudio){
+          dashboardAmbientAudio=new Audio('assets/audio/dashboard-ambient.mp3');
+          dashboardAmbientAudio.loop=true;
+          dashboardAmbientAudio.preload='none';
+        }
+        if(dashboardAmbientFadeTimer){clearInterval(dashboardAmbientFadeTimer);dashboardAmbientFadeTimer=null;}
+        if(!dashboardAmbientAudio.paused)return true;
+        dashboardAmbientAudio.volume=dashboardAmbientVolume;
+        await dashboardAmbientAudio.play();
+        if(!dashboardAmbientPreference||!document.getElementById('panel-home')?.classList.contains('active')){stopDashboardAmbient();return false;}
+        return true;
+      } catch(error) {
+        console.warn('[Audio] N\u00e3o foi poss\u00edvel iniciar a m\u00fasica do dashboard:',error);
+        return false;
+      }
+    }
+
+    function stopDashboardAmbient() {
+      if(dashboardAmbientFadeTimer){clearInterval(dashboardAmbientFadeTimer);dashboardAmbientFadeTimer=null;}
+      if(!dashboardAmbientAudio||dashboardAmbientAudio.paused)return;
+      const startVolume=dashboardAmbientAudio.volume;
+      const startedAt=Date.now();
+      dashboardAmbientFadeTimer=setInterval(()=>{
+        const progress=Math.min(1,(Date.now()-startedAt)/250);
+        dashboardAmbientAudio.volume=startVolume*(1-progress);
+        if(progress>=1){
+          clearInterval(dashboardAmbientFadeTimer);
+          dashboardAmbientFadeTimer=null;
+          dashboardAmbientAudio.pause();
+          dashboardAmbientAudio.currentTime=0;
+          dashboardAmbientAudio.volume=dashboardAmbientVolume;
+        }
+      },25);
+    }
+
+    async function toggleDashboardAmbient() {
+      dashboardAmbientPreference=!dashboardAmbientPreference;
+      try { localStorage.setItem('pokemonTrainerDashboardAmbient',dashboardAmbientPreference?'1':'0'); } catch {}
+      syncDashboardAmbientButton();
+      if(dashboardAmbientPreference&&document.getElementById('panel-home')?.classList.contains('active')){
+        const started=await startDashboardAmbient();
+        if(!started)showToast('Este navegador n\u00e3o conseguiu iniciar o \u00e1udio ambiente.','error');
+      } else if(!dashboardAmbientPreference)stopDashboardAmbient();
+    }
+
+    function setDashboardAmbientVolume(value) {
+      dashboardAmbientVolume=Math.max(0,Math.min(1,Number(value)/100));
+      try { localStorage.setItem('pokemonTrainerDashboardAmbientVolume',String(dashboardAmbientVolume)); } catch {}
+      if(dashboardAmbientAudio)dashboardAmbientAudio.volume=dashboardAmbientVolume;
+      syncDashboardAmbientButton();
+    }
+
+    let centerAmbientPreference = true;
+    let centerAmbientVolume = 0.1;
+    try { centerAmbientPreference = localStorage.getItem('pokemonTrainerCenterAmbient') !== '0'; } catch {}
+    try { centerAmbientVolume = Math.max(0,Math.min(1,Number(localStorage.getItem('pokemonTrainerCenterAmbientVolume') ?? 0.1))); } catch {}
 
     function syncCenterAmbientButton() {
       const button=document.getElementById('profileAmbientToggle');
@@ -7134,7 +7337,7 @@
     }
 
     async function startCenterAmbient() {
-      if(!centerAmbientPreference)return false;
+      if(!centerAmbientPreference||!document.getElementById('panel-center')?.classList.contains('active'))return false;
       try {
         if(!centerAmbientAudio) {
           centerAmbientAudio=new Audio('assets/audio/pokemon-center.mp3');
@@ -7176,7 +7379,7 @@
       centerAmbientPreference=!centerAmbientPreference;
       try { localStorage.setItem('pokemonTrainerCenterAmbient',centerAmbientPreference?'1':'0'); } catch {}
       syncCenterAmbientButton();
-      if(centerAmbientPreference) {
+      if(centerAmbientPreference && document.getElementById('panel-center')?.classList.contains('active')) {
         const started=await startCenterAmbient();
         if(!started)showToast('Este navegador não conseguiu iniciar o áudio ambiente.','error');
       } else stopCenterAmbient();
@@ -9745,6 +9948,8 @@
       if (id === 'silph-co' && !GameRules.canAccessSilphCo(isAdminAccount(), hasDefeatedSabrinaGym())) { showProgressionNotice('Derrote Sabrina no Gin\u00e1sio de Saffron para liberar a Silph C.O.'); id = 'home'; }
       const currentPanelId = document.querySelector('.panel.active')?.id.replace('panel-', '') || 'home';
       if (currentPanelId === 'center' && id !== 'center') stopCenterAmbient();
+      if (currentPanelId === 'home' && id !== 'home') stopDashboardAmbient();
+      if (currentPanelId === 'market' && id !== 'market') stopMarketAmbient();
       if (['admin', 'social'].includes(id) && currentPanelId !== id) panelReturnTargets[id] = currentPanelId;
       for (const panelId of ['admin', 'social']) {
         const backButton = document.querySelector('#panel-' + panelId + ' .panel-back-button');
@@ -9783,7 +9988,8 @@
         syncCenterAmbientButton();
         if (centerAmbientPreference) startCenterAmbient();
       }
-      if (id === 'market') refreshMarketUI();
+      if (id === 'home' && dashboardAmbientPreference) startDashboardAmbient();
+      if (id === 'market') { refreshMarketUI(); if(marketAmbientPreference)startMarketAmbient(); }
       if (id === 'game-corner') openGameCorner();
       if (id === 'season-pass') renderSeasonPass();
       if (id === 'bag') renderBag();
@@ -9793,7 +9999,7 @@
         player?.party?.forEach(queueAutomaticEvolution);
       }
       if (id === 'pokedex') renderPokedex();
-      if (id === 'profile') { pendingTrainerAvatar = null; refreshProfileUI(); syncBattleVolumeControl(); syncMuteButton(); syncCenterAmbientButton(); }
+      if (id === 'profile') { pendingTrainerAvatar = null; refreshProfileUI(); syncBattleVolumeControl(); syncMuteButton(); syncCenterAmbientButton(); syncDashboardAmbientButton(); syncMarketAmbientButton(); }
       if (id === 'social') socialRefresh();
       if (id === 'gyms') renderGyms();
       if (id === 'battle-tower') renderBattleTower();
@@ -10736,7 +10942,7 @@
     const SFX = (() => {
       let ctx = null;
       let muted = false;
-      let volume = 0.7;
+      let volume = 0.1;
       try { muted = localStorage.getItem('pokemonTrainerMuteSfx') === '1'; } catch (e) {}
       try {
         const storedVolume = localStorage.getItem('pokemonTrainerVolume');
@@ -10820,6 +11026,8 @@
     })();
     // Unlock audio on first user gesture
     document.addEventListener('pointerdown', () => SFX.unlock(), { once: true });
+    document.addEventListener('pointerdown', () => { if(document.getElementById('panel-home')?.classList.contains('active'))startDashboardAmbient(); }, { once: true });
+    document.addEventListener('keydown', () => { if(document.getElementById('panel-home')?.classList.contains('active'))startDashboardAmbient(); }, { once: true });
     function applyBattleVolumeToAudio(audio) {
       if (!audio) return;
       const baseVolume = Number(audio._baseVolume);
@@ -10864,7 +11072,7 @@
     document.addEventListener('DOMContentLoaded', syncBattleVolumeControl, { once: true });
     function setBattleSfxVolume(value) {
       SFX.setVolume(Number(value) / 100);
-      [battleBgm, wildVictoryBgm, pokemonCaptureSfx, oakIntroBgm, mewtwoRaidBgm, centerHealingAudio, viridianExplorationAudio, ...pokemonCryAudioByRole.values()]
+      [battleBgm, wildVictoryBgm, pokemonCaptureSfx, oakIntroBgm, mewtwoRaidBgm, centerHealingAudio, viridianExplorationAudio, evolutionMusicAudio, ...pokemonCryAudioByRole.values()]
         .forEach(applyBattleVolumeToAudio);
       syncMuteButton();
       syncBattleVolumeControl();
@@ -10872,7 +11080,7 @@
     function toggleBattleSfx() {
       const muted = SFX.toggleMute();
       syncMuteButton();
-      if (muted) { stopBattleBgm(); stopOakIntroBgm(); stopMewtwoRaidBgm(); if(viridianExplorationAudio){viridianExplorationAudio.pause();viridianExplorationAudio.currentTime=0;} if(viridianExplorationFadeTimer){clearInterval(viridianExplorationFadeTimer);viridianExplorationFadeTimer=null;} }
+      if (muted) { stopBattleBgm(); stopOakIntroBgm(); stopMewtwoRaidBgm(); stopEvolutionMusic(true); if(viridianExplorationAudio){viridianExplorationAudio.pause();viridianExplorationAudio.currentTime=0;} if(viridianExplorationFadeTimer){clearInterval(viridianExplorationFadeTimer);viridianExplorationFadeTimer=null;} }
       else if (coopBossRoom?.status === 'battle') playMewtwoRaidBgm();
       else if (document.getElementById('battleOverlay')?.classList.contains('active')) {
         if (activeBattleBgmTrack === 'wild-victory') playWildVictoryBgm();

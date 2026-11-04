@@ -1815,11 +1815,14 @@
     @media(max-width:420px) { .daily-login-card { padding:18px; } .daily-login-week { gap:4px; } .daily-login-day { font-size:.62rem; } }
     .profile-overview-grid { display:grid; grid-template-columns:minmax(0,1fr); align-items:stretch; gap:16px; width:100%; }
     #profileBox { display:contents !important; }
-    .profile-settings-card { width:100%; margin:18px 0 20px; padding:16px; border:1px solid rgba(249,115,22,.38); border-radius:16px; background:radial-gradient(ellipse at 0 0,rgba(249,115,22,.1),transparent 50%),linear-gradient(145deg,#191622,#111018); box-shadow:0 12px 32px rgba(0,0,0,.2); }
+    .profile-settings-dialog { width:min(520px,calc(100% - 24px)); max-width:none; max-height:calc(100dvh - 32px); padding:0; overflow:visible; border:0; background:transparent; color:var(--text); }
+    .profile-settings-dialog::backdrop { background:rgba(5,4,10,.78); backdrop-filter:blur(5px); }
+    .profile-settings-card { width:100%; max-height:calc(100dvh - 32px); margin:0; padding:16px; overflow:auto; border:1px solid rgba(249,115,22,.48); border-radius:16px; background:radial-gradient(ellipse at 0 0,rgba(249,115,22,.1),transparent 50%),linear-gradient(145deg,#191622,#111018); box-shadow:0 18px 48px rgba(0,0,0,.5); }
     .profile-settings-heading { display:flex; align-items:center; gap:11px; margin-bottom:12px; }
     .profile-settings-heading h3 { margin:0; font-size:1rem; }
     .profile-settings-heading p { margin:3px 0 0; color:var(--text-muted); font-size:.78rem; }
     .profile-settings-icon { display:grid; place-items:center; width:40px; height:40px; flex:0 0 40px; border:1px solid rgba(249,115,22,.34); border-radius:12px; background:rgba(249,115,22,.13); color:#fdba74; font-size:1.35rem; }
+    .profile-settings-close { display:grid; place-items:center; width:38px; height:38px; flex:0 0 38px; margin-left:auto; border:1px solid var(--border); border-radius:10px; background:var(--input-bg); color:var(--text); font-size:1.35rem; cursor:pointer; }
     .profile-sound-setting { display:flex; align-items:center; gap:14px; min-width:0; padding:12px 0; border-top:1px solid rgba(255,255,255,.08); }
     .profile-sound-copy { display:grid; gap:3px; flex:1 1 200px; min-width:150px; }
     .profile-sound-copy strong { font-size:.84rem; }
@@ -1830,7 +1833,9 @@
     .profile-sound-toggle { display:grid; place-items:center; width:40px; height:40px; flex:0 0 40px; border:1px solid var(--border); border-radius:11px; background:var(--input-bg); color:var(--text); font-size:1.1rem; cursor:pointer; }
     .profile-sound-toggle[aria-pressed="true"] { border-color:rgba(249,115,22,.58); background:rgba(249,115,22,.16); }
     .profile-sound-toggle:focus-visible { outline:2px solid #fdba74; outline-offset:2px; }
-    @media(max-width:560px) { .profile-settings-card { padding:13px; } .profile-sound-setting { flex-wrap:wrap; gap:9px; } .profile-sound-copy { flex-basis:calc(100% - 52px); } .profile-sound-volume { flex:1 1 calc(100% - 50px); } }
+    .profile-settings-shortcut .game-card-header { background:linear-gradient(135deg,#54351d,#24170f); color:#fdba74; }
+    .profile-settings-shortcut .game-card-header span { display:grid; place-items:center; width:58px; height:58px; border:1px solid rgba(253,186,116,.38); border-radius:18px; background:rgba(249,115,22,.15); font-size:2.2rem; }
+    @media(max-width:560px) { .profile-settings-dialog { width:calc(100% - 20px); max-height:calc(100dvh - 24px); } .profile-settings-card { max-height:calc(100dvh - 24px); padding:13px; } .profile-sound-setting { flex-wrap:wrap; gap:9px; } .profile-sound-copy { flex-basis:calc(100% - 52px); } .profile-sound-volume { flex:1 1 calc(100% - 50px); } }
     .trainer-card { --tc-ink:var(--text); --tc-muted:var(--text-muted); width:100%; margin:18px 0 20px; padding:9px; border:1px solid rgba(249,115,22,.48); border-radius:18px; background:radial-gradient(ellipse at 50% 0,rgba(249,115,22,.13),transparent 55%),linear-gradient(145deg,#191622,#111018); color:var(--tc-ink); box-shadow:0 16px 42px rgba(0,0,0,.28),0 0 24px rgba(249,115,22,.08),inset 0 1px rgba(255,255,255,.05); }
     .trainer-card-header { min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:9px 15px; border:1px solid rgba(253,186,116,.4); border-radius:11px; background:linear-gradient(100deg,#f97316,#fb923c 55%,#f97316); color:#faf5ff; }
     .trainer-card-header strong { font-size:1rem; letter-spacing:.015em; }
