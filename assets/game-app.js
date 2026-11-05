@@ -1965,6 +1965,33 @@
     const SPRITE_FRONT = id => Number(id) === 1025 ? 'assets/pecharunt-front.gif' : Number(id) === 920 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/920.gif' : Number(id) === 996 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/996.gif' : Number(id) === 997 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/997.gif' : Number(id) === 998 ? 'assets/baxcalibur-front.gif' : Number(id) === 912 ? 'assets/quaxly-front.gif' : Number(id) === 913 ? 'assets/quaxwell-front.gif' : Number(id) === 914 ? 'assets/quaquaval-front.gif' : Number(id) === 898 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/898.gif' : Number(id) === 848 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/848.gif' : Number(id) === 849 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/849.gif' : Number(id) === 748 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/748.gif' : Number(id) === 779 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/779.gif' : Number(id) === 796 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/796.gif' : Number(id) === 716 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/716.gif' : Number(id) === 723 ? 'https://assets.pokestats.gg/pokeapi/orig/pokemon/versions/generation-vii/ultra-sun-ultra-moon/723.gif' : Number(id) === 653 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/653.gif' : Number(id) === 684 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/684.gif' : Number(id) === 655 ? 'assets/delphox-front.gif' : Number(id) === 654 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/654.gif' : Number(id) === 682 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/682.gif' : Number(id) === 906 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/other/showdown/906.gif' : Number(id) === 667 ? 'https://assets.pokestats.gg/pokeapi/v1/pokemon/versions/generation-v/black-white/animated/667.gif' : id === 979 ? 'assets/annihilape-retronc.gif' : Number(id) <= 649 && pokeSlug(Number(id)) ? `https://img.pokemondb.net/sprites/black-white/normal/${pokeSlug(Number(id))}.png` : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
     const SPRITE_FB = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     const SPRITE = SPRITE_FRONT;
+    function setWelcomePokemonSprite(pokemon) {
+      const image = document.getElementById('welcomePoke');
+      if (!image) return;
+      const id = Number(pokemon?.id);
+      if (!Number.isInteger(id) || id < 1) {
+        image.hidden = true;
+        image.removeAttribute('src');
+        return;
+      }
+      const localSprites = {
+        1: 'bulbasaur.png', 4: 'charmander.png', 6: 'charizard.png', 7: 'squirtle.png',
+        25: 'pikachu.png', 94: 'gengar.png', 100: 'voltorb.png', 101: 'electrode.png', 150: 'mewtwo.png'
+      };
+      const sources = [...new Set([SPRITE(id), SPRITE_FB(id), localSprites[id] ? `assets/game-corner/sprites/${localSprites[id]}` : null].filter(Boolean))];
+      let sourceIndex = 0;
+      image.alt = pokemon?.name || 'Pokémon da equipe';
+      image.hidden = false;
+      image.onerror = function() {
+        const nextSource = sources[sourceIndex++];
+        if (nextSource) this.src = nextSource;
+        else {
+          this.hidden = true;
+          this.removeAttribute('src');
+        }
+      };
+      image.src = sources[sourceIndex++];
+    }
 
     // Slug for pokemondb animated sprites (black-white)
     // Ex.: Mudkip → https://img.pokemondb.net/sprites/black-white/anim/back-normal/mudkip.gif
@@ -2538,11 +2565,7 @@
       saveGame();
       // Update welcome sprite if needed
       if (player && player.party[0]) {
-        const w = document.getElementById('welcomePoke');
-        if (w) {
-          w.src = SPRITE(player.party[0].id);
-          w.onerror = function(){ this.src = SPRITE_FB(player.party[0].id); };
-        }
+        setWelcomePokemonSprite(player.party[0]);
       }
       processPendingLevelUpMoves();
       setTimeout(startNextAutomaticEvolution, 350);
@@ -4511,18 +4534,7 @@
 
       updateStatsUI();
       refreshPartyUI();
-      const welcomePoke = document.getElementById('welcomePoke');
-      const welcomePokemon = player.party?.[0];
-      if (welcomePoke) {
-        if (welcomePokemon?.id) {
-          welcomePoke.hidden = false;
-          welcomePoke.src = SPRITE(welcomePokemon.id);
-          welcomePoke.onerror = function() { this.onerror = null; this.src = SPRITE_FB(welcomePokemon.id); };
-        } else {
-          welcomePoke.removeAttribute('src');
-          welcomePoke.hidden = true;
-        }
-      }
+      setWelcomePokemonSprite(player.party?.[0]);
       if (document.getElementById('panel-bag')?.classList.contains('active')) renderBag();
       if (document.getElementById('panel-pc')?.classList.contains('active')) renderPC();
       saveGame();
@@ -4899,7 +4911,7 @@
             redirectTo: getAuthRedirectUrl()
           });
           if (error) throw error;
-          showToast('Se a conta existir, você receberá um link para redefinir a senha.');
+          document.getElementById('passwordRecoverySentDialog').showModal();
         } catch (error) {
           showToast('Não foi possível enviar o link: ' + error.message, 'error');
         }
@@ -7501,7 +7513,7 @@
       }
     }
     function startCenterHealingPulse() {
-      if (!centerHealingAnalyser || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+      if (!centerHealingAnalyser || document.body.classList.contains('graphics-lite')) return;
       if (centerHealingPulseFrame) cancelAnimationFrame(centerHealingPulseFrame);
       const samples = new Uint8Array(centerHealingAnalyser.fftSize);
       let level = 0;
@@ -9012,19 +9024,9 @@
       document.getElementById('dashMeta').textContent = `Origem: ${player.originRegion}`;
       pendingTrainerAvatar = null;
       applyTrainerAvatar();
-      document.getElementById('adminProfileCard').style.display = isAdminAccount() ? '' : 'none';
       document.getElementById('itemCatalogHomeCard').style.display = isAdminAccount() ? '' : 'none';
       document.getElementById('welcomeName').textContent = player.name;
-      const welcomePoke=document.getElementById('welcomePoke');
-      const welcomePokemon=player.party?.[0]||null;
-      if (welcomePokemon?.id) {
-        welcomePoke.hidden=false;
-        welcomePoke.src=SPRITE(welcomePokemon.id);
-        welcomePoke.onerror=function(){this.onerror=null;this.src=SPRITE_FB(welcomePokemon.id);};
-      } else {
-        welcomePoke.removeAttribute('src');
-        welcomePoke.hidden=true;
-      }
+      setWelcomePokemonSprite(player.party?.[0]);
       updateStatsUI();
       socialStart();
 
@@ -9078,6 +9080,8 @@
       const isOriginalAdmin = onlineUser?.id === ADMIN_ACCOUNT_ID && String(onlineUser?.email || '').toLowerCase() === ADMIN_ACCOUNT_EMAIL;
       currentUserIsAdmin = isOriginalAdmin;
       currentUserCanManageAdmins = isOriginalAdmin;
+      const mobileAdminMenuButton = document.getElementById('mobileAdminMenuButton');
+      if (mobileAdminMenuButton) mobileAdminMenuButton.hidden = !currentUserIsAdmin;
       if (!onlineUser || !supabaseClient) return;
       try {
         const {data,error}=await supabaseClient.rpc('admin_access_status');
@@ -9087,6 +9091,7 @@
       } catch (error) {
         console.warn('[Admin] Não foi possível carregar as permissões administrativas:',error);
       }
+      if (mobileAdminMenuButton) mobileAdminMenuButton.hidden = !currentUserIsAdmin;
     }
     function renderAdminPanel() {
       if (!isAdminAccount()) return;
@@ -9890,7 +9895,7 @@
         button.textContent = 'Enviar recursos selecionados';
       }
     }
-    const MOBILE_MORE_PANEL_IDS = new Set(['market','center','season-pass','missions','gyms','pokedex','social','profile']);
+    const MOBILE_MORE_PANEL_IDS = new Set(['market','center','season-pass','missions','gyms','pokedex','pc','admin','social','profile']);
     function toggleMobileMoreMenu(forceOpen) {
       const menu = document.getElementById('mobileMoreMenu');
       const button = document.getElementById('mobileMoreButton');
@@ -9898,6 +9903,11 @@
       const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : menu.hidden;
       menu.hidden = !shouldOpen;
       button.setAttribute('aria-expanded', String(shouldOpen));
+    }
+    function openProfileSettingsFromMobileMenu() {
+      toggleMobileMoreMenu(false);
+      switchPanel('profile');
+      document.getElementById('profileSettingsDialog')?.showModal();
     }
     document.addEventListener('pointerdown', event => {
       const menu = document.getElementById('mobileMoreMenu');
@@ -9999,7 +10009,7 @@
         player?.party?.forEach(queueAutomaticEvolution);
       }
       if (id === 'pokedex') renderPokedex();
-      if (id === 'profile') { pendingTrainerAvatar = null; refreshProfileUI(); syncBattleVolumeControl(); syncMuteButton(); syncCenterAmbientButton(); syncDashboardAmbientButton(); syncMarketAmbientButton(); }
+      if (id === 'profile') { pendingTrainerAvatar = null; refreshProfileUI(); syncBattleVolumeControl(); syncMuteButton(); syncCenterAmbientButton(); syncDashboardAmbientButton(); syncMarketAmbientButton(); syncGraphicsModeControl(); }
       if (id === 'social') socialRefresh();
       if (id === 'gyms') renderGyms();
       if (id === 'battle-tower') renderBattleTower();
@@ -10193,11 +10203,12 @@
       const rankBody=(searching?'<div class="pvp-searching"><span><strong>Procurando advers\u00e1rio...</strong><br><small>Rating atual '+rating+' \u00b7 A busca amplia o intervalo conforme o tempo.</small></span><button type="button" class="btn btn-secondary" style="width:auto;margin:0 0 0 auto;padding:7px 10px" onclick="pvpRankedLeaveQueue()">Cancelar</button></div>':'')+'<div class="pvp-room-controls"><button type="button" class="btn" style="width:auto;margin:14px 0 0" onclick="pvpRankedEnterQueue()" '+(searching?'disabled':'')+'>'+(searching?'Buscando...':'Buscar advers\u00e1rio')+'</button><span style="align-self:center;color:var(--text-muted);font-size:.76rem;margin:14px 0 0">Vit\u00f3rias no PvP tamb\u00e9m rendem 3 BP.</span></div>';
       const modeBody=pvpSelectedMode==='ranked'?rankBody:challenge+'<div class="pvp-room-controls" style="margin-top:14px">'+friendlyControls+'</div>';
       root.innerHTML='<div class="pvp-hub"><section class="pvp-hero"><div class="pvp-hero-copy"><span class="pvp-eyebrow">&#x2694;&#xFE0F; PvP Online</span><h2>Desafie treinadores</h2><p>Monte sua equipe e escolha entre uma sala amistosa ou uma busca ranqueada por advers\u00e1rios do seu n\u00edvel.</p><span class="pvp-season-chip">&#x1F3C1; Temporada '+escapeHTML(season)+'</span></div><div class="pvp-rank-emblem" aria-hidden="true">&#x1F3C6;</div>'
-      +'<div class="pvp-rank-overview"><div class="pvp-rank-stat"><span>DIVIS&Atilde;O ATUAL</span><strong class="pvp-tier-label">'+tier.icon+' '+tier.name+'</strong></div><div class="pvp-rank-stat"><span>RATING</span><strong>'+rating.toLocaleString('pt-BR')+' RP</strong></div><div class="pvp-rank-stat"><span>VIT\u00d3RIAS</span><strong>'+Math.max(0,Number(profile.wins)||0)+'</strong></div><div class="pvp-rank-stat"><span>DERROTAS</span><strong>'+Math.max(0,Number(profile.losses)||0)+'</strong></div></div><div class="pvp-rank-progress" role="progressbar" aria-label="Progresso para a pr\u00f3xima divis\u00e3o" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress+'"><i style="width:'+progress+'%"></i></div></section>'
+      +'<div class="pvp-rank-overview"><div class="pvp-rank-stat"><span>DIVIS&Atilde;O ATUAL</span><strong class="pvp-tier-label">'+pvpRankTierLabel(tier)+'</strong></div><div class="pvp-rank-stat"><span>RATING</span><strong>'+rating.toLocaleString('pt-BR')+' RP</strong></div><div class="pvp-rank-stat"><span>VIT\u00d3RIAS</span><strong>'+Math.max(0,Number(profile.wins)||0)+'</strong></div><div class="pvp-rank-stat"><span>DERROTAS</span><strong>'+Math.max(0,Number(profile.losses)||0)+'</strong></div></div><div class="pvp-rank-progress" role="progressbar" aria-label="Progresso para a pr\u00f3xima divis\u00e3o" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress+'"><i style="width:'+progress+'%"></i></div></section>'
       +'<div class="pvp-mode-tabs" role="tablist" aria-label="Modo PvP"><button type="button" role="tab" aria-selected="'+(pvpSelectedMode==='ranked')+'" class="pvp-mode-tab '+(pvpSelectedMode==='ranked'?'active':'')+'" onclick="pvpSelectMode(&quot;ranked&quot;)">&#x1F3C6; Ranqueado</button><button type="button" role="tab" aria-selected="'+(pvpSelectedMode==='friendly')+'" class="pvp-mode-tab '+(pvpSelectedMode==='friendly'?'active':'')+'" onclick="pvpSelectMode(&quot;friendly&quot;)">&#x1F91D; Amistoso</button></div>'
       +'<section class="pvp-mode-card"><div class="pvp-mode-head"><div><h3>'+(pvpSelectedMode==='ranked'?'Fila ranqueada':'Batalha amistosa')+'</h3><p>'+modeCopy+'</p></div><span class="pvp-mode-badge">'+(pvpSelectedMode==='ranked'?'TEMPORADA ATIVA':'SEM RATING')+'</span></div>'+modeBody+'</section><section><div class="pvp-select-title"><strong>Monte sua equipe</strong><small>Escolha de 1 a 6 Pok\u00e9mon &#xB7; HP e PP de batalha s\u00e3o isolados</small></div>'+pvpRenderTeamSelection()+'</section></div>';
     }
-    function pvpRankTier(rating){const tiers=[{name:'Pok\u00e9 Ball',icon:'&#x1F534;',floor:1000,next:1100},{name:'Great Ball',icon:'&#x1F535;',floor:1100,next:1250},{name:'Ultra Ball',icon:'&#x1F7E1;',floor:1250,next:1400},{name:'Master Ball',icon:'&#x1F7E3;',floor:1400,next:1600},{name:'Champion',icon:'&#x1F451;',floor:1600,next:null}];return tiers.slice().reverse().find(t=>rating>=t.floor)||tiers[0];}
+    function pvpRankTierLabel(tier){if(!tier.sprite)return tier.icon+' '+tier.name;return '<img class="pvp-tier-sprite" src="'+tier.sprite+'" data-fallback-src="'+tier.fallback+'" alt="" aria-hidden="true" onerror="if(this.dataset.fallbackSrc){this.src=this.dataset.fallbackSrc;this.dataset.fallbackSrc=\'\'}else this.hidden=true">'+tier.name;}
+    function pvpRankTier(rating){const tiers=[{name:'Pok\u00e9 Ball',sprite:'assets/game-corner/sprites/poke-ball.png',fallback:ITEM_SPRITE_FB.balls,floor:1000,next:1100},{name:'Great Ball',sprite:ITEM_SPRITE.greatball,fallback:ITEM_SPRITE_FB.greatball,floor:1100,next:1250},{name:'Ultra Ball',sprite:ITEM_SPRITE.ultraball,fallback:ITEM_SPRITE_FB.ultraball,floor:1250,next:1400},{name:'Master Ball',sprite:ITEM_SPRITE.masterball,fallback:ITEM_SPRITE_FB.masterball,floor:1400,next:1600},{name:'Champion',icon:'&#x1F451;',floor:1600,next:null}];return tiers.slice().reverse().find(t=>rating>=t.floor)||tiers[0];}
     function pvpSelectMode(mode){if(!['friendly','ranked'].includes(mode)||pvpChallengeTarget)return;pvpSelectedMode=mode;renderPvpPanel();}
     async function pvpRefreshRankedProfile(){if(!supabaseClient||!onlineUser||pvpRankedProfileLoading)return;pvpRankedProfileLoading=true;const userId=onlineUser.id;try{const {data,error}=await supabaseClient.rpc('pvp_ranked_get_profile');if(error)throw error;if(onlineUser?.id!==userId)return;pvpRankedProfile=data||null;pvpRankedProfileUserId=userId;if(!pvpRoom&&document.getElementById('pvp')?.classList.contains('active'))renderPvpPanel();}catch(error){console.warn('Falha ao carregar rating PvP:',error.message);}finally{pvpRankedProfileLoading=false;if(onlineUser?.id&&onlineUser.id!==userId)void pvpRefreshRankedProfile();}}
     async function pvpRankedEnterQueue(){if(pvpSubmitting||pvpRankedQueueState?.status==='waiting'||!supabaseClient||!onlineUser)return;pvpSubmitting=true;pvpRankedQueueState={status:'waiting'};renderPvpPanel();try{const team=await pvpBuildTeamSnapshot();if(!team.length)throw new Error('Selecione ao menos um Pok\u00e9mon.');const {data,error}=await supabaseClient.rpc('pvp_ranked_enter_queue',{p_team:team,p_trainer:player.name});if(error)throw error;if(data?.status==='matched'&&data.room){pvpRankedQueueState=null;if(pvpRankedPollInterval)clearInterval(pvpRankedPollInterval);pvpRankedPollInterval=null;await pvpAttachRoom(data.room);showToast('Advers\u00e1rio encontrado! Confira o lobby e confirme para come\u00e7ar.');}else{pvpRankedQueueState={status:'waiting'};pvpStartRankedPolling();renderPvpPanel();}}catch(error){pvpRankedQueueState=null;showToast('N\u00e3o foi poss\u00edvel entrar na fila ranqueada: '+error.message,'error');renderPvpPanel();}finally{pvpSubmitting=false;}}
@@ -11033,6 +11044,25 @@
       const baseVolume = Number(audio._baseVolume);
       if (Number.isFinite(baseVolume)) audio.volume = Math.max(0, Math.min(1, baseVolume * SFX.getVolume()));
     }
+    const GRAPHICS_MODE_STORAGE_KEY = 'pokemonTrainerGraphicsMode';
+    function getGraphicsMode() {
+      try { return localStorage.getItem(GRAPHICS_MODE_STORAGE_KEY) === 'lite' ? 'lite' : 'full'; }
+      catch { return 'full'; }
+    }
+    function setGraphicsMode(mode) {
+      const selectedMode = mode === 'lite' ? 'lite' : 'full';
+      document.body.classList.toggle('graphics-lite', selectedMode === 'lite');
+      try { localStorage.setItem(GRAPHICS_MODE_STORAGE_KEY, selectedMode); } catch {}
+      const selector = document.getElementById('profileGraphicsMode');
+      if (selector) selector.value = selectedMode;
+      return selectedMode;
+    }
+    function syncGraphicsModeControl() {
+      const selector = document.getElementById('profileGraphicsMode');
+      if (selector) selector.value = getGraphicsMode();
+    }
+    setGraphicsMode(getGraphicsMode());
+
     function syncBattleVolumeControl() {
       const volume = SFX.getVolume();
       const slider = document.getElementById('battleSfxVolume');
@@ -11069,7 +11099,7 @@
       button.setAttribute('aria-expanded', String(isOpening));
       if (isOpening) document.getElementById('battleSfxVolume')?.focus({ preventScroll: true });
     }
-    document.addEventListener('DOMContentLoaded', syncBattleVolumeControl, { once: true });
+    document.addEventListener('DOMContentLoaded', () => { syncBattleVolumeControl(); syncGraphicsModeControl(); }, { once: true });
     function setBattleSfxVolume(value) {
       SFX.setVolume(Number(value) / 100);
       [battleBgm, wildVictoryBgm, pokemonCaptureSfx, oakIntroBgm, mewtwoRaidBgm, centerHealingAudio, viridianExplorationAudio, evolutionMusicAudio, ...pokemonCryAudioByRole.values()]
@@ -11480,8 +11510,8 @@
         foundPokemon.src=SPRITE_ANIM_POKEMON(wild);
         foundPokemon.onerror=function(){this.onerror=null;this.src=wild.shiny?SPRITE_SHINY(wild.id):SPRITE(wild.id);};
       }
-      const reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      const durations=reducedMotion?[600,600,500,800]:[2100,2200,1600,4100];
+      const graphicsLite=document.body.classList.contains('graphics-lite');
+      const durations=graphicsLite?[600,600,500,800]:[2100,2200,1600,4100];
       overlay.classList.remove('active','found');
       scene.classList.remove('flash');
       frame.src=stages[0].image;

@@ -193,14 +193,17 @@
         </button>
       </nav>
       <div class="mobile-more-menu" id="mobileMoreMenu" aria-label="Mais opções de navegação" hidden>
-        <button type="button" data-mobile-more-panel="market" onclick="switchPanel('market')">&#128722; Poke Mart</button>
-        <button type="button" data-mobile-more-panel="center" onclick="switchPanel('center')">&#127973; Centro Pokémon</button>
-        <button type="button" data-mobile-more-panel="season-pass" onclick="switchPanel('season-pass')">&#127915; Passe da Temporada</button>
-        <button type="button" data-mobile-more-panel="missions" onclick="switchPanel('missions')">&#127919; Missões</button>
-        <button type="button" data-mobile-more-panel="gyms" onclick="switchPanel('gyms')">&#127947; Ginásios</button>
-        <button type="button" data-mobile-more-panel="pokedex" onclick="switchPanel('pokedex')">&#128302; Pokédex</button>
-        <button type="button" data-mobile-more-panel="social" onclick="switchPanel('social')">&#128101; Amigos</button>
         <button type="button" data-mobile-more-panel="profile" onclick="switchPanel('profile')">&#128100; Perfil</button>
+        <button type="button" data-mobile-more-panel="missions" onclick="switchPanel('missions')">&#127919; Missões</button>
+        <button type="button" data-mobile-more-panel="center" onclick="switchPanel('center')">&#127973; Centro Pokémon</button>
+        <button type="button" data-mobile-more-panel="pc" onclick="switchPanel('pc')">&#128187; Meu PC</button>
+        <button type="button" data-mobile-more-panel="pokedex" onclick="switchPanel('pokedex')">&#128302; Pokédex</button>
+        <button type="button" data-mobile-more-panel="season-pass" onclick="switchPanel('season-pass')">&#127915; Passe da Temporada</button>
+        <button type="button" data-mobile-more-panel="gyms" onclick="switchPanel('gyms')">&#127947; Ginásios</button>
+        <button type="button" id="mobileAdminMenuButton" data-mobile-more-panel="admin" onclick="switchPanel('admin')" hidden>&#128737; Administrador</button>
+        <button type="button" data-mobile-more-panel="market" onclick="switchPanel('market')">&#128722; Poke Mart</button>
+        <button type="button" data-mobile-more-panel="social" onclick="switchPanel('social')">&#128101; Amigos</button>
+        <button type="button" onclick="openProfileSettingsFromMobileMenu()">&#9881; Configurações</button>
       </div>
       <div class="content">
         <div class="panel active" id="panel-home">
@@ -234,7 +237,7 @@
               <div class="game-card-body"><div class="game-card-title">Exploração</div><div class="game-card-desc">Explore Kanto e encontre Pokémon selvagens.</div></div>
             </div>
             <div class="game-card" id="gymsHomeCard" role="button" tabindex="0" onclick="switchPanel('gyms')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('gyms')}">
-              <div class="game-card-header"><img loading="lazy" decoding="async" src="assets/gyms-card.png" alt="Ginásio de Pokémon e as oito insígnias de Kanto" /></div>
+              <div class="game-card-header"><img loading="lazy" decoding="async" src="assets/gym-badges.png" alt="As oito insígnias de Kanto" /></div>
               <div class="game-card-body"><div class="quick-mission-title-row"><div class="game-card-title">Ginásios</div><div class="quick-mission-progress"><strong id="quickGymCount">0 / 8</strong><span>insígnias</span></div></div><div class="game-card-desc">Desafie os líderes e conquiste insígnias.</div></div>
             </div>
             <div class="game-card" id="pokemonCenterHomeCard" role="button" tabindex="0" onclick="switchPanel('center')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('center')}">
@@ -286,7 +289,7 @@
               <div class="game-card-body"><div class="game-card-title">Catálogo de Itens</div><div class="game-card-desc">Consulte itens, categorias e efeitos.</div></div>
             </div>
             <div class="game-card" id="pvpHomeCard" role="button" tabindex="0" onclick="switchPanel('pvp')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pvp')}">
-              <div class="game-card-header"><img loading="lazy" decoding="async" src="assets/pvp-versus.png" alt="Arte de batalha PvP Online com Pokémon de treinadores" /></div>
+              <div class="game-card-header"><picture class="pvp-responsive-art"><source media="(max-width: 600px)" srcset="assets/pvp-online-mobile.png" /><img loading="lazy" decoding="async" src="assets/pvp-versus.png" alt="Arte de batalha PvP Online com Pokémon de treinadores" /></picture></div>
               <div class="game-card-body"><div class="game-card-title">PvP Online</div><div class="game-card-desc">Desafie outro treinador por código de sala.</div></div>
             </div>
 
@@ -701,11 +704,12 @@
           <section id="trainerCard" class="trainer-card" aria-label="Cartão de Treinador"></section>
           <dialog id="profileSettingsDialog" class="profile-settings-dialog" aria-labelledby="profileSettingsTitle" onclick="if(event.target===this)this.close()">
             <section class="profile-settings-card">
-            <div class="profile-settings-heading"><span class="profile-settings-icon" aria-hidden="true">&#9881;</span><div><h3 id="profileSettingsTitle">Configura&ccedil;&otilde;es</h3><p>Controle a m&uacute;sica e os efeitos sonoros do jogo.</p></div><button type="button" class="profile-settings-close" onclick="this.closest('dialog').close()" aria-label="Fechar configura&ccedil;&otilde;es">&times;</button></div>
+            <div class="profile-settings-heading"><span class="profile-settings-icon" aria-hidden="true">&#9881;</span><div><h3 id="profileSettingsTitle">Configura&ccedil;&otilde;es</h3><p>Personalize o &aacute;udio e os gr&aacute;ficos do jogo.</p></div><button type="button" class="profile-settings-close" onclick="this.closest('dialog').close()" aria-label="Fechar configura&ccedil;&otilde;es">&times;</button></div>
             <div class="profile-sound-setting"><div class="profile-sound-copy"><strong>Efeitos sonoros e batalhas</strong><span>Golpes, capturas e m&uacute;sicas de batalha</span></div><label class="profile-sound-volume"><span>Volume</span><input id="profileSfxVolume" type="range" min="0" max="100" step="5" value="10" aria-label="Volume dos efeitos sonoros e batalhas" oninput="setBattleSfxVolume(this.value)"><output id="profileSfxVolumeValue">10%</output></label><button type="button" id="profileSoundMute" class="profile-sound-toggle" onclick="toggleBattleSfx()" aria-pressed="false" aria-label="Desativar efeitos sonoros">&#128266;</button></div>
             <div class="profile-sound-setting"><div class="profile-sound-copy"><strong>M&uacute;sica ambiente do Centro Pok&eacute;mon</strong><span>Reproduz em loop enquanto estiver no Centro</span></div><label class="profile-sound-volume"><span>Volume</span><input id="profileAmbientVolume" type="range" min="0" max="100" step="5" value="10" aria-label="Volume da m&uacute;sica ambiente" oninput="setCenterAmbientVolume(this.value)"><output id="profileAmbientVolumeValue">10%</output></label><button type="button" id="profileAmbientToggle" class="profile-sound-toggle" aria-pressed="false" onclick="toggleCenterAmbient()" aria-label="Ativar m&uacute;sica ambiente">&#9835;</button></div>
             <div class="profile-sound-setting"><div class="profile-sound-copy"><strong>M&uacute;sica do dashboard</strong><span>Toca em loop enquanto estiver no painel inicial</span></div><label class="profile-sound-volume"><span>Volume</span><input id="profileDashboardAmbientVolume" type="range" min="0" max="100" step="5" value="10" aria-label="Volume da m&uacute;sica do dashboard" oninput="setDashboardAmbientVolume(this.value)"><output id="profileDashboardAmbientVolumeValue">10%</output></label><button type="button" id="profileDashboardAmbientToggle" class="profile-sound-toggle" aria-pressed="false" onclick="toggleDashboardAmbient()" aria-label="Desativar m&uacute;sica do dashboard">&#128266;</button></div>
             <div class="profile-sound-setting"><div class="profile-sound-copy"><strong>M&uacute;sica do Poke Mart</strong><span>Toca em loop enquanto estiver na loja</span></div><label class="profile-sound-volume"><span>Volume</span><input id="profileMarketAmbientVolume" type="range" min="0" max="100" step="5" value="10" aria-label="Volume da m&uacute;sica do Poke Mart" oninput="setMarketAmbientVolume(this.value)"><output id="profileMarketAmbientVolumeValue">10%</output></label><button type="button" id="profileMarketAmbientToggle" class="profile-sound-toggle" aria-pressed="false" onclick="toggleMarketAmbient()" aria-label="Desativar m&uacute;sica do Poke Mart">&#128266;</button></div>
+            <div class="profile-sound-setting profile-graphics-setting"><div class="profile-sound-copy"><strong>Gr&aacute;ficos e anima&ccedil;&otilde;es</strong><span>Escolha como este aparelho exibe o jogo. O modo leve s&oacute; ativa quando voc&ecirc; selecionar.</span></div><label class="profile-graphics-mode"><span>Experi&ecirc;ncia</span><select id="profileGraphicsMode" aria-label="Qualidade gr&aacute;fica" onchange="setGraphicsMode(this.value)"><option value="full">Completa · anima&ccedil;&otilde;es 100%</option><option value="lite">Leve · celulares mais fracos</option></select></label></div>
             </section>
           </dialog>
           <div class="profile-overview-grid">
@@ -722,37 +726,6 @@
               <div class="weekly-login-days" id="weeklyLoginDays" aria-label="Calend&aacute;rio de recompensas dos sete dias"></div>
               <div class="weekly-login-footer"><small id="weeklyLoginHint">A sequ&ecirc;ncia volta ao primeiro dia se passar um dia sem resgatar.</small><button type="button" class="btn" id="weeklyLoginClaimButton" onclick="openDailyLoginRewardIfAvailable()">Ver recompensa</button></div>
             </section>
-          </div>
-          <h3 style="font-size:1.05rem;margin:24px 0 12px;">Acesso rápido</h3>
-          <div class="cards-grid profile-shortcuts">
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('bag')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('bag')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#3b2c1c,#1c1712);"><img src="assets/trainer-backpack.png" alt="" style="width:82px;height:88px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Mochila</div><div class="game-card-desc">Consulte e use seus itens.</div></div>
-            </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pokemon')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pokemon')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#29354d,#151b2a);"><img src="assets/my-pokemon-ball.png" alt="" style="width:82px;height:82px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Meus Pokémon</div><div class="game-card-desc">Veja sua equipe e gerencie seus Pokémon.</div></div>
-            </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pc')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pc')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#26394a,#111922);"><img src="assets/personal-pc.png" alt="" style="width:88px;height:88px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Meu PC</div><div class="game-card-desc">Guarde Pok&eacute;mon e itens.</div></div>
-            </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('pokedex')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('pokedex')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#38283e,#19121f);"><img src="assets/pokedex-device.png" alt="" style="width:116px;height:92px;object-fit:contain;image-rendering:pixelated;" /></div>
-              <div class="game-card-body"><div class="game-card-title">Pok&#233;dex</div><div class="game-card-desc">Consulte os Pok&#233;mon vistos e capturados.</div></div>
-            </div>
-            <div class="game-card profile-settings-shortcut" role="button" tabindex="0" onclick="document.getElementById('profileSettingsDialog').showModal()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('profileSettingsDialog').showModal()}">
-              <div class="game-card-header" aria-hidden="true"><span>&#9881;</span></div>
-              <div class="game-card-body"><div class="game-card-title">Configura&ccedil;&otilde;es</div><div class="game-card-desc">Ajuste a m&uacute;sica e os efeitos sonoros.</div></div>
-            </div>
-            <div class="game-card" role="button" tabindex="0" onclick="switchPanel('social')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('social')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#302153,#123b46);"><span aria-hidden="true" style="font-size:3rem;">&#128101;</span></div>
-              <div class="game-card-body"><div class="game-card-title">Central de Amizade</div><div class="game-card-desc">Encontre amigos, converse, troque Pok&#233;mon e marque batalhas.</div></div>
-            </div>
-            <div class="game-card" id="adminProfileCard" role="button" tabindex="0" style="display:none" onclick="switchPanel('admin')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPanel('admin')}">
-              <div class="game-card-header" style="background:linear-gradient(135deg,#4a3515,#21190c);font-size:3rem;">&#128737;&#65039;</div>
-              <div class="game-card-body"><div class="game-card-title">Painel de administrador</div><div class="game-card-desc">Envie itens, Pok&#233;mon e moedas para treinadores.</div></div>
-            </div>
           </div>
           <div class="profile-danger-zone" style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border);">
             <button class="btn btn-secondary" onclick="if(confirm('Apagar todo o progresso salvo?'))clearSave()" style="width:auto;max-width:280px;margin:0;">&#128465; Apagar dados salvos</button>
@@ -1150,6 +1123,15 @@
     </div>
   </dialog>
   <div class="toast" id="toast"></div>
+  <dialog id="passwordRecoverySentDialog" class="password-recovery-dialog" aria-labelledby="passwordRecoverySentTitle" aria-describedby="passwordRecoverySentMessage" onclick="if(event.target===this)this.close()">
+    <section class="password-recovery-card">
+      <div class="password-recovery-icon" aria-hidden="true">✉</div>
+      <span class="password-recovery-kicker">Poke Flame</span>
+      <h2 id="passwordRecoverySentTitle">Confira seu e-mail</h2>
+      <p id="passwordRecoverySentMessage">Se a conta existir, você receberá um link para redefinir a senha.</p>
+      <button type="button" class="btn" onclick="this.closest('dialog').close()" autofocus>Entendi</button>
+    </section>
+  </dialog>
   <div class="welcome-popup-overlay" id="welcomePopupOverlay" onclick="if(event.target===this)closeWelcomePopup()">
     <section class="welcome-popup-card" role="dialog" aria-modal="true" aria-labelledby="welcomePopupTitle" aria-describedby="welcomePopupMessage">
       <div class="welcome-popup-icon" aria-hidden="true">✓</div>
